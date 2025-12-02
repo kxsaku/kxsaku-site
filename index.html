@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>kxsaku | Home</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      background: radial-gradient(circle at top, #f0e6ff 0, #120321 55%, #05020b 100%);
+      color: #f9f5ff;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 900px;
+      background: rgba(10, 5, 25, 0.9);
+      border-radius: 24px;
+      padding: 2.5rem 2rem;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.65);
+      border: 1px solid rgba(182, 142, 255, 0.4);
+      backdrop-filter: blur(12px);
+    }
+
+    .heading-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .logo-circle {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: conic-gradient(from 210deg, #f5e1ff, #a855f7, #6366f1, #f973e2, #f5e1ff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+    }
+
+    .logo-circle span {
+      font-weight: 800;
+      font-size: 1.6rem;
+      color: #0b0417;
+      text-shadow: 0 0 10px rgba(255,255,255,0.7);
+    }
+
+    .title-block h1 {
+      font-size: 2.4rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .title-block h1 span {
+      background: linear-gradient(90deg, #f973e2, #c4b5fd, #a855f7);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .title-block p {
+      margin-top: 0.35rem;
+      color: #cbd5ff;
+      font-size: 0.95rem;
+      max-width: 26rem;
+    }
+
+    .tag {
+      padding: 0.35rem 0.9rem;
+      border-radius: 999px;
+      background: rgba(168, 85, 247, 0.12);
+      border: 1px solid rgba(196, 181, 253, 0.4);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #e9d5ff;
+    }
+
+    .grid {
+      margin-top: 1.5rem;
+      display: grid;
+      gap: 1.3rem;
+    }
+
+    @media (min-width: 760px) {
+      .grid {
+        grid-template-columns: 2fr 1.5fr;
+      }
+    }
+
+    .section {
+      background: rgba(22, 10, 57, 0.9);
+      border-radius: 18px;
+      padding: 1.25rem 1.5rem;
+      border: 1px solid rgba(148, 163, 255, 0.3);
+    }
+
+    .section h2 {
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: #e9d5ff;
+      margin-bottom: 0.6rem;
+    }
+
+    .section p {
+      font-size: 0.95rem;
+      color: #d4d4ff;
+      line-height: 1.5;
+    }
+
+    .section strong {
+      color: #f9a8ff;
+    }
+
+    .info-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      margin-top: 0.7rem;
+    }
+
+    .pill {
+      font-size: 0.82rem;
+      padding: 0.28rem 0.7rem;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(148, 163, 255, 0.35);
+      color: #e5e7ff;
+    }
+
+    .pill code {
+      font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 0.8rem;
+    }
+
+    .links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      margin-top: 0.8rem;
+    }
+
+    .btn-link {
+      text-decoration: none;
+      padding: 0.55rem 1.1rem;
+      border-radius: 999px;
+      border: 1px solid rgba(216, 180, 254, 0.6);
+      background: radial-gradient(circle at top left, #a855f7, #6b21a8);
+      color: #fdf2ff;
+      font-size: 0.9rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      box-shadow: 0 15px 35px rgba(88, 28, 135, 0.7);
+    }
+
+    .btn-link.secondary {
+      background: transparent;
+      box-shadow: none;
+      border-color: rgba(148, 163, 255, 0.5);
+      color: #e0f2fe;
+    }
+
+    footer {
+      margin-top: 1.6rem;
+      font-size: 0.75rem;
+      text-align: center;
+      color: #a5b4fc;
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="heading-row">
+      <div class="logo-circle"><span>kx</span></div>
+      <div class="title-block">
+        <h1><span>kxsaku</span></h1>
+        <p>Home base for my server, games, and whatever else I feel like breaking & fixing in the homelab.</p>
+      </div>
+      <span class="tag">online</span>
+    </div>
+
+    <div class="grid">
+      <!-- LEFT: Minecraft / server info -->
+      <section class="section">
+        <h2>Minecraft Bedrock Server</h2>
+        <p>
+          Survival-focused Bedrock server, hosted out of my own lab. Expect chill vibes, light chaos,
+          and the occasional network experiment.
+        </p>
+
+        <div class="info-row">
+          <div class="pill">
+            Address: <code>mc.kxsaku.com</code>
+          </div>
+          <div class="pill">
+            Port: <code>1935</code>
+          </div>
+          <div class="pill">
+            Version: <code>Latest Bedrock</code>
+          </div>
+        </div>
+
+        <p style="margin-top:0.8rem;">
+          Want in? Ask me for the rules and whitelist info — I keep it small so it doesn’t turn into a grief-fest.
+        </p>
+      </section>
+
+      <!-- RIGHT: links / about -->
+      <section class="section">
+        <h2>Links & Stuff</h2>
+        <p>
+          I mess with networking, homelab builds, & games. You’ll mostly catch me on
+          Counter-Strike, Minecraft, or buried in configs.
+        </p>
+
+        <div class="links">
+          <a class="btn-link" href="https://twitch.tv/kxsaku" target="_blank" rel="noreferrer">
+            ⚡ Twitch
+          </a>
+          <a class="btn-link secondary" href="https://discord.com" target="_blank" rel="noreferrer">
+            💬 Discord (soon)
+          </a>
+        </div>
+      </section>
+    </div>
+
+    <footer>
+      <span>© <span id="year"></span> kxsaku · Built from the homelab.</span>
+    </footer>
+
+    <script>
+      document.getElementById("year").textContent = new Date().getFullYear();
+    </script>
+  </main>
+</body>
+</html>
