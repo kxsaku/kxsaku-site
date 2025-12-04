@@ -6,13 +6,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <!--
-    GLOBAL STYLES
-    -------------
-    Everything is grouped & labeled so you can find sections easily.
+    Single-file version: HTML + CSS + tiny JS.
+    Everything is commented so you can edit it later.
   -->
   <style>
     :root {
-      /* Core colors – tweak these if you ever want to shift the theme */
       --bg-main: #050014;
       --bg-card: rgba(10, 5, 25, 0.95);
       --bg-card-soft: rgba(18, 10, 50, 0.96);
@@ -38,12 +36,27 @@
 
     body {
       min-height: 100vh;
-      background:
-        radial-gradient(circle at top, #5342a5 0, #080313 55%, #02000a 100%);
       color: var(--text-main);
       display: flex;
       justify-content: center;
       padding: 2.5rem 1.2rem;
+
+      /* Animated background gradient */
+      background: radial-gradient(circle at 0% 0%, #5342a5 0, #080313 55%, #02000a 100%);
+      background-size: 200% 200%;
+      animation: gradientShift 25s ease-in-out infinite alternate;
+    }
+
+    @keyframes gradientShift {
+      0% {
+        background-position: 0% 0%;
+      }
+      50% {
+        background-position: 50% 100%;
+      }
+      100% {
+        background-position: 100% 0%;
+      }
     }
 
     /*  MAIN SHELL (big rounded rectangle)  */
@@ -59,15 +72,27 @@
       display: flex;
       flex-direction: column;
       gap: 1.6rem;
+      animation: fadeInUp 0.8s ease-out;
     }
 
-    /*  HEADER: logo + name + tagline + nav tabs  */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /*  HEADER: logo + name + tagline + avatar + status  */
 
     .header-row {
-      display: flex;
-      flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 1.4rem;
       align-items: center;
-      gap: 1.6rem;
     }
 
     .logo-circle {
@@ -87,6 +112,7 @@
       align-items: center;
       justify-content: center;
       box-shadow: 0 18px 45px rgba(0, 0, 0, 0.7);
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
     }
 
     .logo-circle span {
@@ -94,6 +120,11 @@
       font-size: 1.8rem;
       color: #050012;
       text-shadow: 0 0 12px rgba(255, 255, 255, 0.7);
+    }
+
+    .logo-circle:hover {
+      transform: translateY(-1px) scale(1.03);
+      box-shadow: 0 22px 50px rgba(0, 0, 0, 0.9);
     }
 
     .title-block {
@@ -125,13 +156,36 @@
     .title-block .tagline {
       font-size: 0.92rem;
       color: var(--text-muted);
-      max-width: 26rem;
+      max-width: 28rem;
     }
 
-    /* status pill (ONLINE) */
+    /* AVATAR – your real photo */
+    .avatar-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.6rem;
+    }
+
+    .avatar {
+      width: 82px;
+      height: 82px;
+      border-radius: 999px;
+      overflow: hidden;
+      border: 2px solid rgba(216, 180, 254, 0.7);
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.85);
+    }
+
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* status pill (AVAILABLE FOR OPPORTUNITIES) */
 
     .status-pill {
-      margin-left: auto;
       padding: 0.45rem 1.1rem;
       border-radius: 999px;
       border: 1px solid rgba(196, 181, 253, 0.55);
@@ -143,6 +197,7 @@
       display: inline-flex;
       align-items: center;
       gap: 0.35rem;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.95);
     }
 
     .status-dot {
@@ -153,11 +208,11 @@
       box-shadow: 0 0 10px #22c55e;
     }
 
-    /* NAV TABS (Home, Experience, Homelab, etc.) */
+    /* NAV TABS */
 
     .nav-tabs {
       width: 100%;
-      margin-top: 0.8rem;
+      margin-top: 1rem;
       display: flex;
       flex-wrap: wrap;
       gap: 0.55rem;
@@ -175,7 +230,7 @@
       align-items: center;
       gap: 0.25rem;
       transition: background 0.16s ease, transform 0.12s ease,
-        box-shadow 0.16s ease;
+        box-shadow 0.16s ease, border-color 0.16s ease;
     }
 
     .nav-tab.active {
@@ -187,11 +242,7 @@
     .nav-tab:hover {
       transform: translateY(-1px);
       box-shadow: 0 12px 26px rgba(15, 23, 42, 0.7);
-    }
-
-    .nav-tab span.key {
-      font-size: 0.7rem;
-      opacity: 0.7;
+      border-color: rgba(191, 219, 254, 0.7);
     }
 
     /*  MAIN GRID LAYOUT  */
@@ -217,6 +268,15 @@
       border-radius: var(--radius-lg);
       border: 1px solid var(--border-soft);
       padding: 1.4rem 1.5rem;
+      transition: transform 0.16s ease, box-shadow 0.16s ease,
+        border-color 0.16s ease, background 0.16s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 20px 50px rgba(15, 23, 42, 0.95);
+      border-color: rgba(191, 219, 254, 0.7);
+      background: rgba(22, 13, 65, 0.98);
     }
 
     .card-header {
@@ -320,6 +380,8 @@
       color: #fdf2ff;
       background: radial-gradient(circle at top left, var(--accent-3), #6b21a8);
       box-shadow: 0 14px 32px rgba(88, 28, 135, 0.7);
+      transition: transform 0.14s ease, box-shadow 0.14s ease,
+        border-color 0.14s ease, filter 0.14s ease;
     }
 
     .btn-link.secondary {
@@ -329,22 +391,46 @@
       color: #bfdbfe;
     }
 
-    /* IMAGE STRIP – small thumbnails you can swap later */
-
-    .image-strip {
-      margin-top: 0.9rem;
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 0.45rem;
+    .btn-link:hover {
+      transform: translateY(-1px) scale(1.01);
+      box-shadow: 0 18px 40px rgba(88, 28, 135, 0.95);
+      filter: brightness(1.05);
     }
 
-    .image-strip img {
+    .btn-link.secondary:hover {
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.95);
+    }
+
+    /* IMAGE STRIP – small photo + caption tiles */
+
+    .image-strip {
+      margin-top: 1rem;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.6rem;
+    }
+
+    .image-tile {
+      border-radius: 18px;
+      overflow: hidden;
+      border: 1px solid rgba(148, 163, 255, 0.45);
+      background: rgba(15, 23, 42, 0.9);
+      display: flex;
+      flex-direction: column;
+      min-height: 110px;
+    }
+
+    .image-tile img {
       width: 100%;
       height: 70px;
       object-fit: cover;
-      border-radius: 16px;
-      border: 1px solid rgba(148, 163, 255, 0.35);
-      opacity: 0.95;
+      display: block;
+    }
+
+    .image-tile span {
+      padding: 0.4rem 0.55rem 0.5rem;
+      font-size: 0.78rem;
+      color: #e5e7ff;
     }
 
     /* BULLET LISTS */
@@ -372,6 +458,18 @@
 
     /* RESPONSIVE TWEAKS */
 
+    @media (max-width: 780px) {
+      .header-row {
+        grid-template-columns: auto 1fr;
+        grid-template-rows: auto auto;
+      }
+      .avatar-wrapper {
+        grid-column: 2 / -1;
+        align-items: flex-start;
+        margin-top: 0.6rem;
+      }
+    }
+
     @media (max-width: 640px) {
       .shell {
         padding: 1.5rem 1.2rem 1.4rem;
@@ -380,52 +478,61 @@
       .title-block .name-line {
         font-size: 1.9rem;
       }
-      .status-pill {
-        margin-left: 0;
-      }
     }
   </style>
 </head>
 <body>
   <main class="shell">
     <!-- =======================================================
-         HEADER: Logo + Name + Tagline + Status + Nav Tabs
+         HEADER: Logo + Name + Tagline + Avatar + Status + Nav Tabs
          ======================================================= -->
     <header>
       <div class="header-row">
+        <!-- Brand circle (kx) -->
         <div class="logo-circle">
-          <!-- You can change this text to initials or an icon later -->
           <span>kx</span>
         </div>
 
+        <!-- Name / summary -->
         <div class="title-block">
-          <!-- MAIN NAME -->
           <div class="name-line">
             <span>Brandon Ortiz</span>
           </div>
-          <!-- SMALL HANDLE / BRAND -->
-          <div class="subname">@kxsaku · Network Admin & Homelabber</div>
-          <!-- SHORT TAGLINE -->
+          <div class="subname">
+            USMC Veteran · Network Admin &amp; Homelabber
+          </div>
           <p class="tagline">
-            Building, breaking, and fixing networks & systems – from USMC
+            Building, breaking, and fixing networks &amp; systems – from USMC
             missions to a homelab that never stops evolving.
           </p>
         </div>
 
-        <!-- ONLINE STATUS PILL -->
-        <div class="status-pill">
-          <span class="status-dot"></span>
-          <span>Available for opportunities</span>
+        <!-- Avatar + status -->
+        <div class="avatar-wrapper">
+          <!--
+            Replace src with the path to your picture.
+            Example: put your image at assets/brandon.jpg
+            and use src="assets/brandon.jpg".
+          -->
+          <div class="avatar">
+            <img src="assets/brandon.jpg" alt="Photo of Brandon Ortiz" />
+          </div>
+          <div class="status-pill">
+            <span class="status-dot"></span>
+            <span>Available for opportunities</span>
+          </div>
         </div>
       </div>
 
-      <!-- NAVIGATION TABS (currently scroll to sections; later can link to other pages) -->
+      <!-- NAVIGATION TABS
+           NOTE: these now point to separate pages (you'll create them later).
+      -->
       <nav class="nav-tabs" aria-label="Primary navigation">
-        <a href="#top" class="nav-tab active"><span>Home</span></a>
-        <a href="#experience" class="nav-tab"><span>Experience</span></a>
-        <a href="#homelab" class="nav-tab"><span>Homelab</span></a>
-        <a href="#minecraft" class="nav-tab"><span>Minecraft</span></a>
-        <a href="#socials" class="nav-tab"><span>Socials</span></a>
+        <a href="index.html" class="nav-tab active"><span>Home</span></a>
+        <a href="experience.html" class="nav-tab"><span>Experience</span></a>
+        <a href="homelab.html" class="nav-tab"><span>Homelab</span></a>
+        <a href="minecraft.html" class="nav-tab"><span>Minecraft</span></a>
+        <a href="socials.html" class="nav-tab"><span>Socials</span></a>
       </nav>
     </header>
 
@@ -437,21 +544,20 @@
       <section class="card hero-intro" aria-labelledby="hero-heading">
         <div class="card-header">
           <h2 class="card-title" id="hero-heading">Profile Snapshot</h2>
-          <span class="card-subtitle">Who I am & what I do</span>
+          <span class="card-subtitle">Who I am &amp; what I do</span>
         </div>
         <div class="card-body">
           <p>
-            I’m <strong>Brandon Ortiz</strong>, a network administrator with
-            hands-on experience from the
-            <strong>United States Marine Corps</strong> to enterprise-style
-            environments. I like making infrastructure work reliably –
-            switches, routers, servers, VPNs, and all the weird stuff in
-            between.
+            I’m <strong>Brandon Ortiz</strong>, a <strong>USMC veteran</strong> and
+            network administrator with over <strong>4 years</strong> of
+            hands-on experience working with real infrastructure – routers,
+            switches, servers, and the people who rely on them.
           </p>
           <p>
-            Outside of work, I treat my homelab like a living sandbox:
-            firewalls, Cisco gear, Windows & Linux servers, automation
-            experiments, and a few game servers hiding in the mix.
+            I like taking messy, unreliable systems and turning them into
+            something stable, documented, and actually pleasant to use – whether
+            that’s on base, in an enterprise environment, or inside my own
+            homelab.
           </p>
 
           <!-- KEY PILL STATS -->
@@ -461,22 +567,21 @@
               <span>Network Admin / Infra Nerd</span>
             </div>
             <div class="pill">
-              <span class="pill-label">Strengths</span>
-              <span>Routing · Switching · Troubleshooting · Teaching</span>
+              <span class="pill-label">Background</span>
+              <span>USMC Communications · Enterprise Support</span>
             </div>
             <div class="pill">
               <span class="pill-label">Focus</span>
-              <span>Security-minded, clean architecture, real-world reliability</span>
+              <span>Reliable networks, clean design, security-minded builds</span>
             </div>
           </div>
 
-          <!-- CALL TO ACTION (EDIT LINK LATER IF NEEDED) -->
+          <!-- CONTACT BUTTON -->
           <a
             class="btn-link"
-            href="mailto:youremail@example.com"
-            title="Replace this email with your real one"
+            href="mailto:ksaku@pm.me"
           >
-            ✉ Reach out about work or collabs
+            ✉ Email me · ksaku@pm.me
           </a>
         </div>
       </section>
@@ -492,29 +597,38 @@
             <li>
               <div class="fact-label">Location</div>
               <div class="fact-main">Los Angeles, California</div>
-              <div class="fact-note">Working in and around real-world infra.</div>
-            </li>
-            <li>
-              <div class="fact-label">Background</div>
-              <div class="fact-main">USMC Network Admin · 4+ years</div>
               <div class="fact-note">
-                From live-fire missions to supporting deployed units with
-                communications.
+                Working in and around real-world infrastructure.
               </div>
             </li>
             <li>
-              <div class="fact-label">Current focus</div>
-              <div class="fact-main">Cybersecurity & advanced networking</div>
+              <div class="fact-label">Experience</div>
+              <div class="fact-main">
+                4+ years hands-on networking &amp; systems work
+              </div>
               <div class="fact-note">
-                Studying, homelabbing, and leveling up for long-term
-                infrastructure & security roles.
+                From USMC communications missions to supporting enterprise-style
+                environments.
               </div>
             </li>
             <li>
-              <div class="fact-label">Certs & Training</div>
-              <div class="fact-main">CompTIA Security+ · DoD / USMC training</div>
+              <div class="fact-label">Recent roles</div>
+              <div class="fact-main">
+                USMC Network Admin (2020–2024) · Network Admin supporting USAF
+                via Beacon Hill / Trace Systems
+              </div>
               <div class="fact-note">
-                Always chasing the next thing to get better at.
+                Installing, maintaining, and troubleshooting switches, routers,
+                UPS units, and server rooms.
+              </div>
+            </li>
+            <li>
+              <div class="fact-label">Certs &amp; training</div>
+              <div class="fact-main">
+                CompTIA Security+ · USMC Communications-Electronics School
+              </div>
+              <div class="fact-note">
+                Always leveling up with cybersecurity &amp; advanced networking.
               </div>
             </li>
           </ul>
@@ -523,7 +637,7 @@
     </section>
 
     <!-- =======================================================
-         EXPERIENCE SNAPSHOT (CAREER-FOCUSED)
+         EXPERIENCE + HOMELAB SNAPSHOT
          ======================================================= -->
     <section class="grid grid-2-balanced" id="experience">
       <!-- LEFT: PROFESSIONAL JOURNEY -->
@@ -537,51 +651,32 @@
         <div class="card-body">
           <ul class="bullet-list">
             <li>
-              <strong>United States Marine Corps – Network Administrator</strong><br />
-              Deployed comms, maintained mission-critical networks, and taught
-              Marines how not to break things (and how to fix them when they
-              did.
+              <strong>United States Marine Corps – Network Administrator (2020–2024)</strong><br />
+              Deployed and maintained mission-critical communications, supported
+              live-fire training and operations, and trained Marines on
+              networking fundamentals and troubleshooting.
             </li>
             <li>
-              <strong>Enterprise-style support & infrastructure</strong><br />
-              Installation & maintenance of switches, routers, UPS units, and
-              network closets – with documentation, diagrams, and clean cable
-              management.
+              <strong>Network Administrator – Contractor supporting USAF</strong><br />
+              Working through Beacon Hill / Trace Systems to support base
+              infrastructure: switch installations, port activations, UPS
+              replacements, documentation, and keeping closets clean and sane.
             </li>
             <li>
-              <strong>Educator & teammate</strong><br />
-              I’ve taught networking concepts to junior Marines and teammates,
-              turning abstract topics into practical skills.
+              <strong>Teacher &amp; teammate</strong><br />
+              I enjoy breaking down complex topics into something people can
+              actually use – whether that’s junior Marines, coworkers, or
+              friends trying to understand “why the Wi-Fi sucks.”
             </li>
           </ul>
-
-          <!-- IMAGE STRIP – EXPERIENCE-RELATED PHOTOS -->
-          <div class="image-strip">
-            <!--
-              Replace these URLs later with your own photos or assets.
-              Example: /assets/brandon-usmc-rack.jpg
-            -->
-            <img
-              src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=600&q=80"
-              alt="Server rack and cabling"
-            />
-            <img
-              src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=600&q=80"
-              alt="Networking equipment and cables"
-            />
-            <img
-              src="https://images.unsplash.com/photo-1587620931276-d97f425f62b9?auto=format&fit=crop&w=600&q=80"
-              alt="Working on a laptop at a desk"
-            />
-          </div>
         </div>
       </section>
 
-      <!-- RIGHT: HOMELAB SNAPSHOT (SHORT VERSION) -->
+      <!-- RIGHT: HOMELAB SNAPSHOT -->
       <section class="card" id="homelab" aria-labelledby="homelab-heading">
         <div class="card-header">
           <h2 class="card-title" id="homelab-heading">Homelab in Progress</h2>
-          <span class="card-subtitle">Because lab > theory</span>
+          <span class="card-subtitle">Because lab &gt; theory</span>
         </div>
         <div class="card-body">
           <p>
@@ -592,7 +687,7 @@
           <ul class="bullet-list">
             <li>Cisco-based core with segmented VLANs and proper routing.</li>
             <li>
-              Windows & Linux servers handling DNS, certs, storage, and game
+              Windows &amp; Linux servers handling DNS, certs, storage, and game
               servers.
             </li>
             <li>
@@ -601,90 +696,62 @@
             </li>
           </ul>
 
+          <!-- IMAGE STRIP – now real images with captions -->
           <div class="image-strip">
-            <!-- Swap these later with shots of your actual rack / gear -->
-            <img
-              src="https://images.unsplash.com/photo-1587202372616-b43abea06c2c?auto=format&fit=crop&w=600&q=80"
-              alt="Close-up of switches and patch cables"
-            />
-            <img
-              src="https://images.unsplash.com/photo-1516031190212-da133013de50?auto=format&fit=crop&w=600&q=80"
-              alt="Desk setup with multiple monitors"
-            />
-            <img
-              src="https://images.unsplash.com/photo-1580894742444-8ecded7900cd?auto=format&fit=crop&w=600&q=80"
-              alt="Server equipment and blinking lights"
-            />
+            <div class="image-tile">
+              <img
+                src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=600&q=80"
+                alt="Close-up of switches and patch cables"
+              />
+              <span>Close-up of switches and patch cables.</span>
+            </div>
+            <div class="image-tile">
+              <img
+                src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=600&q=80"
+                alt="Monitoring screen in a dark room"
+              />
+              <span>Dashboards and logs to keep an eye on the lab.</span>
+            </div>
+            <div class="image-tile">
+              <img
+                src="https://images.unsplash.com/photo-1580894742444-8ecded7900cd?auto=format&fit=crop&w=600&q=80"
+                alt="Server equipment with lights"
+              />
+              <span>Server equipment and blinking lights at home.</span>
+            </div>
           </div>
 
-          <a class="btn-link secondary" href="#minecraft">
-            👾 View the Minecraft & game server side
+          <a class="btn-link secondary" href="minecraft.html">
+            👾 View the Minecraft &amp; game server side
           </a>
         </div>
       </section>
     </section>
 
     <!-- =======================================================
-         MINECRAFT / FUN STUFF PREVIEW (LINK OUT LATER)
-         ======================================================= -->
-    <section class="card" id="minecraft" aria-labelledby="mc-heading">
-      <div class="card-header">
-        <h2 class="card-title" id="mc-heading">Minecraft & Side Projects</h2>
-        <span class="card-subtitle">Because infra should still be fun</span>
-      </div>
-      <div class="card-body">
-        <p>
-          I run a <strong>Bedrock Minecraft server</strong> out of the lab as a
-          way to combine gaming with real infrastructure: tunneling, DNS,
-          security, and uptime – all behind the scenes of a simple “join and
-          play” experience.
-        </p>
-        <p style="margin-top: 0.5rem;">
-          The full details (rules, address, whitelisting, status, and more) will
-          live on a dedicated page soon. For now, this is just a preview of the
-          kind of things I like to build when I’m not in a ticket queue.
-        </p>
-      </div>
-    </section>
-
-    <!-- =======================================================
-         SOCIALS PREVIEW
+         SOCIALS PREVIEW (LinkedIn only for now)
          ======================================================= -->
     <section class="card" id="socials" aria-labelledby="socials-heading">
       <div class="card-header">
-        <h2 class="card-title" id="socials-heading">Social & Contact</h2>
+        <h2 class="card-title" id="socials-heading">Social &amp; Contact</h2>
         <span class="card-subtitle">Where to find me online</span>
       </div>
       <div class="card-body">
         <p>
-          I’m not everywhere, but here are a few places I’ll actually respond
-          from:
+          I’m not trying to be everywhere – just where it matters for my
+          career and the work I care about.
         </p>
         <div class="pill-row" style="margin-top: 0.8rem;">
-          <!-- Update these href values to your real profiles -->
-          <a
-            class="btn-link"
-            href="https://twitch.tv/kxsaku"
-            target="_blank"
-            rel="noreferrer"
-          >
-            ⚡ Twitch / kxsaku
-          </a>
           <a
             class="btn-link secondary"
-            href="https://www.linkedin.com"
+            href="https://www.linkedin.com/in/brandon-ortiz-4b148326b/"
             target="_blank"
             rel="noreferrer"
           >
-            💼 LinkedIn (coming soon)
+            💼 LinkedIn · Brandon Ortiz
           </a>
-          <a
-            class="btn-link secondary"
-            href="https://discord.com"
-            target="_blank"
-            rel="noreferrer"
-          >
-            💬 Discord server (soon)
+          <a class="btn-link" href="mailto:ksaku@pm.me">
+            ✉ Email · ksaku@pm.me
           </a>
         </div>
       </div>
