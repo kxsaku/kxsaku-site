@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Experience | Brandon Ortiz</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!--
+    Single-file version: HTML + CSS + tiny JS.
+    Everything is commented so you can edit it later.
+  -->
+  <style>
+    :root {
+      --bg-main: #050014;
+      --bg-card: rgba(10, 5, 25, 0.95);
+      --bg-card-soft: rgba(18, 10, 50, 0.96);
+      --accent-1: #f973e2;
+      --accent-2: #c4b5fd;
+      --accent-3: #a855f7;
+      --accent-soft: rgba(168, 85, 247, 0.16);
+      --text-main: #f9f5ff;
+      --text-muted: #cbd5ff;
+      --border-soft: rgba(148, 163, 255, 0.35);
+      --radius-xl: 28px;
+      --radius-lg: 20px;
+      --shadow-soft: 0 22px 60px rgba(0, 0, 0, 0.7);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      padding: 2.5rem 1.2rem;
+
+      /* Animated background gradient */
+      background: radial-gradient(circle at 0% 0%, #5342a5 0, #080313 55%, #02000a 100%);
+      background-size: 200% 200%;
+      animation: gradientShift 25s ease-in-out infinite alternate;
+    }
+
+    @keyframes gradientShift {
+      0% {
+        background-position: 0% 0%;
+      }
+      50% {
+        background-position: 50% 100%;
+      }
+      100% {
+        background-position: 100% 0%;
+      }
+    }
+
+    /*  MAIN SHELL (big rounded rectangle)  */
+    .shell {
+      width: 100%;
+      max-width: 1120px;
+      background: var(--bg-card);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-soft);
+      border: 1px solid rgba(182, 142, 255, 0.4);
+      padding: 1.9rem 1.7rem 1.8rem;
+      backdrop-filter: blur(14px);
+      display: flex;
+      flex-direction: column;
+      gap: 1.6rem;
+      animation: fadeInUp 0.8s ease-out;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /*  HEADER: logo + name + tagline + avatar + status  */
+
+    .header-row {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 1.4rem;
+      align-items: center;
+    }
+
+    .logo-circle {
+      width: 78px;
+      height: 78px;
+      flex-shrink: 0;
+      border-radius: 999px;
+      background: conic-gradient(
+        from 220deg,
+        #f5e1ff,
+        #f973e2,
+        #a855f7,
+        #6366f1,
+        #f5e1ff
+      );
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.7);
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .logo-circle span {
+      font-weight: 800;
+      font-size: 1.8rem;
+      color: #050012;
+      text-shadow: 0 0 12px rgba(255, 255, 255, 0.7);
+    }
+
+    .logo-circle:hover {
+      transform: translateY(-1px) scale(1.03);
+      box-shadow: 0 22px 50px rgba(0, 0, 0, 0.9);
+    }
+
+    .title-block {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      min-width: 220px;
+    }
+
+    .title-block .name-line {
+      font-size: 2.4rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .title-block .name-line span {
+      background: linear-gradient(90deg, var(--accent-1), var(--accent-2));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .title-block .subname {
+      font-size: 1.05rem;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    .title-block .tagline {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      max-width: 28rem;
+    }
+
+    /* AVATAR – your real photo */
+    .avatar-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.6rem;
+    }
+
+    .avatar {
+      width: 82px;
+      height: 82px;
+      border-radius: 999px;
+      overflow: hidden;
+      border: 2px solid rgba(216, 180, 254, 0.7);
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.85);
+    }
+
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* status pill (AVAILABLE FOR OPPORTUNITIES) */
+
+    .status-pill {
+      padding: 0.45rem 1.1rem;
+      border-radius: 999px;
+      border: 1px solid rgba(196, 181, 253, 0.55);
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      font-size: 0.75rem;
+      color: #e9d5ff;
+      background: radial-gradient(circle at top, #22c55e33, #0b1120);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.95);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #22c55e;
+      box-shadow: 0 0 10px #22c55e;
+    }
+
+    /* NAV TABS */
+
+    .nav-tabs {
+      width: 100%;
+      margin-top: 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.55rem;
+    }
+
+    .nav-tab {
+      text-decoration: none;
+      padding: 0.4rem 0.9rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 255, 0.45);
+      font-size: 0.82rem;
+      color: #e5e7ff;
+      background: rgba(15, 23, 42, 0.9);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      transition: background 0.16s ease, transform 0.12s ease,
+        box-shadow 0.16s ease, border-color 0.16s ease;
+    }
+
+    .nav-tab.active {
+      background: radial-gradient(circle at top left, var(--accent-3), #4c1d95);
+      box-shadow: 0 12px 26px rgba(88, 28, 135, 0.6);
+      border-color: rgba(216, 180, 254, 0.7);
+    }
+
+    .nav-tab:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 26px rgba(15, 23, 42, 0.7);
+      border-color: rgba(191, 219, 254, 0.7);
+    }
+
+    /*  MAIN GRID LAYOUT  */
+
+    .grid {
+      display: grid;
+      gap: 1.3rem;
+    }
+
+    @media (min-width: 880px) {
+      .grid.grid-2 {
+        grid-template-columns: 3fr 2.2fr;
+      }
+      .grid.grid-2-balanced {
+        grid-template-columns: 1.2fr 1.1fr;
+      }
+    }
+
+    /*  GENERIC CARD COMPONENT  */
+
+    .card {
+      background: var(--bg-card-soft);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-soft);
+      padding: 1.4rem 1.5rem;
+      transition: transform 0.16s ease, box-shadow 0.16s ease,
+        border-color 0.16s ease, background 0.16s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 20px 50px rgba(15, 23, 42, 0.95);
+      border-color: rgba(191, 219, 254, 0.7);
+      background: rgba(22, 13, 65, 0.98);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 0.5rem;
+      margin-bottom: 0.65rem;
+    }
+
+    .card-title {
+      font-size: 0.98rem;
+      text-transform: uppercase;
+      letter-spacing: 0.22em;
+      color: #e9d5ff;
+    }
+
+    .card-subtitle {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      opacity: 0.9;
+    }
+
+    .card-body {
+      font-size: 0.95rem;
+      color: #d4d4ff;
+      line-height: 1.55;
+    }
+
+    /* HERO INTRO TEXT */
+
+    .hero-intro p {
+      margin-bottom: 0.8rem;
+    }
+
+    .pill-row {
+      margin-top: 0.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+    }
+
+    .pill {
+      font-size: 0.8rem;
+      padding: 0.25rem 0.7rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 255, 0.45);
+      background: rgba(15, 23, 42, 0.9);
+      color: #e5e7ff;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .pill-label {
+      font-size: 0.73rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      opacity: 0.85;
+    }
+
+    /* QUICK FACTS LIST */
+
+    .facts-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+      margin-top: 0.2rem;
+      font-size: 0.9rem;
+    }
+
+    .fact-label {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: #a5b4fc;
+    }
+
+    .fact-main {
+      color: #fef9ff;
+    }
+
+    .fact-note {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* SIMPLE BUTTON LINKS */
+
+    .btn-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-top: 0.7rem;
+      padding: 0.5rem 1.1rem;
+      border-radius: 999px;
+      border: 1px solid rgba(216, 180, 254, 0.65);
+      text-decoration: none;
+      font-size: 0.88rem;
+      color: #fdf2ff;
+      background: radial-gradient(circle at top left, var(--accent-3), #6b21a8);
+      box-shadow: 0 14px 32px rgba(88, 28, 135, 0.7);
+      transition: transform 0.14s ease, box-shadow 0.14s ease,
+        border-color 0.14s ease, filter 0.14s ease;
+    }
+
+    .btn-link.secondary {
+      border-color: rgba(148, 163, 255, 0.55);
+      background: transparent;
+      box-shadow: none;
+      color: #bfdbfe;
+    }
+
+    .btn-link:hover {
+      transform: translateY(-1px) scale(1.01);
+      box-shadow: 0 18px 40px rgba(88, 28, 135, 0.95);
+      filter: brightness(1.05);
+    }
+
+    .btn-link.secondary:hover {
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.95);
+    }
+
+    /* IMAGE STRIP – small photo + caption tiles */
+
+    .image-strip {
+      margin-top: 1rem;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.6rem;
+    }
+
+    .image-tile {
+      border-radius: 18px;
+      overflow: hidden;
+      border: 1px solid rgba(148, 163, 255, 0.45);
+      background: rgba(15, 23, 42, 0.9);
+      display: flex;
+      flex-direction: column;
+      min-height: 110px;
+    }
+
+    .image-tile img {
+      width: 100%;
+      height: 70px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .image-tile span {
+      padding: 0.4rem 0.55rem 0.5rem;
+      font-size: 0.78rem;
+      color: #e5e7ff;
+    }
+
+    /* BULLET LISTS */
+
+    .bullet-list {
+      margin-top: 0.3rem;
+      padding-left: 1.1rem;
+      font-size: 0.9rem;
+      color: #d4d4ff;
+    }
+
+    .bullet-list li + li {
+      margin-top: 0.25rem;
+    }
+
+    /* FOOTER */
+
+    footer {
+      margin-top: 0.6rem;
+      text-align: center;
+      font-size: 0.76rem;
+      color: #a5b4fc;
+      opacity: 0.85;
+    }
+
+    /* RESPONSIVE TWEAKS */
+
+    @media (max-width: 780px) {
+      .header-row {
+        grid-template-columns: auto 1fr;
+        grid-template-rows: auto auto;
+      }
+      .avatar-wrapper {
+        grid-column: 2 / -1;
+        align-items: flex-start;
+        margin-top: 0.6rem;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .shell {
+        padding: 1.5rem 1.2rem 1.4rem;
+        border-radius: 22px;
+      }
+      .title-block .name-line {
+        font-size: 1.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <!-- Same header block as Home, but with Experience nav active -->
+    <header>
+      <!-- ...logo / name / avatar wrapper EXACTLY like index.html... -->
+
+      <nav class="nav-tabs" aria-label="Primary navigation">
+        <a href="index.html" class="nav-tab"><span>Home</span></a>
+        <a href="experience.html" class="nav-tab active"><span>Experience</span></a>
+        <a href="homelab.html" class="nav-tab"><span>Homelab</span></a>
+        <a href="minecraft.html" class="nav-tab"><span>Minecraft</span></a>
+        <a href="socials.html" class="nav-tab"><span>Socials</span></a>
+      </nav>
+    </header>
+
+    <!-- Experience page content -->
+    <section class="grid grid-2-balanced" id="experience">
+      <!-- Left: Timeline -->
+      <section class="card" aria-labelledby="exp-timeline-heading">
+        <div class="card-header">
+          <h2 class="card-title" id="exp-timeline-heading">Experience Timeline</h2>
+          <span class="card-subtitle">Where I’ve been so far</span>
+        </div>
+        <div class="card-body">
+          <ul class="bullet-list">
+            <li>
+              <strong>Network Administrator – United States Marine Corps</strong><br />
+              <em>2020 – 2024</em><br />
+              Deployed and maintained mission-critical communications in the field and
+              in garrison. Supported live-fire exercises, coordinated with other
+              units, and ensured the network did not fail when it mattered.
+            </li>
+            <li>
+              <strong>Networking Chief on Live-Fire Missions</strong><br />
+              Took ownership of complex network builds as a junior Marine, leading
+              setup of routers, switches, radios, and server gear in real-world
+              training environments. Zero failed networking missions.
+            </li>
+            <li>
+              <strong>Network Administrator – Beacon Hill / Trace Systems</strong><br />
+              Supporting the 61st Communications Squadron and related units:
+              installing Cisco switches, activating ports, managing UPS hardware,
+              documenting cabling, and keeping server rooms tidy and functional.
+            </li>
+            <li>
+              <strong>Instructor &amp; Mentor</strong><br />
+              Taught networking fundamentals and practical labs to Marines and
+              teammates, focusing on repeatable processes and clear documentation.
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Right: What I bring -->
+      <section class="card" aria-labelledby="exp-strengths-heading">
+        <div class="card-header">
+          <h2 class="card-title" id="exp-strengths-heading">What I Bring</h2>
+          <span class="card-subtitle">How I like to work</span>
+        </div>
+        <div class="card-body">
+          <ul class="bullet-list">
+            <li>
+              <strong>Production mindset, lab mentality.</strong> I design and
+              troubleshoot like it’s production, then experiment and break things
+              safely in the homelab.
+            </li>
+            <li>
+              <strong>Documentation &amp; repeatability.</strong> I care about
+              port labels, diagrams, and configs that someone else can understand
+              six months later.
+            </li>
+            <li>
+              <strong>Hands-on problem solving.</strong> I’d rather trace the
+              cabling, check the logs, and verify the config than guess.
+            </li>
+            <li>
+              <strong>Calm under pressure.</strong> Live-fire exercises, tight
+              timelines, and production tickets don’t rattle me – they just
+              sharpen my focus.
+            </li>
+          </ul>
+
+          <a class="btn-link secondary" href="mailto:ksaku@pm.me">
+            ✉ Reach out about opportunities
+          </a>
+        </div>
+      </section>
+    </section>
+
+    <!-- Skills / tools section -->
+    <section class="card" aria-labelledby="skills-heading" style="margin-top: 1.3rem;">
+      <div class="card-header">
+        <h2 class="card-title" id="skills-heading">Skills &amp; Tools</h2>
+        <span class="card-subtitle">Things I’m comfortable working with</span>
+      </div>
+      <div class="card-body">
+        <div class="pill-row">
+          <div class="pill"><span class="pill-label">Networking</span><span>Cisco IOS · VLANs · Inter-VLAN routing</span></div>
+          <div class="pill"><span class="pill-label">Infra</span><span>Server rooms · UPS · rack gear</span></div>
+          <div class="pill"><span class="pill-label">Systems</span><span>Windows &amp; Linux servers</span></div>
+          <div class="pill"><span class="pill-label">Security</span><span>CompTIA Security+ mindset</span></div>
+          <div class="pill"><span class="pill-label">Soft skills</span><span>Teaching · mentoring · documentation</span></div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      © <span id="year"></span> kxsaku · Built from the homelab.
+    </footer>
+  </main>
+
+
+  <!-- Simple script just to keep the year up to date -->
+  <script>
+    document.getElementById("year").textContent =
+      new Date().getFullYear().toString();
+  </script>
+</body>
+</html>
