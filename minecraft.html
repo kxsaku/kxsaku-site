@@ -479,6 +479,116 @@
         font-size: 1.9rem;
       }
     }
+/* --- Password overlay --- */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 90;
+}
+
+.overlay.active {
+  display: flex;
+}
+
+.overlay-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(5, 4, 24, 0.78);
+  backdrop-filter: blur(4px);
+}
+
+.overlay-card {
+  position: relative;
+  max-width: 420px;
+  width: 90%;
+  background: radial-gradient(circle at top left, #5d3bff 0, #160b2e 45%, #050414 100%);
+  border-radius: 24px;
+  padding: 1.8rem 1.6rem;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(185, 148, 255, 0.28);
+  animation: overlay-pop-in 0.2s ease-out;
+}
+
+.overlay-text {
+  margin-top: 0.5rem;
+  margin-bottom: 1.1rem;
+  color: rgba(236, 234, 255, 0.85);
+  font-size: 0.95rem;
+}
+
+.field-label {
+  display: block;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(191, 173, 255, 0.9);
+  margin-bottom: 0.25rem;
+}
+
+.field-input {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid rgba(112, 95, 220, 0.7);
+  background: rgba(8, 6, 26, 0.95);
+  color: #f5f2ff;
+  font: inherit;
+  outline: none;
+}
+
+.field-input:focus {
+  border-color: #a98bff;
+  box-shadow: 0 0 0 1px rgba(169, 139, 255, 0.6);
+}
+
+.overlay-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.error-msg {
+  margin-top: 0.4rem;
+  font-size: 0.8rem;
+  color: #ff7b7b;
+  min-height: 1em;
+}
+
+/* Turn the clickable pill into a button look */
+.pill-button {
+  cursor: pointer;
+  border: none;
+  text-align: left;
+  transition: transform 0.12s ease-out, box-shadow 0.12s ease-out, background 0.12s ease-out;
+}
+
+.pill-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 0 1px rgba(191, 173, 255, 0.35);
+}
+
+.pill-button.revealed {
+  box-shadow: 0 0 0 1px rgba(100, 255, 183, 0.4);
+}
+
+/* Overlay animation */
+@keyframes overlay-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+
   </style>
 </head>
 <body>
@@ -510,10 +620,10 @@
           </p>
 
           <div class="pill-row" style="margin-top: 0.7rem;">
-            <div class="pill">
+            <button class="pill pill-button" id="reveal-ip-btn" type="button">
               <span class="pill-label">Address</span>
-              <span>mc.kxsaku.com</span>
-            </div>
+              <span id="server-address-text">Hidden — click to unlock</span>
+            </button>
             <div class="pill">
               <span class="pill-label">Port</span>
               <span>1935</span>
@@ -567,6 +677,40 @@
       </section>
     </section>
 
+<!-- Password overlay -->
+<div class="overlay" id="password-overlay" aria-hidden="true">
+  <div class="overlay-backdrop"></div>
+
+  <div class="overlay-card" role="dialog" aria-modal="true" aria-labelledby="pw-title">
+    <h2 id="pw-title">Enter access password</h2>
+    <p class="overlay-text">
+      This keeps the server address shared only with invited players.
+    </p>
+
+    <form id="password-form" class="overlay-form">
+      <label class="field-label" for="server-password">Password</label>
+      <input
+        id="server-password"
+        class="field-input"
+        type="password"
+        autocomplete="off"
+        required
+      />
+
+      <p class="error-msg" id="password-error" aria-live="polite"></p>
+
+      <div class="overlay-actions">
+        <button type="submit" class="btn-link">Unlock address</button>
+        <button type="button" class="btn-link secondary" id="cancel-overlay">
+          Cancel
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+
     <footer>
       © <span id="year"></span> kxsaku · Built from the homelab.
     </footer>
@@ -577,5 +721,65 @@
     document.getElementById("year").textContent =
       new Date().getFullYear().toString();
   </script>
+
+  <script>
+  // ================== Minecraft IP unlock config ==================
+  // Change these whenever you want to rotate things:
+  const MC_SERVER_ADDRESS = 'mc.kxsaku.com';           // what to reveal
+  const MC_SERVER_PASSWORD = 'change-me-123';          // password to unlock
+
+  const revealBtn = document.getElementById('reveal-ip-btn');
+  const overlay = document.getElementById('password-overlay');
+  const cancelOverlayBtn = document.getElementById('cancel-overlay');
+  const pwForm = document.getElementById('password-form');
+  const pwInput = document.getElementById('server-password');
+  const pwError = document.getElementById('password-error');
+  const addrText = document.getElementById('server-address-text');
+
+  function openOverlay() {
+    overlay.classList.add('active');
+    overlay.setAttribute('aria-hidden', 'false');
+    pwError.textContent = '';
+    pwInput.value = '';
+    setTimeout(() => pwInput.focus(), 50);
+  }
+
+  function closeOverlay() {
+    overlay.classList.remove('active');
+    overlay.setAttribute('aria-hidden', 'true');
+    revealBtn.focus();
+  }
+
+  revealBtn?.addEventListener('click', openOverlay);
+  cancelOverlayBtn?.addEventListener('click', closeOverlay);
+
+  // Close if you click outside the card
+  overlay?.addEventListener('click', (e) => {
+    if (e.target === overlay || e.target === overlay.querySelector('.overlay-backdrop')) {
+      closeOverlay();
+    }
+  });
+
+  // Close on Esc
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && overlay.classList.contains('active')) {
+      closeOverlay();
+    }
+  });
+
+  // Check password
+  pwForm?.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    if (pwInput.value === MC_SERVER_PASSWORD) {
+      addrText.textContent = MC_SERVER_ADDRESS;
+      revealBtn.classList.add('revealed');
+      closeOverlay();
+    } else {
+      pwError.textContent = 'Incorrect password. Try again.';
+    }
+  });
+</script>
+
 </body>
 </html>
