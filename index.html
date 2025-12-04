@@ -2,253 +2,706 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>kxsaku | Home</title>
+  <title>Brandon Ortiz | kxsaku</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!--
+    GLOBAL STYLES
+    -------------
+    Everything is grouped & labeled so you can find sections easily.
+  -->
   <style>
+    :root {
+      /* Core colors – tweak these if you ever want to shift the theme */
+      --bg-main: #050014;
+      --bg-card: rgba(10, 5, 25, 0.95);
+      --bg-card-soft: rgba(18, 10, 50, 0.96);
+      --accent-1: #f973e2;
+      --accent-2: #c4b5fd;
+      --accent-3: #a855f7;
+      --accent-soft: rgba(168, 85, 247, 0.16);
+      --text-main: #f9f5ff;
+      --text-muted: #cbd5ff;
+      --border-soft: rgba(148, 163, 255, 0.35);
+      --radius-xl: 28px;
+      --radius-lg: 20px;
+      --shadow-soft: 0 22px 60px rgba(0, 0, 0, 0.7);
+    }
+
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
     }
 
     body {
-      background: radial-gradient(circle at top, #f0e6ff 0, #120321 55%, #05020b 100%);
-      color: #f9f5ff;
       min-height: 100vh;
+      background:
+        radial-gradient(circle at top, #5342a5 0, #080313 55%, #02000a 100%);
+      color: var(--text-main);
       display: flex;
       justify-content: center;
-      padding: 2rem 1rem;
+      padding: 2.5rem 1.2rem;
     }
 
-    .card {
+    /*  MAIN SHELL (big rounded rectangle)  */
+    .shell {
       width: 100%;
-      max-width: 900px;
-      background: rgba(10, 5, 25, 0.9);
-      border-radius: 24px;
-      padding: 2.5rem 2rem;
-      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.65);
+      max-width: 1120px;
+      background: var(--bg-card);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-soft);
       border: 1px solid rgba(182, 142, 255, 0.4);
-      backdrop-filter: blur(12px);
+      padding: 1.9rem 1.7rem 1.8rem;
+      backdrop-filter: blur(14px);
+      display: flex;
+      flex-direction: column;
+      gap: 1.6rem;
     }
 
-    .heading-row {
+    /*  HEADER: logo + name + tagline + nav tabs  */
+
+    .header-row {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
-      gap: 1.5rem;
-      margin-bottom: 2rem;
+      gap: 1.6rem;
     }
 
     .logo-circle {
-      width: 72px;
-      height: 72px;
-      border-radius: 50%;
-      background: conic-gradient(from 210deg, #f5e1ff, #a855f7, #6366f1, #f973e2, #f5e1ff);
+      width: 78px;
+      height: 78px;
+      flex-shrink: 0;
+      border-radius: 999px;
+      background: conic-gradient(
+        from 220deg,
+        #f5e1ff,
+        #f973e2,
+        #a855f7,
+        #6366f1,
+        #f5e1ff
+      );
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.7);
     }
 
     .logo-circle span {
       font-weight: 800;
-      font-size: 1.6rem;
-      color: #0b0417;
-      text-shadow: 0 0 10px rgba(255,255,255,0.7);
+      font-size: 1.8rem;
+      color: #050012;
+      text-shadow: 0 0 12px rgba(255, 255, 255, 0.7);
     }
 
-    .title-block h1 {
+    .title-block {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      min-width: 220px;
+    }
+
+    .title-block .name-line {
       font-size: 2.4rem;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
     }
 
-    .title-block h1 span {
-      background: linear-gradient(90deg, #f973e2, #c4b5fd, #a855f7);
+    .title-block .name-line span {
+      background: linear-gradient(90deg, var(--accent-1), var(--accent-2));
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
     }
 
-    .title-block p {
-      margin-top: 0.35rem;
-      color: #cbd5ff;
-      font-size: 0.95rem;
+    .title-block .subname {
+      font-size: 1.05rem;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    .title-block .tagline {
+      font-size: 0.92rem;
+      color: var(--text-muted);
       max-width: 26rem;
     }
 
-    .tag {
-      padding: 0.35rem 0.9rem;
+    /* status pill (ONLINE) */
+
+    .status-pill {
+      margin-left: auto;
+      padding: 0.45rem 1.1rem;
       border-radius: 999px;
-      background: rgba(168, 85, 247, 0.12);
-      border: 1px solid rgba(196, 181, 253, 0.4);
-      font-size: 0.78rem;
+      border: 1px solid rgba(196, 181, 253, 0.55);
       text-transform: uppercase;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.16em;
+      font-size: 0.75rem;
       color: #e9d5ff;
+      background: radial-gradient(circle at top, #22c55e33, #0b1120);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
     }
 
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #22c55e;
+      box-shadow: 0 0 10px #22c55e;
+    }
+
+    /* NAV TABS (Home, Experience, Homelab, etc.) */
+
+    .nav-tabs {
+      width: 100%;
+      margin-top: 0.8rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.55rem;
+    }
+
+    .nav-tab {
+      text-decoration: none;
+      padding: 0.4rem 0.9rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 255, 0.45);
+      font-size: 0.82rem;
+      color: #e5e7ff;
+      background: rgba(15, 23, 42, 0.9);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      transition: background 0.16s ease, transform 0.12s ease,
+        box-shadow 0.16s ease;
+    }
+
+    .nav-tab.active {
+      background: radial-gradient(circle at top left, var(--accent-3), #4c1d95);
+      box-shadow: 0 12px 26px rgba(88, 28, 135, 0.6);
+      border-color: rgba(216, 180, 254, 0.7);
+    }
+
+    .nav-tab:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 26px rgba(15, 23, 42, 0.7);
+    }
+
+    .nav-tab span.key {
+      font-size: 0.7rem;
+      opacity: 0.7;
+    }
+
+    /*  MAIN GRID LAYOUT  */
+
     .grid {
-      margin-top: 1.5rem;
       display: grid;
       gap: 1.3rem;
     }
 
-    @media (min-width: 760px) {
-      .grid {
-        grid-template-columns: 2fr 1.5fr;
+    @media (min-width: 880px) {
+      .grid.grid-2 {
+        grid-template-columns: 3fr 2.2fr;
+      }
+      .grid.grid-2-balanced {
+        grid-template-columns: 1.2fr 1.1fr;
       }
     }
 
-    .section {
-      background: rgba(22, 10, 57, 0.9);
-      border-radius: 18px;
-      padding: 1.25rem 1.5rem;
-      border: 1px solid rgba(148, 163, 255, 0.3);
+    /*  GENERIC CARD COMPONENT  */
+
+    .card {
+      background: var(--bg-card-soft);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-soft);
+      padding: 1.4rem 1.5rem;
     }
 
-    .section h2 {
-      font-size: 1rem;
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 0.5rem;
+      margin-bottom: 0.65rem;
+    }
+
+    .card-title {
+      font-size: 0.98rem;
       text-transform: uppercase;
-      letter-spacing: 0.18em;
+      letter-spacing: 0.22em;
       color: #e9d5ff;
-      margin-bottom: 0.6rem;
     }
 
-    .section p {
+    .card-subtitle {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      opacity: 0.9;
+    }
+
+    .card-body {
       font-size: 0.95rem;
       color: #d4d4ff;
-      line-height: 1.5;
+      line-height: 1.55;
     }
 
-    .section strong {
-      color: #f9a8ff;
+    /* HERO INTRO TEXT */
+
+    .hero-intro p {
+      margin-bottom: 0.8rem;
     }
 
-    .info-row {
+    .pill-row {
+      margin-top: 0.5rem;
       display: flex;
       flex-wrap: wrap;
       gap: 0.45rem;
-      margin-top: 0.7rem;
     }
 
     .pill {
-      font-size: 0.82rem;
-      padding: 0.28rem 0.7rem;
-      border-radius: 999px;
-      background: rgba(15, 23, 42, 0.85);
-      border: 1px solid rgba(148, 163, 255, 0.35);
-      color: #e5e7ff;
-    }
-
-    .pill code {
-      font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
       font-size: 0.8rem;
-    }
-
-    .links {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.6rem;
-      margin-top: 0.8rem;
-    }
-
-    .btn-link {
-      text-decoration: none;
-      padding: 0.55rem 1.1rem;
+      padding: 0.25rem 0.7rem;
       border-radius: 999px;
-      border: 1px solid rgba(216, 180, 254, 0.6);
-      background: radial-gradient(circle at top left, #a855f7, #6b21a8);
-      color: #fdf2ff;
-      font-size: 0.9rem;
+      border: 1px solid rgba(148, 163, 255, 0.45);
+      background: rgba(15, 23, 42, 0.9);
+      color: #e5e7ff;
       display: inline-flex;
       align-items: center;
-      gap: 0.35rem;
-      box-shadow: 0 15px 35px rgba(88, 28, 135, 0.7);
+      gap: 0.3rem;
+    }
+
+    .pill-label {
+      font-size: 0.73rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      opacity: 0.85;
+    }
+
+    /* QUICK FACTS LIST */
+
+    .facts-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+      margin-top: 0.2rem;
+      font-size: 0.9rem;
+    }
+
+    .fact-label {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: #a5b4fc;
+    }
+
+    .fact-main {
+      color: #fef9ff;
+    }
+
+    .fact-note {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* SIMPLE BUTTON LINKS */
+
+    .btn-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-top: 0.7rem;
+      padding: 0.5rem 1.1rem;
+      border-radius: 999px;
+      border: 1px solid rgba(216, 180, 254, 0.65);
+      text-decoration: none;
+      font-size: 0.88rem;
+      color: #fdf2ff;
+      background: radial-gradient(circle at top left, var(--accent-3), #6b21a8);
+      box-shadow: 0 14px 32px rgba(88, 28, 135, 0.7);
     }
 
     .btn-link.secondary {
+      border-color: rgba(148, 163, 255, 0.55);
       background: transparent;
       box-shadow: none;
-      border-color: rgba(148, 163, 255, 0.5);
-      color: #e0f2fe;
+      color: #bfdbfe;
     }
 
+    /* IMAGE STRIP – small thumbnails you can swap later */
+
+    .image-strip {
+      margin-top: 0.9rem;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.45rem;
+    }
+
+    .image-strip img {
+      width: 100%;
+      height: 70px;
+      object-fit: cover;
+      border-radius: 16px;
+      border: 1px solid rgba(148, 163, 255, 0.35);
+      opacity: 0.95;
+    }
+
+    /* BULLET LISTS */
+
+    .bullet-list {
+      margin-top: 0.3rem;
+      padding-left: 1.1rem;
+      font-size: 0.9rem;
+      color: #d4d4ff;
+    }
+
+    .bullet-list li + li {
+      margin-top: 0.25rem;
+    }
+
+    /* FOOTER */
+
     footer {
-      margin-top: 1.6rem;
-      font-size: 0.75rem;
+      margin-top: 0.6rem;
       text-align: center;
+      font-size: 0.76rem;
       color: #a5b4fc;
-      opacity: 0.8;
+      opacity: 0.85;
+    }
+
+    /* RESPONSIVE TWEAKS */
+
+    @media (max-width: 640px) {
+      .shell {
+        padding: 1.5rem 1.2rem 1.4rem;
+        border-radius: 22px;
+      }
+      .title-block .name-line {
+        font-size: 1.9rem;
+      }
+      .status-pill {
+        margin-left: 0;
+      }
     }
   </style>
 </head>
 <body>
-  <main class="card">
-    <div class="heading-row">
-      <div class="logo-circle"><span>kx</span></div>
-      <div class="title-block">
-        <h1><span>kxsaku</span></h1>
-        <p>Home base for my server, games, and whatever else I feel like breaking & fixing in the homelab.</p>
+  <main class="shell">
+    <!-- =======================================================
+         HEADER: Logo + Name + Tagline + Status + Nav Tabs
+         ======================================================= -->
+    <header>
+      <div class="header-row">
+        <div class="logo-circle">
+          <!-- You can change this text to initials or an icon later -->
+          <span>kx</span>
+        </div>
+
+        <div class="title-block">
+          <!-- MAIN NAME -->
+          <div class="name-line">
+            <span>Brandon Ortiz</span>
+          </div>
+          <!-- SMALL HANDLE / BRAND -->
+          <div class="subname">@kxsaku · Network Admin & Homelabber</div>
+          <!-- SHORT TAGLINE -->
+          <p class="tagline">
+            Building, breaking, and fixing networks & systems – from USMC
+            missions to a homelab that never stops evolving.
+          </p>
+        </div>
+
+        <!-- ONLINE STATUS PILL -->
+        <div class="status-pill">
+          <span class="status-dot"></span>
+          <span>Available for opportunities</span>
+        </div>
       </div>
-      <span class="tag">online</span>
-    </div>
 
-    <div class="grid">
-      <!-- LEFT: Minecraft / server info -->
-      <section class="section">
-        <h2>Minecraft Bedrock Server!</h2>
-        <p>
-          Survival-focused Bedrock server, hosted out of my own lab. Expect chill vibes, light chaos,
-          and the occasional network experiment.
-        </p>
+      <!-- NAVIGATION TABS (currently scroll to sections; later can link to other pages) -->
+      <nav class="nav-tabs" aria-label="Primary navigation">
+        <a href="#top" class="nav-tab active"><span>Home</span></a>
+        <a href="#experience" class="nav-tab"><span>Experience</span></a>
+        <a href="#homelab" class="nav-tab"><span>Homelab</span></a>
+        <a href="#minecraft" class="nav-tab"><span>Minecraft</span></a>
+        <a href="#socials" class="nav-tab"><span>Socials</span></a>
+      </nav>
+    </header>
 
-        <div class="info-row">
-          <div class="pill">
-            Address: <code>HIDDEN</code>
-          </div>
-          <div class="pill">
-            Port: <code>1935</code>
-          </div>
-          <div class="pill">
-            Version: <code>Latest Bedrock</code>
-          </div>
+    <!-- =======================================================
+         HERO AREA (LEFT: intro / RIGHT: quick facts)
+         ======================================================= -->
+    <section class="grid grid-2" id="top">
+      <!-- LEFT: HERO INTRO / SUMMARY -->
+      <section class="card hero-intro" aria-labelledby="hero-heading">
+        <div class="card-header">
+          <h2 class="card-title" id="hero-heading">Profile Snapshot</h2>
+          <span class="card-subtitle">Who I am & what I do</span>
         </div>
+        <div class="card-body">
+          <p>
+            I’m <strong>Brandon Ortiz</strong>, a network administrator with
+            hands-on experience from the
+            <strong>United States Marine Corps</strong> to enterprise-style
+            environments. I like making infrastructure work reliably –
+            switches, routers, servers, VPNs, and all the weird stuff in
+            between.
+          </p>
+          <p>
+            Outside of work, I treat my homelab like a living sandbox:
+            firewalls, Cisco gear, Windows & Linux servers, automation
+            experiments, and a few game servers hiding in the mix.
+          </p>
 
-        <p style="margin-top:0.8rem;">
-          Want in? Ask me for the rules and whitelist info — I keep it small so it doesn’t turn into a grief-fest.
-        </p>
+          <!-- KEY PILL STATS -->
+          <div class="pill-row">
+            <div class="pill">
+              <span class="pill-label">Role</span>
+              <span>Network Admin / Infra Nerd</span>
+            </div>
+            <div class="pill">
+              <span class="pill-label">Strengths</span>
+              <span>Routing · Switching · Troubleshooting · Teaching</span>
+            </div>
+            <div class="pill">
+              <span class="pill-label">Focus</span>
+              <span>Security-minded, clean architecture, real-world reliability</span>
+            </div>
+          </div>
+
+          <!-- CALL TO ACTION (EDIT LINK LATER IF NEEDED) -->
+          <a
+            class="btn-link"
+            href="mailto:youremail@example.com"
+            title="Replace this email with your real one"
+          >
+            ✉ Reach out about work or collabs
+          </a>
+        </div>
       </section>
 
-      <!-- RIGHT: links / about -->
-      <section class="section">
-        <h2>Links & Stuff</h2>
-        <p>
-          I mess with networking, homelab builds, & games. You’ll mostly catch me on
-          Counter-Strike, Minecraft, or buried in configs.
-        </p>
+      <!-- RIGHT: QUICK FACTS CARD -->
+      <aside class="card" aria-label="Quick facts">
+        <div class="card-header">
+          <h2 class="card-title">Quick Facts</h2>
+          <span class="card-subtitle">At a glance</span>
+        </div>
+        <div class="card-body">
+          <ul class="facts-list">
+            <li>
+              <div class="fact-label">Location</div>
+              <div class="fact-main">Los Angeles, California</div>
+              <div class="fact-note">Working in and around real-world infra.</div>
+            </li>
+            <li>
+              <div class="fact-label">Background</div>
+              <div class="fact-main">USMC Network Admin · 4+ years</div>
+              <div class="fact-note">
+                From live-fire missions to supporting deployed units with
+                communications.
+              </div>
+            </li>
+            <li>
+              <div class="fact-label">Current focus</div>
+              <div class="fact-main">Cybersecurity & advanced networking</div>
+              <div class="fact-note">
+                Studying, homelabbing, and leveling up for long-term
+                infrastructure & security roles.
+              </div>
+            </li>
+            <li>
+              <div class="fact-label">Certs & Training</div>
+              <div class="fact-main">CompTIA Security+ · DoD / USMC training</div>
+              <div class="fact-note">
+                Always chasing the next thing to get better at.
+              </div>
+            </li>
+          </ul>
+        </div>
+      </aside>
+    </section>
 
-        <div class="links">
-          <a class="btn-link" href="https://twitch.tv/kxsaku" target="_blank" rel="noreferrer">
-            ⚡ Twitch
-          </a>
-          <a class="btn-link secondary" href="https://discord.com" target="_blank" rel="noreferrer">
-            💬 Discord (soon)
+    <!-- =======================================================
+         EXPERIENCE SNAPSHOT (CAREER-FOCUSED)
+         ======================================================= -->
+    <section class="grid grid-2-balanced" id="experience">
+      <!-- LEFT: PROFESSIONAL JOURNEY -->
+      <section class="card" aria-labelledby="experience-heading">
+        <div class="card-header">
+          <h2 class="card-title" id="experience-heading">
+            Professional Journey
+          </h2>
+          <span class="card-subtitle">How I got here</span>
+        </div>
+        <div class="card-body">
+          <ul class="bullet-list">
+            <li>
+              <strong>United States Marine Corps – Network Administrator</strong><br />
+              Deployed comms, maintained mission-critical networks, and taught
+              Marines how not to break things (and how to fix them when they
+              did.
+            </li>
+            <li>
+              <strong>Enterprise-style support & infrastructure</strong><br />
+              Installation & maintenance of switches, routers, UPS units, and
+              network closets – with documentation, diagrams, and clean cable
+              management.
+            </li>
+            <li>
+              <strong>Educator & teammate</strong><br />
+              I’ve taught networking concepts to junior Marines and teammates,
+              turning abstract topics into practical skills.
+            </li>
+          </ul>
+
+          <!-- IMAGE STRIP – EXPERIENCE-RELATED PHOTOS -->
+          <div class="image-strip">
+            <!--
+              Replace these URLs later with your own photos or assets.
+              Example: /assets/brandon-usmc-rack.jpg
+            -->
+            <img
+              src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=600&q=80"
+              alt="Server rack and cabling"
+            />
+            <img
+              src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=600&q=80"
+              alt="Networking equipment and cables"
+            />
+            <img
+              src="https://images.unsplash.com/photo-1587620931276-d97f425f62b9?auto=format&fit=crop&w=600&q=80"
+              alt="Working on a laptop at a desk"
+            />
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT: HOMELAB SNAPSHOT (SHORT VERSION) -->
+      <section class="card" id="homelab" aria-labelledby="homelab-heading">
+        <div class="card-header">
+          <h2 class="card-title" id="homelab-heading">Homelab in Progress</h2>
+          <span class="card-subtitle">Because lab > theory</span>
+        </div>
+        <div class="card-body">
+          <p>
+            My homelab mirrors the kind of networks I’d build in production:
+            VLANs, routing, VPNs, monitoring, and services that I actually use
+            day-to-day.
+          </p>
+          <ul class="bullet-list">
+            <li>Cisco-based core with segmented VLANs and proper routing.</li>
+            <li>
+              Windows & Linux servers handling DNS, certs, storage, and game
+              servers.
+            </li>
+            <li>
+              Experiments with security, logging, automation, and failover
+              ideas.
+            </li>
+          </ul>
+
+          <div class="image-strip">
+            <!-- Swap these later with shots of your actual rack / gear -->
+            <img
+              src="https://images.unsplash.com/photo-1587202372616-b43abea06c2c?auto=format&fit=crop&w=600&q=80"
+              alt="Close-up of switches and patch cables"
+            />
+            <img
+              src="https://images.unsplash.com/photo-1516031190212-da133013de50?auto=format&fit=crop&w=600&q=80"
+              alt="Desk setup with multiple monitors"
+            />
+            <img
+              src="https://images.unsplash.com/photo-1580894742444-8ecded7900cd?auto=format&fit=crop&w=600&q=80"
+              alt="Server equipment and blinking lights"
+            />
+          </div>
+
+          <a class="btn-link secondary" href="#minecraft">
+            👾 View the Minecraft & game server side
           </a>
         </div>
       </section>
-    </div>
+    </section>
 
+    <!-- =======================================================
+         MINECRAFT / FUN STUFF PREVIEW (LINK OUT LATER)
+         ======================================================= -->
+    <section class="card" id="minecraft" aria-labelledby="mc-heading">
+      <div class="card-header">
+        <h2 class="card-title" id="mc-heading">Minecraft & Side Projects</h2>
+        <span class="card-subtitle">Because infra should still be fun</span>
+      </div>
+      <div class="card-body">
+        <p>
+          I run a <strong>Bedrock Minecraft server</strong> out of the lab as a
+          way to combine gaming with real infrastructure: tunneling, DNS,
+          security, and uptime – all behind the scenes of a simple “join and
+          play” experience.
+        </p>
+        <p style="margin-top: 0.5rem;">
+          The full details (rules, address, whitelisting, status, and more) will
+          live on a dedicated page soon. For now, this is just a preview of the
+          kind of things I like to build when I’m not in a ticket queue.
+        </p>
+      </div>
+    </section>
+
+    <!-- =======================================================
+         SOCIALS PREVIEW
+         ======================================================= -->
+    <section class="card" id="socials" aria-labelledby="socials-heading">
+      <div class="card-header">
+        <h2 class="card-title" id="socials-heading">Social & Contact</h2>
+        <span class="card-subtitle">Where to find me online</span>
+      </div>
+      <div class="card-body">
+        <p>
+          I’m not everywhere, but here are a few places I’ll actually respond
+          from:
+        </p>
+        <div class="pill-row" style="margin-top: 0.8rem;">
+          <!-- Update these href values to your real profiles -->
+          <a
+            class="btn-link"
+            href="https://twitch.tv/kxsaku"
+            target="_blank"
+            rel="noreferrer"
+          >
+            ⚡ Twitch / kxsaku
+          </a>
+          <a
+            class="btn-link secondary"
+            href="https://www.linkedin.com"
+            target="_blank"
+            rel="noreferrer"
+          >
+            💼 LinkedIn (coming soon)
+          </a>
+          <a
+            class="btn-link secondary"
+            href="https://discord.com"
+            target="_blank"
+            rel="noreferrer"
+          >
+            💬 Discord server (soon)
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- =======================================================
+         FOOTER
+         ======================================================= -->
     <footer>
-      <span>© <span id="year"></span> kxsaku · Built from the homelab.</span>
+      © <span id="year"></span> kxsaku · Built from the homelab.
     </footer>
-
-    <script>
-      document.getElementById("year").textContent = new Date().getFullYear();
-    </script>
   </main>
+
+  <!-- Simple script just to keep the year up to date -->
+  <script>
+    document.getElementById("year").textContent =
+      new Date().getFullYear().toString();
+  </script>
 </body>
 </html>
-
-
