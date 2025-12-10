@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Saku Network Solutions | kxsaku</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta
+    name="description"
+    content="Saku Network Solutions – small-business office networking design, installation, and ongoing network administration by Brandon Ortiz."
+  />
+
+  <!-- Font / base styles -->
+  <style>
+    :root {
+      --bg-main: #050414;
+      --bg-card: #0d0724;
+      --bg-card-soft: #12092f;
+      --accent: #b26bff;
+      --accent-soft: rgba(178, 107, 255, 0.22);
+      --accent-strong: #f16bff;
+      --text-main: #f5f2ff;
+      --text-soft: #d0c9ff;
+      --text-muted: #a39ad7;
+      --pill-bg: rgba(9, 5, 35, 0.9);
+      --pill-border: rgba(112, 97, 214, 0.8);
+      --radius-xl: 32px;
+      --radius-lg: 24px;
+      --radius-pill: 999px;
+      --shadow-soft: 0 22px 60px rgba(0, 0, 0, 0.75);
+      --transition-fast: 0.15s ease-out;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+        "Segoe UI", sans-serif;
+      color: var(--text-main);
+      background: radial-gradient(circle at top, #28145a 0, #050414 55%, #020010 100%);
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      padding: 2.5rem 1.25rem 3.5rem;
+    }
+
+    .page {
+      width: 100%;
+      max-width: 1120px;
+      background: radial-gradient(circle at top left, #5b30ff 0, #0b051c 45%, #050414 100%);
+      border-radius: var(--radius-xl);
+      padding: 1.8rem 1.6rem 2.4rem;
+      box-shadow: var(--shadow-soft);
+      border: 1px solid rgba(170, 143, 255, 0.35);
+      position: relative;
+      overflow: hidden;
+    }
+
+    @media (min-width: 900px) {
+      .page {
+        padding: 2.3rem 2.4rem 3rem;
+      }
+    }
+
+    /* ---------- header / nav ---------- */
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 1.4rem;
+      margin-bottom: 1.3rem;
+      flex-wrap: wrap;
+    }
+
+    .logo-circle {
+      width: 64px;
+      height: 64px;
+      border-radius: 999px;
+      background: conic-gradient(from 160deg, #ff6bcb, #7b5cff, #4df0ff, #ff6bcb);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 40px rgba(193, 144, 255, 0.7);
+      flex-shrink: 0;
+    }
+
+    .logo-circle span {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #120620;
+    }
+
+    .header-main {
+      flex: 1;
+      min-width: 230px;
+    }
+
+    .headline-kxsaku {
+      font-size: clamp(1.8rem, 2.6vw + 1.2rem, 2.6rem);
+      letter-spacing: 0.23em;
+      text-transform: uppercase;
+      margin: 0 0 0.3rem;
+    }
+
+    .headline-kxsaku span {
+      color: #f8e7ff;
+    }
+
+    .subtitle {
+      margin: 0;
+      font-size: 0.95rem;
+      color: var(--text-soft);
+    }
+
+    .subtitle strong {
+      color: var(--accent-strong);
+      font-weight: 600;
+    }
+
+    .badge-availability {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.28rem 0.9rem;
+      border-radius: var(--radius-pill);
+      background: linear-gradient(90deg, #0c3b26, #1a6041);
+      color: #e1fff0;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      margin-top: 0.55rem;
+    }
+
+    .badge-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #32ff8f;
+      box-shadow: 0 0 0 4px rgba(50, 255, 143, 0.2);
+    }
+
+    .nav-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.7rem;
+      margin-top: 1.4rem;
+    }
+
+    .nav-tab {
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(121, 107, 214, 0.75);
+      background: rgba(8, 4, 33, 0.9);
+      color: var(--text-soft);
+      padding: 0.42rem 1.2rem;
+      font-size: 0.9rem;
+      text-decoration: none;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background var(--transition-fast), transform var(--transition-fast),
+        box-shadow var(--transition-fast), color var(--transition-fast);
+    }
+
+    .nav-tab::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.16), transparent 55%);
+      opacity: 0;
+      transition: opacity var(--transition-fast);
+    }
+
+    .nav-tab:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 0 0 1px rgba(184, 162, 255, 0.7);
+    }
+
+    .nav-tab:hover::before {
+      opacity: 1;
+    }
+
+    .nav-tab.active {
+      background: linear-gradient(135deg, #b26bff, #f16bff);
+      color: #130516;
+      box-shadow: 0 0 32px rgba(227, 167, 255, 0.6);
+      border-color: transparent;
+    }
+
+    /* ---------- layout ---------- */
+
+    .grid-main {
+      display: grid;
+      grid-template-columns: minmax(0, 3fr) minmax(0, 2.6fr);
+      gap: 1.5rem;
+      margin-top: 1.4rem;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 880px) {
+      .grid-main {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .card {
+      background: radial-gradient(circle at top left, #28145a 0, #0c0623 40%, #050414 100%);
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(135, 112, 235, 0.55);
+      padding: 1.3rem 1.3rem 1.4rem;
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.7);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card + .card {
+      margin-top: 1rem;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 1rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .card-title {
+      font-size: 1rem;
+      letter-spacing: 0.19em;
+      text-transform: uppercase;
+    }
+
+    .card-tagline {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .card p {
+      font-size: 0.92rem;
+      color: var(--text-soft);
+      line-height: 1.55;
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 0.9rem;
+    }
+
+    .pill {
+      border-radius: var(--radius-pill);
+      border: 1px solid var(--pill-border);
+      background: var(--pill-bg);
+      padding: 0.35rem 0.9rem;
+      font-size: 0.85rem;
+      color: var(--text-soft);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      white-space: nowrap;
+    }
+
+    .pill-label {
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    .list {
+      margin: 0.6rem 0 0.2rem;
+      padding-left: 1.1rem;
+      color: var(--text-soft);
+      font-size: 0.92rem;
+    }
+
+    .list li + li {
+      margin-top: 0.3rem;
+    }
+
+    .subdued {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .split-two {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, 1.1fr);
+      gap: 1rem;
+      margin-top: 0.9rem;
+    }
+
+    @media (max-width: 720px) {
+      .split-two {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    /* CTA / buttons */
+
+    .cta {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.9rem;
+      margin-top: 1.2rem;
+    }
+
+    .cta-main {
+      font-size: 0.92rem;
+      color: var(--text-soft);
+    }
+
+    .btn-link {
+      border-radius: var(--radius-pill);
+      padding: 0.55rem 1.4rem;
+      border: none;
+      outline: none;
+      background: linear-gradient(135deg, #b26bff, #f16bff);
+      color: #130516;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      box-shadow: 0 16px 40px rgba(214, 150, 255, 0.5);
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast),
+        filter var(--transition-fast);
+      white-space: nowrap;
+    }
+
+    .btn-link:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 20px 46px rgba(214, 150, 255, 0.75);
+      filter: brightness(1.06);
+    }
+
+    .btn-link.secondary {
+      background: rgba(8, 4, 33, 0.9);
+      border: 1px solid rgba(157, 139, 241, 0.9);
+      color: var(--text-soft);
+      box-shadow: none;
+    }
+
+    .btn-link.secondary:hover {
+      box-shadow: 0 0 0 1px rgba(189, 170, 255, 0.7);
+    }
+
+    /* footer */
+
+    footer {
+      margin-top: 2.1rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    /* small float animation for cards on hover */
+
+    .card {
+      transition: transform 0.16s ease-out, box-shadow 0.16s ease-out,
+        border-color 0.16s ease-out;
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 26px 70px rgba(0, 0, 0, 0.85);
+      border-color: rgba(189, 170, 255, 0.9);
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <!-- ====== Header / Nav ====== -->
+    <header class="header">
+      <div class="logo-circle">
+        <span>kx</span>
+      </div>
+
+      <div class="header-main">
+        <h1 class="headline-kxsaku"><span>BRANDON ORTIZ</span></h1>
+        <p class="subtitle">
+          <strong>Saku Network Solutions (SNS)</strong> &mdash; small-business office networking,
+          designed and deployed by a USMC veteran Network Administrator.
+        </p>
+        <div class="badge-availability">
+          <span class="badge-dot"></span>
+          <span>Accepting new small-office projects</span>
+        </div>
+
+        <!-- Main nav tabs – make sure these match across all pages -->
+        <nav class="nav-tabs" aria-label="Main">
+          <a class="nav-tab" href="index.html">Home</a>
+          <a class="nav-tab" href="experience.html">Experience</a>
+          <a class="nav-tab" href="homelab.html">Homelab</a>
+          <a class="nav-tab" href="minecraft.html">Minecraft</a>
+          <a class="nav-tab" href="socials.html">Socials</a>
+          <a class="nav-tab active" href="sns.html">Saku Network Solutions</a>
+        </nav>
+      </div>
+    </header>
+
+    <!-- ====== Main content grid ====== -->
+    <section class="grid-main">
+      <!-- Left column: What SNS does / how it works -->
+      <div>
+        <article class="card">
+          <div class="card-header">
+            <h2 class="card-title">WHAT I DO</h2>
+            <span class="card-tagline">Small-office networking, end to end</span>
+          </div>
+
+          <p>
+            Saku Network Solutions is my boutique service for small businesses that need a
+            reliable office network without enterprise-consultant pricing. I help you plan,
+            purchase, install, and configure your network &mdash; then keep it healthy with
+            ongoing network administration.
+          </p>
+
+          <ul class="list">
+            <li>Design small-office networks based on users, growth plans, and speed needs.</li>
+            <li>Recommend the right switches, routers, racks, and access points (no overkill).</li>
+            <li>Order equipment on your behalf, then install and configure it on-site.</li>
+            <li>
+              Offer ongoing network administration on a monthly subscription for maintenance and
+              support.
+            </li>
+          </ul>
+
+          <div class="pill-row">
+            <div class="pill">
+              <span class="pill-label">Ideal size</span>
+              <span>3 &ndash; 50 users</span>
+            </div>
+            <div class="pill">
+              <span class="pill-label">Focus</span>
+              <span>Small offices, clinics, studios</span>
+            </div>
+            <div class="pill">
+              <span class="pill-label">Location</span>
+              <span>Los Angeles area &middot; Remote design available</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="card-header">
+            <h2 class="card-title">HOW A PROJECT WORKS</h2>
+            <span class="card-tagline">From idea to working network</span>
+          </div>
+
+          <div class="split-two">
+            <div>
+              <p><strong>1. Discovery &amp; goals (email)</strong></p>
+              <p>
+                You email me a quick overview: what your business does, how many people you have,
+                your current internet connection, and what&rsquo;s not working today.
+              </p>
+
+              <p><strong>2. Design &amp; quote</strong></p>
+              <p>
+                I propose a network layout and recommended hardware (rack, router, switches, APs,
+                etc.). Pricing is <strong>project-based and quote-only</strong> so small offices
+                aren&rsquo;t paying enterprise rates.
+              </p>
+            </div>
+            <div>
+              <p><strong>3. Procurement &amp; install</strong></p>
+              <p>
+                With your approval, I order the agreed equipment. I bring and install what fits in
+                my vehicle; larger items can ship directly to your office. I don&rsquo;t handle
+                heavy construction or forklift moves.
+              </p>
+
+              <p><strong>4. Configuration &amp; handover</strong></p>
+              <p>
+                I configure the network, connect to your ISP, verify key workstations, and provide
+                simple documentation so you know what&rsquo;s installed and where.
+              </p>
+            </div>
+          </div>
+
+          <p class="subdued">
+            Note: I assume you already have an internet provider. If you don&rsquo;t, I can advise
+            on what to ask for when ordering service.
+          </p>
+        </article>
+      </div>
+
+      <!-- Right column: Ongoing care + why me + contact -->
+      <div>
+        <article class="card">
+          <div class="card-header">
+            <h2 class="card-title">ONGOING NETWORK CARE</h2>
+            <span class="card-tagline">Optional monthly subscription</span>
+          </div>
+
+          <p>
+            After the initial build-out, you can keep me on as your part-time network admin.
+            Instead of hiring full-time IT, you get a dedicated person who already knows your
+            environment.
+          </p>
+
+          <ul class="list">
+            <li>Firmware/OS updates for agreed network devices.</li>
+            <li>Configuration changes as you grow: new users, VLANs, ports, Wi-Fi tweaks.</li>
+            <li>Remote troubleshooting for network-related issues during agreed hours.</li>
+            <li>Upgrade planning when you start to outgrow the original design.</li>
+          </ul>
+
+          <p class="subdued">
+            Monthly pricing is custom and depends on devices under management, number of locations,
+            and expected ticket volume. All support starts via email and will move into a proper
+            ticketing system as the service grows.
+          </p>
+        </article>
+
+        <article class="card">
+          <div class="card-header">
+            <h2 class="card-title">WHY WORK WITH ME</h2>
+            <span class="card-tagline">USMC veteran &amp; hands-on network admin</span>
+          </div>
+
+          <p>
+            I&rsquo;m Brandon Ortiz &mdash; a <strong>USMC Veteran Network Administrator</strong>
+            with over four years of experience building and maintaining production networks, plus an
+            ever-growing homelab that mirrors real-world environments.
+          </p>
+
+          <ul class="list">
+            <li>Real-world experience with Cisco routing/switching, VLANs, and secure office design.</li>
+            <li>Background supporting missions, not just lab gear &mdash; reliability matters.</li>
+            <li>
+              Pricing intentionally structured to beat large consulting firms for small-office work.
+            </li>
+            <li>No upsell, no fluff &mdash; I recommend what you actually need, with room to grow.</li>
+          </ul>
+
+          <div class="cta">
+            <div class="cta-main">
+              <strong>Ready to talk about your office network?</strong>
+              <br />
+              Email me with a short description of your business, headcount, and goals.
+            </div>
+            <a class="btn-link" href="mailto:ksaku@pm.me?subject=SNS%20-%20New%20Office%20Network%20Inquiry">
+              Email Brandon
+            </a>
+          </div>
+
+          <p class="subdued" style="margin-top: 0.8rem;">
+            Hours are flexible and scheduled around my full-time role. All initial contact is via
+            email so I can respond with focused questions and a realistic timeline.
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <footer>
+      &copy; <span id="year"></span> kxsaku &middot; Built from the homelab.
+    </footer>
+  </main>
+
+  <script>
+    // Set footer year
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
