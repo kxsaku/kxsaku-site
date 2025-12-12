@@ -124,10 +124,11 @@
           <button class="btn" id="resetAssignedBtn">Reset to Assigned</button>
         </div>
         <div class="toolbar-right">
-          <button class="btn" id="flagRedBtn">Flag Red</button>
-          <button class="btn" id="flagYellowBtn">Flag Yellow</button>
-          <button class="btn" id="flagGreenBtn">Flag Green</button>
-          <button class="btn btn-danger" id="deleteBtn">Delete</button>
+            <button class="btn" id="flagRedBtn">Flag Red</button>
+            <button class="btn" id="flagYellowBtn">Flag Yellow</button>
+            <button class="btn" id="flagGreenBtn">Flag Green</button>
+            <button class="btn" id="flagClearBtn">Reset Priority</button>
+            <button class="btn" id="refreshBtn">Refresh</button>
         </div>
       </div>
 
@@ -215,8 +216,10 @@
 
   <!-- Login overlay -->
   <div class="overlay" id="loginOverlay" style="display:none;">
-    <div class="login-card">
-      <h2 class="login-title">Admin login</h2>
+    <div class="login-card" style="position:relative;">
+        <button class="login-close" id="loginCloseBtn" aria-label="Close">✕</button>
+        <h2 class="login-title">Admin login</h2>
+
       <p class="login-sub">
         Sign in to view this inquiry. Data is protected by Supabase policies.
       </p>
@@ -401,6 +404,8 @@
     document.getElementById("flagRedBtn").addEventListener("click", () => updateInquiry({ priority_flag: "red" }));
     document.getElementById("flagYellowBtn").addEventListener("click", () => updateInquiry({ priority_flag: "yellow" }));
     document.getElementById("flagGreenBtn").addEventListener("click", () => updateInquiry({ priority_flag: "green" }));
+    document.getElementById("flagClearBtn").addEventListener("click", () => updateMany({ priority_flag: null }));
+
 
     document.getElementById("deleteBtn").addEventListener("click", deleteInquiry);
 

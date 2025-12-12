@@ -717,6 +717,16 @@
       <a href="/sns-admin.html" class="admin-icon" aria-label="Admin Login" title="Admin">
   ⛭
 </a>
+
+<script>
+  (function(){
+    const a = document.getElementById("adminLink");
+    if (!a) return;
+    const here = window.location.href;
+    a.href = `sns-admin.html?from=${encodeURIComponent(here)}`;
+  })();
+</script>
+
     </footer>
   </main>
 

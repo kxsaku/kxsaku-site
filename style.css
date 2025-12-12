@@ -18,3 +18,22 @@
   background: rgba(15, 10, 55, 0.45);
   filter: brightness(1.05);
 }
+
+.login-close{
+  position:absolute;
+  top:14px;
+  right:14px;
+  width:38px;
+  height:38px;
+  border-radius:12px;
+  border:1px solid rgba(129,118,255,.25);
+  background: rgba(15, 10, 55, 0.55);
+  color:#f4f0ff;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition: transform .08s ease, filter .12s ease, border-color .12s ease;
+}
+.login-close:hover { transform: translateY(-1px); border-color:#b37cff; filter:brightness(1.08); }
+.login-close:active { transform: translateY(1px); }
