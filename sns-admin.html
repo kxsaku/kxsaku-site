@@ -22,7 +22,7 @@
       box-shadow: 0 25px 80px rgba(0, 0, 0, 0.65);
       backdrop-filter: blur(16px);
       padding: 1.25rem 1.25rem 1.1rem;
-      overflow:hidden;
+      /* overflow removed so UI elements aren't clipped */
     }
 
     .toolbar { display:flex; flex-wrap:wrap; gap:.6rem; align-items:center; justify-content:space-between; margin-bottom: .8rem; }
@@ -70,43 +70,6 @@
 
     .err { margin-top:.8rem; color:#ff9494; font-size:.9rem; display:none; }
     .ok { margin-top:.8rem; color:#7af9c4; font-size:.9rem; display:none; }
-
-    /* Eye tooltip */
-    .quickcell { display:flex; align-items:center; justify-content:flex-end; gap:.6rem; }
-    .eye-wrap { position:relative; display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:999px; border:1px solid rgba(129,118,255,.25); background: rgba(9,6,34,.25); }
-    .eye-wrap:hover { border-color:#b37cff; box-shadow:0 0 0 1px rgba(179,124,255,.25); }
-    .eye { font-size:14px; opacity:.9; }
-    .tooltip {
-      position:absolute;
-      right:0;
-      top:calc(100% + 10px);
-      width: min(340px, 70vw);
-      background: rgba(9, 6, 34, 0.98);
-      border: 1px solid rgba(130, 106, 255, 0.35);
-      border-radius: 16px;
-      box-shadow: 0 25px 70px rgba(0,0,0,.7);
-      padding: .75rem .85rem;
-      color:#f4f0ff;
-      opacity:0;
-      transform: translateY(-6px);
-      pointer-events:none;
-      transition: opacity .15s ease, transform .15s ease;
-      z-index: 50;
-    }
-    .eye-wrap:hover .tooltip {
-      opacity:1;
-      transform: translateY(0);
-      pointer-events:auto;
-    }
-    .tooltip h4 {
-      margin:0 0 .45rem;
-      font-size:.78rem;
-      letter-spacing:.12em;
-      text-transform:uppercase;
-      color:#cfc8ff;
-    }
-    .tooltip .line { font-size:.85rem; color:#e9e5ff; margin:.2rem 0; }
-    .tooltip .k { color:#bdb7ff; }
 
     /* Login overlay */
     .overlay {
@@ -227,6 +190,22 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- Global Quick Look tooltip (floats above everything) -->
+<div id="qlTooltip" style="
+  position: fixed;
+  z-index: 99999;
+  display: none;
+  pointer-events: none;
+  max-width: 420px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(129,118,255,.35);
+  background: rgba(9, 6, 34, 0.98);
+  color: #f4f0ff;
+  box-shadow: 0 25px 80px rgba(0,0,0,.65);
+  backdrop-filter: blur(16px);
+">
+</div>
 
   <script>
     /**************************************************************
@@ -383,22 +362,14 @@
             <td>${quickContact}</td>
             <td>${quickBiz}</td>
             <td>${quickServices}</td>
-            <td style="text-align:right;">
-              <div class="quickcell">
-                <span class="eye-wrap" aria-label="Quick look">
-                  <span class="eye">👁</span>
-                  <div class="tooltip">
-                    <h4>Quick look</h4>
-                    <div class="line"><span class="k">Contact:</span> ${quickContact || "-"}</div>
-                    <div class="line"><span class="k">Business:</span> ${quickBiz || "-"}</div>
-                    <div class="line"><span class="k">Services:</span> ${quickServices || "-"}</div>
-                  </div>
-                </span>
+            <td style="white-space:nowrap;">
+  <button class="btn" data-eye="${sanitize(r.id)}" aria-label="Quick look" title="Quick look" style="padding:.55rem .75rem;">
+    👁
+  </button>
+  <button class="btn" data-view="${sanitize(r.id)}" style="margin-left:.35rem;">View</button>
+  <button class="btn" data-del="${sanitize(r.id)}" style="margin-left:.35rem; border-color: rgba(255,98,98,.35);">Delete</button>
+</td>
 
-                <a class="btn" href="sns-inquiry-view.html?id=${encodeURIComponent(r.id)}">View</a>
-                <button class="btn btn-danger" data-delete="${sanitize(r.id)}">Delete</button>
-              </div>
-            </td>
           </tr>
         `;
       }).join("");
@@ -419,21 +390,129 @@
       await loadInquiries();
     }
 
-    async function deleteMany(ids) {
-      clearErr();
-      if (!ids || ids.length === 0) { showErr("Select at least one inquiry."); return; }
+        async function deleteMany(ids) {
+  clearErr();
+  if (!ids || ids.length === 0) { showErr("Select at least one inquiry."); return; }
 
-      const ok = confirm(`Delete ${ids.length} inquiry(s)? This cannot be undone.`);
-      if (!ok) return;
+  const ok = confirm(`Delete ${ids.length} inquiry(s)? This cannot be undone.`);
+  if (!ok) return;
 
-      const { error } = await sb.from("inquiries").delete().in("id", ids);
-      if (error) { showErr(error.message); return; }
+  const { error, count } = await sb
+    .from("inquiries")
+    .delete({ count: "exact" })
+    .in("id", ids);
 
-      showOk("Deleted " + ids.length + " inquiry(s).");
-      await loadInquiries();
-    }
+  if (error) {
+    showErr("Delete failed: " + error.message);
+    return;
+  }
+
+  if (!count || count === 0) {
+    showErr("Delete request returned 0 deleted rows. This usually means RLS is blocking DELETE.");
+    return;
+  }
+
+  showOk(`${count} inquiry deleted.`);
+  await loadInquiries();
+}
+
+
 
     // Toolbar events
+
+    // --- Tooltip helpers (global floating tooltip; not clipped) ---
+const qlTooltip = document.getElementById("qlTooltip");
+
+function showTooltip(html, x, y) {
+  qlTooltip.innerHTML = html;
+  qlTooltip.style.display = "block";
+
+  const pad = 14;
+  // Force layout so rect is accurate after innerHTML change
+  const rect = qlTooltip.getBoundingClientRect();
+
+  let left = x + 14;
+  let top  = y + 14;
+
+  if (left + rect.width + pad > window.innerWidth) left = window.innerWidth - rect.width - pad;
+  if (top + rect.height + pad > window.innerHeight) top = window.innerHeight - rect.height - pad;
+
+  qlTooltip.style.left = left + "px";
+  qlTooltip.style.top  = top + "px";
+}
+
+function hideTooltip() {
+  qlTooltip.style.display = "none";
+  qlTooltip.innerHTML = "";
+}
+
+// --- Row-level actions + tooltip (event delegation) ---
+document.addEventListener("click", async (e) => {
+  const viewBtn = e.target.closest("[data-view]");
+  if (viewBtn) {
+    const id = viewBtn.getAttribute("data-view");
+    window.location.href = `sns-inquiry-view.html?id=${encodeURIComponent(id)}`;
+    return;
+  }
+
+  const delBtn = e.target.closest("[data-del]");
+  if (delBtn) {
+    const id = delBtn.getAttribute("data-del");
+    await deleteMany([id]);
+    return;
+  }
+});
+
+// Keep tooltip near cursor when visible
+document.addEventListener("mousemove", (e) => {
+  if (qlTooltip.style.display === "block") {
+    showTooltip(qlTooltip.innerHTML, e.clientX, e.clientY);
+  }
+});
+
+// IMPORTANT: use mouseover/mouseout (mouseenter doesn't bubble reliably for delegation)
+document.addEventListener("mouseover", (e) => {
+  const eyeBtn = e.target.closest("[data-eye]");
+  if (!eyeBtn) return;
+
+  const row = eyeBtn.closest("tr");
+  if (!row) return;
+
+  const tds = row.querySelectorAll("td");
+  const date     = tds[1]?.textContent?.trim() || "";
+  const priority = tds[2]?.textContent?.trim() || "";
+  const status   = tds[3]?.textContent?.trim() || "";
+  const contact  = tds[4]?.textContent?.trim() || "";
+  const business = tds[5]?.textContent?.trim() || "";
+  const services = tds[6]?.textContent?.trim() || "";
+
+  const html = `
+    <div style="letter-spacing:.14em; text-transform:uppercase; font-size:.78rem; color:#cfc8ff; margin-bottom:.5rem;">
+      Quick Look
+    </div>
+    <div style="font-size:.92rem; line-height:1.45;">
+      <div><span style="color:#bdb7ff;">Date:</span> ${sanitize(date)}</div>
+      <div><span style="color:#bdb7ff;">Status:</span> ${sanitize(status)}</div>
+      <div><span style="color:#bdb7ff;">Priority:</span> ${sanitize(priority)}</div>
+      <div style="margin-top:.45rem;"><span style="color:#bdb7ff;">Contact:</span> ${sanitize(contact)}</div>
+      <div><span style="color:#bdb7ff;">Business:</span> ${sanitize(business)}</div>
+      <div style="margin-top:.45rem;"><span style="color:#bdb7ff;">Services:</span> ${sanitize(services)}</div>
+    </div>
+  `;
+
+  showTooltip(html, e.clientX, e.clientY);
+});
+
+document.addEventListener("mouseout", (e) => {
+  const eyeBtn = e.target.closest("[data-eye]");
+  if (!eyeBtn) return;
+
+  // If you're still inside the same eye button, ignore
+  if (e.relatedTarget && eyeBtn.contains(e.relatedTarget)) return;
+
+  hideTooltip();
+});
+
     document.getElementById("refreshBtn").addEventListener("click", () => loadInquiries());
     document.getElementById("markWorkingBtn").addEventListener("click", () => updateMany({ status: "working" }));
     document.getElementById("markCompletedBtn").addEventListener("click", () => updateMany({ status: "completed" }));
@@ -445,17 +524,14 @@
 
     document.getElementById("deleteSelectedBtn").addEventListener("click", () => deleteMany(getSelectedIds()));
 
+
+
+
     selectAll.addEventListener("change", (e) => {
       document.querySelectorAll("input[data-id]").forEach(cb => cb.checked = e.target.checked);
     });
 
     // Row-level delete (event delegation)
-    rowsEl.addEventListener("click", (e) => {
-      const btn = e.target.closest("[data-delete]");
-      if (!btn) return;
-      const id = btn.getAttribute("data-delete");
-      deleteMany([id]);
-    });
 
     logoutBtn.addEventListener("click", async () => {
       await sb.auth.signOut();
