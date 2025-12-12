@@ -1,0 +1,20 @@
+.admin-link{
+  margin-left: 12px;
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(210, 205, 255, 0.55);
+  text-decoration: none;
+  border: 1px solid rgba(129,118,255,0.22);
+  background: rgba(9, 6, 34, 0.35);
+  padding: 0.35rem 0.6rem;
+  border-radius: 999px;
+  transition: border-color .12s ease, filter .12s ease, color .12s ease, background .12s ease;
+}
+
+.admin-link:hover{
+  color: rgba(244, 240, 255, 0.9);
+  border-color: rgba(179,124,255,0.45);
+  background: rgba(15, 10, 55, 0.45);
+  filter: brightness(1.05);
+}
