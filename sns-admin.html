@@ -28,6 +28,65 @@
     .toolbar { display:flex; flex-wrap:wrap; gap:.6rem; align-items:center; justify-content:space-between; margin-bottom: .8rem; }
     .toolbar-left, .toolbar-right { display:flex; flex-wrap:wrap; gap:.6rem; align-items:center; }
 
+    /* Modern toolbar layout */
+.toolbar-grid{
+  display:grid;
+  grid-template-columns: 1fr auto;
+  gap: .85rem 1rem;
+  align-items:end;
+  margin-bottom: 1rem;
+  padding-bottom: .9rem;
+  border-bottom: 1px solid rgba(129,118,255,.14);
+}
+
+.toolgroup{ display:flex; flex-direction:column; gap:.5rem; }
+.toolgroup-right{ justify-self:end; text-align:right; }
+.tooltitle{
+  font-size:.72rem;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:#bdb7ff;
+  opacity:.9;
+  user-select:none;
+}
+
+.toolrow{ display:flex; flex-wrap:wrap; gap:.55rem; align-items:center; }
+
+/* Button variants */
+.btn-soft{
+  background: rgba(15, 10, 55, 0.55);
+  border-color: rgba(129,118,255,.28);
+}
+.btn-primary{
+  background: rgba(179,124,255,.18);
+  border-color: rgba(179,124,255,.45);
+}
+.btn-primary:hover{
+  border-color:#b37cff;
+  box-shadow:0 0 0 1px rgba(179,124,255,.35);
+}
+
+.btn-chip{
+  padding:.6rem .9rem;
+}
+
+/* Tiny color dots for flag buttons */
+.dot{
+  width:10px; height:10px; border-radius:999px;
+  box-shadow: 0 0 0 2px rgba(255,255,255,.06);
+  display:inline-block;
+}
+.dot-red{ background:#ff6262; }
+.dot-yellow{ background:#ffd45a; }
+.dot-green{ background:#6cffb0; }
+
+/* Responsive: stack nicely on small screens */
+@media (max-width: 780px){
+  .toolbar-grid{ grid-template-columns: 1fr; }
+  .toolgroup-right{ justify-self:start; text-align:left; }
+}
+
+
     .btn {
       border-radius:999px;
       padding:.65rem 1.05rem;
@@ -120,20 +179,40 @@
     </div>
 
     <div class="card">
-      <div class="toolbar">
-        <div class="toolbar-left">
-          <button class="btn" id="markWorkingBtn">Mark as Working</button>
-          <button class="btn" id="markCompletedBtn">Mark as Completed</button>
-          <button class="btn" id="resetAssignedBtn">Reset to Assigned</button>
-          <button class="btn btn-danger" id="deleteSelectedBtn">Delete Selected</button>
-        </div>
-        <div class="toolbar-right">
-          <button class="btn" id="flagRedBtn">Flag Red</button>
-          <button class="btn" id="flagYellowBtn">Flag Yellow</button>
-          <button class="btn" id="flagGreenBtn">Flag Green</button>
-          <button class="btn" id="refreshBtn">Refresh</button>
-        </div>
-      </div>
+<div class="toolbar toolbar-grid">
+  <div class="toolgroup">
+    <div class="tooltitle">Status</div>
+    <div class="toolrow">
+      <button class="btn btn-soft" id="markWorkingBtn">Working</button>
+      <button class="btn btn-soft" id="markCompletedBtn">Completed</button>
+      <button class="btn btn-soft" id="resetAssignedBtn">Assigned</button>
+    </div>
+  </div>
+
+  <div class="toolgroup toolgroup-right">
+    <div class="tooltitle">Manage</div>
+    <div class="toolrow">
+      <button class="btn btn-danger" id="deleteSelectedBtn">Delete selected</button>
+    </div>
+  </div>
+
+  <div class="toolgroup">
+    <div class="tooltitle">Priority</div>
+    <div class="toolrow">
+      <button class="btn btn-chip" id="flagRedBtn"><span class="dot dot-red"></span>Red</button>
+      <button class="btn btn-chip" id="flagYellowBtn"><span class="dot dot-yellow"></span>Yellow</button>
+      <button class="btn btn-chip" id="flagGreenBtn"><span class="dot dot-green"></span>Green</button>
+    </div>
+  </div>
+
+  <div class="toolgroup toolgroup-right">
+    <div class="tooltitle">Sync</div>
+    <div class="toolrow">
+      <button class="btn btn-primary" id="refreshBtn">Refresh</button>
+    </div>
+  </div>
+</div>
+
 
       <div class="err" id="errBox"></div>
       <div class="ok" id="okBox"></div>
