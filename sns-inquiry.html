@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>SNS · Start Your Network Project</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Simple page-specific styles (can be moved into styles.css) -->
+  <style>
+    .page-shell {
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #342067, #050315 55%, #020010);
+      color: #f4f0ff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 3rem 1rem 4rem;
+    }
+
+    .sns-form-card {
+      width: 100%;
+      max-width: 960px;
+      background: rgba(9, 6, 34, 0.95);
+      border-radius: 32px;
+      box-shadow: 0 25px 80px rgba(0, 0, 0, 0.65);
+      padding: 2.5rem 2.25rem 2.75rem;
+      border: 1px solid rgba(130, 106, 255, 0.3);
+      backdrop-filter: blur(16px);
+    }
+
+    .sns-form-header {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .sns-form-header h1 {
+      font-size: 2rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #f8f1ff;
+    }
+
+    .sns-form-header p {
+      max-width: 620px;
+      color: #c5bcff;
+      line-height: 1.5;
+    }
+
+    .sns-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.5rem 1.75rem;
+    }
+
+    .sns-grid-full {
+      grid-column: 1 / -1;
+    }
+
+    .sns-field label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #d5cffc;
+      margin-bottom: 0.4rem;
+    }
+
+    .sns-field small {
+      display: block;
+      font-size: 0.75rem;
+      color: #9ea0d7;
+      margin-top: 0.2rem;
+    }
+
+    .sns-input,
+    .sns-select,
+    .sns-textarea {
+      width: 100%;
+      border-radius: 999px;
+      border: 1px solid rgba(129, 118, 255, 0.35);
+      background: rgba(9, 6, 34, 0.95);
+      color: #f4f0ff;
+      padding: 0.7rem 1rem;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+    }
+
+    .sns-textarea {
+      border-radius: 22px;
+      min-height: 110px;
+      padding-top: 0.9rem;
+      resize: vertical;
+    }
+
+    .sns-input:focus,
+    .sns-select:focus,
+    .sns-textarea:focus {
+      border-color: #9c88ff;
+      box-shadow: 0 0 0 1px rgba(156, 136, 255, 0.55);
+      background: rgba(12, 9, 49, 0.98);
+    }
+
+    .sns-checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+
+    .sns-pill-checkbox {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.45rem 0.85rem;
+      border-radius: 999px;
+      border: 1px solid rgba(129, 118, 255, 0.35);
+      background: rgba(15, 10, 55, 0.9);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: background 0.18s ease, border-color 0.18s ease,
+                  box-shadow 0.18s ease, transform 0.1s ease;
+    }
+
+    .sns-pill-checkbox input {
+      accent-color: #b37cff;
+    }
+
+    .sns-pill-checkbox:hover {
+      border-color: #b37cff;
+      box-shadow: 0 0 0 1px rgba(179, 124, 255, 0.45);
+      transform: translateY(-1px);
+    }
+
+    .sns-actions {
+      margin-top: 2.2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .sns-actions .hint {
+      font-size: 0.8rem;
+      color: #9ea0d7;
+    }
+
+    .sns-submit-btn {
+      border-radius: 999px;
+      padding: 0.85rem 1.8rem;
+      border: none;
+      cursor: pointer;
+      background-image: linear-gradient(135deg, #b659ff, #6a7bff);
+      color: white;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-size: 0.85rem;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+      transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.12s ease;
+    }
+
+    .sns-submit-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 20px 55px rgba(0, 0, 0, 0.7);
+      filter: brightness(1.05);
+    }
+
+    .sns-submit-btn:active {
+      transform: translateY(1px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+    }
+
+    .sns-error {
+      margin-top: 1rem;
+      color: #ff9494;
+      font-size: 0.85rem;
+    }
+
+    .sns-success {
+      margin-top: 1rem;
+      color: #7af9c4;
+      font-size: 0.85rem;
+    }
+
+    @media (max-width: 720px) {
+      .sns-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .sns-form-card {
+        padding: 2rem 1.5rem 2.25rem;
+        border-radius: 24px;
+      }
+      .sns-form-header h1 {
+        font-size: 1.6rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-shell">
+    <div class="sns-form-card">
+      <header class="sns-form-header">
+        <h1>Project inquiry</h1>
+        <p>
+          Tell me about your business and what you need from your network.
+          This is not a commitment — it is the first step so I can review,
+          estimate scope, and respond with a plan.
+        </p>
+      </header>
+
+      <form id="sns-inquiry-form">
+        <div class="sns-grid">
+          <!-- Contact info -->
+          <div class="sns-field">
+            <label for="contactName">Your name *</label>
+            <input id="contactName" name="contactName" type="text"
+                   class="sns-input" required />
+          </div>
+
+          <div class="sns-field">
+            <label for="businessName">Business or organization name *</label>
+            <input id="businessName" name="businessName" type="text"
+                   class="sns-input" required />
+          </div>
+
+          <div class="sns-field">
+            <label for="email">Email *</label>
+            <input id="email" name="email" type="email"
+                   class="sns-input" required />
+          </div>
+
+          <div class="sns-field">
+            <label for="phone">Phone (optional)</label>
+            <input id="phone" name="phone" type="tel"
+                   class="sns-input" />
+          </div>
+
+          <div class="sns-field">
+            <label for="location">Office location (city, state) *</label>
+            <input id="location" name="location" type="text"
+                   class="sns-input" required />
+          </div>
+
+          <div class="sns-field">
+            <label for="companySize">Approximate team size *</label>
+            <select id="companySize" name="companySize"
+                    class="sns-select" required>
+              <option value="">Select one</option>
+              <option value="1-10">1 – 10 people</option>
+              <option value="11-25">11 – 25 people</option>
+              <option value="26-50">26 – 50 people</option>
+              <option value="51-100">51 – 100 people</option>
+              <option value="100+">More than 100</option>
+            </select>
+          </div>
+
+          <!-- Services needed -->
+          <div class="sns-field sns-grid-full">
+            <label>What do you need help with? *</label>
+            <div class="sns-checkbox-group">
+              <label class="sns-pill-checkbox">
+                <input type="checkbox" name="services" value="New office network" />
+                <span>New office network</span>
+              </label>
+              <label class="sns-pill-checkbox">
+                <input type="checkbox" name="services" value="Upgrade existing network" />
+                <span>Upgrade existing network</span>
+              </label>
+              <label class="sns-pill-checkbox">
+                <input type="checkbox" name="services" value="Wi-Fi and access points" />
+                <span>Wi-Fi and access points</span>
+              </label>
+              <label class="sns-pill-checkbox">
+                <input type="checkbox" name="services" value="NAS / file server setup" />
+                <span>NAS / file server setup</span>
+              </label>
+              <label class="sns-pill-checkbox">
+                <input type="checkbox" name="services" value="Firewall / security" />
+                <span>Firewall / security</span>
+              </label>
+              <label class="sns-pill-checkbox">
+                <input type="checkbox" name="services" value="Ongoing network maintenance" />
+                <span>Ongoing network maintenance</span>
+              </label>
+              <label class="sns-pill-checkbox">
+                <input type="checkbox" name="services" value="Other" />
+                <span>Other</span>
+              </label>
+            </div>
+            <small>
+              This helps me understand whether you need design, hardware, installation,
+              ongoing support, or all of the above.
+            </small>
+          </div>
+
+          <!-- Current setup -->
+          <div class="sns-field sns-grid-full">
+            <label for="currentSetup">Current situation</label>
+            <textarea id="currentSetup" name="currentSetup"
+                      class="sns-textarea"
+                      placeholder="Do you already have any networking equipment, cabling, or a server rack? Any pain points today?"></textarea>
+          </div>
+
+          <!-- Goals -->
+          <div class="sns-field sns-grid-full">
+            <label for="goals">What do you want your network to do? *</label>
+            <textarea id="goals" name="goals"
+                      class="sns-textarea" required
+                      placeholder="For example: &quot;Support 20 people in the office, separate staff and guest Wi-Fi, central file storage with backups, and room to grow.&quot;"></textarea>
+          </div>
+
+          <!-- Budget / timeline -->
+          <div class="sns-field">
+            <label for="budget">Rough budget range (USD) *</label>
+            <select id="budget" name="budget"
+                    class="sns-select" required>
+              <option value="">Select one</option>
+              <option value="under-2000">Under $2,000</option>
+              <option value="2000-5000">$2,000 – $5,000</option>
+              <option value="5000-10000">$5,000 – $10,000</option>
+              <option value="10000+">More than $10,000</option>
+              <option value="unsure">Not sure yet</option>
+            </select>
+          </div>
+
+          <div class="sns-field">
+            <label for="timeline">Preferred timeline *</label>
+            <select id="timeline" name="timeline"
+                    class="sns-select" required>
+              <option value="">Select one</option>
+              <option value="asap">As soon as possible</option>
+              <option value="30-days">Within 30 days</option>
+              <option value="60-90-days">Within 60–90 days</option>
+              <option value="planning">Still planning / exploring</option>
+            </select>
+          </div>
+
+          <!-- Extra -->
+          <div class="sns-field sns-grid-full">
+            <label for="extraNotes">Anything else I should know?</label>
+            <textarea id="extraNotes" name="extraNotes"
+                      class="sns-textarea"
+                      placeholder="Access restrictions, building requirements, previous quotes, or anything that helps me give you a better response."></textarea>
+          </div>
+        </div>
+
+        <div class="sns-actions">
+          <p class="hint">
+            By submitting, you agree to be contacted by email regarding this inquiry.
+          </p>
+
+          <button type="submit" class="sns-submit-btn">
+            Send inquiry
+          </button>
+        </div>
+
+        <div id="sns-message" class="sns-error" style="display:none;"></div>
+      </form>
+    </div>
+    <footer style="margin-top: 1.75rem; font-size: 0.8rem; color: #7b78b6;">
+      © 2025 kxsaku · Built from the homelab.
+    </footer>
+  </div>
+
+  <script type="module">
+  import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+  const supabaseUrl = "YOUR_PROJECT_URL";
+  const supabaseAnonKey = "YOUR_ANON_PUBLIC_KEY";
+  const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+  const form = document.getElementById('sns-inquiry-form');
+  const msgEl = document.getElementById('sns-message');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    msgEl.style.display = 'none';
+    msgEl.textContent = '';
+
+    const fd = new FormData(form);
+    const services = fd.getAll('services');
+    if (!services.length) {
+      msgEl.style.display = 'block';
+      msgEl.textContent = 'Please select at least one service.';
+      return;
+    }
+
+    const { error } = await supabase.from('inquiries').insert({
+      contact_name: fd.get('contactName'),
+      business_name: fd.get('businessName'),
+      email: fd.get('email'),
+      phone: fd.get('phone') || null,
+      location: fd.get('location'),
+      company_size: fd.get('companySize'),
+      services,
+      current_setup: fd.get('currentSetup') || null,
+      goals: fd.get('goals'),
+      budget: fd.get('budget'),
+      timeline: fd.get('timeline'),
+      extra_notes: fd.get('extraNotes') || null
+    });
+
+    if (error) {
+      console.error(error);
+      msgEl.style.display = 'block';
+      msgEl.textContent = 'Failed to submit inquiry. Please try again.';
+      return;
+    }
+
+    window.location.href = 'sns-inquiry-success.html';
+  });
+</script>
+
+</body>
+</html>

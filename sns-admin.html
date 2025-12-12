@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>SNS · Inquiry Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+        "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #342067, #050315 55%, #020010);
+      color: #f4f0ff;
+    }
+    .admin-shell {
+      min-height: 100vh;
+      padding: 2rem 1.5rem 2.5rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.8rem;
+    }
+    .admin-header h1 {
+      font-size: 1.6rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .admin-header .subtitle {
+      font-size: 0.9rem;
+      color: #9ea0d7;
+      margin-top: 0.3rem;
+    }
+    .admin-card {
+      background: rgba(9, 6, 34, 0.97);
+      border-radius: 28px;
+      border: 1px solid rgba(130, 106, 255, 0.35);
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.7);
+      padding: 1.5rem 1.5rem 1.8rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.86rem;
+    }
+    thead {
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.78rem;
+      color: #9ea0d7;
+    }
+    th, td {
+      padding: 0.6rem 0.5rem;
+      border-bottom: 1px solid rgba(53, 49, 107, 0.8);
+    }
+    tbody tr:hover {
+      background: rgba(26, 22, 70, 0.75);
+    }
+    .checkbox-col {
+      width: 28px;
+    }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.25rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 600;
+    }
+    .tag-status-assigned {
+      background: rgba(40, 40, 52, 0.9);
+      color: #e0e0ff;
+    }
+    .tag-status-working {
+      background: rgba(78, 126, 255, 0.2);
+      color: #84a8ff;
+      border: 1px solid rgba(132, 168, 255, 0.65);
+    }
+    .tag-status-completed {
+      background: rgba(47, 180, 132, 0.18);
+      color: #7af9c4;
+      border: 1px solid rgba(122, 249, 196, 0.6);
+    }
+    .flag-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      display: inline-block;
+      margin-right: 0.35rem;
+    }
+    .flag-red { background: #ff6b6b; }
+    .flag-yellow { background: #ffd66b; }
+    .flag-green { background: #56f59b; }
+    .quick-eye {
+      cursor: pointer;
+      font-size: 1rem;
+      opacity: 0.7;
+      transition: opacity 0.15s ease, transform 0.1s ease;
+    }
+    .quick-eye:hover {
+      opacity: 1;
+      transform: translateY(-1px);
+    }
+    .admin-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .admin-toolbar button {
+      border-radius: 999px;
+      border: 1px solid rgba(130, 106, 255, 0.55);
+      background: rgba(16, 11, 65, 0.96);
+      color: #eae7ff;
+      padding: 0.45rem 0.9rem;
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      transition: background 0.12s ease, transform 0.08s ease, box-shadow 0.08s ease;
+    }
+    .admin-toolbar button:hover {
+      background: rgba(24, 18, 92, 1);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6);
+      transform: translateY(-1px);
+    }
+    .quick-panel {
+      position: fixed;
+      right: 1.5rem;
+      bottom: 1.5rem;
+      width: 320px;
+      max-width: calc(100% - 2.5rem);
+      background: rgba(8, 6, 30, 0.98);
+      border-radius: 22px;
+      border: 1px solid rgba(130, 106, 255, 0.5);
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.85);
+      padding: 1rem 1.1rem 1.1rem;
+      font-size: 0.8rem;
+      display: none;
+      z-index: 20;
+    }
+    .quick-panel h3 {
+      font-size: 0.85rem;
+      margin: 0 0 0.25rem;
+    }
+    .quick-panel p {
+      margin: 0.15rem 0;
+      color: #c5bcff;
+    }
+    .status-color-assigned { color: #d4d2ff; }
+    .status-color-working { color: #84a8ff; }
+    .status-color-completed { color: #7af9c4; }
+    @media (max-width: 800px) {
+      .admin-card {
+        padding: 1rem 0.8rem 1.2rem;
+        border-radius: 20px;
+      }
+      th:nth-child(5), td:nth-child(5) { display: none; } /* hide email on small screens */
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-shell">
+    <header class="admin-header">
+      <div>
+        <h1>SNS Inquiries</h1>
+        <div class="subtitle">Internal dashboard · newest inquiries first</div>
+      </div>
+      <!-- You can later swap this for a real "Logged in as Brandon" status -->
+      <div style="font-size:0.8rem;color:#9ea0d7;">Admin view</div>
+    </header>
+
+    <section class="admin-card">
+      <div class="admin-toolbar">
+        <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+          <button type="button" data-status="working" id="btn-mark-working">Mark as Working</button>
+          <button type="button" data-status="completed" id="btn-mark-completed">Mark as Completed</button>
+          <button type="button" data-status="assigned" id="btn-mark-assigned">Reset to Assigned</button>
+        </div>
+        <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+          <button type="button" data-flag="red" class="btn-flag">Flag Red</button>
+          <button type="button" data-flag="yellow" class="btn-flag">Flag Yellow</button>
+          <button type="button" data-flag="green" class="btn-flag">Flag Green</button>
+        </div>
+      </div>
+
+      <div style="overflow-x:auto;">
+        <table id="inquiry-table">
+          <thead>
+            <tr>
+              <th class="checkbox-col"><input type="checkbox" id="check-all"></th>
+              <th>Date</th>
+              <th>Priority</th>
+              <th>Status</th>
+              <th>Contact</th>
+              <th>Business</th>
+              <th>Services</th>
+              <th>Quick</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Rows injected by JS -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <div class="quick-panel" id="quick-panel">
+    <h3 id="quick-name"></h3>
+    <p id="quick-business"></p>
+    <p id="quick-services"></p>
+    <p id="quick-status"></p>
+  </div>
+
+  <script>
+    // Replace with your backend base URL
+    const API_BASE = 'https://YOUR_BACKEND_URL/api';
+
+    const tableBody = document.querySelector('#inquiry-table tbody');
+    const checkAll = document.getElementById('check-all');
+    const quickPanel = document.getElementById('quick-panel');
+    const quickName = document.getElementById('quick-name');
+    const quickBusiness = document.getElementById('quick-business');
+    const quickServices = document.getElementById('quick-services');
+    const quickStatus = document.getElementById('quick-status');
+
+    let inquiries = [];
+
+    function statusTag(status) {
+      if (status === 'working') {
+        return '<span class="tag tag-status-working">Working</span>';
+      } else if (status === 'completed') {
+        return '<span class="tag tag-status-completed">Completed</span>';
+      }
+      return '<span class="tag tag-status-assigned">Assigned</span>';
+    }
+
+    function flagDot(flag) {
+      const c = flag === 'red' ? 'flag-red' : flag === 'yellow' ? 'flag-yellow' : 'flag-green';
+      return '<span class="flag-dot ' + c + '"></span>' + (flag || '');
+    }
+
+    function formatDate(iso) {
+      const d = new Date(iso);
+      return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function renderTable() {
+      tableBody.innerHTML = '';
+      const sorted = [...inquiries].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+      for (const inquiry of sorted) {
+        const tr = document.createElement('tr');
+        tr.dataset.id = inquiry.id;
+
+        const servicesShort = (inquiry.services || []).slice(0, 2).join(', ') +
+          ((inquiry.services || []).length > 2 ? '…' : '');
+
+        tr.innerHTML = `
+          <td class="checkbox-col">
+            <input type="checkbox" class="row-check">
+          </td>
+          <td>${formatDate(inquiry.createdAt)}</td>
+          <td>${flagDot(inquiry.priority || 'green')}</td>
+          <td>${statusTag(inquiry.status || 'assigned')}</td>
+          <td>${inquiry.contactName || ''}</td>
+          <td>${inquiry.businessName || ''}</td>
+          <td>${servicesShort}</td>
+          <td><span class="quick-eye" title="Quick view">&#128065;</span></td>
+        `;
+        tableBody.appendChild(tr);
+      }
+    }
+
+    async function loadInquiries() {
+      // In real use, include Authorization header with your admin token
+      const res = await fetch(`${API_BASE}/inquiries`, {
+        headers: {
+          'Content-Type': 'application/json'
+          // 'Authorization': 'Bearer ' + YOUR_ADMIN_TOKEN
+        }
+      });
+
+      if (!res.ok) {
+        console.error('Failed to load inquiries');
+        return;
+      }
+
+      inquiries = await res.json();
+      renderTable();
+    }
+
+    function getSelectedIds() {
+      const rows = tableBody.querySelectorAll('tr');
+      const ids = [];
+      rows.forEach(row => {
+        const cb = row.querySelector('.row-check');
+        if (cb && cb.checked) {
+          ids.push(row.dataset.id);
+        }
+      });
+      return ids;
+    }
+
+    checkAll.addEventListener('change', () => {
+      const rows = tableBody.querySelectorAll('.row-check');
+      rows.forEach(cb => cb.checked = checkAll.checked);
+    });
+
+    // Bulk status buttons
+    document.getElementById('btn-mark-working').addEventListener('click', () => updateStatusBulk('working'));
+    document.getElementById('btn-mark-completed').addEventListener('click', () => updateStatusBulk('completed'));
+    document.getElementById('btn-mark-assigned').addEventListener('click', () => updateStatusBulk('assigned'));
+
+    document.querySelectorAll('.btn-flag').forEach(btn => {
+      btn.addEventListener('click', () => updateFlagBulk(btn.dataset.flag));
+    });
+
+    async function updateStatusBulk(status) {
+      const ids = getSelectedIds();
+      if (!ids.length) return;
+
+      await fetch(`${API_BASE}/inquiries/bulk-status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids, status })
+      });
+
+      // update local copy
+      inquiries = inquiries.map(i => ids.includes(String(i.id)) ? { ...i, status } : i);
+      renderTable();
+    }
+
+    async function updateFlagBulk(priority) {
+      const ids = getSelectedIds();
+      if (!ids.length) return;
+
+      await fetch(`${API_BASE}/inquiries/bulk-priority`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids, priority })
+      });
+
+      inquiries = inquiries.map(i => ids.includes(String(i.id)) ? { ...i, priority } : i);
+      renderTable();
+    }
+
+    // Quick view hover
+    tableBody.addEventListener('mouseover', (e) => {
+      const eye = e.target.closest('.quick-eye');
+      if (!eye) return;
+      const row = eye.closest('tr');
+      const id = row.dataset.id;
+      const inquiry = inquiries.find(i => String(i.id) === id);
+      if (!inquiry) return;
+
+      quickName.textContent = inquiry.contactName || 'Unknown contact';
+      quickBusiness.textContent = inquiry.businessName || '';
+      quickServices.textContent = 'Services: ' + (inquiry.services || []).join(', ');
+      quickStatus.textContent = 'Status: ' + (inquiry.status || 'assigned');
+      quickStatus.className = inquiry.status === 'working'
+        ? 'status-color-working'
+        : inquiry.status === 'completed'
+        ? 'status-color-completed'
+        : 'status-color-assigned';
+      quickPanel.style.display = 'block';
+    });
+
+    tableBody.addEventListener('mouseout', (e) => {
+      if (e.relatedTarget && quickPanel.contains(e.relatedTarget)) return;
+      quickPanel.style.display = 'none';
+    });
+
+    // Initial load
+    loadInquiries();
+  </script>
+</body>
+</html>
