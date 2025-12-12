@@ -378,9 +378,35 @@
   const msgEl = document.getElementById('sns-message');
 
   form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    msgEl.style.display = 'none';
-    msgEl.textContent = '';
+        e.preventDefault();
+
+        if (isSubmitting) return;
+        isSubmitting = true;
+
+        msgEl.style.display = 'none';
+        msgEl.textContent = '';
+
+    const form = document.getElementById('sns-inquiry-form');
+    const msgEl = document.getElementById('sns-message');
+    // Prevent double-submits (double clicks / slow connections)
+    let isSubmitting = false;
+
+    // Retry wrapper (handles random network hiccups / transient failures)
+    async function withRetry(fn, { tries = 3, baseDelayMs = 350 } = {}) {
+    let lastErr;
+
+    for (let i = 0; i < tries; i++) {
+        try {
+        return await fn();
+        } catch (e) {
+        lastErr = e;
+        const delay = baseDelayMs * Math.pow(2, i); // 350ms, 700ms, 1400ms
+        await new Promise(r => setTimeout(r, delay));
+        }
+    }
+
+    throw lastErr;
+    }
 
     const fd = new FormData(form);
     const services = fd.getAll('services');
@@ -390,28 +416,54 @@
       return;
     }
 
-    const { error } = await supabase.from('inquiries').insert({
-      contact_name: fd.get('contactName'),
-      business_name: fd.get('businessName'),
-      email: fd.get('email'),
-      phone: fd.get('phone') || null,
-      location: fd.get('location'),
-      company_size: fd.get('companySize'),
-      services,
-      current_setup: fd.get('currentSetup') || null,
-      goals: fd.get('goals'),
-      budget: fd.get('budget'),
-      timeline: fd.get('timeline'),
-      extra_notes: fd.get('extraNotes') || null
+    function fmtSbError(error) {
+  if (!error) return "Unknown error";
+  return [
+    error.code ? `code=${error.code}` : null,
+    error.message ? `message=${error.message}` : null,
+    error.details ? `details=${error.details}` : null,
+    error.hint ? `hint=${error.hint}` : null,
+  ].filter(Boolean).join(" | ");
+}
+
+    let insertError = null;
+
+    try {
+    await withRetry(async () => {
+        const { error } = await supabase.from('inquiries').insert({
+        contact_name: fd.get('contactName'),
+        business_name: fd.get('businessName'),
+        email: fd.get('email'),
+        phone: fd.get('phone') || null,
+        location: fd.get('location'),
+        company_size: fd.get('companySize'),
+        services,
+        current_setup: fd.get('currentSetup') || null,
+        goals: fd.get('goals'),
+        budget: fd.get('budget'),
+        timeline: fd.get('timeline'),
+        extra_notes: fd.get('extraNotes') || null
+        });
+
+        if (error) throw error;
     });
 
-    if (error) {
-      console.error(error);
-      msgEl.style.display = 'block';
-      msgEl.textContent = 'Failed to submit inquiry. Please try again.';
-      return;
+    } catch (error) {
+    insertError = error;
     }
 
+
+    if (insertError) {
+    console.error("Inquiry submit failed:", insertError);
+    console.error(fmtSbError(insertError));
+
+    msgEl.style.display = 'block';
+    msgEl.textContent = 'Failed to submit inquiry. Please try again.';
+    isSubmitting = false;
+    return;
+    }
+
+    isSubmitting = false;
     window.location.href = 'sns-inquiry-success.html';
   });
 </script>
