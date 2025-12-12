@@ -377,21 +377,10 @@
   const form = document.getElementById('sns-inquiry-form');
   const msgEl = document.getElementById('sns-message');
 
-  form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-
-        if (isSubmitting) return;
-        isSubmitting = true;
-
-        msgEl.style.display = 'none';
-        msgEl.textContent = '';
-
-    const form = document.getElementById('sns-inquiry-form');
-    const msgEl = document.getElementById('sns-message');
-    // Prevent double-submits (double clicks / slow connections)
+      // Prevent double-submits (double clicks / slow connections)
     let isSubmitting = false;
 
-    // Retry wrapper (handles random network hiccups / transient failures)
+        // Retry wrapper (handles random network hiccups / transient failures)
     async function withRetry(fn, { tries = 3, baseDelayMs = 350 } = {}) {
     let lastErr;
 
@@ -407,6 +396,25 @@
 
     throw lastErr;
     }
+
+    form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+        if (isSubmitting) return;
+        isSubmitting = true;
+
+
+
+
+
+        msgEl.style.display = 'none';
+        msgEl.textContent = '';
+
+    const form = document.getElementById('sns-inquiry-form');
+    const msgEl = document.getElementById('sns-message');
+
+
+
 
     const fd = new FormData(form);
     const services = fd.getAll('services');
