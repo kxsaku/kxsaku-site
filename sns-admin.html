@@ -79,6 +79,7 @@
 .dot-red{ background:#ff6262; }
 .dot-yellow{ background:#ffd45a; }
 .dot-green{ background:#6cffb0; }
+.dot-none{ background: rgba(255,255,255,.18); }
 
 /* Responsive: stack nicely on small screens */
 @media (max-width: 780px){
@@ -202,6 +203,7 @@
       <button class="btn btn-chip" id="flagRedBtn"><span class="dot dot-red"></span>Red</button>
       <button class="btn btn-chip" id="flagYellowBtn"><span class="dot dot-yellow"></span>Yellow</button>
       <button class="btn btn-chip" id="flagGreenBtn"><span class="dot dot-green"></span>Green</button>
+      <button class="btn btn-chip" id="flagNoneBtn"><span class="dot dot-none"></span>Clear</button>
     </div>
   </div>
 
@@ -600,6 +602,8 @@ document.addEventListener("mouseout", (e) => {
     document.getElementById("flagRedBtn").addEventListener("click", () => updateMany({ priority_flag: "red" }));
     document.getElementById("flagYellowBtn").addEventListener("click", () => updateMany({ priority_flag: "yellow" }));
     document.getElementById("flagGreenBtn").addEventListener("click", () => updateMany({ priority_flag: "green" }));
+    document.getElementById("flagNoneBtn").addEventListener("click", () => updateMany({ priority_flag: null }));
+
 
     document.getElementById("deleteSelectedBtn").addEventListener("click", () => deleteMany(getSelectedIds()));
 
