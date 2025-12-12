@@ -7,6 +7,44 @@
   <link rel="stylesheet" href="styles.css" />
 
   <style>
+        /* Prevent 100% width + padding from overflowing containers */
+    *, *::before, *::after { box-sizing: border-box; }
+
+    /* Make the login card able to place an X button */
+    .login-card { position: relative; }
+
+    /* Input sizing + extra right padding to “make room” for browser icons */
+    .field input{
+    box-sizing: border-box;
+    max-width: 100%;
+    padding-right: 3rem; /* space for browser/password-manager icons */
+    }
+
+    /* Modern close button (top-right) */
+    .login-close{
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
+    border: 1px solid rgba(129,118,255,.28);
+    background: rgba(15, 10, 55, 0.55);
+    color: #f4f0ff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform .08s ease, border-color .12s ease, filter .12s ease;
+    }
+    .login-close:hover{
+    transform: translateY(-1px);
+    border-color: rgba(179,124,255,.55);
+    filter: brightness(1.08);
+    }
+    .login-close:active{ transform: translateY(1px); }
+    .login-close svg{ width: 16px; height: 16px; opacity: .9; }
+
     body { margin:0; background: radial-gradient(circle at top, #342067, #050315 55%, #020010); color:#f4f0ff; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial; }
     .wrap { max-width: 1200px; margin: 0 auto; padding: 3rem 1rem 4rem; }
     .toprow { display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; }
@@ -246,7 +284,11 @@
   <!-- Login overlay -->
   <div class="overlay" id="loginOverlay" style="display:none;">
     <div class="login-card" style="position:relative;">
-        <button class="login-close" id="loginCloseBtn" aria-label="Close">✕</button>
+        <button class="login-close" id="loginCloseBtn" type="button" aria-label="Close">
+            <svg viewBox="0 0 24 24" fill="none">
+                <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+            </svg>
+            </button>
         <h2 class="login-title">Admin login</h2>
       <p class="login-sub">
         Sign in to view and manage inquiries. This page can load publicly, but data is protected by Supabase policies.
@@ -323,21 +365,20 @@
 
     const adminCard = document.getElementById("adminCard");
 
-        function goBackOrHome() {
-    const url = new URL(window.location.href);
-    const from = url.searchParams.get("from");
-    if (from) {
-        window.location.href = from;
+    function setLocked(isLocked){
+    if (isLocked){
+        adminCard.style.display = "none";   // nothing visible behind overlay
     } else {
-        // fallback behavior if they typed the admin URL directly
-        window.location.href = "/";
-    }
+        adminCard.style.display = "block";
+      }
     }
 
-    loginCloseBtn?.addEventListener("click", () => {
-    // Hide overlay and route back out
-    loginOverlay.style.display = "none";
-    goBackOrHome();
+    loginCloseBtn.addEventListener("click", () => {
+    hideLogin();
+
+    // Go back to the page you were on before clicking Admin (best UX)
+    if (history.length > 1) history.back();
+    else window.location.href = "/"; // fallback
     });
 
 
@@ -395,6 +436,7 @@
       if (!user) {
         whoami.textContent = "Not signed in";
         logoutBtn.style.display = "none";
+        setLocked(true);
         showLogin("Sign in to load inquiries.");
         return null;
       }
@@ -403,12 +445,14 @@
         await sb.auth.signOut();
         whoami.textContent = "Wrong account";
         logoutBtn.style.display = "none";
+        setLocked(true);
         showLogin("Use your admin email to sign in.");
         return null;
       }
 
       whoami.textContent = "Signed in: " + user.email;
       logoutBtn.style.display = "inline-flex";
+      setLocked(false);
       hideLogin();
       if (adminCard) adminCard.style.display = "block";
       return user;
