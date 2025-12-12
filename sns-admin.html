@@ -602,7 +602,7 @@ document.addEventListener("mouseout", (e) => {
     document.getElementById("flagRedBtn").addEventListener("click", () => updateMany({ priority_flag: "red" }));
     document.getElementById("flagYellowBtn").addEventListener("click", () => updateMany({ priority_flag: "yellow" }));
     document.getElementById("flagGreenBtn").addEventListener("click", () => updateMany({ priority_flag: "green" }));
-    document.getElementById("flagNoneBtn").addEventListener("click", () => updateMany({ priority_flag: null }));
+    document.getElementById("flagNoneBtn").addEventListener("click", () => updateMany({ priority_flag: "none" }));
 
 
     document.getElementById("deleteSelectedBtn").addEventListener("click", () => deleteMany(getSelectedIds()));
