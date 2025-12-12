@@ -1,101 +1,430 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>SNS · Inquiry</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8" />
+  <title>SNS · View Inquiry</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="styles.css" />
 
-<style>
-body {
-  margin:0;
-  background: radial-gradient(circle at top, #342067, #050315 55%, #020010);
-  color:#f4f0ff;
-  font-family: ui-sans-serif, system-ui;
-}
-.wrap {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 3rem 1rem;
-}
-.card {
-  background: rgba(9,6,34,.92);
-  border-radius: 28px;
-  border: 1px solid rgba(130,106,255,.35);
-  padding: 2rem;
-}
-.label {
-  color:#bdb7ff;
-  text-transform: uppercase;
-  font-size:.7rem;
-  letter-spacing:.12em;
-  margin-top:1.1rem;
-}
-.value {
-  margin-top:.25rem;
-}
-.btn {
-  margin-top:2rem;
-}
-</style>
+  <style>
+    body { margin:0; background: radial-gradient(circle at top, #342067, #050315 55%, #020010); color:#f4f0ff; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial; }
+    .wrap { max-width: 1050px; margin: 0 auto; padding: 3rem 1rem 4rem; }
+
+    .toprow { display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; }
+    h1 { margin:0; letter-spacing:.18em; text-transform:uppercase; font-size: 1.2rem; }
+    .sub { color:#bdb7ff; margin-top:.6rem; }
+
+    .pill { display:inline-flex; align-items:center; gap:.5rem; padding:.55rem .95rem; border-radius:999px; border:1px solid rgba(129,118,255,.35); background: rgba(9,6,34,.65); color:#d9d3ff; font-size:.85rem; }
+
+    .card {
+      margin-top: 1.75rem;
+      background: rgba(9, 6, 34, 0.9);
+      border: 1px solid rgba(130, 106, 255, 0.3);
+      border-radius: 28px;
+      box-shadow: 0 25px 80px rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(16px);
+      padding: 1.25rem 1.25rem 1.1rem;
+      overflow:hidden;
+    }
+
+    .btn {
+      border-radius:999px;
+      padding:.65rem 1.05rem;
+      border:1px solid rgba(129,118,255,.35);
+      background: rgba(15, 10, 55, 0.8);
+      color:#f4f0ff;
+      cursor:pointer;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      font-size:.78rem;
+      transition: transform .08s ease, box-shadow .12s ease, border-color .12s ease, filter .12s ease;
+      user-select:none;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:.4rem;
+      white-space:nowrap;
+    }
+    .btn:hover { transform: translateY(-1px); border-color:#b37cff; box-shadow:0 0 0 1px rgba(179,124,255,.35); filter:brightness(1.05); }
+    .btn:active { transform: translateY(1px); }
+    .btn-danger { border-color: rgba(255,98,98,.45); }
+    .btn-danger:hover { border-color:#ff6262; box-shadow:0 0 0 1px rgba(255,98,98,.25); }
+
+    .toolbar { display:flex; flex-wrap:wrap; gap:.6rem; align-items:center; justify-content:space-between; margin-bottom: 1rem; }
+    .toolbar-left, .toolbar-right { display:flex; flex-wrap:wrap; gap:.6rem; align-items:center; }
+
+    .grid {
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem 1.25rem;
+      margin-top: 1rem;
+    }
+    .field { padding: .85rem .95rem; border:1px solid rgba(129,118,255,.18); border-radius:18px; background: rgba(9,6,34,.35); }
+    .k { display:block; font-size:.78rem; color:#cfc8ff; letter-spacing:.12em; text-transform:uppercase; margin-bottom:.35rem; }
+    .v { color:#f4f0ff; line-height:1.45; white-space: pre-wrap; overflow-wrap:anywhere; }
+    .full { grid-column: 1 / -1; }
+
+    .err { margin-top:.8rem; color:#ff9494; font-size:.95rem; }
+    .muted { color:#bdb7ff; font-size:.85rem; }
+
+    /* Login overlay */
+    .overlay {
+      position:fixed; inset:0;
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(8px);
+      display:flex; align-items:center; justify-content:center;
+      padding: 1rem;
+      z-index: 9999;
+    }
+    .login-card {
+      width: min(520px, 100%);
+      background: rgba(9, 6, 34, 0.95);
+      border: 1px solid rgba(130, 106, 255, 0.35);
+      border-radius: 28px;
+      box-shadow: 0 25px 90px rgba(0, 0, 0, 0.75);
+      padding: 1.75rem 1.5rem 1.4rem;
+    }
+    .login-title { margin:0; letter-spacing:.16em; text-transform:uppercase; font-size:1.05rem; }
+    .login-sub { margin:.6rem 0 1.1rem; color:#bdb7ff; line-height:1.45; font-size:.9rem; }
+    .field2 label { display:block; margin:.7rem 0 .35rem; font-size:.78rem; color:#d5cffc; letter-spacing:.1em; text-transform:uppercase; }
+    .field2 input {
+      width:100%;
+      border-radius: 999px;
+      border: 1px solid rgba(129,118,255,.35);
+      background: rgba(9,6,34,.95);
+      color:#f4f0ff;
+      padding:.75rem 1rem;
+      outline:none;
+    }
+    .field2 input:focus { border-color:#9c88ff; box-shadow:0 0 0 1px rgba(156,136,255,.55); }
+    .login-actions { display:flex; gap:.7rem; justify-content:space-between; align-items:center; margin-top: 1.1rem; flex-wrap:wrap; }
+    .tiny { font-size:.8rem; color:#9ea0d7; }
+  </style>
 </head>
 
 <body>
-<div class="wrap">
-  <div class="card" id="content">Loading…</div>
-</div>
+  <div class="wrap">
+    <div class="toprow">
+      <div>
+        <h1>VIEW INQUIRY</h1>
+        <div class="sub">Full details</div>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:.6rem; align-items:flex-end;">
+        <span class="pill" id="whoami">Not signed in</span>
+        <a class="btn" href="sns-admin.html">Back to list</a>
+      </div>
+    </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-const sb = supabase.createClient(
-  "https://jgvxmpsjtkedzgygynbl.supabase.co",
-  "YOUR_ANON_KEY"
-);
+    <div class="card">
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <button class="btn" id="markWorkingBtn">Mark as Working</button>
+          <button class="btn" id="markCompletedBtn">Mark as Completed</button>
+          <button class="btn" id="resetAssignedBtn">Reset to Assigned</button>
+        </div>
+        <div class="toolbar-right">
+          <button class="btn" id="flagRedBtn">Flag Red</button>
+          <button class="btn" id="flagYellowBtn">Flag Yellow</button>
+          <button class="btn" id="flagGreenBtn">Flag Green</button>
+          <button class="btn btn-danger" id="deleteBtn">Delete</button>
+        </div>
+      </div>
 
-const id = new URLSearchParams(window.location.search).get("id");
-const box = document.getElementById("content");
+      <div id="err" class="err" style="display:none;"></div>
 
-async function load() {
-  const { data, error } = await sb
-    .from("inquiries")
-    .select("*")
-    .eq("id", id)
-    .single();
+      <div id="content" style="display:none;">
+        <div class="grid">
+          <div class="field">
+            <span class="k">Created</span>
+            <div class="v" id="createdAt"></div>
+          </div>
+          <div class="field">
+            <span class="k">Status</span>
+            <div class="v" id="status"></div>
+          </div>
 
-  if (error || !data) {
-    box.textContent = "Unable to load inquiry.";
-    return;
-  }
+          <div class="field">
+            <span class="k">Priority</span>
+            <div class="v" id="priority"></div>
+          </div>
+          <div class="field">
+            <span class="k">Team size</span>
+            <div class="v" id="companySize"></div>
+          </div>
 
-  box.innerHTML = `
-    <h2>${data.contact_name}</h2>
+          <div class="field">
+            <span class="k">Contact name</span>
+            <div class="v" id="contactName"></div>
+          </div>
+          <div class="field">
+            <span class="k">Business</span>
+            <div class="v" id="businessName"></div>
+          </div>
 
-    <div class="label">Business</div>
-    <div class="value">${data.business_name}</div>
+          <div class="field">
+            <span class="k">Email</span>
+            <div class="v" id="email"></div>
+          </div>
+          <div class="field">
+            <span class="k">Phone</span>
+            <div class="v" id="phone"></div>
+          </div>
 
-    <div class="label">Email</div>
-    <div class="value">${data.email}</div>
+          <div class="field full">
+            <span class="k">Location</span>
+            <div class="v" id="location"></div>
+          </div>
 
-    <div class="label">Phone</div>
-    <div class="value">${data.phone || "—"}</div>
+          <div class="field full">
+            <span class="k">Services requested</span>
+            <div class="v" id="services"></div>
+          </div>
 
-    <div class="label">Location</div>
-    <div class="value">${data.location}</div>
+          <div class="field full">
+            <span class="k">Current setup</span>
+            <div class="v" id="currentSetup"></div>
+          </div>
 
-    <div class="label">Services</div>
-    <div class="value">${(data.services || []).join(", ")}</div>
+          <div class="field full">
+            <span class="k">Goals</span>
+            <div class="v" id="goals"></div>
+          </div>
 
-    <div class="label">Goals</div>
-    <div class="value">${data.goals}</div>
+          <div class="field">
+            <span class="k">Budget</span>
+            <div class="v" id="budget"></div>
+          </div>
+          <div class="field">
+            <span class="k">Timeline</span>
+            <div class="v" id="timeline"></div>
+          </div>
 
-    <div class="label">Notes</div>
-    <div class="value">${data.extra_notes || "—"}</div>
+          <div class="field full">
+            <span class="k">Extra notes</span>
+            <div class="v" id="extraNotes"></div>
+          </div>
+        </div>
 
-    <button class="btn" onclick="history.back()">← Back</button>
-  `;
-}
+        <div class="muted" style="margin-top:1rem;">
+          © 2025 kxsaku · Built from the homelab.
+        </div>
+      </div>
+    </div>
+  </div>
 
-load();
-</script>
+  <!-- Login overlay -->
+  <div class="overlay" id="loginOverlay" style="display:none;">
+    <div class="login-card">
+      <h2 class="login-title">Admin login</h2>
+      <p class="login-sub">
+        Sign in to view this inquiry. Data is protected by Supabase policies.
+      </p>
+
+      <div class="field2">
+        <label for="loginEmail">Email</label>
+        <input id="loginEmail" type="email" autocomplete="username" placeholder="brandon.sns@pm.me">
+      </div>
+
+      <div class="field2">
+        <label for="loginPass">Password</label>
+        <input id="loginPass" type="password" autocomplete="current-password" placeholder="••••••••">
+      </div>
+
+      <div class="login-actions">
+        <span class="tiny" id="loginHint"></span>
+        <button class="btn" id="loginBtn">Sign in</button>
+      </div>
+
+      <div class="err" id="loginErr" style="display:none;"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    /**************************************************************
+     * REQUIRED: Paste your Supabase details below
+     **************************************************************/
+    const SUPABASE_URL = "https://jgvxmpsjtkedzgygynbl.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpndnhtcHNqdGtlZHpneWd5bmJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0NzgxMjYsImV4cCI6MjA4MTA1NDEyNn0.OCh23RWm8COtxWuumYvKUmfMOLOW01B1zrbtzcr3w6Y";
+    const ADMIN_EMAIL = "brandon.sns@pm.me";
+    /**************************************************************/
+
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const whoami = document.getElementById("whoami");
+    const errEl = document.getElementById("err");
+    const content = document.getElementById("content");
+
+    const loginOverlay = document.getElementById("loginOverlay");
+    const loginBtn = document.getElementById("loginBtn");
+    const loginEmail = document.getElementById("loginEmail");
+    const loginPass = document.getElementById("loginPass");
+    const loginErr = document.getElementById("loginErr");
+    const loginHint = document.getElementById("loginHint");
+
+    function showErr(msg) { errEl.style.display = "block"; errEl.textContent = msg; }
+    function clearErr() { errEl.style.display = "none"; errEl.textContent = ""; }
+
+    function showLogin(msg) {
+      loginOverlay.style.display = "flex";
+      loginErr.style.display = "none";
+      loginErr.textContent = "";
+      loginHint.textContent = msg || "";
+      loginEmail.value = ADMIN_EMAIL;
+    }
+    function hideLogin() { loginOverlay.style.display = "none"; }
+
+    function sanitize(s) {
+      return (s ?? "").toString().replace(/[&<>"']/g, m => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;" }[m]));
+    }
+
+    function fmtDate(iso) {
+      const d = new Date(iso);
+      return d.toLocaleString(undefined, { year:"numeric", month:"short", day:"2-digit", hour:"2-digit", minute:"2-digit" });
+    }
+
+    function qp(name) {
+      const u = new URL(location.href);
+      return u.searchParams.get(name);
+    }
+
+    const inquiryId = qp("id");
+
+    async function requireAdminSession() {
+      const { data: { user } } = await sb.auth.getUser();
+
+      if (!user) {
+        whoami.textContent = "Not signed in";
+        showLogin("Sign in to view this inquiry.");
+        return null;
+      }
+
+      if ((user.email || "").toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+        await sb.auth.signOut();
+        whoami.textContent = "Wrong account";
+        showLogin("Use your admin email to sign in.");
+        return null;
+      }
+
+      whoami.textContent = "Signed in: " + user.email;
+      hideLogin();
+      return user;
+    }
+
+    let current = null;
+
+    function setText(id, value) {
+      document.getElementById(id).textContent = value || "-";
+    }
+
+    async function loadInquiry() {
+      clearErr();
+      content.style.display = "none";
+
+      if (!inquiryId) {
+        showErr("Missing inquiry id in URL.");
+        return;
+      }
+
+      const user = await requireAdminSession();
+      if (!user) return;
+
+      const { data, error } = await sb
+        .from("inquiries")
+        .select("*")
+        .eq("id", inquiryId)
+        .single();
+
+      if (error || !data) {
+        showErr("Unable to load inquiry.");
+        return;
+      }
+
+      current = data;
+
+      setText("createdAt", fmtDate(data.created_at));
+      setText("status", data.status || "assigned");
+      setText("priority", data.priority_flag || "none");
+
+      setText("contactName", data.contact_name);
+      setText("businessName", data.business_name);
+      setText("email", data.email);
+      setText("phone", data.phone);
+
+      setText("location", data.location);
+      setText("companySize", data.company_size);
+
+      const services = Array.isArray(data.services) ? data.services.join(", ") : (data.services || "");
+      setText("services", services);
+
+      setText("currentSetup", data.current_setup);
+      setText("goals", data.goals);
+
+      setText("budget", data.budget);
+      setText("timeline", data.timeline);
+
+      setText("extraNotes", data.extra_notes);
+
+      content.style.display = "block";
+    }
+
+    async function updateInquiry(patch) {
+      clearErr();
+      const user = await requireAdminSession();
+      if (!user) return;
+
+      const { error } = await sb.from("inquiries").update(patch).eq("id", inquiryId);
+      if (error) { showErr(error.message); return; }
+      await loadInquiry();
+    }
+
+    async function deleteInquiry() {
+      clearErr();
+      const user = await requireAdminSession();
+      if (!user) return;
+
+      const ok = confirm("Delete this inquiry? This cannot be undone.");
+      if (!ok) return;
+
+      const { error } = await sb.from("inquiries").delete().eq("id", inquiryId);
+      if (error) { showErr(error.message); return; }
+
+      location.href = "sns-admin.html";
+    }
+
+    document.getElementById("markWorkingBtn").addEventListener("click", () => updateInquiry({ status: "working" }));
+    document.getElementById("markCompletedBtn").addEventListener("click", () => updateInquiry({ status: "completed" }));
+    document.getElementById("resetAssignedBtn").addEventListener("click", () => updateInquiry({ status: "assigned" }));
+
+    document.getElementById("flagRedBtn").addEventListener("click", () => updateInquiry({ priority_flag: "red" }));
+    document.getElementById("flagYellowBtn").addEventListener("click", () => updateInquiry({ priority_flag: "yellow" }));
+    document.getElementById("flagGreenBtn").addEventListener("click", () => updateInquiry({ priority_flag: "green" }));
+
+    document.getElementById("deleteBtn").addEventListener("click", deleteInquiry);
+
+    loginBtn.addEventListener("click", async () => {
+      loginErr.style.display = "none";
+      loginErr.textContent = "";
+
+      try {
+        const email = loginEmail.value.trim();
+        const password = loginPass.value;
+
+        const { error } = await sb.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+
+        await loadInquiry();
+      } catch (e) {
+        loginErr.style.display = "block";
+        loginErr.textContent = e.message || "Login failed.";
+      }
+    });
+
+    sb.auth.onAuthStateChange(() => { loadInquiry(); });
+
+    loadInquiry();
+  </script>
 </body>
 </html>

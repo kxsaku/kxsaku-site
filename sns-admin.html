@@ -7,7 +7,6 @@
   <link rel="stylesheet" href="styles.css" />
 
   <style>
-    /* Keep your existing theme style — this just adds the login overlay + small utilities */
     body { margin:0; background: radial-gradient(circle at top, #342067, #050315 55%, #020010); color:#f4f0ff; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial; }
     .wrap { max-width: 1200px; margin: 0 auto; padding: 3rem 1rem 4rem; }
     .toprow { display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; }
@@ -40,14 +39,24 @@
       text-transform:uppercase;
       font-size:.78rem;
       transition: transform .08s ease, box-shadow .12s ease, border-color .12s ease, filter .12s ease;
+      user-select:none;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:.4rem;
+      white-space:nowrap;
     }
     .btn:hover { transform: translateY(-1px); border-color:#b37cff; box-shadow:0 0 0 1px rgba(179,124,255,.35); filter:brightness(1.05); }
     .btn:active { transform: translateY(1px); }
+    .btn-danger { border-color: rgba(255,98,98,.45); }
+    .btn-danger:hover { border-color:#ff6262; box-shadow:0 0 0 1px rgba(255,98,98,.25); }
 
     table { width:100%; border-collapse: collapse; }
-    th, td { padding: .85rem .6rem; border-bottom: 1px solid rgba(129,118,255,.18); color:#e9e5ff; font-size:.92rem; text-align:left; }
+    th, td { padding: .85rem .6rem; border-bottom: 1px solid rgba(129,118,255,.18); color:#e9e5ff; font-size:.92rem; text-align:left; vertical-align: middle; }
     th { color:#cfc8ff; font-size:.78rem; letter-spacing:.12em; text-transform:uppercase; }
     .muted { color:#bdb7ff; font-size:.85rem; }
+
     .status { font-weight:700; font-size:.8rem; letter-spacing:.08em; text-transform:uppercase; }
     .s-assigned { color:#bdb7ff; }
     .s-working { color:#7bb8ff; }
@@ -61,6 +70,43 @@
 
     .err { margin-top:.8rem; color:#ff9494; font-size:.9rem; display:none; }
     .ok { margin-top:.8rem; color:#7af9c4; font-size:.9rem; display:none; }
+
+    /* Eye tooltip */
+    .quickcell { display:flex; align-items:center; justify-content:flex-end; gap:.6rem; }
+    .eye-wrap { position:relative; display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:999px; border:1px solid rgba(129,118,255,.25); background: rgba(9,6,34,.25); }
+    .eye-wrap:hover { border-color:#b37cff; box-shadow:0 0 0 1px rgba(179,124,255,.25); }
+    .eye { font-size:14px; opacity:.9; }
+    .tooltip {
+      position:absolute;
+      right:0;
+      top:calc(100% + 10px);
+      width: min(340px, 70vw);
+      background: rgba(9, 6, 34, 0.98);
+      border: 1px solid rgba(130, 106, 255, 0.35);
+      border-radius: 16px;
+      box-shadow: 0 25px 70px rgba(0,0,0,.7);
+      padding: .75rem .85rem;
+      color:#f4f0ff;
+      opacity:0;
+      transform: translateY(-6px);
+      pointer-events:none;
+      transition: opacity .15s ease, transform .15s ease;
+      z-index: 50;
+    }
+    .eye-wrap:hover .tooltip {
+      opacity:1;
+      transform: translateY(0);
+      pointer-events:auto;
+    }
+    .tooltip h4 {
+      margin:0 0 .45rem;
+      font-size:.78rem;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      color:#cfc8ff;
+    }
+    .tooltip .line { font-size:.85rem; color:#e9e5ff; margin:.2rem 0; }
+    .tooltip .k { color:#bdb7ff; }
 
     /* Login overlay */
     .overlay {
@@ -94,43 +140,6 @@
     .field input:focus { border-color:#9c88ff; box-shadow:0 0 0 1px rgba(156,136,255,.55); }
     .login-actions { display:flex; gap:.7rem; justify-content:space-between; align-items:center; margin-top: 1.1rem; flex-wrap:wrap; }
     .tiny { font-size:.8rem; color:#9ea0d7; }
-
-    .eye-wrap {
-  position: relative;
-  display: inline-block;
-}
-
-.eye-btn {
-  background: none;
-  border: none;
-  color: #bdb7ff;
-  cursor: pointer;
-  font-size: 1rem;
-}
-
-.eye-preview {
-  position: absolute;
-  top: 130%;
-  left: 50%;
-  transform: translateX(-50%);
-  min-width: 260px;
-  background: rgba(12, 9, 45, 0.98);
-  border: 1px solid rgba(140,120,255,.35);
-  border-radius: 16px;
-  padding: .75rem .85rem;
-  box-shadow: 0 20px 50px rgba(0,0,0,.7);
-  font-size: .8rem;
-  color: #eae6ff;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity .18s ease, transform .18s ease;
-  z-index: 20;
-}
-
-.eye-wrap:hover .eye-preview {
-  opacity: 1;
-  transform: translateX(-50%) translateY(4px);
-}
   </style>
 </head>
 
@@ -153,6 +162,7 @@
           <button class="btn" id="markWorkingBtn">Mark as Working</button>
           <button class="btn" id="markCompletedBtn">Mark as Completed</button>
           <button class="btn" id="resetAssignedBtn">Reset to Assigned</button>
+          <button class="btn btn-danger" id="deleteSelectedBtn">Delete Selected</button>
         </div>
         <div class="toolbar-right">
           <button class="btn" id="flagRedBtn">Flag Red</button>
@@ -176,7 +186,7 @@
               <th>Contact</th>
               <th>Business</th>
               <th>Services</th>
-              <th style="width:160px;">Actions</th>
+              <th style="width:230px; text-align:right;">Actions</th>
             </tr>
           </thead>
           <tbody id="rows"></tbody>
@@ -216,7 +226,6 @@
     </div>
   </div>
 
-  <!-- Supabase JS (browser) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <script>
@@ -225,11 +234,9 @@
      **************************************************************/
     const SUPABASE_URL = "https://jgvxmpsjtkedzgygynbl.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpndnhtcHNqdGtlZHpneWd5bmJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0NzgxMjYsImV4cCI6MjA4MTA1NDEyNn0.OCh23RWm8COtxWuumYvKUmfMOLOW01B1zrbtzcr3w6Y";
-
-    // Your admin email that is allowed by RLS
     const ADMIN_EMAIL = "brandon.sns@pm.me";
-
     /**************************************************************/
+
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     const rowsEl = document.getElementById("rows");
@@ -246,6 +253,7 @@
     const loginHint = document.getElementById("loginHint");
 
     const selectAll = document.getElementById("selectAll");
+    const refreshBtn = document.getElementById("refreshBtn");
 
     function showErr(msg) { errBox.style.display = "block"; errBox.textContent = msg; }
     function clearErr() { errBox.style.display = "none"; errBox.textContent = ""; }
@@ -258,7 +266,6 @@
       loginHint.textContent = msg || "";
       loginEmail.value = ADMIN_EMAIL;
     }
-
     function hideLogin() {
       loginOverlay.style.display = "none";
       loginErr.style.display = "none";
@@ -302,7 +309,6 @@
         return null;
       }
 
-      // Extra client-side check (RLS is the real protection)
       if ((user.email || "").toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
         await sb.auth.signOut();
         whoami.textContent = "Wrong account";
@@ -317,72 +323,88 @@
       return user;
     }
 
+    // Prevent overlapping renders (this fixes the duplicates/refresh weirdness)
+    let loadNonce = 0;
+
     async function loadInquiries() {
+      const myNonce = ++loadNonce;
       clearErr();
-      rowsEl.innerHTML = "";
 
+      refreshBtn.disabled = true;
+      refreshBtn.style.opacity = "0.6";
+
+      // Require admin first
       const user = await requireAdminSession();
-      if (!user) return;
+      if (!user) {
+        refreshBtn.disabled = false;
+        refreshBtn.style.opacity = "1";
+        return;
+      }
 
-      // IMPORTANT: if RLS blocks, you'll get an error here and we show it
+      // Query
       const { data, error } = await sb
         .from("inquiries")
         .select("id, created_at, priority_flag, status, contact_name, business_name, services")
         .order("created_at", { ascending: false })
         .limit(200);
 
+      // If another load started after this one, ignore this result
+      if (myNonce !== loadNonce) return;
+
+      refreshBtn.disabled = false;
+      refreshBtn.style.opacity = "1";
+
       if (error) {
+        rowsEl.innerHTML = "";
         showErr("Could not load inquiries: " + error.message);
         return;
       }
 
       if (!data || data.length === 0) {
         rowsEl.innerHTML = `<tr><td colspan="8" class="muted" style="padding:1.2rem .6rem;">
-          No inquiries returned. If you KNOW one exists, this is almost always an auth/RLS issue.
+          No inquiries returned.
         </td></tr>`;
         return;
       }
 
-      for (const r of data) {
+      // Build rows once (avoids duplicate append behavior)
+      const html = data.map(r => {
         const services = Array.isArray(r.services) ? r.services.join(", ") : (r.services || "");
-        rowsEl.insertAdjacentHTML("beforeend", `
+        const quickContact = sanitize(r.contact_name || "");
+        const quickBiz = sanitize(r.business_name || "");
+        const quickServices = sanitize(services);
+
+        return `
           <tr>
             <td><input type="checkbox" data-id="${sanitize(r.id)}"></td>
             <td>${sanitize(fmtDate(r.created_at))}</td>
             <td><span class="flag ${flagClass(r.priority_flag)}"></span>${sanitize(r.priority_flag || "none")}</td>
             <td class="status ${statusClass(r.status)}">${sanitize(r.status || "assigned")}</td>
-            <td>${sanitize(r.contact_name || "")}</td>
-            <td>${sanitize(r.business_name || "")}</td>
-            <td>${sanitize(services)}</td>
-            <td>
-  <div style="display:flex; gap:.4rem; align-items:center;">
-    
-    <!-- Eye hover preview -->
-    <div class="eye-wrap">
-      <button class="eye-btn" title="Quick look">👁</button>
-      <div class="eye-preview">
-        <strong>${sanitize(r.contact_name)}</strong><br>
-        ${sanitize(r.business_name)}<br><br>
-        <span class="muted">Services:</span><br>
-        ${sanitize(services)}
-      </div>
-    </div>
+            <td>${quickContact}</td>
+            <td>${quickBiz}</td>
+            <td>${quickServices}</td>
+            <td style="text-align:right;">
+              <div class="quickcell">
+                <span class="eye-wrap" aria-label="Quick look">
+                  <span class="eye">👁</span>
+                  <div class="tooltip">
+                    <h4>Quick look</h4>
+                    <div class="line"><span class="k">Contact:</span> ${quickContact || "-"}</div>
+                    <div class="line"><span class="k">Business:</span> ${quickBiz || "-"}</div>
+                    <div class="line"><span class="k">Services:</span> ${quickServices || "-"}</div>
+                  </div>
+                </span>
 
-    <!-- View inquiry -->
-    <button class="btn" onclick="viewInquiry('${sanitize(r.id)}')">
-      View
-    </button>
-
-    <!-- Delete -->
-    <button class="btn" onclick="deleteInquiry('${sanitize(r.id)}')">
-      Delete
-    </button>
-  </div>
-</td>
-
+                <a class="btn" href="sns-inquiry-view.html?id=${encodeURIComponent(r.id)}">View</a>
+                <button class="btn btn-danger" data-delete="${sanitize(r.id)}">Delete</button>
+              </div>
+            </td>
           </tr>
-        `);
-      }
+        `;
+      }).join("");
+
+      rowsEl.innerHTML = html;
+      selectAll.checked = false;
     }
 
     async function updateMany(patch) {
@@ -397,30 +419,22 @@
       await loadInquiries();
     }
 
-    async function deleteInquiry(id) {
-  clearErr();
+    async function deleteMany(ids) {
+      clearErr();
+      if (!ids || ids.length === 0) { showErr("Select at least one inquiry."); return; }
 
-  if (!confirm("Delete this inquiry permanently? This cannot be undone.")) {
-    return;
-  }
+      const ok = confirm(`Delete ${ids.length} inquiry(s)? This cannot be undone.`);
+      if (!ok) return;
 
-  const { error } = await sb
-    .from("inquiries")
-    .delete()
-    .eq("id", id);
+      const { error } = await sb.from("inquiries").delete().in("id", ids);
+      if (error) { showErr(error.message); return; }
 
-  if (error) {
-    showErr(error.message);
-    return;
-  }
+      showOk("Deleted " + ids.length + " inquiry(s).");
+      await loadInquiries();
+    }
 
-  showOk("Inquiry deleted.");
-  await loadInquiries();
-}
-
-
-    // Events
-    document.getElementById("refreshBtn").addEventListener("click", loadInquiries);
+    // Toolbar events
+    document.getElementById("refreshBtn").addEventListener("click", () => loadInquiries());
     document.getElementById("markWorkingBtn").addEventListener("click", () => updateMany({ status: "working" }));
     document.getElementById("markCompletedBtn").addEventListener("click", () => updateMany({ status: "completed" }));
     document.getElementById("resetAssignedBtn").addEventListener("click", () => updateMany({ status: "assigned" }));
@@ -429,8 +443,18 @@
     document.getElementById("flagYellowBtn").addEventListener("click", () => updateMany({ priority_flag: "yellow" }));
     document.getElementById("flagGreenBtn").addEventListener("click", () => updateMany({ priority_flag: "green" }));
 
+    document.getElementById("deleteSelectedBtn").addEventListener("click", () => deleteMany(getSelectedIds()));
+
     selectAll.addEventListener("change", (e) => {
       document.querySelectorAll("input[data-id]").forEach(cb => cb.checked = e.target.checked);
+    });
+
+    // Row-level delete (event delegation)
+    rowsEl.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-delete]");
+      if (!btn) return;
+      const id = btn.getAttribute("data-delete");
+      deleteMany([id]);
     });
 
     logoutBtn.addEventListener("click", async () => {
@@ -447,7 +471,7 @@
         const email = loginEmail.value.trim();
         const password = loginPass.value;
 
-        const { data, error } = await sb.auth.signInWithPassword({ email, password });
+        const { error } = await sb.auth.signInWithPassword({ email, password });
         if (error) throw error;
 
         await loadInquiries();
@@ -457,15 +481,10 @@
       }
     });
 
-    // If session changes (refresh, etc.), reload
-    sb.auth.onAuthStateChange((_event, _session) => { loadInquiries(); });
+    // Important: This can fire during session restore. With nonce guard above, it won’t duplicate rows.
+    sb.auth.onAuthStateChange(() => { loadInquiries(); });
 
-    // Initial load
     loadInquiries();
-
-    function viewInquiry(id) {
-  window.location.href = `sns-inquiry-view.html?id=${id}`;
-}
   </script>
 </body>
 </html>
