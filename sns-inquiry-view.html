@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SNS · Inquiry</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="styles.css">
+
+<style>
+body {
+  margin:0;
+  background: radial-gradient(circle at top, #342067, #050315 55%, #020010);
+  color:#f4f0ff;
+  font-family: ui-sans-serif, system-ui;
+}
+.wrap {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 3rem 1rem;
+}
+.card {
+  background: rgba(9,6,34,.92);
+  border-radius: 28px;
+  border: 1px solid rgba(130,106,255,.35);
+  padding: 2rem;
+}
+.label {
+  color:#bdb7ff;
+  text-transform: uppercase;
+  font-size:.7rem;
+  letter-spacing:.12em;
+  margin-top:1.1rem;
+}
+.value {
+  margin-top:.25rem;
+}
+.btn {
+  margin-top:2rem;
+}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+  <div class="card" id="content">Loading…</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const sb = supabase.createClient(
+  "https://jgvxmpsjtkedzgygynbl.supabase.co",
+  "YOUR_ANON_KEY"
+);
+
+const id = new URLSearchParams(window.location.search).get("id");
+const box = document.getElementById("content");
+
+async function load() {
+  const { data, error } = await sb
+    .from("inquiries")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (error || !data) {
+    box.textContent = "Unable to load inquiry.";
+    return;
+  }
+
+  box.innerHTML = `
+    <h2>${data.contact_name}</h2>
+
+    <div class="label">Business</div>
+    <div class="value">${data.business_name}</div>
+
+    <div class="label">Email</div>
+    <div class="value">${data.email}</div>
+
+    <div class="label">Phone</div>
+    <div class="value">${data.phone || "—"}</div>
+
+    <div class="label">Location</div>
+    <div class="value">${data.location}</div>
+
+    <div class="label">Services</div>
+    <div class="value">${(data.services || []).join(", ")}</div>
+
+    <div class="label">Goals</div>
+    <div class="value">${data.goals}</div>
+
+    <div class="label">Notes</div>
+    <div class="value">${data.extra_notes || "—"}</div>
+
+    <button class="btn" onclick="history.back()">← Back</button>
+  `;
+}
+
+load();
+</script>
+</body>
+</html>
