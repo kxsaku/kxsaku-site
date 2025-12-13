@@ -325,6 +325,60 @@
       color: var(--text-soft);
     }
 
+    /* Subtle inquiry CTA button */
+.sns-cta-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+
+  padding: 0.55rem 0.95rem;
+
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  text-transform: uppercase;
+
+  color: #d9ccff;
+
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(160, 140, 255, 0.45);
+  background: rgba(12, 7, 40, 0.85);
+
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.14s ease;
+}
+
+.sns-cta-link .arrow {
+  font-size: 0.95rem;
+  transition: transform 0.15s ease;
+}
+
+/* Hover */
+.sns-cta-link:hover {
+  background: rgba(26, 18, 80, 0.95);
+  border-color: rgba(200, 180, 255, 0.8);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.65);
+  transform: translateY(-1px);
+}
+
+.sns-cta-link:hover .arrow {
+  transform: translateX(3px);
+}
+
+/* Active */
+.sns-cta-link:active {
+  transform: translateY(0);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.5);
+}
+
+
     .btn-link {
       border-radius: var(--radius-pill);
       padding: 0.55rem 1.4rem;
@@ -384,6 +438,14 @@
       box-shadow: 0 26px 70px rgba(0, 0, 0, 0.85);
       border-color: rgba(189, 170, 255, 0.9);
     }
+
+    @media (min-width: 900px) {
+  .sns-cta-link {
+    font-size: 0.85rem;
+    padding: 0.6rem 1.1rem;
+  }
+}
+
   </style>
 </head>
 <body>
