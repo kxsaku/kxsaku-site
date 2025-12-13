@@ -129,6 +129,7 @@
             <button class="btn" id="flagGreenBtn">Flag Green</button>
             <button class="btn" id="flagClearBtn">Reset Priority</button>
             <button class="btn" id="refreshBtn">Refresh</button>
+            <button class="btn btn-danger" id="deleteBtn">Delete</button>
         </div>
       </div>
 
@@ -407,7 +408,7 @@
     document.getElementById("flagClearBtn").addEventListener("click", () => updateMany({ priority_flag: null }));
 
 
-    document.getElementById("deleteBtn").addEventListener("click", deleteInquiry);
+    
 
     loginBtn.addEventListener("click", async () => {
       loginErr.style.display = "none";
