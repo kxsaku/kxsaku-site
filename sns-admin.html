@@ -20,6 +20,19 @@
     padding-right: 3rem; /* space for browser/password-manager icons */
     }
 
+    .top-actions{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:.6rem;
+  flex-wrap:wrap;
+}
+
+.top-actions .pill{
+  margin:0;
+}
+
+
     /* Modern close button (top-right) */
     .login-close{
     position: absolute;
@@ -47,7 +60,7 @@
 
     body { margin:0; background: radial-gradient(circle at top, #342067, #050315 55%, #020010); color:#f4f0ff; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial; }
     .wrap { max-width: 1200px; margin: 0 auto; padding: 3rem 1rem 4rem; }
-    .toprow { display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; }
+    .toprow { display:flex; justify-content:space-between; align-items:center; gap:1rem; }
     h1 { margin:0; letter-spacing:.18em; text-transform:uppercase; }
     .sub { color:#bdb7ff; margin-top:.6rem; }
     .pill { display:inline-flex; align-items:center; gap:.5rem; padding:.55rem .95rem; border-radius:999px; border:1px solid rgba(129,118,255,.35); background: rgba(9,6,34,.65); color:#d9d3ff; font-size:.85rem; }
@@ -66,12 +79,13 @@
     .toolbar { display:flex; flex-wrap:wrap; gap:.6rem; align-items:center; justify-content:space-between; margin-bottom: .8rem; }
     .toolbar-left, .toolbar-right { display:flex; flex-wrap:wrap; gap:.6rem; align-items:center; }
 
-    /* Modern toolbar layout */
+/* Modern toolbar layout (tighter + cleaner) */
 .toolbar-grid{
-  display:grid;
-  grid-template-columns: 1fr auto;
+  display: grid;
+  grid-template-columns: auto auto;   /* <-- no more giant 1fr gap */
+  justify-content: space-between;     /* pushes left + right, but not “miles apart” */
   gap: .85rem 1rem;
-  align-items:end;
+  align-items: start;
   margin-bottom: 1rem;
   padding-bottom: .9rem;
   border-bottom: 1px solid rgba(129,118,255,.14);
@@ -79,16 +93,13 @@
 
 .toolgroup{ display:flex; flex-direction:column; gap:.5rem; }
 .toolgroup-right{ justify-self:end; text-align:right; }
-.tooltitle{
-  font-size:.72rem;
-  letter-spacing:.18em;
-  text-transform:uppercase;
-  color:#bdb7ff;
-  opacity:.9;
-  user-select:none;
+
+/* Responsive: stack nicely on small screens */
+@media (max-width: 780px){
+  .toolbar-grid{ grid-template-columns: 1fr; }
+  .toolgroup-right{ justify-self:start; text-align:left; }
 }
 
-.toolrow{ display:flex; flex-wrap:wrap; gap:.55rem; align-items:center; }
 
 /* Button variants */
 .btn-soft{
@@ -237,20 +248,19 @@
         <h1>SNS INQUIRIES</h1>
         <div class="sub">Internal dashboard · newest inquiries first</div>
       </div>
-      <div style="display:flex; flex-direction:column; gap:.6rem; align-items:flex-end;">
-  <span class="pill" id="whoami">Not signed in</span>
+      <div class="top-actions">
+        <span class="pill" id="whoami">Not signed in</span>
 
-  <div style="display:flex; gap:.6rem; align-items:center;">
-    <a class="icon-btn" href="sns.html" title="Back to SNS Home" aria-label="Home">
-      <svg viewBox="0 0 24 24" fill="none">
-        <path d="M3 11.5L12 4l9 7.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M5.5 10.5V20h13V10.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </a>
+        <a class="icon-btn" href="sns.html" title="Back to SNS Home" aria-label="Home">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M3 11.5L12 4l9 7.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M5.5 10.5V20h13V10.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
 
-    <button class="btn" id="logoutBtn" style="display:none;">Logout</button>
-  </div>
-</div>
+        <button class="btn" id="logoutBtn" style="display:none;">Logout</button>
+      </div>
+
       </div>
     </div>
 
