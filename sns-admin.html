@@ -150,6 +150,32 @@
     .btn-danger { border-color: rgba(255,98,98,.45); }
     .btn-danger:hover { border-color:#ff6262; box-shadow:0 0 0 1px rgba(255,98,98,.25); }
 
+    /* Minimal home icon button (matches SNS theme) */
+.icon-btn{
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  border: 1px solid rgba(129,118,255,.35);
+  background: rgba(15, 10, 55, 0.70);
+  color: #d9d3ff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: transform .08s ease, box-shadow .12s ease, border-color .12s ease, filter .12s ease;
+  user-select: none;
+}
+.icon-btn:hover{
+  transform: translateY(-1px);
+  border-color:#b37cff;
+  box-shadow:0 0 0 1px rgba(179,124,255,.35);
+  filter:brightness(1.05);
+}
+.icon-btn:active{ transform: translateY(1px); }
+.icon-btn svg{ width: 18px; height: 18px; opacity: .95; }
+
+
+
     table { width:100%; border-collapse: collapse; }
     th, td { padding: .85rem .6rem; border-bottom: 1px solid rgba(129,118,255,.18); color:#e9e5ff; font-size:.92rem; text-align:left; vertical-align: middle; }
     th { color:#cfc8ff; font-size:.78rem; letter-spacing:.12em; text-transform:uppercase; }
@@ -212,6 +238,19 @@
         <div class="sub">Internal dashboard · newest inquiries first</div>
       </div>
       <div style="display:flex; flex-direction:column; gap:.6rem; align-items:flex-end;">
+  <span class="pill" id="whoami">Not signed in</span>
+
+  <div style="display:flex; gap:.6rem; align-items:center;">
+    <a class="icon-btn" href="sns.html" title="Back to SNS Home" aria-label="Home">
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M3 11.5L12 4l9 7.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M5.5 10.5V20h13V10.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </a>
+
+    <button class="btn" id="logoutBtn" style="display:none;">Logout</button>
+  </div>
+</div>
         <span class="pill" id="whoami">Not signed in</span>
         <button class="btn" id="logoutBtn" style="display:none;">Logout</button>
       </div>
