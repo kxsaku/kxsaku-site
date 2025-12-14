@@ -407,9 +407,13 @@
     document.getElementById("flagGreenBtn").addEventListener("click", () => updateInquiry({ priority_flag: "green" }));
     document.getElementById("flagClearBtn").addEventListener("click", () => updateInquiry({ priority_flag: null }));
 
+    document.getElementById("refreshBtn").addEventListener("click", loadInquiry);
+
+// Only enable delete if you actually added <button id="deleteBtn">
+const del = document.getElementById("deleteBtn");
+if (del) del.addEventListener("click", deleteInquiry);
 
 
-    
 
     loginBtn.addEventListener("click", async () => {
       loginErr.style.display = "none";
