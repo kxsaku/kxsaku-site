@@ -239,6 +239,13 @@
       border-color: rgba(216, 180, 254, 0.7);
     }
 
+    /* Treat nav-active the same as active */
+.nav-tab.nav-active {
+  background: radial-gradient(circle at top left, var(--accent-3), #4c1d95);
+  box-shadow: 0 12px 26px rgba(88, 28, 135, 0.6);
+  border-color: rgba(216, 180, 254, 0.7);
+}
+
     .nav-tab:hover {
       transform: translateY(-1px);
       box-shadow: 0 12px 26px rgba(15, 23, 42, 0.7);
@@ -528,7 +535,7 @@
            NOTE: these now point to separate pages (you'll create them later).
       -->
 <nav class="nav-tabs" aria-label="Primary navigation">
-  <a href="/home" class="nav-tab" class="nav-tab nav-active">
+  <a href="/home" class="nav-tab nav-active">
     <span>Home</span>
   </a>
 
