@@ -405,7 +405,8 @@
     document.getElementById("flagRedBtn").addEventListener("click", () => updateInquiry({ priority_flag: "red" }));
     document.getElementById("flagYellowBtn").addEventListener("click", () => updateInquiry({ priority_flag: "yellow" }));
     document.getElementById("flagGreenBtn").addEventListener("click", () => updateInquiry({ priority_flag: "green" }));
-    document.getElementById("flagClearBtn").addEventListener("click", () => updateInquiry({ priority_flag: null }));
+    document.getElementById("flagClearBtn").addEventListener("click", () => updateInquiry({ priority_flag: "none" }));
+
 
     document.getElementById("refreshBtn").addEventListener("click", loadInquiry);
 
