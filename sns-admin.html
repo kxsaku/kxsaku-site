@@ -59,7 +59,12 @@
     .login-close svg{ width: 16px; height: 16px; opacity: .9; }
 
     body { margin:0; background: radial-gradient(circle at top, #342067, #050315 55%, #020010); color:#f4f0ff; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial; }
-    .wrap { max-width: 1200px; margin: 0 auto; padding: 3rem 1rem 4rem; }
+    .wrap{
+  width: min(1600px, calc(100% - 32px)); /* wider container, still centered */
+  margin: 0 auto;
+  padding: 3rem 0 4rem;                  /* remove extra left/right padding */
+}
+
     .toprow { display:flex; justify-content:space-between; align-items:center; gap:1rem; }
     h1 { margin:0; letter-spacing:.18em; text-transform:uppercase; }
     .sub { color:#bdb7ff; margin-top:.6rem; }
@@ -262,7 +267,6 @@
       </div>
 
       </div>
-    </div>
 
     <div class="card" id="adminCard" style="display:none;">
 <div class="toolbar toolbar-grid">
