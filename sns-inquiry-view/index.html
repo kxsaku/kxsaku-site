@@ -361,9 +361,7 @@
         return;
       }
 
-      // Populate internal notes
-      const notesBoxEl = document.getElementById("notesBox");
-      if (notesBoxEl) notesBoxEl.value = data.notes || "";
+
 
 
       const user = await requireAdminSession();
@@ -379,6 +377,11 @@
         showErr("Unable to load inquiry.");
         return;
       }
+
+      // Populate internal notes (NOW data exists)
+      const notesBoxEl = document.getElementById("notesBox");
+      if (notesBoxEl) notesBoxEl.value = data.notes || "";
+
 
       current = data;
 
