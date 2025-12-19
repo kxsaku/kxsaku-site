@@ -322,74 +322,7 @@
 
     const inquiryId = qp("id");
 
-    const notesBox = document.getElementById("notesBox");
-const saveNotesBtn = document.getElementById("saveNotesBtn");
-const okBox = document.getElementById("okBox");
-const errBox = document.getElementById("errBox");
 
-function showErr(msg){ errBox.style.display="block"; errBox.textContent=msg; }
-function clearErr(){ errBox.style.display="none"; errBox.textContent=""; }
-function showOk(msg){
-  okBox.style.display="block";
-  okBox.textContent=msg;
-  setTimeout(() => (okBox.style.display="none"), 1600);
-}
-
-let currentInquiryId = null;
-
-// use your existing way of reading ?id=...
-const params = new URLSearchParams(window.location.search);
-currentInquiryId = params.get("id");
-
-// When you fetch the inquiry, make sure NOTES is included:
-async function loadInquiry(){
-  clearErr();
-
-  const { data, error } = await sb
-    .from("inquiries")
-    .select("*") // or list fields, but MUST include notes
-    .eq("id", currentInquiryId)
-    .single();
-
-  if (error) { showErr("Load failed: " + error.message); return; }
-
-  // ...your existing rendering/populating fields...
-
-  // Populate notes
-  if (notesBox) notesBox.value = data.notes || "";
-}
-
-saveNotesBtn.addEventListener("click", async () => {
-  clearErr();
-
-  if (!currentInquiryId) { showErr("Missing inquiry id."); return; }
-
-  saveNotesBtn.disabled = true;
-  saveNotesBtn.style.opacity = "0.6";
-
-  const newNotes = notesBox.value || "";
-
-  const { data, error } = await sb
-    .from("inquiries")
-    .update({ notes: newNotes })
-    .eq("id", currentInquiryId)
-    .select("notes")     // <— forces Supabase to return what was saved
-    .single();
-
-  saveNotesBtn.disabled = false;
-  saveNotesBtn.style.opacity = "1";
-
-  if (error) {
-    showErr("Save notes failed: " + error.message);
-    return;
-  }
-
-  notesBox.value = data?.notes || "";
-  showOk("Notes saved.");
-});
-
-// call it wherever you currently load the inquiry
-loadInquiry();
 
 
     async function requireAdminSession() {
@@ -427,6 +360,11 @@ loadInquiry();
         showErr("Missing inquiry id in URL.");
         return;
       }
+
+      // Populate internal notes
+      const notesBoxEl = document.getElementById("notesBox");
+      if (notesBoxEl) notesBoxEl.value = data.notes || "";
+
 
       const user = await requireAdminSession();
       if (!user) return;
@@ -510,6 +448,62 @@ loadInquiry();
 const del = document.getElementById("deleteBtn");
 if (del) del.addEventListener("click", deleteInquiry);
 
+const notesBoxEl = document.getElementById("notesBox");
+const saveNotesBtn = document.getElementById("saveNotesBtn");
+const notesOk = document.getElementById("okBox");
+const notesErr = document.getElementById("errBox");
+
+function notesShowErr(msg){
+  if (!notesErr) return;
+  notesErr.style.display = "block";
+  notesErr.textContent = msg;
+}
+function notesClearErr(){
+  if (!notesErr) return;
+  notesErr.style.display = "none";
+  notesErr.textContent = "";
+}
+function notesShowOk(msg){
+  if (!notesOk) return;
+  notesOk.style.display = "block";
+  notesOk.textContent = msg;
+  setTimeout(() => (notesOk.style.display = "none"), 1400);
+}
+
+if (saveNotesBtn && notesBoxEl) {
+  saveNotesBtn.addEventListener("click", async () => {
+    notesClearErr();
+
+    const user = await requireAdminSession();
+    if (!user) return;
+
+    if (!inquiryId) { notesShowErr("Missing inquiry id."); return; }
+
+    saveNotesBtn.disabled = true;
+    saveNotesBtn.style.opacity = "0.6";
+
+    const newNotes = notesBoxEl.value || "";
+
+    const { data, error } = await sb
+      .from("inquiries")
+      .update({ notes: newNotes })
+      .eq("id", inquiryId)
+      .select("notes")
+      .single();
+
+    saveNotesBtn.disabled = false;
+    saveNotesBtn.style.opacity = "1";
+
+    if (error) {
+      notesShowErr("Save notes failed: " + error.message);
+      return;
+    }
+
+    // keep textarea consistent with DB response
+    notesBoxEl.value = data?.notes || "";
+    notesShowOk("Notes saved.");
+  });
+}
 
 
     loginBtn.addEventListener("click", async () => {
