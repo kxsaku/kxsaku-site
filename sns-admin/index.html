@@ -286,6 +286,7 @@
     <div class="tooltitle">Manage</div>
     <div class="toolrow">
       <button class="btn btn-danger" id="deleteSelectedBtn">Delete selected</button>
+      <button class="btn btn-danger" id="resetWorkOrdersBtn" type="button">Reset WO #s</button>
     </div>
   </div>
 
@@ -352,7 +353,7 @@
 
   <div class="muted" id="detailsMeta" style="margin-top:.7rem;"></div>
 
-  
+
 </div>
 
 
@@ -455,6 +456,7 @@ function includesCI(haystack, needle){
 
     const selectAll = document.getElementById("selectAll");
     const refreshBtn = document.getElementById("refreshBtn");
+    const resetWorkOrdersBtn = document.getElementById("resetWorkOrdersBtn");
 
     function showErr(msg) { errBox.style.display = "block"; errBox.textContent = msg; }
     function clearErr() { errBox.style.display = "none"; errBox.textContent = ""; }
@@ -516,6 +518,37 @@ function includesCI(haystack, needle){
   selectAll.checked = false;
 }
 
+    
+if (resetWorkOrdersBtn) {
+  resetWorkOrdersBtn.addEventListener("click", async () => {
+    clearErr();
+
+    const user = await requireAdminSession();
+    if (!user) return;
+
+    const ok1 = confirm("Are you sure you want to RESET ALL work order numbers? This will renumber every inquiry.");
+    if (!ok1) return;
+
+    const ok2 = confirm("Last warning: This cannot be undone. Proceed?");
+    if (!ok2) return;
+
+    resetWorkOrdersBtn.disabled = true;
+    resetWorkOrdersBtn.style.opacity = "0.6";
+
+    const { error } = await sb.rpc("reset_work_orders");
+
+    resetWorkOrdersBtn.disabled = false;
+    resetWorkOrdersBtn.style.opacity = "1";
+
+    if (error) {
+      showErr("Reset failed: " + error.message);
+      return;
+    }
+
+    showOk("Work order numbers reset.");
+    await loadInquiries();
+  });
+}
 
     loginCloseBtn.addEventListener("click", () => {
     hideLogin();
