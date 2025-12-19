@@ -361,17 +361,30 @@ async function loadInquiry(){
 
 saveNotesBtn.addEventListener("click", async () => {
   clearErr();
+
   if (!currentInquiryId) { showErr("Missing inquiry id."); return; }
+
+  saveNotesBtn.disabled = true;
+  saveNotesBtn.style.opacity = "0.6";
 
   const newNotes = notesBox.value || "";
 
-  const { error } = await sb
+  const { data, error } = await sb
     .from("inquiries")
     .update({ notes: newNotes })
-    .eq("id", currentInquiryId);
+    .eq("id", currentInquiryId)
+    .select("notes")     // <— forces Supabase to return what was saved
+    .single();
 
-  if (error) { showErr("Save notes failed: " + error.message); return; }
+  saveNotesBtn.disabled = false;
+  saveNotesBtn.style.opacity = "1";
 
+  if (error) {
+    showErr("Save notes failed: " + error.message);
+    return;
+  }
+
+  notesBox.value = data?.notes || "";
   showOk("Notes saved.");
 });
 
