@@ -206,6 +206,32 @@
             <span class="k">Extra notes</span>
             <div class="v" id="extraNotes"></div>
           </div>
+
+          <div class="fieldbox" style="margin-top:14px;">
+  <div class="label">Notes (internal)</div>
+
+  <textarea id="notesBox" placeholder="Write notes for this inquiry..."
+    style="
+      width:100%;
+      min-height:160px;
+      resize:vertical;
+      border-radius:18px;
+      border:1px solid rgba(129,118,255,.35);
+      background: rgba(9,6,34,.95);
+      color:#f4f0ff;
+      padding: .9rem 1rem;
+      outline:none;
+      line-height:1.45;
+    "></textarea>
+
+  <div style="margin-top:.8rem; display:flex; gap:.6rem; justify-content:flex-end; flex-wrap:wrap;">
+    <button class="btn btn-primary" id="saveNotesBtn" type="button">Save Notes</button>
+  </div>
+
+  <div class="ok" id="okBox" style="display:none; margin-top:.6rem;"></div>
+  <div class="err" id="errBox" style="display:none; margin-top:.6rem;"></div>
+</div>
+
         </div>
 
         <div class="muted" style="margin-top:1rem;">
@@ -295,6 +321,63 @@
     }
 
     const inquiryId = qp("id");
+
+    const notesBox = document.getElementById("notesBox");
+const saveNotesBtn = document.getElementById("saveNotesBtn");
+const okBox = document.getElementById("okBox");
+const errBox = document.getElementById("errBox");
+
+function showErr(msg){ errBox.style.display="block"; errBox.textContent=msg; }
+function clearErr(){ errBox.style.display="none"; errBox.textContent=""; }
+function showOk(msg){
+  okBox.style.display="block";
+  okBox.textContent=msg;
+  setTimeout(() => (okBox.style.display="none"), 1600);
+}
+
+let currentInquiryId = null;
+
+// use your existing way of reading ?id=...
+const params = new URLSearchParams(window.location.search);
+currentInquiryId = params.get("id");
+
+// When you fetch the inquiry, make sure NOTES is included:
+async function loadInquiry(){
+  clearErr();
+
+  const { data, error } = await sb
+    .from("inquiries")
+    .select("*") // or list fields, but MUST include notes
+    .eq("id", currentInquiryId)
+    .single();
+
+  if (error) { showErr("Load failed: " + error.message); return; }
+
+  // ...your existing rendering/populating fields...
+
+  // Populate notes
+  if (notesBox) notesBox.value = data.notes || "";
+}
+
+saveNotesBtn.addEventListener("click", async () => {
+  clearErr();
+  if (!currentInquiryId) { showErr("Missing inquiry id."); return; }
+
+  const newNotes = notesBox.value || "";
+
+  const { error } = await sb
+    .from("inquiries")
+    .update({ notes: newNotes })
+    .eq("id", currentInquiryId);
+
+  if (error) { showErr("Save notes failed: " + error.message); return; }
+
+  showOk("Notes saved.");
+});
+
+// call it wherever you currently load the inquiry
+loadInquiry();
+
 
     async function requireAdminSession() {
       const { data: { user } } = await sb.auth.getUser();

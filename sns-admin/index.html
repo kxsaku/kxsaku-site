@@ -348,16 +348,7 @@
         </table>
       </div>
 
-      <div id="detailsPanel" style="
-  margin-top: 1rem;
-  border-top: 1px solid rgba(129,118,255,.14);
-  padding-top: 1rem;
-  display:none;
-">
-  <div style="display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap;">
-    <div class="pill" id="detailsTitle">Selected Inquiry</div>
-    <button class="btn btn-soft" id="closeDetailsBtn">Close</button>
-  </div>
+
 
   <div class="muted" id="detailsMeta" style="margin-top:.7rem;"></div>
 
@@ -453,16 +444,11 @@
 
     const searchBox = document.getElementById("searchBox");
 
-const detailsPanel = document.getElementById("detailsPanel");
-const detailsTitle = document.getElementById("detailsTitle");
-const detailsMeta  = document.getElementById("detailsMeta");
-const notesBox     = document.getElementById("notesBox");
-const saveNotesBtn = document.getElementById("saveNotesBtn");
-const closeDetailsBtn = document.getElementById("closeDetailsBtn");
+
 
 let allInquiries = [];
 let filteredInquiries = [];
-let selectedInquiry = null;
+
 
 function fmtWO(n){
   if (n == null) return "";
@@ -823,57 +809,7 @@ document.addEventListener("mouseover", (e) => {
 // Search
 searchBox.addEventListener("input", () => applySearchAndRender());
 
-// Open notes panel when clicking a row (but not when clicking buttons/checkbox)
-document.addEventListener("click", (e) => {
-  const tr = e.target.closest("tr[data-rowid]");
-  if (!tr) return;
 
-  if (e.target.closest("[data-view], [data-del], [data-eye], input[type='checkbox']")) return;
-
-  const id = tr.getAttribute("data-rowid");
-  const found = allInquiries.find(x => String(x.id) === String(id));
-  if (!found) return;
-
-  selectedInquiry = found;
-
-  detailsPanel.style.display = "block";
-  detailsTitle.textContent = `${fmtWO(found.work_order)} · ${found.contact_name || "Inquiry"}`;
-  const email = getEmail(found);
-  const phone = getPhone(found);
-  detailsMeta.textContent =
-    `${found.business_name || ""}` +
-    (email ? ` · ${email}` : "") +
-    (phone ? ` · ${phone}` : "");
-
-
-  notesBox.value = found.notes || "";
-});
-
-closeDetailsBtn.addEventListener("click", () => {
-  detailsPanel.style.display = "none";
-  selectedInquiry = null;
-});
-
-saveNotesBtn.addEventListener("click", async () => {
-  clearErr();
-  if (!selectedInquiry) { showErr("Select an inquiry first."); return; }
-
-  const newNotes = notesBox.value || "";
-
-  const { error } = await sb
-    .from("inquiries")
-    .update({ notes: newNotes })
-    .eq("id", selectedInquiry.id);
-
-  if (error) { showErr("Save notes failed: " + error.message); return; }
-
-  // update local cache
-  selectedInquiry.notes = newNotes;
-  const idx = allInquiries.findIndex(x => String(x.id) === String(selectedInquiry.id));
-  if (idx >= 0) allInquiries[idx].notes = newNotes;
-
-  showOk("Notes saved.");
-});
 
 
 document.addEventListener("mouseout", (e) => {
