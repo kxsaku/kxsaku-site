@@ -766,7 +766,7 @@ document.addEventListener("click", async (e) => {
   const viewBtn = e.target.closest("[data-view]");
   if (viewBtn) {
     const id = viewBtn.getAttribute("data-view");
-    window.location.href = `sns-inquiry-view.html?id=${encodeURIComponent(id)}`;
+    window.location.href = `/sns-inquiry-view/index.html?id=${encodeURIComponent(id)}`;
     return;
   }
 
