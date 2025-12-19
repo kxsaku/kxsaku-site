@@ -296,6 +296,24 @@
     </div>
   </div>
 
+  <div class="toolgroup">
+  <div class="tooltitle">Search</div>
+  <div class="toolrow">
+    <input id="searchBox" type="text" placeholder="Search name, WO#, email, phone, business..."
+      style="
+        width:min(520px, 100%);
+        padding:.7rem 1rem;
+        border-radius:999px;
+        border:1px solid rgba(129,118,255,.35);
+        background: rgba(9,6,34,.95);
+        color:#f4f0ff;
+        outline:none;
+      "
+    />
+  </div>
+</div>
+
+
   <div class="toolgroup toolgroup-right">
     <div class="tooltitle">Sync</div>
     <div class="toolrow">
@@ -314,6 +332,7 @@
             <tr>
               <th style="width:42px;"><input type="checkbox" id="selectAll"></th>
               <th>Date</th>
+              <th>Work Order</th>
               <th>Priority</th>
               <th>Status</th>
               <th>Contact</th>
@@ -325,6 +344,42 @@
           <tbody id="rows"></tbody>
         </table>
       </div>
+
+      <div id="detailsPanel" style="
+  margin-top: 1rem;
+  border-top: 1px solid rgba(129,118,255,.14);
+  padding-top: 1rem;
+  display:none;
+">
+  <div style="display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap;">
+    <div class="pill" id="detailsTitle">Selected Inquiry</div>
+    <button class="btn btn-soft" id="closeDetailsBtn">Close</button>
+  </div>
+
+  <div class="muted" id="detailsMeta" style="margin-top:.7rem;"></div>
+
+  <div style="margin-top:1rem;">
+    <div class="tooltitle" style="margin-bottom:.5rem;">Notes</div>
+    <textarea id="notesBox" placeholder="Write notes for this inquiry..."
+      style="
+        width:100%;
+        min-height:140px;
+        resize:vertical;
+        border-radius:18px;
+        border:1px solid rgba(129,118,255,.35);
+        background: rgba(9,6,34,.95);
+        color:#f4f0ff;
+        padding: .9rem 1rem;
+        outline:none;
+        line-height:1.45;
+      "></textarea>
+
+    <div style="margin-top:.8rem; display:flex; gap:.6rem; justify-content:flex-end; flex-wrap:wrap;">
+      <button class="btn btn-primary" id="saveNotesBtn">Save Notes</button>
+    </div>
+  </div>
+</div>
+
 
       <div class="muted" style="margin-top:.8rem;">
         © 2025 kxsaku · Built from the homelab.
@@ -393,6 +448,27 @@
 
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+    const searchBox = document.getElementById("searchBox");
+
+const detailsPanel = document.getElementById("detailsPanel");
+const detailsTitle = document.getElementById("detailsTitle");
+const detailsMeta  = document.getElementById("detailsMeta");
+const notesBox     = document.getElementById("notesBox");
+const saveNotesBtn = document.getElementById("saveNotesBtn");
+const closeDetailsBtn = document.getElementById("closeDetailsBtn");
+
+let allInquiries = [];
+let filteredInquiries = [];
+let selectedInquiry = null;
+
+function fmtWO(n){
+  if (n == null) return "";
+  return "WO-" + String(n).padStart(6, "0");
+}
+
+function includesCI(haystack, needle){
+  return (haystack || "").toString().toLowerCase().includes((needle || "").toString().toLowerCase());
+}
     const rowsEl = document.getElementById("rows");
     const errBox = document.getElementById("errBox");
     const okBox = document.getElementById("okBox");
@@ -423,6 +499,46 @@
         adminCard.style.display = "block";
       }
     }
+
+    function applySearchAndRender(){
+  const q = (searchBox?.value || "").trim().toLowerCase();
+
+  filteredInquiries = !q ? allInquiries : allInquiries.filter(r => {
+    const wo = fmtWO(r.work_order);
+    const services = Array.isArray(r.services) ? r.services.join(", ") : (r.services || "");
+    return (
+      includesCI(r.contact_name, q) ||
+      includesCI(r.contact_email, q) ||
+      includesCI(r.contact_phone, q) ||
+      includesCI(r.business_name, q) ||
+      includesCI(services, q) ||
+      includesCI(wo, q) ||
+      includesCI(r.work_order, q)
+    );
+  });
+
+  rowsEl.innerHTML = filteredInquiries.map(r => `
+    <tr data-rowid="${sanitize(r.id)}">
+      <td><input type="checkbox" data-id="${sanitize(r.id)}"></td>
+      <td>${sanitize(fmtDate(r.created_at))}</td>
+      <td>${sanitize(fmtWO(r.work_order))}</td>
+      <td><span class="flag ${flagClass(r.priority_flag)}"></span>${sanitize(r.priority_flag || "none")}</td>
+      <td class="status ${statusClass(r.status)}">${sanitize(r.status || "assigned")}</td>
+      <td>${sanitize(r.contact_name || "")}</td>
+      <td>${sanitize(r.business_name || "")}</td>
+      <td>${sanitize(Array.isArray(r.services) ? r.services.join(", ") : (r.services || ""))}</td>
+      <td style="text-align:right; white-space:nowrap;">
+        <button class="btn btn-soft" data-eye="${sanitize(r.id)}" type="button" title="Quick look">👁</button>
+        <button class="btn btn-soft" data-view="${sanitize(r.id)}" type="button">View</button>
+        <button class="btn btn-danger" data-del="${sanitize(r.id)}" type="button">Delete</button>
+      </td>
+    </tr>
+  `).join("");
+
+  // keep “select all” sane after rerender
+  selectAll.checked = false;
+}
+
 
     loginCloseBtn.addEventListener("click", () => {
     hideLogin();
@@ -530,7 +646,7 @@
       // Query
       const { data, error } = await sb
         .from("inquiries")
-        .select("id, created_at, priority_flag, status, contact_name, business_name, services")
+        .select("id, created_at, work_order, priority_flag, status, contact_name, business_name, services, contact_email, contact_phone, notes")
         .order("created_at", { ascending: false })
         .limit(200);
 
@@ -547,41 +663,19 @@
       }
 
       if (!data || data.length === 0) {
-        rowsEl.innerHTML = `<tr><td colspan="8" class="muted" style="padding:1.2rem .6rem;">
+        rowsEl.innerHTML = `<tr><td colspan="9" class="muted" style="padding:1.2rem .6rem;">
           No inquiries returned.
         </td></tr>`;
         return;
       }
 
+
       // Build rows once (avoids duplicate append behavior)
-      const html = data.map(r => {
-        const services = Array.isArray(r.services) ? r.services.join(", ") : (r.services || "");
-        const quickContact = sanitize(r.contact_name || "");
-        const quickBiz = sanitize(r.business_name || "");
-        const quickServices = sanitize(services);
+      allInquiries = data;
+      applySearchAndRender();
 
-        return `
-          <tr>
-            <td><input type="checkbox" data-id="${sanitize(r.id)}"></td>
-            <td>${sanitize(fmtDate(r.created_at))}</td>
-            <td><span class="flag ${flagClass(r.priority_flag)}"></span>${sanitize(r.priority_flag || "none")}</td>
-            <td class="status ${statusClass(r.status)}">${sanitize(r.status || "assigned")}</td>
-            <td>${quickContact}</td>
-            <td>${quickBiz}</td>
-            <td>${quickServices}</td>
-            <td style="white-space:nowrap;">
-  <button class="btn" data-eye="${sanitize(r.id)}" aria-label="Quick look" title="Quick look" style="padding:.55rem .75rem;">
-    👁
-  </button>
-  <button class="btn" data-view="${sanitize(r.id)}" style="margin-left:.35rem;">View</button>
-  <button class="btn" data-del="${sanitize(r.id)}" style="margin-left:.35rem; border-color: rgba(255,98,98,.35);">Delete</button>
-</td>
+      
 
-          </tr>
-        `;
-      }).join("");
-
-      rowsEl.innerHTML = html;
       selectAll.checked = false;
     }
 
@@ -654,6 +748,9 @@ function hideTooltip() {
 }
 
 // --- Row-level actions + tooltip (event delegation) ---
+
+
+
 document.addEventListener("click", async (e) => {
   const viewBtn = e.target.closest("[data-view]");
   if (viewBtn) {
@@ -687,11 +784,12 @@ document.addEventListener("mouseover", (e) => {
 
   const tds = row.querySelectorAll("td");
   const date     = tds[1]?.textContent?.trim() || "";
-  const priority = tds[2]?.textContent?.trim() || "";
-  const status   = tds[3]?.textContent?.trim() || "";
-  const contact  = tds[4]?.textContent?.trim() || "";
-  const business = tds[5]?.textContent?.trim() || "";
-  const services = tds[6]?.textContent?.trim() || "";
+  const workOrder= tds[2]?.textContent?.trim() || "";
+  const priority = tds[3]?.textContent?.trim() || "";
+  const status   = tds[4]?.textContent?.trim() || "";
+  const contact  = tds[5]?.textContent?.trim() || "";
+  const business = tds[6]?.textContent?.trim() || "";
+  const services = tds[7]?.textContent?.trim() || "";
 
   const html = `
     <div style="letter-spacing:.14em; text-transform:uppercase; font-size:.78rem; color:#cfc8ff; margin-bottom:.5rem;">
@@ -699,6 +797,7 @@ document.addEventListener("mouseover", (e) => {
     </div>
     <div style="font-size:.92rem; line-height:1.45;">
       <div><span style="color:#bdb7ff;">Date:</span> ${sanitize(date)}</div>
+      <div><span style="color:#bdb7ff;">Work Order:</span> ${sanitize(workOrder)}</div>
       <div><span style="color:#bdb7ff;">Status:</span> ${sanitize(status)}</div>
       <div><span style="color:#bdb7ff;">Priority:</span> ${sanitize(priority)}</div>
       <div style="margin-top:.45rem;"><span style="color:#bdb7ff;">Contact:</span> ${sanitize(contact)}</div>
@@ -709,6 +808,59 @@ document.addEventListener("mouseover", (e) => {
 
   showTooltip(html, e.clientX, e.clientY);
 });
+
+// Search
+searchBox.addEventListener("input", () => applySearchAndRender());
+
+// Open notes panel when clicking a row (but not when clicking buttons/checkbox)
+document.addEventListener("click", (e) => {
+  const tr = e.target.closest("tr[data-rowid]");
+  if (!tr) return;
+
+  if (e.target.closest("[data-view], [data-del], [data-eye], input[type='checkbox']")) return;
+
+  const id = tr.getAttribute("data-rowid");
+  const found = allInquiries.find(x => String(x.id) === String(id));
+  if (!found) return;
+
+  selectedInquiry = found;
+
+  detailsPanel.style.display = "block";
+  detailsTitle.textContent = `${fmtWO(found.work_order)} · ${found.contact_name || "Inquiry"}`;
+  detailsMeta.textContent =
+    `${found.business_name || ""}` +
+    (found.contact_email ? ` · ${found.contact_email}` : "") +
+    (found.contact_phone ? ` · ${found.contact_phone}` : "");
+
+  notesBox.value = found.notes || "";
+});
+
+closeDetailsBtn.addEventListener("click", () => {
+  detailsPanel.style.display = "none";
+  selectedInquiry = null;
+});
+
+saveNotesBtn.addEventListener("click", async () => {
+  clearErr();
+  if (!selectedInquiry) { showErr("Select an inquiry first."); return; }
+
+  const newNotes = notesBox.value || "";
+
+  const { error } = await sb
+    .from("inquiries")
+    .update({ notes: newNotes })
+    .eq("id", selectedInquiry.id);
+
+  if (error) { showErr("Save notes failed: " + error.message); return; }
+
+  // update local cache
+  selectedInquiry.notes = newNotes;
+  const idx = allInquiries.findIndex(x => String(x.id) === String(selectedInquiry.id));
+  if (idx >= 0) allInquiries[idx].notes = newNotes;
+
+  showOk("Notes saved.");
+});
+
 
 document.addEventListener("mouseout", (e) => {
   const eyeBtn = e.target.closest("[data-eye]");
