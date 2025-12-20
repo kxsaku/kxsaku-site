@@ -507,7 +507,7 @@ function includesCI(haystack, needle){
       <td>${sanitize(r.business_name || "")}</td>
       <td>${sanitize(Array.isArray(r.services) ? r.services.join(", ") : (r.services || ""))}</td>
       <td style="text-align:right; white-space:nowrap;">
-        <button class="btn btn-soft" data-eye="${sanitize(r.id)}" type="button" title="Quick look">👁</button>
+        <button class="btn btn-soft" data-eye="${sanitize(r.id)}" type="button" title="Quick look">👁️</button>
         <button class="btn btn-soft" data-view="${sanitize(r.id)}" type="button">View</button>
         <button class="btn btn-danger" data-del="${sanitize(r.id)}" type="button">Delete</button>
       </td>
