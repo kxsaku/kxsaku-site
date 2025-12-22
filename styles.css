@@ -96,3 +96,66 @@
   font-size: 0.78rem;
   letter-spacing: 0.08em;
 }
+
+/* =========================
+   Home page action buttons (less clutter)
+   ========================= */
+.home-actions{
+  margin-top: 1rem;
+  display: flex;
+  gap: .75rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.home-actions-primary{
+  display: flex;
+  gap: .75rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.home-actions-more{
+  position: relative;
+}
+
+.home-actions-more > summary{
+  list-style: none;
+  cursor: pointer;
+}
+.home-actions-more > summary::-webkit-details-marker{ display:none; }
+
+.home-actions-menu{
+  position: absolute;
+  top: calc(100% + .6rem);
+  left: 0;
+  min-width: 220px;
+  padding: .45rem;
+  border-radius: 14px;
+  border: 1px solid rgba(196,181,253,.22);
+  background: rgba(8, 6, 26, .82);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 20px 60px rgba(0,0,0,.45);
+  z-index: 50;
+}
+
+.home-actions-item{
+  display: block;
+  padding: .65rem .75rem;
+  border-radius: 12px;
+  text-decoration: none;
+  color: var(--text);
+  border: 1px solid transparent;
+}
+.home-actions-item:hover{
+  border-color: rgba(196,181,253,.25);
+  background: rgba(196,181,253,.08);
+}
+
+@media (max-width: 560px){
+  .home-actions-primary{ width: 100%; }
+  .home-actions-primary a{ flex: 1 1 auto; text-align: center; }
+  .home-actions-more{ width: 100%; }
+  .home-actions-more > summary{ width: 100%; text-align: center; }
+  .home-actions-menu{ width: 100%; min-width: unset; }
+}
