@@ -487,32 +487,34 @@ button.btn-link, summary.btn-link{
       </form>
     </div>
 
-<div id="otpModal" class="otp-modal" aria-hidden="true"
+<div id="otpModal" class="otp-modal" aria-hidden="true">
   <div class="otp-card" role="dialog" aria-modal="true" aria-labelledby="otpTitle">
-    <h3 id="otpTitle" class="otp-title">Verify your phone</h3>
-    <p class="otp-sub">
-      I sent you a text message with a 6-digit code. Enter it to send your inquiry.
-    </p>
+    <div class="otp-head">
+      <h2 id="otpTitle" class="otp-title">Verify your phone</h2>
+      <p class="otp-sub">I sent you a text message with a 6-digit code. Enter it to send your inquiry.</p>
+    </div>
+
+    <div id="otpMsg" class="otp-msg" style="display:none;"></div>
 
     <input
       id="otpCode"
-      class="sns-input"
+      class="input otp-input"
       inputmode="numeric"
       autocomplete="one-time-code"
+      pattern="\d{6}"
       placeholder="Enter code"
-      maxlength="6"
+      aria-label="6-digit code"
     />
 
     <div class="otp-actions">
-      <button type="button" id="otpCancel" class="btn-link secondary">Cancel</button>
-      <button type="button" id="otpVerify" class="btn-link">Verify &amp; Send</button>
+      <button id="otpCancel" type="button" class="btn-link secondary">Cancel</button>
+      <button id="otpVerify" type="button" class="btn-link">Verify &amp; Send</button>
     </div>
 
-    <button type="button" id="otpResend" class="otp-resend">Resend code</button>
-
-    <div id="otpMsg" class="form-msg" style="margin-top:.75rem; display:none;"></div>
+    <button id="otpResend" type="button" class="otp-resend">Resend code</button>
   </div>
 </div>
+
 
     <footer style="margin-top: 1.75rem; font-size: 0.8rem; color: #7b78b6;">
       © 2025 kxsaku · Built from the homelab.
