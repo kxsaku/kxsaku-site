@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Minecraft Server | Brandon Ortiz</title>
+  <title>Other Stuff | Brandon Ortiz</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <!--
@@ -486,241 +486,120 @@
         font-size: 1.9rem;
       }
     }
-/* --- Password overlay --- */
-
-.overlay {
-  position: fixed;
-  inset: 0;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 90;
-}
-
-.overlay.active {
-  display: flex;
-}
-
-.overlay-backdrop {
-  position: absolute;
-  inset: 0;
-  background: rgba(5, 4, 24, 0.78);
-  backdrop-filter: blur(4px);
-}
-
-.overlay-card {
-  position: relative;
-  max-width: 420px;
-  width: 90%;
-  background: radial-gradient(circle at top left, #5d3bff 0, #160b2e 45%, #050414 100%);
-  border-radius: 24px;
-  padding: 1.8rem 1.6rem;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7);
-  border: 1px solid rgba(185, 148, 255, 0.28);
-  animation: overlay-pop-in 0.2s ease-out;
-}
-
-.overlay-text {
-  margin-top: 0.5rem;
-  margin-bottom: 1.1rem;
-  color: rgba(236, 234, 255, 0.85);
-  font-size: 0.95rem;
-}
-
-.field-label {
-  display: block;
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: rgba(191, 173, 255, 0.9);
-  margin-bottom: 0.25rem;
-}
-
-.field-input {
-  width: 100%;
-  padding: 0.55rem 0.75rem;
-  border-radius: 999px;
-  border: 1px solid rgba(112, 95, 220, 0.7);
-  background: rgba(8, 6, 26, 0.95);
-  color: #f5f2ff;
-  font: inherit;
-  outline: none;
-}
-
-.field-input:focus {
-  border-color: #a98bff;
-  box-shadow: 0 0 0 1px rgba(169, 139, 255, 0.6);
-}
-
-.overlay-actions {
-  display: flex;
-  gap: 0.75rem;
-  margin-top: 1rem;
-  flex-wrap: wrap;
-}
-
-.error-msg {
-  margin-top: 0.4rem;
-  font-size: 0.8rem;
-  color: #ff7b7b;
-  min-height: 1em;
-}
-
-/* Turn the clickable pill into a button look */
-.pill-button {
-  cursor: pointer;
-  border: none;
-  text-align: left;
-  transition: transform 0.12s ease-out, box-shadow 0.12s ease-out, background 0.12s ease-out;
-}
-
-.pill-button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 0 0 1px rgba(191, 173, 255, 0.35);
-}
-
-.pill-button.revealed {
-  box-shadow: 0 0 0 1px rgba(100, 255, 183, 0.4);
-}
-
-/* Overlay animation */
-@keyframes overlay-pop-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px) scale(0.96);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-
   </style>
 </head>
 <body>
+  <main class="shell">
   <main class="shell">
     <header>
       <!-- same header as Home -->
 
 <nav class="nav-tabs" aria-label="Primary navigation">
   <a href="/" class="nav-tab"><span>Home</span></a>
-
   <a href="/sns" class="nav-tab"><span>Saku Network Solutions</span></a>
-
   <a href="/experience" class="nav-tab"><span>Experience</span></a>
-
-  <a href="/other" class="nav-tab"><span>Other Stuff</span></a>
-
+  <a href="/other" class="nav-tab active"><span>Other Stuff</span></a>
   <a href="/socials" class="nav-tab"><span>Socials</span></a>
 </nav>
     </header>
 
-    <section class="grid grid-2-balanced" id="minecraft">
-      <!-- Left: Server info -->
-      <section class="card" aria-labelledby="mc-info-heading">
+<section class="grid grid-2" id="other-hub">
+  <section class="card" aria-labelledby="other-heading">
+    <div class="card-header">
+      <h2 class="card-title" id="other-heading">Other Stuff</h2>
+      <span class="card-subtitle">Extras that show what I build for fun</span>
+    </div>
+    <div class="card-body">
+      <p>
+        These pages aren’t the main business focus, but they show how I build,
+        test, and run real systems outside of work.
+      </p>
+
+      <div class="pill-row" style="margin-top: 1rem;">
+        <a class="btn-link" href="/homelab">
+          🧪 Homelab
+        </a>
+        <a class="btn-link secondary" href="/minecraft">
+          👾 Minecraft
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <aside class="card" aria-label="Quick notes">
+    <div class="card-header">
+      <h2 class="card-title">What you’ll find</h2>
+      <span class="card-subtitle">Short + organized</span>
+    </div>
+    <div class="card-body">
+      <ul class="bullet-list">
+        <li><strong>Homelab:</strong> networking, segmentation, services, and real ops-style organization.</li>
+        <li><strong>Minecraft:</strong> server hosting, routing/DNS realities, and live service upkeep.</li>
+      </ul>
+    </div>
+  </aside>
+</section>
+
+      <!-- Right: Gear list -->
+      <section class="card" aria-labelledby="lab-gear-heading">
         <div class="card-header">
-          <h2 class="card-title" id="mc-info-heading">Minecraft Bedrock Server</h2>
-          <span class="card-subtitle">Survival, chill, and slightly chaotic</span>
-        </div>
-        <div class="card-body">
-          <p>
-            I host a <strong>Bedrock</strong> server out of my own lab. It’s
-            focused on survival, long-term worlds, and keeping the player list
-            small enough that things don’t turn into a grief-fest.
-          </p>
-
-          <div class="pill-row" style="margin-top: 0.7rem;">
-            <button class="pill pill-button" id="reveal-ip-btn" type="button">
-              <span class="pill-label">Address</span>
-              <span id="server-address-text">Hidden — click to unlock</span>
-            </button>
-            <div class="pill">
-              <span class="pill-label">Port</span>
-              <span>1935</span>
-            </div>
-            <div class="pill">
-              <span class="pill-label">Version</span>
-              <span>Latest Bedrock</span>
-            </div>
-          </div>
-
-          <ul class="bullet-list" style="margin-top: 0.7rem;">
-            <li>Survival-focused with light rules and community vibes.</li>
-            <li>No pay-to-win, no random plugins – just a clean survival world.</li>
-            <li>Backed by the same homelab that runs my other services.</li>
-          </ul>
-        </div>
-      </section>
-
-      <!-- Right: Rules / whitelist -->
-      <section class="card" aria-labelledby="mc-rules-heading">
-        <div class="card-header">
-          <h2 class="card-title" id="mc-rules-heading">Rules &amp; Whitelist</h2>
-          <span class="card-subtitle">Keeping it fun, not annoying</span>
+          <h2 class="card-title" id="lab-gear-heading">Core Gear</h2>
+          <span class="card-subtitle">What’s actually running this</span>
         </div>
         <div class="card-body">
           <ul class="bullet-list">
-            <li>No griefing, stealing, or destroying other players’ builds.</li>
-            <li>No hacks or unfair clients – just play the game.</li>
-            <li>Keep chat chill. Trash talk is fine; disrespect isn’t.</li>
-            <li>Communicate if you’re planning big farms or laggy builds.</li>
+            <li>Lenovo &amp; HP desktop-class servers for VMs and game hosting.</li>
+            <li>Dedicated NAS for storage and backups.</li>
+            <li>Cisco ISR router + Catalyst switch for routing and VLANs.</li>
+            <li>UPS and clean power so it survives the occasional blip.</li>
           </ul>
 
-          <p style="margin-top: 0.7rem;">
-            Want in? Reach out and ask about whitelist details:
-          </p>
-
-          <div class="pill-row" style="margin-top: 0.4rem;">
-            <a class="btn-link secondary" href="mailto:brandon.sns@proton.me">
-              ✉ Request whitelist via email
-            </a>
-            <a
-              class="btn-link secondary"
-              href="https://www.linkedin.com/in/brandon-ortiz-4b148326b/"
-              target="_blank"
-              rel="noreferrer"
-            >
-              💼 Or message me on LinkedIn
-            </a>
+          <div class="image-strip">
+            <div class="image-tile">
+              <img
+                src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=600&q=80"
+                alt="Switches and patch panel"
+              />
+              <span>Patch panels, labeling, and cable management.</span>
+            </div>
+            <div class="image-tile">
+              <img
+                src="https://images.unsplash.com/photo-1580894742444-8ecded7900cd?auto=format&fit=crop&w=600&q=80"
+                alt="Rack with servers"
+              />
+              <span>Server stack running VMs, storage, and game servers.</span>
+            </div>
+            <div class="image-tile">
+              <img
+                src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=600&q=80"
+                alt="Monitor with code/logs"
+              />
+              <span>Monitoring, logs, and experiments from the desk.</span>
+            </div>
           </div>
         </div>
       </section>
     </section>
 
-<!-- Password overlay -->
-<div class="overlay" id="password-overlay" aria-hidden="true">
-  <div class="overlay-backdrop"></div>
-
-  <div class="overlay-card" role="dialog" aria-modal="true" aria-labelledby="pw-title">
-    <h2 id="pw-title">Enter access password</h2>
-    <p class="overlay-text">
-      This keeps the server address shared only with invited players.
-    </p>
-
-    <form id="password-form" class="overlay-form">
-      <label class="field-label" for="server-password">Password</label>
-      <input
-        id="server-password"
-        class="field-input"
-        type="password"
-        autocomplete="off"
-        required
-      />
-
-      <p class="error-msg" id="password-error" aria-live="polite"></p>
-
-      <div class="overlay-actions">
-        <button type="submit" class="btn-link">Unlock address</button>
-        <button type="button" class="btn-link secondary" id="cancel-overlay">
-          Cancel
-        </button>
+    <!-- Experiments card -->
+    <section class="card" style="margin-top: 1.3rem;" aria-labelledby="lab-experiments-heading">
+      <div class="card-header">
+        <h2 class="card-title" id="lab-experiments-heading">What I Experiment With</h2>
+        <span class="card-subtitle">Always something to break &amp; fix</span>
       </div>
-    </form>
-  </div>
-</div>
+      <div class="card-body">
+        <ul class="bullet-list">
+          <li>DNS over TLS, ad-blocking, and secure DNS setups.</li>
+          <li>Certificate management for internal services and HTTPS everywhere.</li>
+          <li>Logging and metrics to answer “what just happened?” quickly.</li>
+          <li>Failover ideas, backups, and recovery practice.</li>
+        </ul>
 
-
+        <a class="btn-link" href="minecraft.html">
+          👾 See how the Minecraft server fits into the lab
+        </a>
+      </div>
+    </section>
 
     <footer>
       © <span id="year"></span> kxsaku · Built from the homelab.
@@ -740,70 +619,11 @@
     </footer>
   </main>
 
+
   <!-- Simple script just to keep the year up to date -->
   <script>
     document.getElementById("year").textContent =
       new Date().getFullYear().toString();
   </script>
-
-  <script>
-  // ================== Minecraft IP unlock config ==================
-  // Change these whenever you want to rotate things:
-  const MC_SERVER_ADDRESS = 'mc.kxsaku.com';           // what to reveal
-  const MC_SERVER_PASSWORD = 'listentomymusic6317!!';          // password to unlock
-
-  const revealBtn = document.getElementById('reveal-ip-btn');
-  const overlay = document.getElementById('password-overlay');
-  const cancelOverlayBtn = document.getElementById('cancel-overlay');
-  const pwForm = document.getElementById('password-form');
-  const pwInput = document.getElementById('server-password');
-  const pwError = document.getElementById('password-error');
-  const addrText = document.getElementById('server-address-text');
-
-  function openOverlay() {
-    overlay.classList.add('active');
-    overlay.setAttribute('aria-hidden', 'false');
-    pwError.textContent = '';
-    pwInput.value = '';
-    setTimeout(() => pwInput.focus(), 50);
-  }
-
-  function closeOverlay() {
-    overlay.classList.remove('active');
-    overlay.setAttribute('aria-hidden', 'true');
-    revealBtn.focus();
-  }
-
-  revealBtn?.addEventListener('click', openOverlay);
-  cancelOverlayBtn?.addEventListener('click', closeOverlay);
-
-  // Close if you click outside the card
-  overlay?.addEventListener('click', (e) => {
-    if (e.target === overlay || e.target === overlay.querySelector('.overlay-backdrop')) {
-      closeOverlay();
-    }
-  });
-
-  // Close on Esc
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && overlay.classList.contains('active')) {
-      closeOverlay();
-    }
-  });
-
-  // Check password
-  pwForm?.addEventListener('submit', (e) => {
-    e.preventDefault();
-
-    if (pwInput.value === MC_SERVER_PASSWORD) {
-      addrText.textContent = MC_SERVER_ADDRESS;
-      revealBtn.classList.add('revealed');
-      closeOverlay();
-    } else {
-      pwError.textContent = 'Incorrect password. Try again.';
-    }
-  });
-</script>
-
 </body>
 </html>

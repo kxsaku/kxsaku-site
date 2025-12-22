@@ -289,9 +289,19 @@
           </div>
 
           <div class="sns-field">
-            <label for="phone">Phone (optional)</label>
-            <input id="phone" name="phone" type="tel"
-                   class="sns-input" />
+            <label for="phone">Phone *</label>
+            <input
+              id="phone"
+              name="phone"
+              type="tel"
+              class="sns-input"
+              required
+              inputmode="tel"
+              autocomplete="tel"
+              placeholder="(555) 555-5555"
+              pattern="^\s*(?:\+?1\s*)?(?:\(\s*\d{3}\s*\)|\d{3})[\s.-]?\d{3}[\s.-]?\d{4}\s*$"
+              title="Enter a valid US phone number (10 digits)."
+            />
           </div>
 
           <div class="sns-field">
@@ -489,6 +499,36 @@
 
         try {
         const fd = new FormData(form);
+                const phoneRaw = (fd.get("phone") || "").toString();
+        const digits = phoneRaw.replace(/\D/g, "");
+
+        // Normalize US numbers: allow optional leading 1
+        let d = digits;
+        if (d.length === 11 && d.startsWith("1")) d = d.slice(1);
+
+        // Reject anything not exactly 10 digits
+        const obviousFake = new Set([
+          "0000000000",
+          "1111111111",
+          "2222222222",
+          "3333333333",
+          "4444444444",
+          "5555555555",
+          "6666666666",
+          "7777777777",
+          "8888888888",
+          "9999999999",
+          "1234567890",
+        ]);
+
+        if (d.length !== 10 || obviousFake.has(d)) {
+          showMsg("Please enter a valid US phone number (10 digits).", true);
+          return;
+        }
+
+        // Store a clean formatted version
+        const phoneFormatted = `(${d.slice(0,3)}) ${d.slice(3,6)}-${d.slice(6)}`;
+
         const services = fd.getAll("services");
 
         if (!services.length) {
@@ -501,7 +541,7 @@
             contact_name: fd.get("contactName"),
             business_name: fd.get("businessName"),
             email: fd.get("email"),
-            phone: fd.get("phone") || null,
+            phone: phoneFormatted,
             location: fd.get("location"),
             company_size: fd.get("companySize"),
             services,
