@@ -487,7 +487,7 @@ button.btn-link, summary.btn-link{
       </form>
     </div>
 
-<div id="otpModal" class="otp-modal" aria-hidden="true">
+<div id="otpModal" class="otp-modal open" aria-hidden="false">
   <div class="otp-card" role="dialog" aria-modal="true" aria-labelledby="otpTitle">
     <h3 id="otpTitle" class="otp-title">Verify your phone</h3>
     <p class="otp-sub">
@@ -757,7 +757,7 @@ async function verifyOtpAndSubmit(phone, code, payload){
         } catch (err) {
         console.error("Inquiry submit failed:", err);
         console.error(fmtSbError(err));
-        showMsg("Failed to submit inquiry. Please try again.", true);
+        showMsg(`Failed: ${err?.message || "Unknown error"}`, true);
         } finally {
         isSubmitting = false;
         submitBtn.disabled = false;
