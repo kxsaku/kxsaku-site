@@ -426,6 +426,34 @@
         <div id="sns-message" class="sns-error" style="display:none;"></div>
       </form>
     </div>
+
+<div id="otpModal" class="otp-modal" aria-hidden="true">
+  <div class="otp-card" role="dialog" aria-modal="true" aria-labelledby="otpTitle">
+    <h3 id="otpTitle" class="otp-title">Verify your phone</h3>
+    <p class="otp-sub">
+      I sent you a text message with a 6-digit code. Enter it to send your inquiry.
+    </p>
+
+    <input
+      id="otpCode"
+      class="sns-input"
+      inputmode="numeric"
+      autocomplete="one-time-code"
+      placeholder="Enter code"
+      maxlength="6"
+    />
+
+    <div class="otp-actions">
+      <button type="button" id="otpCancel" class="btn-link secondary">Cancel</button>
+      <button type="button" id="otpVerify" class="btn-link">Verify &amp; Send</button>
+    </div>
+
+    <button type="button" id="otpResend" class="otp-resend">Resend code</button>
+
+    <div id="otpMsg" class="form-msg" style="margin-top:.75rem; display:none;"></div>
+  </div>
+</div>
+
     <footer style="margin-top: 1.75rem; font-size: 0.8rem; color: #7b78b6;">
       © 2025 kxsaku · Built from the homelab.
     </footer>
@@ -441,6 +469,7 @@
     const form = document.getElementById("sns-inquiry-form");
     const msgEl = document.getElementById("sns-message");
     const submitBtn = form.querySelector('button[type="submit"]');
+
 
     // Prevent double submits
     let isSubmitting = false;
@@ -485,6 +514,99 @@
         msgEl.classList.add("sns-error");
         msgEl.classList.remove("sns-success");
     }
+
+// ==============================
+// OTP (SMS verification helpers)
+// ==============================
+const otpModal = document.getElementById("otpModal");
+const otpCode = document.getElementById("otpCode");
+const otpCancel = document.getElementById("otpCancel");
+const otpVerify = document.getElementById("otpVerify");
+const otpResend = document.getElementById("otpResend");
+const otpMsg = document.getElementById("otpMsg");
+
+function otpShowMsg(text, isErr){
+  otpMsg.style.display = "block";
+  otpMsg.textContent = text;
+  otpMsg.style.color = isErr ? "#ffb4b4" : "var(--text)";
+}
+
+function openOtpModal(onVerify){
+  otpModal.classList.add("open");
+  otpModal.setAttribute("aria-hidden","false");
+  otpCode.value = "";
+  otpMsg.style.display = "none";
+  otpCode.focus();
+
+  const cleanup = () => {
+    otpModal.classList.remove("open");
+    otpModal.setAttribute("aria-hidden","true");
+    otpCancel.onclick = null;
+    otpVerify.onclick = null;
+    otpResend.onclick = null;
+  };
+
+  otpCancel.onclick = () => cleanup();
+
+  otpVerify.onclick = async () => {
+    const code = (otpCode.value || "").trim();
+    if (!/^\d{6}$/.test(code)) {
+      otpShowMsg("Enter the 6-digit code.", true);
+      return;
+    }
+    otpVerify.disabled = true;
+    try{
+      await onVerify(code);
+      cleanup();
+    } catch(e){
+      otpShowMsg(e.message || "Verification failed.", true);
+    } finally{
+      otpVerify.disabled = false;
+    }
+  };
+
+  otpResend.onclick = async () => {
+    otpResend.disabled = true;
+    try{
+      await sendOtp(phoneFormatted);
+      otpShowMsg("Code resent.", false);
+    } catch(e){
+      otpShowMsg("Failed to resend.", true);
+    } finally{
+      otpResend.disabled = false;
+    }
+  };
+}
+
+async function callOtpFunction(body){
+  const res = await fetch(
+    `${supabaseUrl}/functions/v1/inquiry-otp`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": supabaseAnonKey,
+        "Authorization": `Bearer ${supabaseAnonKey}`
+      },
+      body: JSON.stringify(body),
+    }
+  );
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || data.ok === false) {
+    throw new Error(data.error || "OTP request failed");
+  }
+  return data;
+}
+
+async function sendOtp(phone){
+  await callOtpFunction({ action: "send", phone });
+}
+
+async function verifyOtpAndSubmit(phone, code, payload){
+  await callOtpFunction({ action: "check", phone, code, payload });
+}
+
+
 
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -536,24 +658,32 @@
             return; // <-- safe now because we reset in finally
         }
 
-        await withRetry(async () => {
-            const { error } = await supabase.from("inquiries").insert({
-            contact_name: fd.get("contactName"),
-            business_name: fd.get("businessName"),
-            email: fd.get("email"),
-            phone: phoneFormatted,
-            location: fd.get("location"),
-            company_size: fd.get("companySize"),
-            services,
-            current_setup: fd.get("currentSetup") || null,
-            goals: fd.get("goals"),
-            budget: fd.get("budget"),
-            timeline: fd.get("timeline"),
-            extra_notes: fd.get("extraNotes") || null,
-            });
+        // Build the exact payload we want to store (same fields as before)
+        const payload = {
+          contact_name: fd.get("contactName"),
+          business_name: fd.get("businessName"),
+          email: fd.get("email"),
+          location: fd.get("location"),
+          company_size: fd.get("companySize"),
+          services,
+          current_setup: fd.get("currentSetup") || null,
+          goals: fd.get("goals"),
+          budget: fd.get("budget"),
+          timeline: fd.get("timeline"),
+          extra_notes: fd.get("extraNotes") || null,
+        };
 
-            if (error) throw error;
+        // 1) Send OTP
+        await sendOtp(phoneFormatted);
+
+        // 2) Open modal for code entry; final submit happens after verify
+        openOtpModal(async (code) => {
+          await verifyOtpAndSubmit(phoneFormatted, code, payload);
+          window.location.href = "/sns-inquiry-success/index.html";
         });
+
+        return; // stop normal flow here; modal will complete it
+
 
         window.location.href = "/sns-inquiry-success/index.html";
         } catch (err) {

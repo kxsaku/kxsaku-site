@@ -159,3 +159,57 @@
   .home-actions-more > summary{ width: 100%; text-align: center; }
   .home-actions-menu{ width: 100%; min-width: unset; }
 }
+
+/* =========================
+   OTP modal (SMS verification)
+   ========================= */
+.otp-modal{
+  position: fixed;
+  inset: 0;
+  display: none;
+  place-items: center;
+  background: rgba(0,0,0,.55);
+  backdrop-filter: blur(8px);
+  z-index: 999;
+}
+
+.otp-modal.open{ display: grid; }
+
+.otp-card{
+  width: min(520px, calc(100% - 2rem));
+  border-radius: 18px;
+  border: 1px solid rgba(196,181,253,.22);
+  background: rgba(8, 6, 26, .88);
+  box-shadow: 0 30px 90px rgba(0,0,0,.55);
+  padding: 1.1rem 1.1rem 1rem;
+}
+
+.otp-title{
+  margin: 0 0 .35rem 0;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.otp-sub{
+  margin: 0 0 .9rem 0;
+  opacity: .9;
+}
+
+.otp-actions{
+  display: flex;
+  gap: .75rem;
+  justify-content: flex-end;
+  margin-top: .85rem;
+  flex-wrap: wrap;
+}
+
+.otp-resend{
+  margin-top: .75rem;
+  background: transparent;
+  border: 0;
+  color: var(--text);
+  opacity: .85;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.otp-resend:hover{ opacity: 1; }
