@@ -250,6 +250,66 @@
         font-size: 1.6rem;
       }
     }
+
+    /* OTP modal (SMS verification) */
+.otp-modal{
+  position: fixed;
+  inset: 0;
+  display: none;
+  place-items: center;
+  background: rgba(0,0,0,.55);
+  backdrop-filter: blur(8px);
+  z-index: 999;
+}
+.otp-modal.open{ display: grid; }
+
+.otp-card{
+  width: min(520px, calc(100% - 2rem));
+  border-radius: 18px;
+  border: 1px solid rgba(196,181,253,.22);
+  background: rgba(10, 5, 25, .92);
+  box-shadow: 0 30px 90px rgba(0,0,0,.55);
+  padding: 1.1rem 1.1rem 1rem;
+}
+
+.otp-title{
+  margin: 0 0 .35rem 0;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.otp-sub{
+  margin: 0 0 .9rem 0;
+  opacity: .9;
+}
+
+.otp-actions{
+  display: flex;
+  gap: .75rem;
+  justify-content: flex-end;
+  margin-top: .85rem;
+  flex-wrap: wrap;
+}
+
+/* Make your existing .btn-link styles apply to <button> and <summary> too */
+button.btn-link, summary.btn-link{
+  -webkit-appearance: none;
+  appearance: none;
+  font: inherit;
+  cursor: pointer;
+}
+
+.otp-resend{
+  margin-top: .75rem;
+  background: transparent;
+  border: 0;
+  color: inherit;
+  opacity: .85;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.otp-resend:hover{ opacity: 1; }
+
   </style>
 </head>
 <body>
@@ -531,7 +591,13 @@ function otpShowMsg(text, isErr){
   otpMsg.style.color = isErr ? "#ffb4b4" : "var(--text)";
 }
 
-function openOtpModal(onVerify){
+function openOtpModal(phoneForResend, onVerify){
+  if (!otpModal || !otpCode || !otpCancel || !otpVerify || !otpResend || !otpMsg) {
+    // hard fail with a visible message on the page
+    showMsg("OTP UI failed to load. Refresh the page.", true);
+    return;
+  }
+
   otpModal.classList.add("open");
   otpModal.setAttribute("aria-hidden","false");
   otpCode.value = "";
@@ -559,7 +625,7 @@ function openOtpModal(onVerify){
       await onVerify(code);
       cleanup();
     } catch(e){
-      otpShowMsg(e.message || "Verification failed.", true);
+      otpShowMsg(e?.message || "Verification failed.", true);
     } finally{
       otpVerify.disabled = false;
     }
@@ -568,15 +634,16 @@ function openOtpModal(onVerify){
   otpResend.onclick = async () => {
     otpResend.disabled = true;
     try{
-      await sendOtp(phoneFormatted);
+      await sendOtp(phoneForResend);
       otpShowMsg("Code resent.", false);
     } catch(e){
-      otpShowMsg("Failed to resend.", true);
+      otpShowMsg(e?.message || "Failed to resend.", true);
     } finally{
       otpResend.disabled = false;
     }
   };
 }
+
 
 async function callOtpFunction(body){
   const res = await fetch(
@@ -677,10 +744,11 @@ async function verifyOtpAndSubmit(phone, code, payload){
         await sendOtp(phoneFormatted);
 
         // 2) Open modal for code entry; final submit happens after verify
-        openOtpModal(async (code) => {
+        openOtpModal(phoneFormatted, async (code) => {
           await verifyOtpAndSubmit(phoneFormatted, code, payload);
           window.location.href = "/sns-inquiry-success/index.html";
         });
+
 
         return; // stop normal flow here; modal will complete it
 
