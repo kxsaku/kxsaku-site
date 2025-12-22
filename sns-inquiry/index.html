@@ -310,6 +310,63 @@ button.btn-link, summary.btn-link{
 }
 .otp-resend:hover{ opacity: 1; }
 
+/* ===== OTP polish (match SNS UI) ===== */
+.otp-card { padding: 1.35rem 1.5rem 1.15rem; }
+
+.otp-title{
+  font-size: 1.25rem;
+  letter-spacing: .16em;
+}
+
+.otp-sub{
+  margin-top: .35rem;
+  margin-bottom: 1.1rem;
+  opacity: .9;
+}
+
+.otp-input{
+  border-radius: 999px;        /* match form pills */
+  font-size: 1.1rem;
+  letter-spacing: .28em;
+  text-align: center;
+  padding: .85rem 1rem;
+}
+
+.otp-actions{
+  margin-top: 1rem;
+  gap: .6rem;
+}
+
+.otp-btn{
+  border-radius: 999px;
+  padding: 0.78rem 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.otp-btn-secondary{
+  background: rgba(12, 9, 49, 0.55);
+  border: 1px solid rgba(156, 136, 255, 0.35);
+  color: #d8ceff;
+}
+
+.otp-btn-secondary:hover{
+  border-color: rgba(182, 89, 255, 0.55);
+}
+
+.otp-btn-primary{
+  /* uses .sns-submit-btn already; this just keeps height consistent */
+  padding: 0.78rem 1.5rem;
+}
+
+.otp-resend{
+  margin-top: .9rem;
+  opacity: .9;
+}
+
   </style>
 </head>
 <body>
@@ -498,7 +555,7 @@ button.btn-link, summary.btn-link{
 
     <input
       id="otpCode"
-      class="input otp-input"
+      class="sns-input otp-input"
       inputmode="numeric"
       autocomplete="one-time-code"
       pattern="\d{6}"
@@ -507,8 +564,8 @@ button.btn-link, summary.btn-link{
     />
 
     <div class="otp-actions">
-      <button id="otpCancel" type="button" class="btn-link secondary">Cancel</button>
-      <button id="otpVerify" type="button" class="btn-link">Verify &amp; Send</button>
+      <button id="otpCancel" type="button" class="otp-btn otp-btn-secondary">Cancel</button>
+      <button id="otpVerify" type="button" class="sns-submit-btn otp-btn-primary">Verify &amp; Send</button>
     </div>
 
     <button id="otpResend" type="button" class="otp-resend">Resend code</button>
