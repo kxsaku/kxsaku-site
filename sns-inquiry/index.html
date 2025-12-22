@@ -208,7 +208,7 @@
       background-image: linear-gradient(135deg, #b659ff, #6a7bff);
       color: white;
       font-weight: 600;
-      letter-spacing: 0.08em;
+      letter-spacing: .03em;
       text-transform: uppercase;
       font-size: 0.85rem;
       box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
@@ -300,22 +300,31 @@ button.btn-link, summary.btn-link{
 }
 
 .otp-resend{
-  margin-top: .75rem;
-  background: transparent;
-  border: 0;
-  color: inherit;
-  opacity: .85;
+  margin-top: .95rem;
+  padding: .55rem .9rem;
+  border-radius: 999px;
+  border: 1px solid rgba(156, 136, 255, 0.28);
+  background: rgba(12, 9, 49, 0.35);
+  color: #d8ceff;
+  opacity: .92;
   cursor: pointer;
-  text-decoration: underline;
+  text-decoration: none;   /* removes ugly underline */
+  width: fit-content;
 }
-.otp-resend:hover{ opacity: 1; }
+
+.otp-resend:hover{
+  opacity: 1;
+  border-color: rgba(182, 89, 255, 0.55);
+}
+
+.otp-resend{ margin-left: auto; }
 
 /* ===== OTP polish (match SNS UI) ===== */
 .otp-card { padding: 1.35rem 1.5rem 1.15rem; }
 
 .otp-title{
   font-size: 1.25rem;
-  letter-spacing: .16em;
+  letter-spacing: .08em
 }
 
 .otp-sub{
@@ -327,7 +336,8 @@ button.btn-link, summary.btn-link{
 .otp-input{
   border-radius: 999px;        /* match form pills */
   font-size: 1.1rem;
-  letter-spacing: .28em;
+  letter-spacing: .10em;
+  text-transform: none;
   text-align: center;
   padding: .85rem 1rem;
 }
@@ -341,7 +351,7 @@ button.btn-link, summary.btn-link{
   border-radius: 999px;
   padding: 0.78rem 1.25rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: .03em;
   text-transform: uppercase;
   font-size: 0.78rem;
   cursor: pointer;
@@ -365,6 +375,15 @@ button.btn-link, summary.btn-link{
 .otp-resend{
   margin-top: .9rem;
   opacity: .9;
+}
+
+.otp-card{ box-sizing: border-box; }
+.otp-card *{ box-sizing: border-box; }
+
+.otp-input{
+  width: 100% !important;
+  max-width: 100% !important;
+  display: block;
 }
 
   </style>
