@@ -212,6 +212,9 @@
             return null;
         }
 
+        history.replaceState({}, document.title, location.pathname);
+
+
         const user = data?.user;
         if (!user?.email) {
             showMsg("No user email found. Please request a new invite.");
@@ -269,9 +272,14 @@
 
         try {
             // Ensure session exists
-            const { data: u } = await sb.auth.getUser();
-            const user = u?.user;
-            if (!user) throw new Error("Auth session missing. Please use invite link again.");
+            const { data: s, error: sErr } = await sb.auth.getSession();
+            if (sErr) throw sErr;
+
+            const session = s?.session;
+            if (!session?.user) throw new Error("Auth session missing. Please use invite link again.");
+
+            const user = session.user;
+
 
             // 1) Set password
             const { error: pwErr } = await sb.auth.updateUser({ password: pw });
