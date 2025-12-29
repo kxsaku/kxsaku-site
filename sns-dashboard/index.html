@@ -161,12 +161,21 @@ Budget: ${r.budget || ""}
       const status = data.status || "none";
       const pay = data.last_payment_status || "unknown";
       const periodEnd = data.current_period_end ? fmtDate(data.current_period_end) : "—";
+      
+      const pretty = (s) => {
+        if (!s) return "—";
+        return String(s)
+          .replace(/_/g, " ")
+          .replace(/\b\w/g, (m) => m.toUpperCase());
+      };
+
 
       subState.innerHTML = `
-        <div class="pill">Status: ${status}</div>
-        <div class="pill">Payment: ${pay}</div>
-        <div class="pill">Current Period End: ${periodEnd}</div>
+        <div class="pill">Status: ${pretty(status)}</div>
+        <div class="pill">Payment: ${pretty(pay)}</div>
+        <div class="pill">Current Period End: ${periodEnd || "—"}</div>
       `;
+
 
       const activeish = ["trialing","active","past_due","unpaid"].includes(status);
       manageBtn.style.display = activeish ? "inline-block" : "none";
