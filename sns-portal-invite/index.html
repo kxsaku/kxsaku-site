@@ -147,9 +147,13 @@
     }
 
     // 3) Implicit/token flow: #access_token=...&refresh_token=...
+    // Note: some browsers/email clients move hash tokens into query params.
     const hash = new URLSearchParams(window.location.hash.slice(1));
-    const access_token = hash.get("access_token");
-    const refresh_token = hash.get("refresh_token");
+    const qs = new URLSearchParams(window.location.search);
+
+    const access_token = hash.get("access_token") || qs.get("access_token");
+    const refresh_token = hash.get("refresh_token") || qs.get("refresh_token");
+
 
     if (access_token && refresh_token) {
       const { data, error } = await sb.auth.setSession({ access_token, refresh_token });
