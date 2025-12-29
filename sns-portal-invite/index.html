@@ -122,6 +122,17 @@
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpndnhtcHNqdGtlZHpneWd5bmJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0NzgxMjYsImV4cCI6MjA4MTA1NDEyNn0.OCh23RWm8COtxWuumYvKUmfMOLOW01B1zrbtzcr3w6Y";
     const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+        import { supabase } from "./supabaseClient";
+
+    useEffect(() => {
+    const hash = window.location.hash;
+
+    if (hash.includes("access_token")) {
+        supabase.auth.setSessionFromUrl({ storeSession: true });
+    }
+    }, []);
+
+
     const msg = document.getElementById("msg");
     const emailEl = document.getElementById("email");
     const pwEl = document.getElementById("pw");
@@ -240,6 +251,12 @@
     document.getElementById("form").addEventListener("submit", async (e) => {
       e.preventDefault();
       clearMsg();
+            const { data: { user } } = await supabase.auth.getUser();
+
+        if (!user) {
+        throw new Error("No active invite session");
+        }
+
 
       const pw = pwEl.value || "";
       const pw2 = pw2El.value || "";
