@@ -5,6 +5,7 @@
   <title>SNS · Client Login</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
+    *, *::before, *::after { box-sizing: border-box; }
     html, body { height:100%; }
     body{
       margin:0;
@@ -45,6 +46,7 @@
     label{ font-size:.78rem; letter-spacing:.16em; text-transform:uppercase; color: rgba(244,240,255,.75); }
     input{
       width:100%;
+      max-width: 100%;
       padding: .9rem 1rem;
       border-radius: 14px;
       border: 1px solid rgba(180,150,255,.22);
@@ -54,6 +56,8 @@
     }
     input:focus{ border-color: rgba(200,170,255,.6); }
     .row{ display:grid; grid-template-columns: 1fr; gap:.4rem; }
+        /* Critical: allow row children to shrink instead of overflowing */
+    .row > * { min-width: 0; }
     .actions{ display:flex; gap:.8rem; align-items:center; justify-content:flex-end; margin-top:.4rem; flex-wrap:wrap; }
     .msg{
       display:none;

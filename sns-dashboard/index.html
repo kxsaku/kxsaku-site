@@ -171,24 +171,37 @@ Budget: ${r.budget || ""}
       manageBtn.style.display = activeish ? "inline-block" : "none";
     }
 
-    async function callFn(path, body = {}){
-      const { data: sess } = await sb.auth.getSession();
-      const token = sess?.session?.access_token;
-      if (!token) throw new Error("Not logged in.");
+    async function getAccessTokenOrThrow() {
+      // 1) Try current session
+      let { data: { session } } = await sb.auth.getSession();
+      if (session?.access_token) return session.access_token;
 
-      const res = await fetch(`${SUPABASE_URL}/functions/v1/${path}`, {
+      // 2) Attempt refresh (fixes the “logged in but session missing” edge case)
+      let refreshed = await sb.auth.refreshSession();
+      const token = refreshed.data?.session?.access_token;
+      if (token) return token;
+
+      throw new Error("Not logged in.");
+    }
+
+    async function callFn(name, body){
+      const token = await getAccessTokenOrThrow();
+
+      const r = await fetch(FN_BASE + "/" + name, {
         method: "POST",
         headers: {
-          "Content-Type":"application/json",
-          "Authorization": `Bearer ${token}`
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + token,
         },
-        body: JSON.stringify(body)
+        body: JSON.stringify(body || {})
       });
 
-      const j = await res.json();
-      if (!res.ok) throw new Error(j?.error || "Request failed");
+      let j = null;
+      try { j = await r.json(); } catch {}
+      if (!r.ok) throw new Error(j?.error || ("Edge error " + r.status));
       return j;
     }
+
 
     subscribeBtn.addEventListener("click", async () => {
       subscribeBtn.disabled = true;
