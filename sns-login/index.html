@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>SNS · Client Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    html, body { height:100%; }
+    body{
+      margin:0;
+      min-height:100vh;
+      background: radial-gradient(circle at top, #342067, #050315 55%, #020010);
+      background-color:#050315;
+      color:#f4f0ff;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    }
+    .wrap{ max-width: 980px; margin:0 auto; padding: 2.5rem 1rem 4rem; }
+    .topbar{ display:flex; justify-content:space-between; align-items:center; gap:1rem; }
+    .brand{ display:flex; align-items:center; gap:.75rem; text-decoration:none; color:#f4f0ff; }
+    .brand strong{ letter-spacing:.18em; text-transform:uppercase; font-size: .95rem; }
+    .btn{
+      appearance:none; border:1px solid rgba(180,150,255,.35);
+      background: rgba(40,20,80,.35);
+      color:#f4f0ff; padding:.7rem 1rem; border-radius: 999px;
+      text-decoration:none; cursor:pointer; font-weight:700; letter-spacing:.12em;
+      text-transform:uppercase; font-size:.78rem;
+      transition: transform .12s ease, border-color .12s ease, background .12s ease;
+    }
+    .btn:hover{ transform: translateY(-1px); border-color: rgba(200,170,255,.65); background: rgba(60,30,120,.35); }
+    .card{
+      margin-top: 2rem;
+      background: rgba(10, 6, 24, .55);
+      border: 1px solid rgba(180,150,255,.22);
+      border-radius: 18px;
+      box-shadow: 0 18px 70px rgba(0,0,0,.55);
+      overflow:hidden;
+    }
+    .card-h{
+      padding: 1.4rem 1.4rem 1rem;
+      border-bottom: 1px solid rgba(180,150,255,.12);
+    }
+    .card-h h1{ margin:0; font-size: 1.05rem; letter-spacing:.18em; text-transform:uppercase; }
+    .card-h p{ margin:.55rem 0 0; color: rgba(244,240,255,.78); }
+    .card-b{ padding: 1.4rem; display:grid; gap: .9rem; }
+    label{ font-size:.78rem; letter-spacing:.16em; text-transform:uppercase; color: rgba(244,240,255,.75); }
+    input{
+      width:100%;
+      padding: .9rem 1rem;
+      border-radius: 14px;
+      border: 1px solid rgba(180,150,255,.22);
+      background: rgba(5,3,18,.55);
+      color:#f4f0ff;
+      outline:none;
+    }
+    input:focus{ border-color: rgba(200,170,255,.6); }
+    .row{ display:grid; grid-template-columns: 1fr; gap:.4rem; }
+    .actions{ display:flex; gap:.8rem; align-items:center; justify-content:flex-end; margin-top:.4rem; flex-wrap:wrap; }
+    .msg{
+      display:none;
+      padding:.9rem 1rem;
+      border-radius: 14px;
+      border: 1px solid rgba(255,120,170,.35);
+      background: rgba(60,0,30,.25);
+      color:#ffd6e6;
+    }
+    .muted-link{
+      color: rgba(200,170,255,.85);
+      text-decoration:none;
+      font-weight:700;
+      letter-spacing:.10em;
+      text-transform:uppercase;
+      font-size:.75rem;
+    }
+    .muted-link:hover{ text-decoration:underline; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <a class="brand" href="/sns/">
+        <strong>Saku Network Solutions</strong>
+      </a>
+      <a class="btn" href="/sns/">Back</a>
+    </div>
+
+    <div class="card">
+      <div class="card-h">
+        <h1>Client Login</h1>
+        <p>Log in to view your dashboard and subscription.</p>
+      </div>
+      <div class="card-b">
+        <div id="msg" class="msg"></div>
+
+        <div class="row">
+          <label for="email">Email</label>
+          <input id="email" type="email" autocomplete="email" placeholder="you@domain.com" />
+        </div>
+
+        <div class="row">
+          <label for="password">Password</label>
+          <input id="password" type="password" autocomplete="current-password" placeholder="••••••••" />
+        </div>
+
+        <div class="actions">
+          <a class="muted-link" href="/sns-portal-invite/">Have an invite?</a>
+          <button id="loginBtn" class="btn">Login</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+    // Keep these consistent with your other pages
+    const SUPABASE_URL = "https://jgvxmpsjtkedzgygynbl.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpndnhtcHNqdGtlZHpneWd5bmJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0NzgxMjYsImV4cCI6MjA4MTA1NDEyNn0.OCh23RWm8COtxWuumYvKUmfMOLOW01B1zrbtzcr3w6Y";
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const msg = document.getElementById("msg");
+    const emailEl = document.getElementById("email");
+    const passEl = document.getElementById("password");
+    const btn = document.getElementById("loginBtn");
+
+    function showMsg(text){
+      msg.textContent = text;
+      msg.style.display = "block";
+    }
+
+    // If already logged in, go straight to dashboard
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) window.location.href = "/sns-dashboard/";
+
+    btn.addEventListener("click", async () => {
+      msg.style.display = "none";
+      btn.disabled = true;
+
+      const email = emailEl.value.trim();
+      const password = passEl.value;
+
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error){
+        showMsg(error.message || "Login failed.");
+        btn.disabled = false;
+        return;
+      }
+
+      window.location.href = "/sns-dashboard/";
+    });
+  </script>
+</body>
+</html>

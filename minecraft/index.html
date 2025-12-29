@@ -59,6 +59,30 @@
       }
     }
 
+    .site-header{ display:flex; align-items:center; justify-content:space-between; gap:1rem; }
+    .header-actions{ display:flex; align-items:center; gap:.6rem; }
+
+    .btn-login{
+      appearance:none;
+      border:1px solid rgba(180,150,255,.35);
+      background: rgba(40,20,80,.35);
+      color:#f4f0ff;
+      padding:.65rem .95rem;
+      border-radius:999px;
+      text-decoration:none;
+      font-weight:800;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      font-size:.72rem;
+      transition: transform .12s ease, border-color .12s ease, background .12s ease;
+    }
+    .btn-login:hover{
+      transform: translateY(-1px);
+      border-color: rgba(200,170,255,.65);
+      background: rgba(60,30,120,.35);
+    }
+
+
     /*  MAIN SHELL (big rounded rectangle)  */
     .shell {
       width: 100%;
@@ -614,6 +638,12 @@
 
   <a href="/socials" class="nav-tab"><span>Socials</span></a>
 </nav>
+
+<div class="header-actions">
+  <a class="btn-login" href="/sns-login/">Client Login</a>
+</div>
+
+
     </header>
 
     <section class="grid grid-2-balanced" id="minecraft">
