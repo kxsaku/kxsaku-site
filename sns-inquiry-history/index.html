@@ -143,7 +143,7 @@
 
       const { data, error } = await sb
         .from("inquiries")
-        .select("created_at, wo_number, services, status")
+        .select("created_at, work_order, services, status")
         .eq("email", user.email)
         .order("created_at", { ascending: false });
 
