@@ -159,50 +159,57 @@ Budget: ${r.budget || ""}
     });
 
     async function loadSubscription(userId){
-      // Always refresh from Stripe before rendering
-      const { data: fresh, error: freshErr } = await sb.functions.invoke("get-billing-status");
-      if (freshErr) throw freshErr;
+  // Always refresh from Stripe before rendering
+  const { data: row, error: freshErr } = await sb.functions.invoke("get-billing-status");
+  if (freshErr) throw freshErr;
 
-      const row = fresh;
+  if (!row) {
+    subState.innerHTML = `<div class="muted">No subscription record found yet.</div>`;
+    elSubStatus.textContent = "—";
+    elSubPay.textContent = "—";
+    elPaidAmount.textContent = "—";
+    elPeriodEnd.textContent = "—";
+    manageBtn.style.display = "none";
+    return;
+  }
 
-      if (error || !data) {
-        subState.innerHTML = `<div class="muted">No subscription record found yet.</div>`;
-        manageBtn.style.display = "none";
-        return;
-      }
+  // Normalize display strings
+  const statusRaw = (row.status || "unknown").toString();
+  const statusPretty = statusRaw.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
 
-      let status = data.status || "none";
-      // Treat trialing as "active" for your UX
-      if (status === "trialing") status = "active";
-      const pay = data.last_payment_status || "unknown";
-      const periodEnd = data.current_period_end ? fmtDate(data.current_period_end) : "—";
-      
-      const pretty = (s) => {
-        if (!s) return "—";
-        return String(s)
-          .replace(/_/g, " ")
-          .replace(/\b\w/g, (m) => m.toUpperCase());
-      };
+  const paymentRaw = (row.payment_status || "unknown").toString();
+  const paymentPretty = paymentRaw.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
 
+  // Amounts / dates
+  const paid = (row.last_payment_amount_cents != null)
+    ? `$${(row.last_payment_amount_cents / 100).toFixed(2)}`
+    : "—";
 
-      elSubStatus.textContent  = "Status: " + pretty(status);
-      elPayStatus.textContent  = "Payment: " + pretty(pay);
-      elPeriodEnd.textContent  = "Current Period End: " + (periodEnd || "—");
+  const periodEnd = row.current_period_end
+    ? new Date(row.current_period_end).toLocaleString()
+    : "—";
 
-      const amt = row.last_payment_amount;
-      const cur = (row.last_payment_currency || "").toUpperCase();
+  elSubStatus.textContent = statusPretty;
+  elSubPay.textContent = paymentPretty;
+  elPaidAmount.textContent = paid;
+  elPeriodEnd.textContent = periodEnd;
 
-      elPaidAmount.textContent =
-        (amt != null && cur)
-          ? `Paid: ${cur} ${amt.toFixed(2)}`
-          : "Paid: —";
+  // Buttons
+  const activeish = ["active","trialing","past_due","unpaid"].includes(statusRaw);
+  manageBtn.style.display = activeish ? "inline-flex" : "none";
 
+  // Helpful note line
+  subState.innerHTML = `<div class="muted">${
+    statusRaw === "active"
+      ? "Subscription is active."
+      : statusRaw === "trialing"
+      ? "Trial is active."
+      : statusRaw === "past_due"
+      ? "Payment is past due — update billing to restore service."
+      : "No active subscription."
+  }</div>`;
+}
 
-
-
-      const activeish = ["trialing","active","past_due","unpaid"].includes(status);
-      manageBtn.style.display = activeish ? "inline-block" : "none";
-    }
 
     async function getAccessTokenOrThrow() {
       // 1) Try current session
