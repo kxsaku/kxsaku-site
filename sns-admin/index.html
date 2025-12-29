@@ -272,6 +272,21 @@
       </div>
 
     <div class="card" id="adminCard" style="display:none;">
+
+      <div class="card" style="margin-top:14px;">
+  <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+    <div>
+      <div style="letter-spacing:.08em; text-transform:uppercase; font-size:.85rem; color: rgba(244,240,255,.75);">Invite Client (Invite-only accounts)</div>
+      <div class="muted" style="margin-top:6px;">Sends a secure one-time invite link to create a password and activate their dashboard.</div>
+    </div>
+    <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+      <input id="inviteEmail" type="email" placeholder="client@email.com" style="min-width:260px;" />
+      <button id="inviteBtn" class="btn">Send Invite</button>
+    </div>
+  </div>
+  <div id="inviteMsg" class="muted" style="margin-top:10px;"></div>
+</div>
+
 <div class="toolbar toolbar-grid">
   <div class="toolgroup">
     <div class="tooltitle">Status</div>
@@ -423,6 +438,46 @@
     /**************************************************************/
 
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const inviteEmailEl = document.getElementById("inviteEmail");
+const inviteBtn = document.getElementById("inviteBtn");
+const inviteMsg = document.getElementById("inviteMsg");
+
+async function callEdge(fnName, payload = {}) {
+  const { data: sess } = await sb.auth.getSession();
+  const token = sess?.session?.access_token;
+  if (!token) throw new Error("Not logged in.");
+
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/${fnName}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const j = await res.json();
+  if (!res.ok) throw new Error(j?.error || "Request failed");
+  return j;
+}
+
+inviteBtn?.addEventListener("click", async () => {
+  inviteMsg.textContent = "";
+  const email = (inviteEmailEl.value || "").trim().toLowerCase();
+  if (!email) return (inviteMsg.textContent = "Enter an email.");
+
+  inviteBtn.disabled = true;
+  try {
+    await callEdge("admin-invite", { email });
+    inviteMsg.textContent = `Invite sent to ${email}`;
+  } catch (e) {
+    inviteMsg.textContent = e?.message || String(e);
+  } finally {
+    inviteBtn.disabled = false;
+  }
+});
+
 
     const searchBox = document.getElementById("searchBox");
 

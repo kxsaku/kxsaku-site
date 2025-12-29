@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>SNS · Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="/styles.css" />
+  <style>
+    body{ margin:0; background: radial-gradient(circle at top, #342067, #050315 55%, #020010); color:#f4f0ff; font-family: ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial; }
+    .wrap{ max-width: 1050px; margin: 0 auto; padding: 3rem 1rem 4rem; }
+    .top{ display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; flex-wrap:wrap; }
+    h1{ margin:0; letter-spacing:.14em; text-transform:uppercase; font-size:1.1rem; }
+    .card{ background: rgba(7,4,25,.78); border: 1px solid rgba(129,118,255,.25); border-radius: 18px; padding: 18px; box-shadow: 0 18px 60px rgba(0,0,0,.5); backdrop-filter: blur(14px); }
+    .grid{ display:grid; grid-template-columns: 1.1fr .9fr; gap: 16px; margin-top: 16px; }
+    @media (max-width: 900px){ .grid{ grid-template-columns:1fr; } }
+    .btn{ padding: 12px 14px; border-radius: 14px; border: 1px solid rgba(129,118,255,.35); background: rgba(129,118,255,.18); color:#f4f0ff; cursor:pointer; font-weight:600; letter-spacing:.08em; text-transform:uppercase; }
+    .btn:disabled{ opacity:.6; cursor:not-allowed; }
+    .btnRed{ border-color: rgba(255,80,120,.35); background: rgba(255,80,120,.12); }
+    .muted{ color: rgba(244,240,255,.75); }
+    .pill{ display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.06); font-size:.85rem; }
+    .row{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 12px; }
+    pre{ margin:0; white-space:pre-wrap; color: rgba(244,240,255,.86); font-family: ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:.9rem; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <h1>SNS Client Dashboard</h1>
+        <div id="who" class="muted" style="margin-top:6px;"></div>
+      </div>
+      <button id="logout" class="btn">Logout</button>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+          <div>
+            <div class="muted" style="letter-spacing:.08em; text-transform:uppercase; font-size:.85rem;">Most Recent Inquiry</div>
+            <div id="inqStatus" class="muted" style="margin-top:6px;">Loading…</div>
+          </div>
+          <button id="viewHistory" class="btn">View Inquiry History</button>
+        </div>
+
+        <div id="inqBox" style="margin-top:12px;"></div>
+      </div>
+
+      <div class="card">
+        <div class="muted" style="letter-spacing:.08em; text-transform:uppercase; font-size:.85rem;">Subscription</div>
+        <div id="subState" style="margin-top:10px;">Loading…</div>
+
+        <div class="row">
+          <button id="subscribeBtn" class="btn">Subscribe</button>
+          <button id="manageBtn" class="btn" style="display:none;">Manage My Subscription</button>
+        </div>
+
+        <div class="muted" style="margin-top:10px; line-height:1.45;">
+          Initiation fee is non-refundable. Monthly billing begins ~30 days after signup.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+    const SUPABASE_URL = "https://jgvxmpsjtkedzgygynbl.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpndnhtcHNqdGtlZHpneWd5bmJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0NzgxMjYsImV4cCI6MjA4MTA1NDEyNn0.OCh23RWm8COtxWuumYvKUmfMOLOW01B1zrbtzcr3w6Y";
+    const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const who = document.getElementById("who");
+    const logoutBtn = document.getElementById("logout");
+
+    const inqStatus = document.getElementById("inqStatus");
+    const inqBox = document.getElementById("inqBox");
+    const viewHistory = document.getElementById("viewHistory");
+
+    const subState = document.getElementById("subState");
+    const subscribeBtn = document.getElementById("subscribeBtn");
+    const manageBtn = document.getElementById("manageBtn");
+
+    async function requireUser(){
+      const { data } = await sb.auth.getUser();
+      const user = data?.user;
+      if (!user) {
+        window.location.href = "/sns/index.html";
+        return null;
+      }
+      who.textContent = user.email;
+      return user;
+    }
+
+    logoutBtn.addEventListener("click", async () => {
+      await sb.auth.signOut();
+      window.location.href = "/sns/index.html";
+    });
+
+    function fmtDate(iso){
+      try { return new Date(iso).toLocaleString(); } catch { return iso || ""; }
+    }
+
+    async function loadInquiry(email){
+      const { data, error } = await sb
+        .from("inquiries")
+        .select("created_at,contact_name,business_name,location,services,timeline,budget,goals,phone")
+        .eq("email", email)
+        .order("created_at", { ascending:false })
+        .limit(1);
+
+      if (error) {
+        inqStatus.textContent = "Could not load inquiry.";
+        inqBox.innerHTML = "";
+        return;
+      }
+
+      if (!data || !data[0]) {
+        inqStatus.textContent = "No inquiries found for your email yet.";
+        inqBox.innerHTML = "";
+        return;
+      }
+
+      const r = data[0];
+      inqStatus.textContent = "Loaded";
+      inqBox.innerHTML = `
+        <div class="pill">Submitted: ${fmtDate(r.created_at)}</div>
+        <div style="margin-top:12px;">
+          <pre>
+Contact: ${r.contact_name || ""}
+Business: ${r.business_name || ""}
+Location: ${r.location || ""}
+Phone: ${r.phone || ""}
+Services: ${(r.services || []).join(", ")}
+Timeline: ${r.timeline || ""}
+Budget: ${r.budget || ""}
+          </pre>
+        </div>
+      `;
+    }
+
+    viewHistory.addEventListener("click", () => {
+      // Uses your existing inquiry view page
+      window.location.href = "/sns-inquiry-view/index.html";
+    });
+
+    async function loadSubscription(userId){
+      const { data, error } = await sb
+        .from("billing_subscriptions")
+        .select("status,cancel_at_period_end,current_period_end,last_payment_status,stripe_customer_id,stripe_subscription_id")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      if (error || !data) {
+        subState.innerHTML = `<div class="muted">No subscription record found yet.</div>`;
+        manageBtn.style.display = "none";
+        return;
+      }
+
+      const status = data.status || "none";
+      const pay = data.last_payment_status || "unknown";
+      const periodEnd = data.current_period_end ? fmtDate(data.current_period_end) : "—";
+
+      subState.innerHTML = `
+        <div class="pill">Status: ${status}</div>
+        <div class="pill">Payment: ${pay}</div>
+        <div class="pill">Current Period End: ${periodEnd}</div>
+      `;
+
+      const activeish = ["trialing","active","past_due","unpaid"].includes(status);
+      manageBtn.style.display = activeish ? "inline-block" : "none";
+    }
+
+    async function callFn(path, body = {}){
+      const { data: sess } = await sb.auth.getSession();
+      const token = sess?.session?.access_token;
+      if (!token) throw new Error("Not logged in.");
+
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/${path}`, {
+        method: "POST",
+        headers: {
+          "Content-Type":"application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(body)
+      });
+
+      const j = await res.json();
+      if (!res.ok) throw new Error(j?.error || "Request failed");
+      return j;
+    }
+
+    subscribeBtn.addEventListener("click", async () => {
+      subscribeBtn.disabled = true;
+      try {
+        const j = await callFn("create-checkout-session");
+        if (!j.url) throw new Error("No checkout URL returned.");
+        window.location.href = j.url;
+      } catch (e) {
+        alert(e.message || String(e));
+        subscribeBtn.disabled = false;
+      }
+    });
+
+    manageBtn.addEventListener("click", async () => {
+      manageBtn.disabled = true;
+      try {
+        const j = await callFn("create-portal-session");
+        if (!j.url) throw new Error("No portal URL returned.");
+        window.location.href = j.url;
+      } catch (e) {
+        alert(e.message || String(e));
+        manageBtn.disabled = false;
+      }
+    });
+
+    const user = await requireUser();
+    if (user){
+      await loadInquiry(user.email);
+      await loadSubscription(user.id);
+    }
+  </script>
+</body>
+</html>
