@@ -118,197 +118,190 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
   const { createClient } = supabase;
-  
-    const SUPABASE_URL = "https://jgvxmpsjtkedzgygynbl.supabase.co";
+
+  const SUPABASE_URL = "https://jgvxmpsjtkedzgygynbl.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpndnhtcHNqdGtlZHpneWd5bmJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0NzgxMjYsImV4cCI6MjA4MTA1NDEyNn0.OCh23RWm8COtxWuumYvKUmfMOLOW01B1zrbtzcr3w6Y";
     const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        import { supabase } from "./supabaseClient";
+    (async () => {
+        const msg = document.getElementById("msg");
+        const emailEl = document.getElementById("email");
+        const pwEl = document.getElementById("pw");
+        const pw2El = document.getElementById("pw2");
+        const submitBtn = document.getElementById("submitBtn");
 
-    useEffect(() => {
-    const hash = window.location.hash;
+        const meterFill = document.getElementById("meterFill");
+        const meterText = document.getElementById("meterText");
 
-    if (hash.includes("access_token")) {
-        supabase.auth.setSessionFromUrl({ storeSession: true });
-    }
-    }, []);
+        const billingSame = document.getElementById("billing_same");
+        const billingWrap = document.getElementById("billingWrap");
+        const billingAddr = document.getElementById("billing_address");
 
-
-    const msg = document.getElementById("msg");
-    const emailEl = document.getElementById("email");
-    const pwEl = document.getElementById("pw");
-    const pw2El = document.getElementById("pw2");
-    const submitBtn = document.getElementById("submitBtn");
-
-    const meterFill = document.getElementById("meterFill");
-    const meterText = document.getElementById("meterText");
-
-    const billingSame = document.getElementById("billing_same");
-    const billingWrap = document.getElementById("billingWrap");
-    const billingAddr = document.getElementById("billing_address");
-
-    billingSame.addEventListener("change", () => {
-      billingWrap.style.display = billingSame.checked ? "none" : "block";
-    });
-
-    function showMsg(text, ok=false){
-      msg.style.display = "block";
-      msg.className = "msg " + (ok ? "ok" : "err");
-      msg.textContent = text;
-    }
-
-    function clearMsg(){ msg.style.display="none"; msg.textContent=""; }
-
-    function parseHashTokens(){
-      // Supabase puts access_token / refresh_token in URL hash after verify redirect
-      const h = new URLSearchParams((location.hash || "").replace(/^#/, ""));
-      const access_token = h.get("access_token");
-      const refresh_token = h.get("refresh_token");
-      return { access_token, refresh_token };
-    }
-
-    function pwPolicy(pw){
-      // 7-30, at least 1 uppercase, 1 number, 1 special, allowed: letters/numbers/normal specials
-      const lenOk = pw.length >= 7 && pw.length <= 30;
-      const upperOk = /[A-Z]/.test(pw);
-      const numOk = /[0-9]/.test(pw);
-      const specialOk = /[!@#$%^&*()]/.test(pw);
-      const allowedOk = /^[A-Za-z0-9!@#$%^&*()]+$/.test(pw);
-      return { lenOk, upperOk, numOk, specialOk, allowedOk };
-    }
-
-    function updateMeter(){
-      const pw = pwEl.value || "";
-      const p = pwPolicy(pw);
-
-      // Simple scoring
-      let score = 0;
-      if (p.lenOk) score++;
-      if (p.upperOk) score++;
-      if (p.numOk) score++;
-      if (p.specialOk) score++;
-      if (p.allowedOk) score++;
-
-      const percent = Math.min(100, (score/5)*100);
-      meterFill.style.width = percent + "%";
-
-      // Color: red (weak), yellow (fine), green (strong)
-      let color = "rgba(255,60,120,.75)";
-      let label = "Weak";
-      if (score >= 4) { color = "rgba(80,255,180,.70)"; label = "Strong"; }
-      else if (score >= 3) { color = "rgba(255,210,90,.70)"; label = "Fine"; }
-      meterFill.style.background = color;
-      meterText.textContent = `${label} — Must be 7–30 chars; include 1 uppercase, 1 number, 1 special (!@#$%^&*()).`;
-    }
-
-    pwEl.addEventListener("input", updateMeter);
-
-    async function requireInviteSession(){
-      const { access_token, refresh_token } = parseHashTokens();
-      if (!access_token || !refresh_token) {
-        showMsg("This invite link is missing login tokens. Please use the invite email link again.");
-        submitBtn.disabled = true;
-        return null;
-      }
-
-      const { data, error } = await sb.auth.setSession({ access_token, refresh_token });
-      if (error) {
-        showMsg("Invite session failed. Please request a new invite.");
-        submitBtn.disabled = true;
-        return null;
-      }
-
-      const user = data?.user;
-      if (!user?.email) {
-        showMsg("No user email found. Please request a new invite.");
-        submitBtn.disabled = true;
-        return null;
-      }
-
-      emailEl.value = user.email;
-      return user;
-    }
-
-    async function autofillFromInquiry(email){
-      // Pull most recent inquiry for same email to prefill basics
-      const { data, error } = await sb
-        .from("inquiries")
-        .select("contact_name,business_name,phone")
-        .eq("email", email)
-        .order("created_at", { ascending:false })
-        .limit(1);
-
-      if (!error && data && data[0]) {
-        const row = data[0];
-        document.getElementById("contact_name").value = row.contact_name || "";
-        document.getElementById("business_name").value = row.business_name || "";
-        document.getElementById("phone").value = row.phone || "";
-      }
-    }
-
-    const user = await requireInviteSession();
-    if (user) await autofillFromInquiry(user.email);
-
-    document.getElementById("form").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      clearMsg();
-            const { data: { user } } = await supabase.auth.getUser();
-
-        if (!user) {
-        throw new Error("No active invite session");
+        function showMsg(text, ok = false) {
+        msg.style.display = "block";
+        msg.className = "msg " + (ok ? "ok" : "err");
+        msg.textContent = text;
+        }
+        function clearMsg() {
+        msg.style.display = "none";
+        msg.textContent = "";
         }
 
+        billingSame.addEventListener("change", () => {
+        billingWrap.style.display = billingSame.checked ? "none" : "block";
+        });
 
-      const pw = pwEl.value || "";
-      const pw2 = pw2El.value || "";
-      const p = pwPolicy(pw);
+        // Supports hash (#access_token=...) AND query (?access_token=...)
+        function parseTokens() {
+        const hash = new URLSearchParams((location.hash || "").replace(/^#/, ""));
+        const qs = new URLSearchParams(location.search || "");
 
-      if (pw !== pw2) return showMsg("Passwords do not match.");
-      if (!p.allowedOk) return showMsg("Password has invalid characters. Use only letters, numbers, and !@#$%^&*().");
-      if (!(p.lenOk && p.upperOk && p.numOk && p.specialOk)) return showMsg("Password does not meet requirements.");
+        const access_token = hash.get("access_token") || qs.get("access_token");
+        const refresh_token = hash.get("refresh_token") || qs.get("refresh_token");
 
-      const contact_name = document.getElementById("contact_name").value.trim();
-      const business_name = document.getElementById("business_name").value.trim();
-      const phone = document.getElementById("phone").value.trim();
-      const business_location = document.getElementById("business_location").value.trim();
-      const mailing_address = document.getElementById("mailing_address").value.trim();
-      const billing_address = billingSame.checked ? mailing_address : billingAddr.value.trim();
+        return { access_token, refresh_token };
+        }
 
-      if (!contact_name || !business_name || !business_location || !mailing_address || !billing_address) {
-        return showMsg("Please fill in all required fields (business + addresses).");
-      }
+        function pwPolicy(pw) {
+        const lenOk = pw.length >= 7 && pw.length <= 30;
+        const upperOk = /[A-Z]/.test(pw);
+        const numOk = /[0-9]/.test(pw);
+        const specialOk = /[!@#$%^&*()]/.test(pw);
+        const allowedOk = /^[A-Za-z0-9!@#$%^&*()]+$/.test(pw);
+        return { lenOk, upperOk, numOk, specialOk, allowedOk };
+        }
 
-      submitBtn.disabled = true;
+        function updateMeter() {
+        const pw = pwEl.value || "";
+        const p = pwPolicy(pw);
 
-      try {
-        // 1) Set password for invited user
-        const { error: pwErr } = await sb.auth.updateUser({ password: pw });
-        if (pwErr) throw pwErr;
+        let score = 0;
+        if (p.lenOk) score++;
+        if (p.upperOk) score++;
+        if (p.numOk) score++;
+        if (p.specialOk) score++;
+        if (p.allowedOk) score++;
 
-        // 2) Save profile details (assumes your SQL created these columns)
-        const { error: profErr } = await sb
-          .from("client_profiles")
-          .upsert({
-            user_id: user.id,
-            email: user.email,
-            contact_name,
-            business_name,
-            phone,
-            business_location,
-            mailing_address,
-            billing_address
-          }, { onConflict: "user_id" });
+        const percent = Math.min(100, (score / 5) * 100);
+        meterFill.style.width = percent + "%";
 
-        if (profErr) throw profErr;
+        let color = "rgba(255,60,120,75)";
+        let label = "Weak";
+        if (score >= 4) { color = "rgba(80,255,180,70)"; label = "Strong"; }
+        else if (score >= 3) { color = "rgba(255,210,90,70)"; label = "Fine"; }
 
-        showMsg("Account created. Redirecting to dashboard…", true);
-        setTimeout(() => { window.location.href = "/sns-dashboard/index.html"; }, 900);
-      } catch (err) {
-        console.error(err);
-        showMsg(err?.message || "Failed to create account.");
-        submitBtn.disabled = false;
-      }
-    });
-  </script>
-</body>
-</html>
+        meterFill.style.background = color;
+        meterText.textContent = `${label} — Must be 7–30 chars; include 1 uppercase, 1 number, 1 special (!@#$%^&*()).`;
+        }
+
+        pwEl.addEventListener("input", updateMeter);
+
+        async function requireInviteSession() {
+        const { access_token, refresh_token } = parseTokens();
+
+        if (!access_token || !refresh_token) {
+            showMsg("Auth session missing. Please open the invite email link again (tokens not found).");
+            submitBtn.disabled = true;
+            return null;
+        }
+
+        const { data, error } = await sb.auth.setSession({ access_token, refresh_token });
+        if (error) {
+            showMsg("Invite session failed. Please request a new invite.");
+            submitBtn.disabled = true;
+            return null;
+        }
+
+        const user = data?.user;
+        if (!user?.email) {
+            showMsg("No user email found. Please request a new invite.");
+            submitBtn.disabled = true;
+            return null;
+        }
+
+        emailEl.value = user.email;
+        return user;
+        }
+
+        async function autofillFromInquiry(email) {
+        const { data, error } = await sb
+            .from("inquiries")
+            .select("contact_name,business_name,phone")
+            .eq("email", email)
+            .order("created_at", { ascending: false })
+            .limit(1);
+
+        if (!error && data && data[0]) {
+            const row = data[0];
+            document.getElementById("contact_name").value = row.contact_name || "";
+            document.getElementById("business_name").value = row.business_name || "";
+            document.getElementById("phone").value = row.phone || "";
+        }
+        }
+
+        const inviteUser = await requireInviteSession();
+        if (inviteUser) await autofillFromInquiry(inviteUser.email);
+
+        document.getElementById("form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        clearMsg();
+
+        const pw = pwEl.value || "";
+        const pw2 = pw2El.value || "";
+        const p = pwPolicy(pw);
+
+        if (pw !== pw2) return showMsg("Passwords do not match.");
+        if (!p.allowedOk) return showMsg("Password has invalid characters. Use only letters, numbers, and !@#$%^&*().");
+        if (!(p.lenOk && p.upperOk && p.numOk && p.specialOk)) return showMsg("Password does not meet requirements.");
+
+        const contact_name = document.getElementById("contact_name").value.trim();
+        const business_name = document.getElementById("business_name").value.trim();
+        const phone = document.getElementById("phone").value.trim();
+        const business_location = document.getElementById("business_location").value.trim();
+        const mailing_address = document.getElementById("mailing_address").value.trim();
+        const billing_address = billingSame.checked ? mailing_address : (billingAddr.value || "").trim();
+
+        if (!contact_name || !business_name || !business_location || !mailing_address || !billing_address) {
+            return showMsg("Please fill in all required fields (business + addresses).");
+        }
+
+        submitBtn.disabled = true;
+
+        try {
+            // Ensure session exists
+            const { data: u } = await sb.auth.getUser();
+            const user = u?.user;
+            if (!user) throw new Error("Auth session missing. Please use invite link again.");
+
+            // 1) Set password
+            const { error: pwErr } = await sb.auth.updateUser({ password: pw });
+            if (pwErr) throw pwErr;
+
+            // 2) Save profile
+            const { error: profErr } = await sb
+            .from("client_profiles")
+            .upsert({
+                user_id: user.id,
+                email: user.email,
+                contact_name,
+                business_name,
+                phone,
+                business_location,
+                mailing_address,
+                billing_address
+            }, { onConflict: "user_id" });
+
+            if (profErr) throw profErr;
+
+            showMsg("Account created. Redirecting to dashboard…", true);
+            setTimeout(() => { window.location.href = "/sns-dashboard/index.html"; }, 900);
+        } catch (err) {
+            console.error(err);
+            showMsg(err?.message || "Failed to create account.");
+            submitBtn.disabled = false;
+        }
+        });
+    })();
+    </script>
+    </body>
+    </html>
