@@ -123,6 +123,109 @@
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpndnhtcHNqdGtlZHpneWd5bmJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0NzgxMjYsImV4cCI6MjA4MTA1NDEyNn0.OCh23RWm8COtxWuumYvKUmfMOLOW01B1zrbtzcr3w6Y";
     const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+      async function bootstrapSessionFromUrl() {
+    // 1) If we already have a session in storage, use it.
+    const { data: s0, error: e0 } = await sb.auth.getSession();
+    if (e0) console.warn("getSession error:", e0);
+    if (s0?.session) return s0.session;
+
+    const url = new URL(window.location.href);
+
+    // 2) PKCE/code flow: ?code=...
+    const code = url.searchParams.get("code");
+    if (code) {
+      const { data, error } = await sb.auth.exchangeCodeForSession(code);
+      if (error) throw error;
+
+      // Clean the URL (removes code from address bar)
+      url.searchParams.delete("code");
+      url.searchParams.delete("type");
+      url.searchParams.delete("token");
+      window.history.replaceState({}, document.title, url.pathname + (url.searchParams.toString() ? `?${url.searchParams}` : ""));
+
+      return data.session;
+    }
+
+    // 3) Implicit/token flow: #access_token=...&refresh_token=...
+    const hash = new URLSearchParams(window.location.hash.slice(1));
+    const access_token = hash.get("access_token");
+    const refresh_token = hash.get("refresh_token");
+
+    if (access_token && refresh_token) {
+      const { data, error } = await sb.auth.setSession({ access_token, refresh_token });
+      if (error) throw error;
+
+      // Clean hash so refreshes don't re-run weirdly
+      window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
+      return data.session;
+    }
+
+    return null;
+  }
+
+  function showMsg(text, type = "error") {
+    // your existing UI message function
+    const el = document.getElementById("msg");
+    if (!el) return alert(text);
+    el.textContent = text;
+    el.style.display = "block";
+    el.dataset.type = type;
+  }
+
+  function getEmailFromUrl() {
+    // Optional: if you pass email in query/hash; otherwise ignore
+    const url = new URL(window.location.href);
+    return url.searchParams.get("email") || "";
+  }
+
+  async function initInvitePage() {
+    try {
+      const session = await bootstrapSessionFromUrl();
+      if (!session?.user) {
+        showMsg("Auth session missing. Please open a fresh invite link.", "error");
+        return;
+      }
+
+      // Prefill email field from the *actual* authed user
+      const emailInput = document.getElementById("email");
+      if (emailInput) {
+        emailInput.value = session.user.email ?? "";
+        emailInput.readOnly = true;
+      }
+
+      // Clear any old error message if we’re good
+      showMsg("", "ok");
+      const msg = document.getElementById("msg");
+      if (msg) msg.style.display = "none";
+    } catch (err) {
+      console.error(err);
+      showMsg("Invite link is invalid or expired. Please request a new invite.", "error");
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", initInvitePage);
+
+  // IMPORTANT: your submit handler must NOT call getUser() before initInvitePage runs.
+  document.getElementById("inviteForm")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    try {
+      const session = await bootstrapSessionFromUrl();
+      if (!session?.user) {
+        showMsg("Auth session missing. Please open a fresh invite link.", "error");
+        return;
+      }
+
+      // Now safe to do:
+      // 1) sb.auth.updateUser({ password })
+      // 2) insert/update your profile/business fields in DB using session.user.id
+      // ...your existing logic...
+    } catch (err) {
+      console.error(err);
+      showMsg(err?.message || "Failed to create account.", "error");
+    }
+  });
+
     (async () => {
         const msg = document.getElementById("msg");
         const emailEl = document.getElementById("email");
