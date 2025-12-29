@@ -158,7 +158,9 @@ Budget: ${r.budget || ""}
         return;
       }
 
-      const status = data.status || "none";
+      let status = data.status || "none";
+      // Treat trialing as "active" for your UX
+      if (status === "trialing") status = "active";
       const pay = data.last_payment_status || "unknown";
       const periodEnd = data.current_period_end ? fmtDate(data.current_period_end) : "—";
       
