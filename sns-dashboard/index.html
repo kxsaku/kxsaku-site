@@ -51,6 +51,14 @@
         <div class="muted" style="letter-spacing:.08em; text-transform:uppercase; font-size:.85rem;">Subscription</div>
         <div id="subState" style="margin-top:10px;">Loading…</div>
 
+        <div class="pillrow">
+        <div class="pill" id="subStatus">Status: —</div>
+        <div class="pill" id="payStatus">Payment: —</div>
+        <div class="pill" id="paidAmount">Paid: —</div>
+        <div class="pill" id="periodEnd">Current Period End: —</div>
+      </div>
+
+
         <div class="row">
           <button id="subscribeBtn" class="btn">Subscribe</button>
           <button id="manageBtn" class="btn" style="display:none;">Manage My Subscription</button>
@@ -81,6 +89,11 @@
     const subState = document.getElementById("subState");
     const subscribeBtn = document.getElementById("subscribeBtn");
     const manageBtn = document.getElementById("manageBtn");
+    const elSubStatus  = document.getElementById("subStatus");
+    const elPayStatus  = document.getElementById("payStatus");
+    const elPeriodEnd  = document.getElementById("periodEnd");
+    const elPaidAmount = document.getElementById("paidAmount");
+
 
     async function requireUser(){
       const { data } = await sb.auth.getUser();
@@ -146,11 +159,11 @@ Budget: ${r.budget || ""}
     });
 
     async function loadSubscription(userId){
-      const { data, error } = await sb
-        .from("billing_subscriptions")
-        .select("status,cancel_at_period_end,current_period_end,last_payment_status,stripe_customer_id,stripe_subscription_id")
-        .eq("user_id", userId)
-        .maybeSingle();
+      // Always refresh from Stripe before rendering
+      const { data: fresh, error: freshErr } = await sb.functions.invoke("get-billing-status");
+      if (freshErr) throw freshErr;
+
+      const row = fresh;
 
       if (error || !data) {
         subState.innerHTML = `<div class="muted">No subscription record found yet.</div>`;
@@ -172,11 +185,19 @@ Budget: ${r.budget || ""}
       };
 
 
-      subState.innerHTML = `
-        <div class="pill">Status: ${pretty(status)}</div>
-        <div class="pill">Payment: ${pretty(pay)}</div>
-        <div class="pill">Current Period End: ${periodEnd || "—"}</div>
-      `;
+      elSubStatus.textContent  = "Status: " + pretty(status);
+      elPayStatus.textContent  = "Payment: " + pretty(pay);
+      elPeriodEnd.textContent  = "Current Period End: " + (periodEnd || "—");
+
+      const amt = row.last_payment_amount;
+      const cur = (row.last_payment_currency || "").toUpperCase();
+
+      elPaidAmount.textContent =
+        (amt != null && cur)
+          ? `Paid: ${cur} ${amt.toFixed(2)}`
+          : "Paid: —";
+
+
 
 
       const activeish = ["trialing","active","past_due","unpaid"].includes(status);

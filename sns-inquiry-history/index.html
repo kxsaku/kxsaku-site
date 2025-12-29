@@ -6,128 +6,186 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="/styles.css" />
   <style>
-    body { margin:0; background: radial-gradient(circle at top, #342067, #050315 55%, #020010); color:#f4f0ff; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial; }
-    .wrap { max-width: 1050px; margin: 0 auto; padding: 3rem 1rem 4rem; }
-    .topbar { display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; margin-bottom: 1.25rem; }
+    body { margin:0; background: radial-gradient(circle at top, #342067, #050315 55%, #020010); color:#f4f0ff; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial; min-height:100vh; }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 3rem 1rem 4rem; min-height:100vh; }
+    .toprow { display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; }
     h1 { margin:0; letter-spacing:.18em; text-transform:uppercase; font-size: 1.2rem; }
-    .sub { opacity:.8; margin-top:.35rem; }
-    .btn { display:inline-flex; align-items:center; justify-content:center; gap:.5rem; padding:.75rem 1rem; border-radius: 999px; border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.06); color:#f4f0ff; text-decoration:none; cursor:pointer; }
+    .sub { opacity:.8; margin-top:.4rem; }
+    .btnrow { display:flex; gap:.7rem; align-items:center; }
+    .btn { cursor:pointer; border:1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.06); color:#f4f0ff; padding:.65rem 1rem; border-radius:999px; letter-spacing:.12em; text-transform:uppercase; font-weight:700; font-size:.75rem; }
     .btn:hover { background: rgba(255,255,255,.10); }
-    .card { border-radius: 18px; border: 1px solid rgba(255,255,255,.14); background: rgba(0,0,0,.28); box-shadow: 0 10px 40px rgba(0,0,0,.45); overflow:hidden; }
-    .row { display:grid; grid-template-columns: 160px 120px 1fr 140px; gap: .75rem; padding: .9rem 1rem; border-top: 1px solid rgba(255,255,255,.08); }
-    .row:first-child { border-top: 0; }
-    .hdr { opacity:.7; text-transform:uppercase; letter-spacing:.14em; font-size:.72rem; background: rgba(255,255,255,.04); }
-    .pill { display:inline-flex; padding:.25rem .55rem; border-radius:999px; border:1px solid rgba(255,255,255,.16); background: rgba(255,255,255,.06); font-size:.8rem; opacity:.95; }
-    .muted { opacity:.75; }
-    .err { margin-bottom: 1rem; padding:.85rem 1rem; border-radius: 14px; border:1px solid rgba(255,80,120,.35); background: rgba(120,30,60,.25); display:none; }
-    .ok { margin-bottom: 1rem; padding:.85rem 1rem; border-radius: 14px; border:1px solid rgba(80,255,170,.25); background: rgba(20,70,50,.22); display:none; }
-    .act { text-align:right; }
-    @media (max-width: 860px) {
-      .row { grid-template-columns: 1fr; }
-      .act { text-align:left; }
-    }
+    .card { margin-top:1.4rem; border-radius: 22px; background: rgba(15, 10, 35, .72); border:1px solid rgba(255,255,255,.12); box-shadow: 0 20px 60px rgba(0,0,0,.55); overflow:hidden; }
+    .banner { padding: 1rem 1.25rem; border-bottom:1px solid rgba(255,255,255,.10); }
+    .warn { margin: 1rem 1.25rem; padding: .9rem 1rem; border-radius: 14px; border:1px solid rgba(255, 80, 160, .35); background: rgba(255, 70, 140, .10); color:#ffd7ea; display:none; }
+    .tablewrap { padding: 1.1rem 1.25rem 1.25rem; }
+    table { width:100%; border-collapse:separate; border-spacing:0 10px; }
+    th { text-align:left; font-size:.72rem; opacity:.75; letter-spacing:.18em; text-transform:uppercase; padding:0 .8rem; }
+    td { padding: .9rem .8rem; background: rgba(255,255,255,.05); border-top:1px solid rgba(255,255,255,.10); border-bottom:1px solid rgba(255,255,255,.10); }
+    tr td:first-child { border-left:1px solid rgba(255,255,255,.10); border-top-left-radius:14px; border-bottom-left-radius:14px; }
+    tr td:last-child { border-right:1px solid rgba(255,255,255,.10); border-top-right-radius:14px; border-bottom-right-radius:14px; }
+    .pill { display:inline-flex; align-items:center; gap:.45rem; padding:.35rem .65rem; border-radius:999px; border:1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.06); font-size:.75rem; }
+    .muted { opacity:.8; }
+    .empty { padding: 2rem 1.25rem; opacity:.85; }
   </style>
 </head>
+
 <body>
   <div class="wrap">
-    <div class="topbar">
+    <div class="toprow">
       <div>
         <h1>INQUIRY HISTORY</h1>
-        <div class="sub" id="who">Checking session…</div>
+        <div id="who" class="sub">Loading…</div>
       </div>
-      <div style="display:flex; gap:.6rem; flex-wrap:wrap;">
-        <a class="btn" href="/sns-dashboard/index.html">Back to Dashboard</a>
-        <button class="btn" id="logoutBtn">Logout</button>
+      <div class="btnrow">
+        <button id="backBtn" class="btn">Back to Dashboard</button>
+        <button id="logoutBtn" class="btn">Logout</button>
       </div>
     </div>
 
-    <div class="err" id="err"></div>
-    <div class="ok" id="ok"></div>
-
-    <div class="card" id="list">
-      <div class="row hdr">
-        <div>Date</div>
-        <div>Work Order</div>
-        <div>Services</div>
-        <div class="act">Status</div>
+    <div class="card">
+      <div class="banner">
+        <div class="sub">All inquiries created under your account email. Newest first.</div>
       </div>
-      <div id="rows"></div>
+
+      <div id="warn" class="warn"></div>
+
+      <div class="tablewrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:170px;">Date</th>
+              <th style="width:150px;">Work Order</th>
+              <th>Services</th>
+              <th style="width:160px;">Status</th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+
+        <div id="empty" class="empty" style="display:none;">No inquiries found for your email yet.</div>
+      </div>
     </div>
   </div>
 
   <script type="module">
     import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-    const SUPABASE_URL = "https://jgvxmpsjtkezdgygynbl.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpndnhtcHNqdGtlZHpneWd5bmJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0NzgxMjYsImV4cCI6MjA4MTA1NDEyNn0.OCh23RWm8COtxWuumYvKUmfMOLOW01B1zrbtzcr3w6Y";
+    // MUST MATCH YOUR OTHER PAGES
+    const SUPABASE_URL = "https://jgvxmpsjtkezdgyygnybl.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpndnhtcHNqdGtlZHpneWd5bmJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0NzgxMjYsImV4cCI6MjA4MTA1NDEyNn0.OCh23RWm8COtxWuumYvKUmfMOLOW01B1zrbtzcr3w6Y"; // <-- replace with the same anon key used on sns-dashboard
+
     const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     const who = document.getElementById("who");
-    const rowsEl = document.getElementById("rows");
-    const errEl = document.getElementById("err");
-    const okEl = document.getElementById("ok");
+    const rows = document.getElementById("rows");
+    const empty = document.getElementById("empty");
+    const warn = document.getElementById("warn");
+
+    const backBtn = document.getElementById("backBtn");
     const logoutBtn = document.getElementById("logoutBtn");
 
-    const showErr = (m) => { errEl.textContent = m; errEl.style.display = "block"; okEl.style.display = "none"; };
-    const showOk  = (m) => { okEl.textContent = m; okEl.style.display = "block"; errEl.style.display = "none"; };
-    const pretty  = (s) => !s ? "—" : String(s).replace(/_/g," ").replace(/\b\w/g, m => m.toUpperCase());
-
-    const fmtDate = (iso) => {
-      if (!iso) return "—";
-      const d = new Date(iso);
-      return d.toLocaleString(undefined, { year:"numeric", month:"short", day:"2-digit", hour:"2-digit", minute:"2-digit" });
-    };
-
+    backBtn.addEventListener("click", () => window.location.href = "/sns-dashboard/index.html");
     logoutBtn.addEventListener("click", async () => {
       await sb.auth.signOut();
       window.location.href = "/sns-login/index.html";
     });
 
-    async function requireSession() {
-      const { data: { user } } = await sb.auth.getUser();
+    function showWarn(msg) {
+      warn.style.display = "block";
+      warn.textContent = msg;
+    }
+
+    function fmtDate(iso) {
+      try {
+        const d = new Date(iso);
+        return d.toLocaleString(undefined, { year:"numeric", month:"short", day:"2-digit", hour:"2-digit", minute:"2-digit" });
+      } catch {
+        return iso ?? "";
+      }
+    }
+
+    function pill(text) {
+      const span = document.createElement("span");
+      span.className = "pill";
+      span.textContent = text ?? "—";
+      return span;
+    }
+
+    // IMPORTANT: Wait for session restore before deciding "not signed in"
+    async function getUserWithRetry() {
+      // 1) session first
+      const { data: s1 } = await sb.auth.getSession();
+      if (s1?.session?.user) return s1.session.user;
+
+      // 2) tiny wait, try again (session can restore async)
+      await new Promise(r => setTimeout(r, 250));
+      const { data: s2 } = await sb.auth.getSession();
+      if (s2?.session?.user) return s2.session.user;
+
+      // 3) final: getUser() (can trigger refresh internally)
+      const { data: u3 } = await sb.auth.getUser();
+      if (u3?.user) return u3.user;
+
+      return null;
+    }
+
+    async function load() {
+      const user = await getUserWithRetry();
+
       if (!user) {
         who.textContent = "Not signed in";
-        showErr("Please log in to view your inquiry history.");
-        setTimeout(() => window.location.href = "/sns-login/index.html", 700);
-        return null;
+        showWarn("Please log in to view your inquiry history.");
+        // Do NOT bounce back to dashboard. Just stop here.
+        return;
       }
-      who.textContent = user.email || "Signed in";
-      return user;
-    }
 
-    async function loadMyInquiries(user) {
-      // IMPORTANT: this relies on the RLS policy you added (email matches auth.jwt email)
+      who.textContent = user.email;
+
       const { data, error } = await sb
         .from("inquiries")
-        .select("id,created_at,work_order,status,services")
-        .order("created_at", { ascending: false })
-        .limit(200);
+        .select("created_at, wo_number, services, status")
+        .eq("email", user.email)
+        .order("created_at", { ascending: false });
 
       if (error) {
-        showErr("Could not load inquiries: " + error.message);
+        showWarn(error.message || "Failed to load inquiries.");
         return;
       }
 
+      rows.innerHTML = "";
       if (!data || data.length === 0) {
-        rowsEl.innerHTML = `<div class="row"><div class="muted">No inquiries found yet.</div></div>`;
+        empty.style.display = "block";
         return;
       }
 
-      rowsEl.innerHTML = data.map(r => `
-        <div class="row">
-          <div>${fmtDate(r.created_at)}</div>
-          <div><span class="pill">${(r.work_order || "—")}</span></div>
-          <div class="muted">${(r.services || "—")}</div>
-          <div class="act"><span class="pill">${pretty(r.status || "assigned")}</span></div>
-        </div>
-      `).join("");
+      empty.style.display = "none";
+
+      for (const r of data) {
+        const tr = document.createElement("tr");
+
+        const tdDate = document.createElement("td");
+        tdDate.textContent = fmtDate(r.created_at);
+
+        const tdWO = document.createElement("td");
+        tdWO.appendChild(pill(r.wo_number || "—"));
+
+        const tdSvc = document.createElement("td");
+        tdSvc.className = "muted";
+        tdSvc.textContent = r.services || "—";
+
+        const tdStatus = document.createElement("td");
+        tdStatus.appendChild(pill((r.status || "unknown").toString().replaceAll("_", " ")));
+
+        tr.appendChild(tdDate);
+        tr.appendChild(tdWO);
+        tr.appendChild(tdSvc);
+        tr.appendChild(tdStatus);
+
+        rows.appendChild(tr);
+      }
     }
 
-    (async () => {
-      const user = await requireSession();
-      if (!user) return;
-      await loadMyInquiries(user);
-    })();
+    load();
   </script>
 </body>
 </html>
