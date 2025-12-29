@@ -59,6 +59,50 @@
       }
     }
 
+    /* ===== Client Login pill (site-wide) ===== */
+    .client-login-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 36px;
+      padding: 0 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.20);
+      color: #f4f0ff;
+      text-decoration: none;
+      font-size: .82rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      box-shadow: 0 10px 30px rgba(0,0,0,.35);
+      backdrop-filter: blur(10px);
+      transition: transform .15s ease, border-color .15s ease, background .15s ease;
+    }
+
+    .client-login-pill:hover {
+      transform: translateY(-1px);
+      border-color: rgba(255,255,255,.22);
+      background: rgba(0,0,0,.28);
+    }
+
+    .client-login-pill:active {
+      transform: translateY(0);
+    }
+
+    .topnav-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .topnav-row .tabs{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
     /*  MAIN SHELL (big rounded rectangle)  */
     .shell {
       width: 100%;
@@ -494,6 +538,9 @@
     <header>
       <!-- ...logo / name / avatar wrapper EXACTLY like index.html... -->
 
+<div class="topnav-row">
+  <div class="tabs">
+
 <nav class="nav-tabs" aria-label="Primary navigation">
   <a href="/" class="nav-tab"><span>Home</span></a>
 
@@ -505,6 +552,13 @@
 
   <a href="/socials" class="nav-tab"><span>Socials</span></a>
 </nav>
+
+  </div>
+
+  <a class="client-login-pill" href="/sns-login/">Client Login</a>
+</div>
+
+
     </header>
 
     <!-- Experience page content -->
