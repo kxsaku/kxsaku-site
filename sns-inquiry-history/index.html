@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>SNS · Inquiry History</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="/styles.css" />
+  <style>
+    body { margin:0; background: radial-gradient(circle at top, #342067, #050315 55%, #020010); color:#f4f0ff; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial; }
+    .wrap { max-width: 1050px; margin: 0 auto; padding: 3rem 1rem 4rem; }
+    .topbar { display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; margin-bottom: 1.25rem; }
+    h1 { margin:0; letter-spacing:.18em; text-transform:uppercase; font-size: 1.2rem; }
+    .sub { opacity:.8; margin-top:.35rem; }
+    .btn { display:inline-flex; align-items:center; justify-content:center; gap:.5rem; padding:.75rem 1rem; border-radius: 999px; border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.06); color:#f4f0ff; text-decoration:none; cursor:pointer; }
+    .btn:hover { background: rgba(255,255,255,.10); }
+    .card { border-radius: 18px; border: 1px solid rgba(255,255,255,.14); background: rgba(0,0,0,.28); box-shadow: 0 10px 40px rgba(0,0,0,.45); overflow:hidden; }
+    .row { display:grid; grid-template-columns: 160px 120px 1fr 140px; gap: .75rem; padding: .9rem 1rem; border-top: 1px solid rgba(255,255,255,.08); }
+    .row:first-child { border-top: 0; }
+    .hdr { opacity:.7; text-transform:uppercase; letter-spacing:.14em; font-size:.72rem; background: rgba(255,255,255,.04); }
+    .pill { display:inline-flex; padding:.25rem .55rem; border-radius:999px; border:1px solid rgba(255,255,255,.16); background: rgba(255,255,255,.06); font-size:.8rem; opacity:.95; }
+    .muted { opacity:.75; }
+    .err { margin-bottom: 1rem; padding:.85rem 1rem; border-radius: 14px; border:1px solid rgba(255,80,120,.35); background: rgba(120,30,60,.25); display:none; }
+    .ok { margin-bottom: 1rem; padding:.85rem 1rem; border-radius: 14px; border:1px solid rgba(80,255,170,.25); background: rgba(20,70,50,.22); display:none; }
+    .act { text-align:right; }
+    @media (max-width: 860px) {
+      .row { grid-template-columns: 1fr; }
+      .act { text-align:left; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div>
+        <h1>INQUIRY HISTORY</h1>
+        <div class="sub" id="who">Checking session…</div>
+      </div>
+      <div style="display:flex; gap:.6rem; flex-wrap:wrap;">
+        <a class="btn" href="/sns-dashboard/index.html">Back to Dashboard</a>
+        <button class="btn" id="logoutBtn">Logout</button>
+      </div>
+    </div>
+
+    <div class="err" id="err"></div>
+    <div class="ok" id="ok"></div>
+
+    <div class="card" id="list">
+      <div class="row hdr">
+        <div>Date</div>
+        <div>Work Order</div>
+        <div>Services</div>
+        <div class="act">Status</div>
+      </div>
+      <div id="rows"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+    const SUPABASE_URL = "https://jgvxmpsjtkezdgygynbl.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpndnhtcHNqdGtlZHpneWd5bmJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0NzgxMjYsImV4cCI6MjA4MTA1NDEyNn0.OCh23RWm8COtxWuumYvKUmfMOLOW01B1zrbtzcr3w6Y";
+    const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const who = document.getElementById("who");
+    const rowsEl = document.getElementById("rows");
+    const errEl = document.getElementById("err");
+    const okEl = document.getElementById("ok");
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    const showErr = (m) => { errEl.textContent = m; errEl.style.display = "block"; okEl.style.display = "none"; };
+    const showOk  = (m) => { okEl.textContent = m; okEl.style.display = "block"; errEl.style.display = "none"; };
+    const pretty  = (s) => !s ? "—" : String(s).replace(/_/g," ").replace(/\b\w/g, m => m.toUpperCase());
+
+    const fmtDate = (iso) => {
+      if (!iso) return "—";
+      const d = new Date(iso);
+      return d.toLocaleString(undefined, { year:"numeric", month:"short", day:"2-digit", hour:"2-digit", minute:"2-digit" });
+    };
+
+    logoutBtn.addEventListener("click", async () => {
+      await sb.auth.signOut();
+      window.location.href = "/sns-login/index.html";
+    });
+
+    async function requireSession() {
+      const { data: { user } } = await sb.auth.getUser();
+      if (!user) {
+        who.textContent = "Not signed in";
+        showErr("Please log in to view your inquiry history.");
+        setTimeout(() => window.location.href = "/sns-login/index.html", 700);
+        return null;
+      }
+      who.textContent = user.email || "Signed in";
+      return user;
+    }
+
+    async function loadMyInquiries(user) {
+      // IMPORTANT: this relies on the RLS policy you added (email matches auth.jwt email)
+      const { data, error } = await sb
+        .from("inquiries")
+        .select("id,created_at,work_order,status,services")
+        .order("created_at", { ascending: false })
+        .limit(200);
+
+      if (error) {
+        showErr("Could not load inquiries: " + error.message);
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        rowsEl.innerHTML = `<div class="row"><div class="muted">No inquiries found yet.</div></div>`;
+        return;
+      }
+
+      rowsEl.innerHTML = data.map(r => `
+        <div class="row">
+          <div>${fmtDate(r.created_at)}</div>
+          <div><span class="pill">${(r.work_order || "—")}</span></div>
+          <div class="muted">${(r.services || "—")}</div>
+          <div class="act"><span class="pill">${pretty(r.status || "assigned")}</span></div>
+        </div>
+      `).join("");
+    }
+
+    (async () => {
+      const user = await requireSession();
+      if (!user) return;
+      await loadMyInquiries(user);
+    })();
+  </script>
+</body>
+</html>
