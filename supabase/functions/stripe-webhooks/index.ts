@@ -79,15 +79,41 @@ serve(async (req) => {
       if (upErr) throw upErr;
     };
 
-    if (type === "checkout.session.completed") {
-      const s = event.data.object;
-      const customer = s.customer as string | null;
-      const subscription = s.subscription as string | null;
+    case "checkout.session.completed": {
+      const session = event.data.object as Stripe.Checkout.Session;
 
-      if (customer && subscription) {
-        await upsertByCustomer(customer, { stripe_subscription_id: subscription });
+      // Only relevant for subscription checkout
+      if (session.mode !== "subscription") break;
+
+      const userId = session.client_reference_id || session.metadata?.user_id;
+      const email = session.customer_details?.email || session.metadata?.email;
+
+      const customerId =
+        typeof session.customer === "string" ? session.customer : session.customer?.id;
+
+      const subscriptionId =
+        typeof session.subscription === "string"
+          ? session.subscription
+          : session.subscription?.id;
+
+      if (!userId || !customerId || !subscriptionId) {
+        // Not enough info to link to a user row
+        break;
       }
+
+      // Fetch the subscription from Stripe so we get status + current_period_end
+      const sub = await stripe.subscriptions.retrieve(subscriptionId);
+
+      await upsertSubscription(
+        userId,
+        email || "",
+        customerId,
+        sub
+      );
+
+      break;
     }
+
 
     if (
       type === "customer.subscription.created" ||
