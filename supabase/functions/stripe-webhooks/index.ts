@@ -131,31 +131,69 @@ serve(async (req) => {
       const sub = event.data.object;
       const customer = sub.customer as string;
       const status = sub.status as string;
-      const cancelAtPeriodEnd = Boolean(sub.cancel_at_period_end);
-      const currentPeriodEnd = sub.current_period_end
-        ? new Date(Number(sub.current_period_end) * 1000).toISOString()
+      const cancelAtPeriodEnd = !!obj.cancel_at_period_end;
+
+      const itemPeriodEnd = obj.items?.data?.[0]?.current_period_end ?? null;
+      const rawPeriodEnd = obj.current_period_end ?? itemPeriodEnd;
+
+      const currentPeriodEnd = rawPeriodEnd
+        ? new Date(rawPeriodEnd * 1000).toISOString()
         : null;
 
-      await upsertByCustomer(customer, {
-        stripe_subscription_id: sub.id,
-        status,
+      await upsertByCustomer(stripeCustomerId, {
+        status: obj.status,
         cancel_at_period_end: cancelAtPeriodEnd,
         current_period_end: currentPeriodEnd,
       });
+
+
+
+
     }
 
-    if (type === "invoice.payment_succeeded" || type === "invoice.payment_failed") {
+    if (type === "invoice.payment_succeeded" || type === "invoice_payment_succeeded") {
       const inv = event.data.object;
-      const customer = inv.customer as string;
-      const paid = Boolean(inv.paid);
 
-      await upsertByCustomer(customer, {
-        last_payment_status: paid ? "paid" : "failed",
-        // Do NOT overwrite subscription status here.
-        // Subscription status is driven by customer.subscription.* events.
-      });
+      const stripeCustomerId = inv.customer as string | null;
+      if (stripeCustomerId) {
+        const amount =
+          typeof inv.amount_paid === "number" ? inv.amount_paid :
+          typeof inv.amount_due === "number" ? inv.amount_due :
+          null;
 
+        const paidAt =
+          inv.status_transitions?.paid_at
+            ? new Date(inv.status_transitions.paid_at * 1000).toISOString()
+            : null;
+
+        await upsertByCustomer(stripeCustomerId, {
+          last_payment_status: "paid",
+          last_payment_amount: amount != null ? amount / 100 : null,
+          last_payment_currency: (inv.currency ?? null),
+          last_payment_at: paidAt,
+        });
+      }
     }
+
+    if (type === "invoice.payment_failed" || type === "invoice_payment_failed") {
+      const inv = event.data.object;
+
+      const stripeCustomerId = inv.customer as string | null;
+      if (stripeCustomerId) {
+        const amount =
+          typeof inv.amount_due === "number" ? inv.amount_due :
+          typeof inv.amount_paid === "number" ? inv.amount_paid :
+          null;
+
+        await upsertByCustomer(stripeCustomerId, {
+          last_payment_status: "failed",
+          last_payment_amount: amount != null ? amount / 100 : null,
+          last_payment_currency: (inv.currency ?? null),
+          last_payment_at: null,
+        });
+      }
+    }
+
 
     return new Response("ok", { status: 200 });
   } catch (e) {
