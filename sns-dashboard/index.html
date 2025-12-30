@@ -166,7 +166,7 @@ Budget: ${r.budget || ""}
   if (!row) {
     subState.innerHTML = `<div class="muted">No subscription record found yet.</div>`;
     elSubStatus.textContent = "—";
-    elSubPay.textContent = "—";
+    elPayStatus.textContent = "—";
     elPaidAmount.textContent = "—";
     elPeriodEnd.textContent = "—";
     manageBtn.style.display = "none";
@@ -190,7 +190,7 @@ Budget: ${r.budget || ""}
     : "—";
 
   elSubStatus.textContent = statusPretty;
-  elSubPay.textContent = paymentPretty;
+  elPayStatus.textContent = paymentPretty;
   elPaidAmount.textContent = paid;
   elPeriodEnd.textContent = periodEnd;
 
