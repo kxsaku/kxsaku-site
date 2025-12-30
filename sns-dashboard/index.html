@@ -270,7 +270,25 @@ Budget: ${r.budget || ""}
     const user = await requireUser();
     if (user){
       await loadInquiry(user.email);
+      try {
       await loadSubscription(user.id);
+    } catch (e) {
+      console.error("loadSubscription failed:", e);
+
+      // Hard-fail UI so it doesn't sit on Loading forever
+      const elSubLoading = document.getElementById("subLoading");
+      const subState = document.getElementById("subState");
+      const payState = document.getElementById("payState");
+      const paidAmount = document.getElementById("paidAmount");
+      const periodEnd = document.getElementById("periodEnd");
+
+      if (elSubLoading) elSubLoading.textContent = "Subscription unavailable";
+      if (subState) subState.textContent = "Unknown";
+      if (payState) payState.textContent = "—";
+      if (paidAmount) paidAmount.textContent = "—";
+      if (periodEnd) periodEnd.textContent = "—";
+    }
+
     }
   </script>
 </body>
