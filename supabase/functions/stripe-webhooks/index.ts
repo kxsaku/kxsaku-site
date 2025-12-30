@@ -57,6 +57,8 @@ serve(async (req) => {
     const event = JSON.parse(body);
     const type = event.type as string;
 
+    console.log("stripe-webhooks:", type);
+
     const sb = createClient(SB_URL, SB_SERVICE_ROLE_KEY);
 
     const upsertByCustomer = async (stripeCustomerId: string, patch: Record<string, unknown>) => {
@@ -78,6 +80,9 @@ serve(async (req) => {
 
       if (upErr) throw upErr;
     };
+
+    switch (type) {
+
 
     case "checkout.session.completed": {
       const session = event.data.object as Stripe.Checkout.Session;
@@ -114,6 +119,9 @@ serve(async (req) => {
       break;
     }
 
+    default:
+      break;
+    }
 
     if (
       type === "customer.subscription.created" ||
