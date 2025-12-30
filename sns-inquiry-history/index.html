@@ -167,7 +167,7 @@
         tdDate.textContent = fmtDate(r.created_at);
 
         const tdWO = document.createElement("td");
-        tdWO.appendChild(pill(r.wo_number || "—"));
+        tdWO.appendChild(pill(r.work_order || "—"));
 
         const tdSvc = document.createElement("td");
         tdSvc.className = "muted";
