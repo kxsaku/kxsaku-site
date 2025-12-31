@@ -2,470 +2,759 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Saku Network Solutions | Services</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="SNS services: network assessments, Wi-Fi under load fixes, secure office networking, and ongoing support plans." />
+  <title>SNS · Services</title>
 
   <style>
     :root{
-      --bg0:#03010b;
-      --bg1:#060214;
+      --bg0:#050315;
+      --bg1:#07031b;
+      --bg2:#020010;
+
       --ink:#f4f0ff;
-      --muted: rgba(244,240,255,.72);
-      --muted2: rgba(244,240,255,.56);
+      --muted:rgba(244,240,255,.74);
 
-      --stroke: rgba(196, 181, 253, .18);
-      --stroke2: rgba(196, 181, 253, .28);
+      --card:rgba(12,10,28,.62);
+      --card2:rgba(12,10,28,.46);
+      --stroke:rgba(255,255,255,.10);
 
-      --glass: rgba(10, 6, 28, .42);
-      --glass2: rgba(12, 8, 34, .62);
+      --accent:#b67bff;
+      --accent2:#8a5dff;
 
-      --accent:#b37cff;
-      --accent2:#f973e2;
-      --accent3:#5eead4;
+      --shadow: 0 18px 60px rgba(0,0,0,.45);
+      --radius: 22px;
 
-      --max: 1160px;
-
-      --r-xl: 28px;
-      --r-lg: 18px;
-      --r-sm: 14px;
-
-      --shadow: 0 25px 90px rgba(0,0,0,.60);
-      --shadow2: 0 18px 50px rgba(0,0,0,.38);
+      --wrap: 1120px;
     }
 
     *{ box-sizing:border-box; }
-    html, body{ height:100%; }
+    html,body{ height:100%; }
     body{
       margin:0;
-      color: var(--ink);
+      color:var(--ink);
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
-      background: radial-gradient(1200px 800px at 25% 20%, rgba(179,124,255,.18), transparent 60%),
-                  radial-gradient(900px 650px at 85% 10%, rgba(94,234,212,.10), transparent 55%),
-                  radial-gradient(1100px 900px at 70% 80%, rgba(249,115,226,.12), transparent 55%),
-                  linear-gradient(180deg, var(--bg1), var(--bg0));
+      background:
+        radial-gradient(1200px 700px at 30% 10%, rgba(182,123,255,.18), transparent 60%),
+        radial-gradient(900px 600px at 85% 20%, rgba(124,92,255,.14), transparent 60%),
+        radial-gradient(900px 700px at 50% 120%, rgba(182,123,255,.10), transparent 60%),
+        linear-gradient(180deg, #050315 0%, #060318 35%, #030012 100%);
       overflow-x:hidden;
     }
 
-    /* Full-bleed animated background */
+    /* animated “Nexros-like” moving veil */
     .bg{
-      position: fixed;
-      inset: 0;
-      z-index: -2;
+      position:fixed;
+      inset:0;
+      z-index:-3;
       pointer-events:none;
-      overflow:hidden;
     }
-    .bg .glow{
+    .bg::before{
+      content:"";
       position:absolute;
-      inset:-20%;
+      inset:-30%;
       background:
-        radial-gradient(circle at 20% 25%, rgba(179,124,255,.22), transparent 55%),
-        radial-gradient(circle at 85% 15%, rgba(94,234,212,.12), transparent 55%),
-        radial-gradient(circle at 60% 80%, rgba(249,115,226,.14), transparent 55%);
-      filter: blur(10px);
-      animation: glowFloat 16s ease-in-out infinite alternate;
+        radial-gradient(900px 600px at 20% 25%, rgba(182,123,255,.20), transparent 62%),
+        radial-gradient(800px 600px at 85% 30%, rgba(124,92,255,.14), transparent 64%),
+        radial-gradient(700px 500px at 50% 75%, rgba(182,123,255,.10), transparent 62%);
+      filter: blur(22px);
       opacity:.9;
+      animation: drift 12s ease-in-out infinite alternate;
+      transform: translate3d(0,0,0);
     }
-    @keyframes glowFloat{
-      from{ transform: translate3d(0,0,0) scale(1); }
-      to{ transform: translate3d(-18px, 12px, 0) scale(1.03); }
+    @keyframes drift{
+      from{ transform: translate(-1.5%, -1.0%) scale(1.02); }
+      to{ transform: translate(1.5%, 1.0%) scale(1.06); }
     }
 
-    .bg .lines{
+    /* subtle diagonal texture like the template */
+    .bg::after{
+      content:"";
       position:absolute;
       inset:0;
       background:
+        linear-gradient(135deg, rgba(255,255,255,.06), transparent 35%),
         repeating-linear-gradient(
           135deg,
-          rgba(255,255,255,.045) 0px,
-          rgba(255,255,255,.045) 1px,
+          rgba(255,255,255,.05) 0px,
+          rgba(255,255,255,.05) 1px,
           transparent 1px,
-          transparent 90px
+          transparent 14px
         );
-      opacity:.18;
-      animation: lineDrift 22s linear infinite;
-    }
-    @keyframes lineDrift{
-      from{ transform: translate3d(0,0,0); }
-      to{ transform: translate3d(-140px, 140px, 0); }
-    }
-
-    .bg .dots{
-      position:absolute;
-      inset:0;
-      background-image:
-        radial-gradient(rgba(255,255,255,.20) 1px, transparent 1px),
-        radial-gradient(rgba(255,255,255,.10) 1px, transparent 1px);
-      background-size: 140px 140px, 220px 220px;
-      background-position: 0 0, 40px 80px;
-      opacity:.16;
-      animation: dotFloat 28s ease-in-out infinite alternate;
-    }
-    @keyframes dotFloat{
-      from{ transform: translate3d(0,0,0); }
-      to{ transform: translate3d(18px, -10px, 0); }
-    }
-
-    .bg .vignette{
-      position:absolute;
-      inset:0;
-      background: radial-gradient(circle at 50% 0%, rgba(0,0,0,.08), rgba(0,0,0,.64) 62%, rgba(0,0,0,.78));
-      z-index: 1;
+      opacity:.10;
+      mix-blend-mode: overlay;
     }
 
     .wrap{
-      width: min(var(--max), calc(100% - 2rem));
+      max-width: var(--wrap);
       margin: 0 auto;
+      padding: 0 1.1rem;
     }
 
-    /* Top nav */
+    /* Top nav (matches home) */
     .topnav{
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      padding: 1.15rem 0;
-      backdrop-filter: blur(14px);
-      background: linear-gradient(180deg, rgba(3,1,11,.72), rgba(3,1,11,.18));
-      border-bottom: 1px solid rgba(196,181,253,.10);
+      position:sticky;
+      top:0;
+      z-index:50;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      background: rgba(5,3,21,.58);
+      border-bottom: 1px solid rgba(255,255,255,.06);
     }
-
     .navrow{
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap: 1rem;
+      gap:1rem;
+      padding: 1.1rem 0;
     }
-
     .brand{
       display:flex;
       align-items:center;
       gap:.75rem;
-      min-width: 240px;
+      min-width: 270px;
     }
-    .mark{
-      width: 42px;
-      height: 42px;
-      border-radius: 14px;
-      display: grid;
-      place-items: center;
-      box-shadow: 0 18px 50px rgba(0,0,0,.45);
+    .brand .mark{
+      width: 40px; height: 40px;
+      border-radius: 12px;
+      background: rgba(182,123,255,.10);
+      border: 1px solid rgba(255,255,255,.10);
+      box-shadow: 0 14px 40px rgba(0,0,0,.35);
+      display:flex;
+      align-items:center;
+      justify-content:center;
       overflow:hidden;
     }
-    .mark img{
-      width: 100%;
-      height: 100%;
+    .brand .mark img{
+      width: 28px;
+      height: 28px;
       object-fit: contain;
-      border-radius: 12px;
       display:block;
+      filter: drop-shadow(0 10px 22px rgba(182,123,255,.25));
     }
-
     .brand strong{
       display:block;
-      font-size:.92rem;
       letter-spacing:.14em;
-      text-transform: uppercase;
-      line-height:1.05;
+      font-size:.86rem;
     }
     .brand span{
       display:block;
-      color: var(--muted2);
-      font-size:.84rem;
-      line-height:1.1;
-      margin-top:.15rem;
+      color: rgba(244,240,255,.65);
+      font-size:.82rem;
+      margin-top:.14rem;
     }
 
     .navlinks{
       display:flex;
-      justify-content:center;
       align-items:center;
-      gap:.6rem;
-      flex-wrap: nowrap;
-      white-space: nowrap;
+      gap: .55rem;
+      flex-wrap: wrap;
+      justify-content:center;
     }
     .navlinks a{
       text-decoration:none;
-      color: var(--muted);
-      font-size:.78rem;
-      letter-spacing:.14em;
-      text-transform: uppercase;
+      color: rgba(244,240,255,.72);
       padding: .55rem .85rem;
       border-radius: 999px;
       border: 1px solid transparent;
-      transition: transform .14s ease, background .14s ease, border-color .14s ease, color .14s ease;
-      will-change: transform;
+      letter-spacing:.12em;
+      font-size: .78rem;
+      text-transform: uppercase;
+      transition: transform .15s ease, background .15s ease, border-color .15s ease, color .15s ease;
     }
     .navlinks a:hover{
+      color: rgba(244,240,255,.95);
+      background: rgba(182,123,255,.10);
+      border-color: rgba(255,255,255,.10);
       transform: translateY(-1px);
-      background: rgba(196,181,253,.08);
-      border-color: rgba(196,181,253,.14);
-      color: var(--ink);
     }
     .navlinks a.active{
-      background: rgba(179,124,255,.16);
-      border-color: rgba(179,124,255,.26);
-      color: var(--ink);
-    }
-
-    .btn{
-      position: relative;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      height: 40px;
-      padding: 0 16px;
-      border-radius: 999px;
-      border: 1px solid rgba(196,181,253,.18);
-      background: rgba(0,0,0,.18);
-      color: var(--ink);
-      text-decoration:none;
-      font-weight: 800;
-      font-size: .78rem;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-      box-shadow: 0 12px 40px rgba(0,0,0,.32);
-      backdrop-filter: blur(10px);
-      transition: transform .14s ease, border-color .14s ease, filter .14s ease, background .14s ease;
-      will-change: transform;
-      overflow:hidden;
-      white-space: nowrap;
-    }
-    .btn::after{
-      content:"";
-      position:absolute;
-      inset:-40% -60%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,.18), transparent);
-      transform: translateX(-60%) rotate(10deg);
-      opacity: 0;
-      transition: transform .55s ease, opacity .18s ease;
-    }
-    .btn:hover{
-      transform: translateY(-2px);
-      border-color: rgba(196,181,253,.30);
-      filter: brightness(1.06);
-    }
-    .btn:hover::after{
-      opacity: 1;
-      transform: translateX(60%) rotate(10deg);
-    }
-    .btn:active{ transform: translateY(0); }
-    .btn.primary{
-      background: linear-gradient(90deg, rgba(179,124,255,.92), rgba(249,115,226,.72));
-      border-color: rgba(255,255,255,.18);
+      color: rgba(244,240,255,.95);
+      background: rgba(182,123,255,.16);
+      border-color: rgba(255,255,255,.12);
     }
 
     .actions{
       display:flex;
       gap:.65rem;
+      align-items:center;
       justify-content:flex-end;
-      min-width: 240px;
-      flex-wrap: wrap;
+      min-width: 170px;
     }
 
-    /* Page layout */
-    .section{ padding: 4.4rem 0; }
-
-    /* Services hero (no particles) */
-    .hero{
-      padding: 5.2rem 0 2.6rem;
-      text-align:center;
-    }
-
-    .hero-mark{
-      width: 56px;
-      height: 56px;
-      margin: 0 auto 1.2rem;
-      border-radius: 18px;
-      display: grid;
-      place-items: center;
-      position: relative;
-      box-shadow: 0 22px 80px rgba(0,0,0,.55);
-      overflow:hidden;
-    }
-    .hero-mark img{
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      border-radius: 14px;
-      display:block;
-    }
-    .hero-mark::after{
-      content:"";
-      position:absolute;
-      inset:-10px;
-      border-radius: 22px;
-      background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.18), transparent 60%);
-      filter: blur(8px);
-      opacity: .28;
-      pointer-events:none;
-    }
-
-    .eyebrow{
+    .btn{
       display:inline-flex;
       align-items:center;
-      gap:.5rem;
-      padding:.35rem .75rem;
-      border-radius: 999px;
-      border: 1px solid rgba(196,181,253,.18);
-      background: rgba(196,181,253,.06);
-      color: var(--muted);
-      font-size:.74rem;
-      letter-spacing:.14em;
-      text-transform: uppercase;
-    }
-
-    h1{
-      margin: 1.2rem auto .9rem;
-      max-width: 22ch;
-      font-size: clamp(2.2rem, 4.6vw, 3.4rem);
-      line-height: 1.06;
-      letter-spacing: .01em;
-    }
-    .hero h1{
-      background: linear-gradient(180deg,
-        rgba(179,124,255,.62),
-        rgba(244,240,255,.42) 60%,
-        rgba(249,115,226,.30)
-      );
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-
-    .lede{
-      margin: 0 auto;
-      max-width: 86ch;
-      color: var(--muted);
-      font-size: 1.05rem;
-      line-height: 1.75;
-    }
-
-    .cta{
-      margin-top: 1.6rem;
-      display:flex;
       justify-content:center;
-      gap:.8rem;
-      flex-wrap: wrap;
-    }
-
-    /* Cards + grids */
-    .grid3{
-      display:grid;
-      grid-template-columns: repeat(3, minmax(0,1fr));
-      gap: 1rem;
-      margin-top: 2.6rem;
-      align-items: stretch;
-    }
-    .grid2{
-      display:grid;
-      grid-template-columns: repeat(2, minmax(0,1fr));
-      gap: 1rem;
-      margin-top: 1rem;
-      align-items: stretch;
-    }
-
-    .card{
-      border-radius: var(--r-xl);
-      border: 1px solid rgba(196,181,253,.16);
-      background: linear-gradient(180deg, rgba(10,6,28,.52), rgba(10,6,28,.30));
-      box-shadow: var(--shadow2);
-      padding: 1.35rem 1.25rem;
-      text-align:left;
-      transition: transform .16s ease, border-color .16s ease, filter .16s ease;
+      gap:.5rem;
+      padding: .72rem 1.05rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.14);
+      color: rgba(244,240,255,.92);
+      text-decoration:none;
+      font-weight: 700;
+      letter-spacing:.12em;
+      font-size:.78rem;
+      text-transform: uppercase;
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);
+      transition: transform .15s ease, background .15s ease, border-color .15s ease, filter .15s ease;
       will-change: transform;
     }
-    .card:hover{
-      transform: translateY(-3px);
-      border-color: rgba(196,181,253,.26);
-      filter: brightness(1.03);
+    .btn:hover{
+      transform: translateY(-2px);
+      border-color: rgba(255,255,255,.16);
+      background: rgba(182,123,255,.10);
+      filter: brightness(1.05);
     }
+    .btn.primary{
+      background: linear-gradient(90deg, rgba(182,123,255,.95), rgba(138,93,255,.95));
+      border-color: rgba(255,255,255,.18);
+      color: #12061f;
+      box-shadow: 0 18px 60px rgba(182,123,255,.20);
+    }
+    .btn.primary:hover{
+      background: linear-gradient(90deg, rgba(182,123,255,1), rgba(138,93,255,1));
+      filter:none;
+    }
+
+    /* Sections */
+    .section{
+      padding: 4.2rem 0;
+      position:relative;
+    }
+    .section.tight{ padding: 3.2rem 0; }
 
     .kicker{
-      color: var(--muted2);
-      font-size: .74rem;
-      letter-spacing: .14em;
+      display:inline-flex;
+      align-items:center;
+      gap:.55rem;
+      padding: .42rem .8rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(182,123,255,.08);
+      color: rgba(244,240,255,.82);
+      letter-spacing:.16em;
+      font-size:.72rem;
       text-transform: uppercase;
-      margin: 0 0 .55rem;
+    }
+    .kicker .dot{
+      width: 8px; height: 8px;
+      border-radius: 999px;
+      background: rgba(182,123,255,.9);
+      box-shadow: 0 0 0 6px rgba(182,123,255,.15);
+    }
+
+    /* Hero (different from home, more “template-like”) */
+    .hero{
+      padding: 4.5rem 0 2.2rem;
+    }
+    .heroGrid{
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 2.2rem;
+      align-items:center;
+    }
+    .hero h1{
+      margin:.9rem 0 .8rem;
+      font-size: clamp(2.1rem, 4.5vw, 3.4rem);
+      line-height: 1.06;
+      letter-spacing: -.02em;
+    }
+    .hero h1 .grad{
+      background: linear-gradient(90deg, rgba(244,240,255,.95), rgba(182,123,255,.78));
+      -webkit-background-clip: text;
+      background-clip:text;
+      color: transparent;
+    }
+    .hero p{
+      margin:0;
+      max-width: 58ch;
+      color: rgba(244,240,255,.74);
+      line-height: 1.65;
+      font-size: 1.02rem;
+    }
+    .heroCtas{
+      display:flex;
+      gap:.85rem;
+      margin-top: 1.4rem;
+      flex-wrap:wrap;
+    }
+
+    /* Right-side “animated” showcase panel */
+    .showcase{
+      border-radius: var(--radius);
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(12,10,28,.52);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      position:relative;
+      min-height: 360px;
+      isolation:isolate;
+    }
+    .showcase::before{
+      content:"";
+      position:absolute;
+      inset:-30%;
+      background:
+        radial-gradient(520px 380px at 25% 25%, rgba(182,123,255,.28), transparent 55%),
+        radial-gradient(520px 380px at 75% 55%, rgba(138,93,255,.18), transparent 55%),
+        radial-gradient(520px 380px at 55% 85%, rgba(182,123,255,.12), transparent 55%);
+      filter: blur(18px);
+      opacity:.95;
+      animation: drift 10s ease-in-out infinite alternate;
+      z-index:-1;
+    }
+    .showcase::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background: linear-gradient(180deg, rgba(0,0,0,.15), rgba(0,0,0,.55));
+      z-index:-1;
+    }
+
+    .showTop{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding: 1.05rem 1.1rem;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      gap:1rem;
+    }
+    .chipRow{
+      display:flex;
+      gap:.5rem;
+      flex-wrap:wrap;
+    }
+    .chip{
+      padding: .42rem .72rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.12);
+      color: rgba(244,240,255,.78);
+      font-size: .72rem;
+      letter-spacing:.12em;
+      text-transform: uppercase;
+      white-space:nowrap;
+    }
+    .pulse{
+      width: 10px; height: 10px;
+      border-radius: 999px;
+      background: rgba(182,123,255,.9);
+      box-shadow: 0 0 0 0 rgba(182,123,255,.45);
+      animation: pulse 1.6s ease-out infinite;
+    }
+    @keyframes pulse{
+      0%{ box-shadow: 0 0 0 0 rgba(182,123,255,.45); }
+      100%{ box-shadow: 0 0 0 14px rgba(182,123,255,0); }
+    }
+
+    .showBody{
+      padding: 1.1rem;
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: .85rem;
+    }
+
+    .miniCard{
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(12,10,28,.55);
+      padding: .9rem .95rem;
+      display:flex;
+      align-items:flex-start;
+      gap: .8rem;
+      transition: transform .18s ease, border-color .18s ease, background .18s ease;
+    }
+    .miniCard:hover{
+      transform: translateY(-2px);
+      border-color: rgba(255,255,255,.14);
+      background: rgba(182,123,255,.07);
+    }
+    .ico{
+      width: 42px; height: 42px;
+      border-radius: 14px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(182,123,255,.10);
+      flex: 0 0 auto;
+      position:relative;
+      overflow:hidden;
+    }
+    .ico::before{
+      content:"";
+      position:absolute;
+      inset:-50%;
+      background: radial-gradient(circle at 40% 40%, rgba(182,123,255,.55), transparent 55%);
+      filter: blur(10px);
+      opacity:.8;
+    }
+    .ico svg{ width: 22px; height: 22px; opacity:.95; z-index:1; }
+
+    .miniCard h4{
+      margin:0;
+      font-size: .95rem;
+      letter-spacing:.06em;
+      text-transform: uppercase;
+    }
+    .miniCard p{
+      margin:.35rem 0 0;
+      color: rgba(244,240,255,.70);
+      line-height: 1.55;
+      font-size:.92rem;
+    }
+
+    /* “Gallery strip” like template (but ours) */
+    .strip{
+      padding: 1.35rem 0 0;
+    }
+    .marquee{
+      border-top: 1px solid rgba(255,255,255,.06);
+      border-bottom: 1px solid rgba(255,255,255,.06);
+      background: rgba(0,0,0,.10);
+      overflow:hidden;
+      position:relative;
+    }
+    .marqueeTrack{
+      display:flex;
+      gap: 1.4rem;
+      padding: 1.05rem 0;
+      width: max-content;
+      animation: roll 26s linear infinite;
+    }
+    @keyframes roll{
+      from{ transform: translateX(0); }
+      to{ transform: translateX(-50%); }
+    }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:.6rem;
+      padding:.55rem .9rem;
+      border-radius: 999px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(12,10,28,.45);
+      color: rgba(244,240,255,.80);
+      font-size: .75rem;
+      letter-spacing:.14em;
+      text-transform: uppercase;
+      white-space:nowrap;
+    }
+    .badge b{
+      color: rgba(244,240,255,.92);
+      letter-spacing:.10em;
+    }
+
+    /* Services grid (main body) */
+    .grid3{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-top: 1.8rem;
+    }
+    .card{
+      border-radius: var(--radius);
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(12,10,28,.52);
+      box-shadow: var(--shadow);
+      padding: 1.35rem 1.25rem;
+      position:relative;
+      overflow:hidden;
+      transition: transform .18s ease, border-color .18s ease, background .18s ease;
+      min-height: 210px;
+    }
+    .card:hover{
+      transform: translateY(-4px);
+      border-color: rgba(255,255,255,.14);
+      background: rgba(182,123,255,.06);
+    }
+    .card .top{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:1rem;
+    }
+    .pill{
+      display:inline-flex;
+      padding:.42rem .72rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.12);
+      color: rgba(244,240,255,.78);
+      font-size: .72rem;
+      letter-spacing:.14em;
+      text-transform: uppercase;
+      white-space:nowrap;
     }
     .card h3{
-      margin:0;
-      font-size: 1.05rem;
-      letter-spacing: .02em;
+      margin: .9rem 0 .5rem;
+      font-size: 1.06rem;
+      letter-spacing:.06em;
+      text-transform: uppercase;
     }
     .card p{
-      margin: .65rem 0 0;
-      color: var(--muted);
-      line-height: 1.7;
+      margin:0;
+      color: rgba(244,240,255,.70);
+      line-height: 1.6;
       font-size: .98rem;
     }
+    .card .ctaLink{
+      display:inline-flex;
+      margin-top: 1.05rem;
+      color: rgba(244,240,255,.88);
+      text-decoration:none;
+      font-weight: 800;
+      letter-spacing:.12em;
+      text-transform: uppercase;
+      font-size:.78rem;
+      opacity:.9;
+      gap:.4rem;
+      align-items:center;
+    }
+    .card .ctaLink:hover{ opacity:1; }
+    .arrow{
+      display:inline-block;
+      transform: translateY(-1px);
+      transition: transform .15s ease;
+    }
+    .card:hover .arrow{
+      transform: translate(2px,-1px);
+    }
 
-    .bullets{
-      margin: .85rem 0 0;
+    /* Process timeline */
+    .timeline{
+      margin-top: 1.8rem;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      align-items:start;
+    }
+    .step{
+      border-radius: var(--radius);
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(12,10,28,.50);
+      box-shadow: var(--shadow);
+      padding: 1.25rem 1.25rem;
+      position:relative;
+      overflow:hidden;
+    }
+    .stepNum{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width: 38px; height: 38px;
+      border-radius: 14px;
+      background: rgba(182,123,255,.12);
+      border: 1px solid rgba(255,255,255,.10);
+      font-weight: 900;
+      color: rgba(244,240,255,.92);
+      box-shadow: 0 16px 40px rgba(0,0,0,.25);
+    }
+    .step h4{
+      margin: .85rem 0 .45rem;
+      letter-spacing:.08em;
+      text-transform: uppercase;
+      font-size: .98rem;
+    }
+    .step p{
+      margin:0;
+      color: rgba(244,240,255,.70);
+      line-height:1.65;
+    }
+
+    /* Pricing */
+    .pricing{
+      margin-top: 1.8rem;
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+    .price{
+      border-radius: var(--radius);
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(12,10,28,.52);
+      box-shadow: var(--shadow);
+      padding: 1.35rem 1.25rem;
+      position:relative;
+      overflow:hidden;
+      min-height: 320px;
+      transition: transform .18s ease, border-color .18s ease, background .18s ease;
+    }
+    .price:hover{
+      transform: translateY(-4px);
+      border-color: rgba(255,255,255,.14);
+      background: rgba(182,123,255,.06);
+    }
+    .price.featured{
+      border-color: rgba(182,123,255,.28);
+      box-shadow: 0 24px 80px rgba(182,123,255,.16);
+    }
+    .price h3{
+      margin: .9rem 0 .35rem;
+      letter-spacing:.08em;
+      text-transform: uppercase;
+      font-size: 1.02rem;
+    }
+    .amount{
+      font-size: 2.1rem;
+      font-weight: 950;
+      letter-spacing: -.02em;
+      margin: .65rem 0 .9rem;
+      background: linear-gradient(90deg, rgba(244,240,255,.95), rgba(182,123,255,.78));
+      -webkit-background-clip:text;
+      background-clip:text;
+      color: transparent;
+    }
+    .price ul{
+      margin: 0;
       padding-left: 1.05rem;
-      color: var(--muted);
+      color: rgba(244,240,255,.72);
+      line-height: 1.75;
+    }
+    .price .foot{
+      margin-top: 1.1rem;
+      color: rgba(244,240,255,.62);
+      font-size: .92rem;
+      line-height:1.55;
+    }
+
+    /* FAQ */
+    .faq{
+      margin-top: 1.8rem;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    details{
+      border-radius: var(--radius);
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(12,10,28,.50);
+      box-shadow: var(--shadow);
+      padding: 1rem 1.1rem;
+    }
+    summary{
+      cursor:pointer;
+      list-style:none;
+      font-weight: 900;
+      letter-spacing:.06em;
+      text-transform: uppercase;
+      font-size: .92rem;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:1rem;
+    }
+    summary::-webkit-details-marker{ display:none; }
+    .caret{
+      width: 28px; height: 28px;
+      border-radius: 10px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(182,123,255,.08);
+      transition: transform .15s ease;
+      flex: 0 0 auto;
+    }
+    details[open] .caret{ transform: rotate(90deg); }
+    details p{
+      margin: .85rem 0 0;
+      color: rgba(244,240,255,.72);
       line-height: 1.65;
     }
-    .bullets li + li{ margin-top: .35rem; }
 
-    /* Section headings */
-    .sectionTitle{
+    /* CTA panel */
+    .ctaPanel{
+      border-radius: calc(var(--radius) + 6px);
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(12,10,28,.52);
+      box-shadow: var(--shadow);
+      padding: 1.65rem 1.35rem;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 1rem;
+      overflow:hidden;
+      position:relative;
+    }
+    .ctaPanel::before{
+      content:"";
+      position:absolute;
+      inset:-35%;
+      background:
+        radial-gradient(520px 380px at 35% 45%, rgba(182,123,255,.26), transparent 60%),
+        radial-gradient(520px 380px at 75% 55%, rgba(138,93,255,.18), transparent 60%);
+      filter: blur(18px);
+      opacity:.9;
+      z-index:-1;
+    }
+    .ctaPanel h2{
       margin:0;
-      font-size: .92rem;
-      letter-spacing: .16em;
+      font-size: 1.35rem;
+      letter-spacing:.06em;
       text-transform: uppercase;
-      color: var(--muted2);
+    }
+    .ctaPanel p{
+      margin:.55rem 0 0;
+      color: rgba(244,240,255,.70);
+      line-height: 1.6;
+      max-width: 60ch;
+    }
+    .ctaPanel .right{
+      display:flex;
+      gap:.75rem;
+      flex-wrap:wrap;
+      justify-content:flex-end;
     }
 
-    .sectionH2{
-      margin:.6rem 0 0;
-      font-size: 1.6rem;
-      letter-spacing: .01em;
-    }
-
-    /* Footer */
     footer{
-      padding: 3.5rem 0 2.5rem;
-      border-top: 1px solid rgba(196,181,253,.10);
-      color: var(--muted2);
-      text-align:center;
+      padding: 2.8rem 0 3.4rem;
+      color: rgba(244,240,255,.55);
+      border-top: 1px solid rgba(255,255,255,.06);
+      background: rgba(0,0,0,.08);
     }
     footer a{
-      color: var(--muted);
+      color: rgba(244,240,255,.72);
       text-decoration:none;
-      border-bottom: 1px solid rgba(196,181,253,.22);
+      border-bottom: 1px solid rgba(244,240,255,.18);
+      padding-bottom:2px;
     }
-    footer a:hover{
-      color: var(--ink);
-      border-bottom-color: rgba(196,181,253,.38);
+    footer a:hover{ color: rgba(244,240,255,.92); }
+
+    /* reveal animation */
+    .reveal{
+      opacity:0;
+      transform: translateY(14px);
+      transition: opacity .55s ease, transform .55s ease;
+    }
+    .reveal.on{
+      opacity:1;
+      transform: translateY(0);
     }
 
-    /* reveal */
-    .reveal{ opacity:0; transform: translateY(16px); transition: opacity .60s ease, transform .60s cubic-bezier(.2,.9,.2,1); }
-    .reveal.in{ opacity:1; transform: translateY(0); }
-
+    /* responsive */
     @media (max-width: 980px){
-      .navrow{ align-items:flex-start; }
-      .navlinks{ flex-wrap: wrap; white-space: normal; }
-      .brand{ min-width: unset; }
-      .actions{ min-width: unset; }
+      .heroGrid{ grid-template-columns: 1fr; }
+      .showcase{ min-height: 320px; }
       .grid3{ grid-template-columns: 1fr; }
-      .grid2{ grid-template-columns: 1fr; }
+      .timeline{ grid-template-columns: 1fr; }
+      .pricing{ grid-template-columns: 1fr; }
+      .faq{ grid-template-columns: 1fr; }
+      .actions{ min-width:auto; }
+      .brand{ min-width:auto; }
     }
 
     @media (prefers-reduced-motion: reduce){
-      .bg .glow, .bg .lines, .bg .dots{ animation:none; }
-      .btn, .card, .navlinks a{ transition:none; }
-      .reveal{ opacity:1; transform:none; transition:none; }
+      .bg::before, .marqueeTrack, .pulse{ animation:none !important; }
+      .btn, .card, .miniCard, .price{ transition:none !important; }
+      .reveal{ opacity:1 !important; transform:none !important; }
     }
   </style>
 </head>
 
 <body>
-  <div class="bg">
-    <div class="glow"></div>
-    <div class="lines"></div>
-    <div class="dots"></div>
-    <div class="vignette"></div>
-  </div>
+  <div class="bg" aria-hidden="true"></div>
 
   <!-- Top Nav -->
   <header class="topnav">
@@ -497,159 +786,362 @@
   </header>
 
   <main>
-    <!-- Services Hero -->
-    <section class="hero">
+    <!-- HERO -->
+    <section class="hero section tight">
       <div class="wrap">
-        <div class="hero-mark reveal">
-          <img src="/assets/sns-logo-purple.png" alt="Saku Network Solutions logo">
+        <div class="heroGrid">
+          <div>
+            <div class="kicker reveal">
+              <span class="dot"></span>
+              Services built for stability, not guesswork
+            </div>
+
+            <h1 class="reveal">
+              Business networking that stays <span class="grad">fast, secure, and managed</span>.
+            </h1>
+
+            <p class="reveal">
+              The SNS Services page is designed to show what you get, how we work, and where we start.
+              Clean installs. Documentation-first. Security-minded configuration. No clutter.
+            </p>
+
+            <div class="heroCtas reveal">
+              <a class="btn primary" href="/sns-inquiry/">Start an Inquiry</a>
+              <a class="btn" href="#services">View Service Modules</a>
+            </div>
+          </div>
+
+          <aside class="showcase reveal" aria-label="Service Overview Panel">
+            <div class="showTop">
+              <div class="chipRow">
+                <span class="chip"><span class="pulse"></span>&nbsp;Live readiness</span>
+                <span class="chip">Wi-Fi under load</span>
+                <span class="chip">Secure segmentation</span>
+              </div>
+              <span class="chip">SNS / SERVICES</span>
+            </div>
+
+            <div class="showBody">
+              <div class="miniCard">
+                <div class="ico" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M4 12h16M12 4v16" stroke="white" stroke-opacity=".9" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M7 7l10 10" stroke="white" stroke-opacity=".35" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                </div>
+                <div>
+                  <h4>Assessment First</h4>
+                  <p>We start with an environment + network survey so fixes are precise, not random upgrades.</p>
+                </div>
+              </div>
+
+              <div class="miniCard">
+                <div class="ico" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M7 17l10-10" stroke="white" stroke-opacity=".9" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M7 7h10v10" stroke="white" stroke-opacity=".35" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                </div>
+                <div>
+                  <h4>Clean Deployments</h4>
+                  <p>Hardware, cabling, VLANs, and configs implemented to enterprise habits — clean and repeatable.</p>
+                </div>
+              </div>
+
+              <div class="miniCard">
+                <div class="ico" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M12 3l8 4v6c0 5-3.5 8.5-8 9-4.5-.5-8-4-8-9V7l8-4Z"
+                      stroke="white" stroke-opacity=".9" stroke-width="2" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                <div>
+                  <h4>Security-Minded</h4>
+                  <p>Guest isolation, segmentation, least privilege, and monitoring options — scaled to your business.</p>
+                </div>
+              </div>
+            </div>
+          </aside>
         </div>
+      </div>
 
-        <div class="eyebrow reveal">Services • Small office IT • Los Angeles</div>
+      <div class="strip">
+        <div class="marquee" aria-hidden="true">
+          <div class="wrap">
+            <div class="marqueeTrack">
+              <span class="badge"><b>Wi-Fi</b> Coverage + Under-Load Stability</span>
+              <span class="badge"><b>Network</b> Segmentation (VLANs)</span>
+              <span class="badge"><b>Security</b> Guest Isolation + Policy</span>
+              <span class="badge"><b>Hardware</b> Right-Sized Upgrades</span>
+              <span class="badge"><b>Documentation</b> Diagrams + Notes</span>
+              <span class="badge"><b>Support</b> Ongoing Admin Options</span>
 
-        <h1 class="reveal">Clear scope. Clean installs. Networks that stay stable.</h1>
-
-        <p class="lede reveal">
-          SNS is built for small businesses that need enterprise-style execution without the enterprise overhead.
-          Everything starts with getting the environment right, validating the bottleneck, and delivering a plan you can trust.
-        </p>
-
-        <div class="cta reveal">
-          <a class="btn primary" href="/sns-inquiry/">Start an Inquiry</a>
-          <a class="btn" href="/experience/">See Credibility</a>
+              <!-- duplicate for seamless scroll -->
+              <span class="badge"><b>Wi-Fi</b> Coverage + Under-Load Stability</span>
+              <span class="badge"><b>Network</b> Segmentation (VLANs)</span>
+              <span class="badge"><b>Security</b> Guest Isolation + Policy</span>
+              <span class="badge"><b>Hardware</b> Right-Sized Upgrades</span>
+              <span class="badge"><b>Documentation</b> Diagrams + Notes</span>
+              <span class="badge"><b>Support</b> Ongoing Admin Options</span>
+            </div>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- Core Services -->
-    <section class="section">
+    <!-- SERVICES -->
+    <section id="services" class="section">
       <div class="wrap">
-        <div class="reveal">
-          <div class="sectionTitle">Core services</div>
-          <div class="sectionH2">What SNS delivers</div>
+        <div class="kicker reveal">
+          <span class="dot"></span>
+          Service modules
         </div>
+
+        <h2 class="reveal" style="margin:.9rem 0 .8rem; font-size:1.6rem; letter-spacing:.06em; text-transform:uppercase;">
+          What SNS can do for your network
+        </h2>
+
+        <p class="reveal" style="margin:0; color:rgba(244,240,255,.70); line-height:1.7; max-width:76ch;">
+          This is intentionally simple. Pick a starting point, and we build the plan from facts on-site.
+          (You can swap these descriptions anytime.)
+        </p>
 
         <div class="grid3">
           <article class="card reveal">
-            <div class="kicker">Step 1</div>
-            <h3>Network Assessment</h3>
-            <p>
-              On-site survey + a written plan. I identify the failure points (coverage, interference, uplink, switching, layout)
-              and map a clean path to stability.
-            </p>
-            <ul class="bullets">
-              <li>Physical + cabling review (rack/IDF, pathways, patching)</li>
-              <li>Wi-Fi coverage + under-load checks</li>
-              <li>Inventory + topology snapshot</li>
-              <li>Action plan: priority fixes + budget ranges</li>
-            </ul>
+            <div class="top">
+              <span class="pill">Starting point</span>
+              <span class="pill">On-site</span>
+            </div>
+            <h3>Environment + Network Assessment</h3>
+            <p>Survey the physical layout, wiring, equipment, coverage, and current configuration. You get a clear scope and plan.</p>
+            <a class="ctaLink" href="/sns-inquiry/">Start with assessment <span class="arrow">→</span></a>
           </article>
 
           <article class="card reveal">
-            <div class="kicker">Most common</div>
+            <div class="top">
+              <span class="pill">Wi-Fi</span>
+              <span class="pill">Stability</span>
+            </div>
             <h3>Wi-Fi Under Load Fix</h3>
-            <p>
-              When Wi-Fi looks “fine” until the office gets busy. This targets drops, retries, congestion, and roaming issues with clean configuration.
-            </p>
-            <ul class="bullets">
-              <li>Band/Channel planning + transmit power sanity</li>
-              <li>Client load balancing + roaming tuning</li>
-              <li>QoS guidance where it actually helps</li>
-              <li>AP placement recommendations (no overkill)</li>
-            </ul>
+            <p>Stop drops, interference, and bandwidth abuse. Tune RF, placement, and configuration — and upgrade only if needed.</p>
+            <a class="ctaLink" href="/sns-inquiry/">Fix Wi-Fi stability <span class="arrow">→</span></a>
           </article>
 
           <article class="card reveal">
-            <div class="kicker">Security-minded</div>
-            <h3>Office Network Build / Upgrade</h3>
-            <p>
-              New buildouts or cleanup projects. Right-sized router/switching, segmented networks, and a stable design that scales with your headcount.
-            </p>
-            <ul class="bullets">
-              <li>Router/switch configuration (VLANs, trunks, port roles)</li>
-              <li>Guest vs staff segmentation</li>
-              <li>Firewall baseline + secure remote admin approach</li>
-              <li>Documentation handoff (so you’re never blind)</li>
-            </ul>
+            <div class="top">
+              <span class="pill">Security</span>
+              <span class="pill">VLANs</span>
+            </div>
+            <h3>Segmentation + Guest Isolation</h3>
+            <p>Separate staff, guests, and business-critical devices. Clean policies that reduce risk and prevent network abuse.</p>
+            <a class="ctaLink" href="/sns-inquiry/">Harden the network <span class="arrow">→</span></a>
           </article>
-        </div>
 
-        <div class="grid2">
           <article class="card reveal">
-            <div class="kicker">Optional</div>
+            <div class="top">
+              <span class="pill">Hardware</span>
+              <span class="pill">Deploy</span>
+            </div>
+            <h3>Switch/AP/Router Install</h3>
+            <p>Installation done clean: cabling, mounting, labeling, configuration, validation, and documented handoff.</p>
+            <a class="ctaLink" href="/sns-inquiry/">Plan an install <span class="arrow">→</span></a>
+          </article>
+
+          <article class="card reveal">
+            <div class="top">
+              <span class="pill">Clean-up</span>
+              <span class="pill">Docs</span>
+            </div>
+            <h3>Network Cleanup + Documentation</h3>
+            <p>Untangle old configs and “mystery gear.” Build a simple diagram + notes so changes stay controlled.</p>
+            <a class="ctaLink" href="/sns-inquiry/">Clean it up <span class="arrow">→</span></a>
+          </article>
+
+          <article class="card reveal">
+            <div class="top">
+              <span class="pill">Membership</span>
+              <span class="pill">Support</span>
+            </div>
             <h3>Ongoing Support</h3>
-            <p>
-              Monthly membership for continuous administration, monitoring, and changes as your office grows — without hiring full-time IT.
-            </p>
-            <ul class="bullets">
-              <li>Planned changes: users, ports, VLANs, Wi-Fi adjustments</li>
-              <li>Device updates (agreed scope)</li>
-              <li>Network issue triage during agreed hours</li>
-            </ul>
+            <p>Optional monthly support for continuous admin, monitoring, and quick changes as you grow.</p>
+            <a class="ctaLink" href="/sns-inquiry/">Ask about support <span class="arrow">→</span></a>
           </article>
-
-          <article class="card reveal">
-            <div class="kicker">Best practices</div>
-            <h3>Documentation + “Clean Room” Standards</h3>
-            <p>
-              The deliverable isn’t just “it works.” It’s a network you can understand, maintain, and expand without mystery cables or undocumented changes.
-            </p>
-            <ul class="bullets">
-              <li>Logical + physical notes (what/where)</li>
-              <li>Naming, labeling, and port maps (as needed)</li>
-              <li>Handover checklist + next-step roadmap</li>
-            </ul>
-          </article>
-        </div>
-
-        <div class="cta reveal" style="margin-top:2.2rem;">
-          <a class="btn primary" href="/sns-inquiry/">Start an Inquiry</a>
-          <a class="btn" href="/socials/">Contact</a>
         </div>
       </div>
     </section>
 
-    <!-- How it works -->
-    <section class="section">
+    <!-- PROCESS -->
+    <section id="process" class="section">
       <div class="wrap">
-        <div class="reveal">
-          <div class="sectionTitle">Process</div>
-          <div class="sectionH2">How a project runs</div>
+        <div class="kicker reveal">
+          <span class="dot"></span>
+          How it works
         </div>
 
-        <div class="grid2">
-          <article class="card reveal">
-            <div class="kicker">1 — Discovery</div>
-            <h3>Scope + constraints</h3>
-            <p>
-              You submit the Inquiry Form. I confirm goals, environment constraints, and what “success” looks like.
-              If an on-site survey is required, we schedule it before any buildout decisions.
-            </p>
-          </article>
+        <h2 class="reveal" style="margin:.9rem 0 .8rem; font-size:1.6rem; letter-spacing:.06em; text-transform:uppercase;">
+          A simple process that avoids wasted spend
+        </h2>
 
-          <article class="card reveal">
-            <div class="kicker">2 — Plan</div>
-            <h3>Design + quote</h3>
-            <p>
-              You get a clear recommendation and quote. No upsell. The design is right-sized with growth headroom,
-              and every change ties back to stability and supportability.
-            </p>
-          </article>
+        <p class="reveal" style="margin:0; color:rgba(244,240,255,.70); line-height:1.7; max-width:76ch;">
+          This mirrors the “clean SaaS” feel you liked — but tailored to network work: assess, execute cleanly, validate, document.
+        </p>
 
-          <article class="card reveal">
-            <div class="kicker">3 — Execute</div>
-            <h3>Install + configuration</h3>
-            <p>
-              Clean install, clean configuration, clean results. Then we validate under realistic load and lock the “known-good” baseline.
-            </p>
-          </article>
+        <div class="timeline">
+          <div class="step reveal">
+            <div class="stepNum">1</div>
+            <h4>Survey & Baseline</h4>
+            <p>Understand layout, cabling, interference, device inventory, and the current configuration state.</p>
+          </div>
 
-          <article class="card reveal">
-            <div class="kicker">4 — Support</div>
-            <h3>Handover or membership</h3>
+          <div class="step reveal">
+            <div class="stepNum">2</div>
+            <h4>Plan & Quote</h4>
+            <p>Clear scope, recommended fixes, and costs. No guessing. No “upgrade everything” approach.</p>
+          </div>
+
+          <div class="step reveal">
+            <div class="stepNum">3</div>
+            <h4>Deploy Clean</h4>
+            <p>Install, configure, and harden. Implement segmentation, Wi-Fi tuning, and policy where appropriate.</p>
+          </div>
+
+          <div class="step reveal">
+            <div class="stepNum">4</div>
+            <h4>Validate & Document</h4>
+            <p>Verify performance and stability, then deliver documentation so your network stays maintainable.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PRICING (placeholder ranges; adjust later) -->
+    <section id="pricing" class="section">
+      <div class="wrap">
+        <div class="kicker reveal">
+          <span class="dot"></span>
+          Simple pricing structure
+        </div>
+
+        <h2 class="reveal" style="margin:.9rem 0 .8rem; font-size:1.6rem; letter-spacing:.06em; text-transform:uppercase;">
+          Transparent starting points
+        </h2>
+
+        <p class="reveal" style="margin:0; color:rgba(244,240,255,.70); line-height:1.7; max-width:76ch;">
+          These are placeholders designed to look clean and professional. Replace with your real numbers whenever you’re ready.
+        </p>
+
+        <div class="pricing">
+          <div class="price reveal">
+            <span class="pill">One-time</span>
+            <h3>Assessment</h3>
+            <div class="amount">$—</div>
+            <ul>
+              <li>On-site environment survey</li>
+              <li>Network baseline + findings</li>
+              <li>Action plan + recommendations</li>
+              <li>Clear scope before installs</li>
+            </ul>
+            <div class="foot">Best for: first-time clients who want a clean plan before spending on hardware.</div>
+          </div>
+
+          <div class="price featured reveal">
+            <span class="pill">Most common</span>
+            <h3>Fix & Deploy</h3>
+            <div class="amount">$—</div>
+            <ul>
+              <li>Wi-Fi stability improvements</li>
+              <li>Config cleanup + segmentation</li>
+              <li>Hardware installs (as needed)</li>
+              <li>Validation + documentation</li>
+            </ul>
+            <div class="foot">Best for: offices with drops under load, unmanaged gear, or security gaps.</div>
+          </div>
+
+          <div class="price reveal">
+            <span class="pill">Monthly</span>
+            <h3>Ongoing Support</h3>
+            <div class="amount">$—/mo</div>
+            <ul>
+              <li>Admin + light monitoring</li>
+              <li>Changes, adds, and adjustments</li>
+              <li>Priority response options</li>
+              <li>Documentation kept current</li>
+            </ul>
+            <div class="foot">Best for: businesses that want “their network guy” on retainer.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq" class="section">
+      <div class="wrap">
+        <div class="kicker reveal">
+          <span class="dot"></span>
+          FAQ
+        </div>
+
+        <h2 class="reveal" style="margin:.9rem 0 .8rem; font-size:1.6rem; letter-spacing:.06em; text-transform:uppercase;">
+          Quick answers
+        </h2>
+
+        <div class="faq">
+          <details class="reveal">
+            <summary>
+              Do you always require an assessment first?
+              <span class="caret">›</span>
+            </summary>
             <p>
-              You either take ownership with documentation, or you keep SNS on as ongoing network admin for maintenance and planned changes.
+              Most of the time, yes. It prevents wasted spend and makes the fix precise.
+              If the job is clearly defined (like a simple equipment swap), we can skip it.
             </p>
-          </article>
+          </details>
+
+          <details class="reveal">
+            <summary>
+              Will you force a full hardware upgrade?
+              <span class="caret">›</span>
+            </summary>
+            <p>
+              No. We troubleshoot and tune first. Hardware recommendations are only made when they’re the real bottleneck.
+            </p>
+          </details>
+
+          <details class="reveal">
+            <summary>
+              Can you work after hours or weekends?
+              <span class="caret">›</span>
+            </summary>
+            <p>
+              Yes, depending on scope. Use the inquiry form and note your preferred windows.
+            </p>
+          </details>
+
+          <details class="reveal">
+            <summary>
+              What brands do you support?
+              <span class="caret">›</span>
+            </summary>
+            <p>
+              Whatever fits the environment and budget. The priority is stability and manageability, not brand hype.
+            </p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="section">
+      <div class="wrap">
+        <div class="ctaPanel reveal" id="contact">
+          <div>
+            <h2>Ready to get it stable?</h2>
+            <p>Start an inquiry and tell me what’s happening. I’ll guide the next step based on your environment and goals.</p>
+          </div>
+          <div class="right">
+            <a class="btn primary" href="/sns-inquiry/">Start an Inquiry</a>
+            <a class="btn" href="/socials/">Contact</a>
+          </div>
         </div>
       </div>
     </section>
@@ -667,21 +1159,21 @@
   </main>
 
   <script>
-    // Lightweight reveal-on-scroll (same as Home)
+    // Reveal-on-scroll (matches the vibe of your home page, no particles)
     (function(){
       const els = Array.from(document.querySelectorAll('.reveal'));
       if (!('IntersectionObserver' in window) || els.length === 0) {
-        els.forEach(el => el.classList.add('in'));
+        els.forEach(el => el.classList.add('on'));
         return;
       }
       const io = new IntersectionObserver((entries) => {
-        for (const e of entries) {
+        entries.forEach(e => {
           if (e.isIntersecting) {
-            e.target.classList.add('in');
+            e.target.classList.add('on');
             io.unobserve(e.target);
           }
-        }
-      }, { threshold: 0.14 });
+        });
+      }, { threshold: 0.12 });
       els.forEach(el => io.observe(el));
     })();
   </script>
