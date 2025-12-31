@@ -1,78 +1,97 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Experience | Saku Network Solutions</title>
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SNS · Experience</title>
+  <meta name="description" content="Professional network experience: military network operations, enterprise installs, and small-business stability." />
 
   <style>
     :root{
-      --bg0:#050014;
-      --bg1:#07021a;
-      --card: rgba(10, 6, 26, .72);
-      --card2: rgba(16, 10, 40, .78);
-      --stroke: rgba(180, 140, 255, .28);
-      --stroke2: rgba(205, 180, 255, .42);
+      --bg0:#050315;
+      --bg1:#07031a;
+      --ink:#f4f0ff;
+      --muted:rgba(244,240,255,.72);
+      --muted2:rgba(244,240,255,.52);
 
-      --text:#f6f0ff;
-      --muted: rgba(240,230,255,.70);
-      --muted2: rgba(240,230,255,.58);
+      --stroke:rgba(244,240,255,.14);
+      --stroke2:rgba(244,240,255,.10);
 
-      --p1:#a855f7;
-      --p2:#c4b5fd;
-      --p3:#f973e2;
+      --card:rgba(8,6,20,.52);
+      --card2:rgba(8,6,20,.36);
 
-      --shadow: 0 22px 70px rgba(0,0,0,.62);
-      --r-xl: 28px;
-      --r-lg: 22px;
-      --r-md: 16px;
+      --accent:#b77bff;
+      --accent2:#7c4dff;
+
+      --shadow: 0 20px 80px rgba(0,0,0,.55);
+      --radius: 22px;
     }
 
-    *{ box-sizing:border-box; margin:0; padding:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial; }
-    html,body{ height:100%; }
-
+    *{box-sizing:border-box}
+    html,body{height:100%}
     body{
-      color: var(--text);
+      margin:0;
+      color:var(--ink);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      background: radial-gradient(1200px 800px at 20% 20%, rgba(124,77,255,.18), transparent 60%),
+                  radial-gradient(900px 700px at 70% 10%, rgba(183,123,255,.12), transparent 55%),
+                  radial-gradient(1200px 900px at 55% 80%, rgba(124,77,255,.10), transparent 60%),
+                  linear-gradient(180deg, #060316 0%, #050315 100%);
+      overflow-x:hidden;
+    }
+
+    /* Subtle animated wash (no snow on non-home pages) */
+    .bgwash{
+      position:fixed;
+      inset:-40px;
+      z-index:-2;
       background:
-        radial-gradient(1200px 800px at 18% 15%, rgba(168,85,247,.26), transparent 60%),
-        radial-gradient(900px 700px at 82% 30%, rgba(99,102,241,.18), transparent 62%),
-        radial-gradient(900px 700px at 70% 88%, rgba(249,115,226,.10), transparent 55%),
-        radial-gradient(circle at 0% 0%, #4a3a97 0, #080313 52%, #02000a 100%);
-      background-size: 200% 200%;
-      animation: bgShift 22s ease-in-out infinite alternate;
-      min-height: 100vh;
-      padding: 26px 16px 42px;
+        radial-gradient(900px 600px at 20% 20%, rgba(183,123,255,.18), transparent 62%),
+        radial-gradient(800px 520px at 75% 15%, rgba(124,77,255,.16), transparent 60%),
+        radial-gradient(900px 700px at 55% 85%, rgba(183,123,255,.10), transparent 65%);
+      filter: blur(10px);
+      opacity:.9;
+      transform: translate3d(0,0,0);
+      animation: wash 10s ease-in-out infinite alternate;
+    }
+    @keyframes wash{
+      0%{transform: translate3d(-6px,-10px,0) scale(1.01)}
+      100%{transform: translate3d(8px,12px,0) scale(1.02)}
     }
 
-    @keyframes bgShift{
-      0%{ background-position: 0% 0%; }
-      50%{ background-position: 55% 100%; }
-      100%{ background-position: 100% 0%; }
+    /* Dots/grid texture */
+    .dots{
+      position:fixed;
+      inset:0;
+      z-index:-1;
+      background:
+        radial-gradient(circle at 1px 1px, rgba(244,240,255,.08) 1px, transparent 1.5px);
+      background-size: 34px 34px;
+      mask-image: radial-gradient(closest-side at 50% 20%, black 0%, transparent 68%);
+      opacity:.35;
+      pointer-events:none;
     }
 
-    /* ======= Shell ======= */
-    .shell{
-      max-width: 1180px;
+    /* ===== Top Nav (match Home/Services) ===== */
+    header.top{
+      position:sticky;
+      top:0;
+      z-index:50;
+      backdrop-filter: blur(18px);
+      background: linear-gradient(180deg, rgba(5,3,21,.78), rgba(5,3,21,.38));
+      border-bottom:1px solid rgba(244,240,255,.08);
+    }
+    .wrap{
+      max-width: 1200px;
       margin: 0 auto;
-      background: rgba(7, 3, 20, .52);
-      border: 1px solid var(--stroke);
-      border-radius: var(--r-xl);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(14px);
-      overflow: hidden;
+      padding: 16px 18px;
     }
-
-    /* ======= Top Nav ======= */
-    .topbar{
+    .toprow{
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap:14px;
-      padding: 18px 18px;
-      border-bottom: 1px solid rgba(255,255,255,.06);
-      background: linear-gradient(90deg, rgba(20,12,48,.55), rgba(10,7,28,.25));
     }
-
     .brand{
       display:flex;
       align-items:center;
@@ -80,672 +99,410 @@
       min-width: 260px;
     }
     .brand .mark{
-      width:42px; height:42px; border-radius: 12px;
-      display:grid; place-items:center;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.22);
-      box-shadow: 0 16px 40px rgba(0,0,0,.40);
+      width:46px;height:46px;
+      border-radius:14px;
+      display:grid;
+      place-items:center;
+      background: rgba(255,255,255,.03);
+      border:1px solid rgba(244,240,255,.14);
+      box-shadow: 0 10px 30px rgba(0,0,0,.35);
       overflow:hidden;
     }
     .brand .mark img{
-      width: 26px;
-      height: 26px;
-      object-fit: contain;
+      width:28px;height:28px;
+      object-fit:contain;
       display:block;
-      filter: drop-shadow(0 10px 18px rgba(168,85,247,.35));
     }
-    .brand .text{
-      display:flex; flex-direction:column; gap:2px;
+    .brand .name{
+      line-height:1.05;
+      font-weight:800;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      font-size: 13px;
     }
-    .brand .text .name{
-      letter-spacing: .14em;
-      text-transform: uppercase;
-      font-weight: 800;
-      font-size: .95rem;
-      line-height: 1.1;
-    }
-    .brand .text .tag{
-      color: var(--muted2);
-      font-size: .86rem;
-      line-height: 1.2;
+    .brand .tag{
+      margin-top:4px;
+      color:var(--muted2);
+      font-size: 13px;
+      letter-spacing:.02em;
     }
 
-    .tabs{
+    nav.center{
       display:flex;
+      align-items:center;
       gap:10px;
       flex-wrap:wrap;
       justify-content:center;
     }
-
-    .nav-pill{
+    .navlink{
       text-decoration:none;
-      color: rgba(245,240,255,.86);
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.22);
-      padding: 8px 14px;
+      color: rgba(244,240,255,.70);
+      font-weight:700;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+      font-size: 12px;
+      padding:10px 12px;
       border-radius: 999px;
-      font-size: .82rem;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-      transition: transform .14s ease, border-color .14s ease, background .14s ease, box-shadow .14s ease;
-      backdrop-filter: blur(10px);
+      border:1px solid transparent;
+      transition: transform .18s ease, background .18s ease, border-color .18s ease, color .18s ease;
     }
-    .nav-pill:hover{
+    .navlink:hover{
       transform: translateY(-1px);
-      border-color: rgba(255,255,255,.22);
-      box-shadow: 0 14px 36px rgba(0,0,0,.35);
+      color: rgba(244,240,255,.92);
+      border-color: rgba(244,240,255,.10);
+      background: rgba(255,255,255,.03);
     }
-    .nav-pill.active{
-      border-color: rgba(216,180,254,.62);
-      background: radial-gradient(circle at top left, rgba(168,85,247,.95), rgba(76,29,149,.75));
-      box-shadow: 0 16px 44px rgba(88,28,135,.45);
+    .navlink.active{
+      color: rgba(244,240,255,.95);
+      border-color: rgba(183,123,255,.32);
+      background: linear-gradient(180deg, rgba(183,123,255,.18), rgba(183,123,255,.06));
+      box-shadow: 0 14px 40px rgba(0,0,0,.35);
     }
 
-    .client-login{
+    .actions{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      justify-content:flex-end;
+      min-width: 260px;
+    }
+
+    .btn{
+      appearance:none;
+      border:none;
+      cursor:pointer;
+      text-decoration:none;
       display:inline-flex;
       align-items:center;
       justify-content:center;
-      height: 36px;
-      padding: 0 14px;
+      gap:10px;
+      padding: 12px 16px;
       border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.20);
-      color: #f4f0ff;
-      text-decoration:none;
-      font-size: .82rem;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-      box-shadow: 0 10px 30px rgba(0,0,0,.35);
-      transition: transform .15s ease, border-color .15s ease, background .15s ease;
-      backdrop-filter: blur(10px);
-      white-space: nowrap;
+      font-weight:800;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      font-size: 12px;
+      transition: transform .18s ease, filter .18s ease, background .18s ease, border-color .18s ease;
+      user-select:none;
+      white-space:nowrap;
     }
-    .client-login:hover{
-      transform: translateY(-1px);
-      border-color: rgba(255,255,255,.22);
-      background: rgba(0,0,0,.28);
+    .btn:active{transform: translateY(0px) scale(.99)}
+    .btn:hover{transform: translateY(-1px)}
+    .btn.ghost{
+      color: rgba(244,240,255,.90);
+      border:1px solid rgba(244,240,255,.14);
+      background: rgba(255,255,255,.03);
+    }
+    .btn.primary{
+      color: rgba(20,10,40,.95);
+      background: linear-gradient(90deg, rgba(183,123,255,1), rgba(124,77,255,1));
+      box-shadow: 0 18px 60px rgba(124,77,255,.25);
     }
 
-    /* ======= Hero ======= */
+    /* ===== Page ===== */
+    main{
+      padding: 34px 0 90px;
+    }
+
     .hero{
-      padding: 34px 22px 16px;
-      position: relative;
+      text-align:center;
+      padding: 44px 0 22px;
     }
-
-    .hero-grid{
+    .heroLogo{
+      width:64px;height:64px;
+      margin: 0 auto 14px;
+      border-radius: 18px;
       display:grid;
-      gap: 16px;
-      grid-template-columns: 1.25fr .9fr;
-      align-items: start;
-    }
-
-    @media (max-width: 980px){
-      .hero-grid{ grid-template-columns: 1fr; }
-    }
-
-    .hero-card{
-      background: linear-gradient(180deg, rgba(18,10,45,.55), rgba(10,6,26,.35));
-      border: 1px solid rgba(255,255,255,.08);
-      border-radius: var(--r-xl);
-      padding: 22px 18px;
-      box-shadow: 0 18px 60px rgba(0,0,0,.35);
+      place-items:center;
+      background: rgba(255,255,255,.03);
+      border:1px solid rgba(244,240,255,.12);
+      box-shadow: 0 18px 70px rgba(0,0,0,.45);
       overflow:hidden;
-      position:relative;
-      transform: translateY(6px);
-      opacity: 0;
-      animation: enter .62s ease forwards;
     }
-
-    @keyframes enter{
-      to{ transform: translateY(0); opacity: 1; }
+    .heroLogo img{
+      width:36px;height:36px;
+      object-fit:contain;
+      display:block;
     }
-
-    .kicker{
+    .pill{
       display:inline-flex;
       align-items:center;
       gap:10px;
-      padding: 7px 12px;
+      padding: 10px 14px;
       border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.18);
-      color: rgba(245,240,255,.76);
-      font-size: .78rem;
-      letter-spacing: .18em;
-      text-transform: uppercase;
-      margin-bottom: 14px;
+      border:1px solid rgba(244,240,255,.12);
+      background: rgba(255,255,255,.03);
+      color: rgba(244,240,255,.70);
+      font-weight:800;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      font-size: 11px;
     }
-    .kicker .dot{
-      width: 8px; height: 8px; border-radius: 999px;
-      background: rgba(168,85,247,.95);
-      box-shadow: 0 0 18px rgba(168,85,247,.55);
+    h1{
+      margin: 18px auto 10px;
+      max-width: 980px;
+      font-size: clamp(42px, 5.3vw, 72px);
+      line-height:1.02;
+      letter-spacing:-.02em;
+      font-weight: 900;
+      color: rgba(244,240,255,.92);
     }
-
-    .hero h1{
-      font-size: clamp(30px, 4.2vw, 48px);
-      line-height: 1.05;
-      letter-spacing: -.01em;
-      margin-bottom: 10px;
-      color: rgba(246,240,255,.92);
-    }
-
-    .hero h1 .grad{
-      background: linear-gradient(90deg, rgba(168,85,247,1), rgba(196,181,253,1), rgba(249,115,226,.9));
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-
-    .hero p{
-      color: var(--muted);
+    .sub{
+      margin: 0 auto;
+      max-width: 780px;
+      color: rgba(244,240,255,.70);
+      font-size: 16px;
       line-height: 1.65;
-      font-size: 1.02rem;
-      max-width: 64ch;
     }
-
-    .stat-row{
+    .cta{
+      margin-top: 18px;
       display:flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 16px;
+      justify-content:center;
+      gap:12px;
+      flex-wrap:wrap;
     }
 
-    .stat{
-      flex: 0 0 auto;
-      min-width: 180px;
-      background: rgba(0,0,0,.18);
-      border: 1px solid rgba(255,255,255,.10);
-      border-radius: 18px;
-      padding: 12px 12px;
-    }
-    .stat .label{
-      font-size: .72rem;
-      letter-spacing: .18em;
-      text-transform: uppercase;
-      color: rgba(196,181,253,.82);
-      margin-bottom: 6px;
-    }
-    .stat .val{
-      font-size: 1.05rem;
-      color: rgba(246,240,255,.92);
-      font-weight: 700;
-    }
-    .stat .sub{
-      margin-top: 4px;
-      font-size: .88rem;
-      color: rgba(240,230,255,.62);
-      line-height: 1.35;
-    }
-
-    /* Right rail “principles” */
-    .rail{
-      display:flex;
-      flex-direction:column;
-      gap: 12px;
-    }
-
-    .mini-card{
-      background: rgba(0,0,0,.16);
-      border: 1px solid rgba(255,255,255,.10);
-      border-radius: var(--r-lg);
-      padding: 14px 14px;
-      transform: translateY(6px);
-      opacity: 0;
-      animation: enter .62s ease forwards;
-    }
-    .mini-card:nth-child(2){ animation-delay: .08s; }
-    .mini-card:nth-child(3){ animation-delay: .14s; }
-
-    .mini-title{
-      font-size: .86rem;
-      letter-spacing: .16em;
-      text-transform: uppercase;
-      color: rgba(233,213,255,.90);
-      margin-bottom: 8px;
-    }
-    .mini-body{
-      color: rgba(240,230,255,.68);
-      line-height: 1.55;
-      font-size: .95rem;
-    }
-
-    /* ======= Main Sections ======= */
-    .section{
-      padding: 12px 22px 26px;
-    }
-
-    .section-head{
-      display:flex;
-      align-items:flex-end;
-      justify-content:space-between;
-      gap: 12px;
-      margin: 18px 0 12px;
-      padding: 0 2px;
-    }
-    .section-head h2{
-      font-size: 1.05rem;
-      letter-spacing: .22em;
-      text-transform: uppercase;
-      color: rgba(233,213,255,.92);
-    }
-    .section-head .hint{
-      color: rgba(240,230,255,.55);
-      font-size: .92rem;
-    }
-
+    /* Cards / grids */
     .grid{
       display:grid;
-      gap: 12px;
-      grid-template-columns: repeat(12, 1fr);
+      gap:14px;
+    }
+    .grid.cols3{grid-template-columns: repeat(3, minmax(0, 1fr));}
+    .grid.cols2{grid-template-columns: repeat(2, minmax(0, 1fr));}
+    @media (max-width: 980px){
+      .grid.cols3{grid-template-columns: 1fr;}
+      .grid.cols2{grid-template-columns: 1fr;}
+      .brand, .actions{min-width:auto}
+      nav.center{display:none;} /* optional: keep simple on mobile */
     }
 
     .card{
-      grid-column: span 12;
-      background: var(--card);
-      border: 1px solid var(--stroke);
-      border-radius: var(--r-xl);
-      padding: 16px 16px;
-      box-shadow: 0 18px 60px rgba(0,0,0,.28);
-      transition: transform .14s ease, border-color .14s ease, background .14s ease;
-      backdrop-filter: blur(12px);
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(8,6,20,.56), rgba(8,6,20,.30));
+      border:1px solid rgba(244,240,255,.12);
+      box-shadow: 0 22px 90px rgba(0,0,0,.45);
+      padding: 18px 18px;
     }
-    .card:hover{
-      transform: translateY(-2px);
-      border-color: var(--stroke2);
-      background: rgba(16,10,44,.78);
+    .card h3{
+      margin: 0 0 8px;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      font-size: 12px;
+      color: rgba(244,240,255,.90);
+    }
+    .card p{
+      margin:0;
+      color: rgba(244,240,255,.68);
+      line-height:1.6;
+      font-size: 14px;
     }
 
-    .card .top{
+    .section{
+      margin-top: 22px;
+    }
+    .sectionTitle{
+      margin: 26px 0 12px;
+      text-align:left;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      font-weight: 900;
+      font-size: 12px;
+      color: rgba(244,240,255,.88);
+    }
+
+    /* Timeline */
+    .timeline{
+      display:grid;
+      gap:14px;
+    }
+    .role{
+      display:grid;
+      gap:10px;
+    }
+    .roleTop{
       display:flex;
-      align-items:baseline;
+      align-items:flex-start;
       justify-content:space-between;
-      gap: 10px;
-      margin-bottom: 10px;
+      gap:12px;
+      flex-wrap:wrap;
     }
-    .card .title{
-      font-size: .95rem;
-      letter-spacing: .20em;
-      text-transform: uppercase;
-      color: rgba(246,240,255,.90);
+    .roleTitle{
+      font-weight: 900;
+      font-size: 16px;
+      letter-spacing:.02em;
+      color: rgba(244,240,255,.92);
     }
-    .card .meta{
-      color: rgba(240,230,255,.55);
-      font-size: .92rem;
-      white-space: nowrap;
+    .roleMeta{
+      color: rgba(244,240,255,.55);
+      font-size: 13px;
+      letter-spacing:.02em;
+      white-space:nowrap;
     }
-
-    .card .body{
-      color: rgba(240,230,255,.72);
-      line-height: 1.62;
-      font-size: .98rem;
-    }
-
-    .bullets{
-      margin-top: 10px;
+    ul.bullets{
+      margin: 0;
       padding-left: 18px;
-      color: rgba(240,230,255,.72);
-      line-height: 1.62;
-      font-size: .96rem;
+      color: rgba(244,240,255,.70);
+      line-height:1.65;
+      font-size: 14px;
     }
-    .bullets li{ margin-top: 6px; }
+    ul.bullets li{margin: 6px 0}
 
-    /* Two-column layout blocks */
-    @media (min-width: 980px){
-      .span-7{ grid-column: span 7; }
-      .span-5{ grid-column: span 5; }
-      .span-6{ grid-column: span 6; }
-      .span-4{ grid-column: span 4; }
-    }
-
-    /* Skills pills */
-    .pillrow{
-      display:flex;
-      flex-wrap:wrap;
-      gap: 10px;
-      margin-top: 6px;
-    }
-    .pill{
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.18);
-      padding: 10px 12px;
-      border-radius: 999px;
-      display:flex;
-      align-items:center;
-      gap: 10px;
-    }
-    .pill .k{
-      font-size: .72rem;
-      letter-spacing: .18em;
-      text-transform: uppercase;
-      color: rgba(196,181,253,.86);
-      white-space: nowrap;
-    }
-    .pill .v{
-      color: rgba(246,240,255,.88);
-      font-size: .95rem;
-      white-space: nowrap;
-    }
-
-    /* CTA */
-    .cta{
-      margin: 6px 22px 22px;
-      padding: 16px 16px;
-      border-radius: var(--r-xl);
-      border: 1px solid rgba(255,255,255,.10);
-      background: linear-gradient(90deg, rgba(168,85,247,.22), rgba(0,0,0,.18));
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 12px;
-      flex-wrap:wrap;
-    }
-    .cta .left{
-      display:flex;
-      flex-direction:column;
-      gap: 6px;
-    }
-    .cta .big{
-      font-size: 1.05rem;
-      letter-spacing: .08em;
-      color: rgba(246,240,255,.92);
-      font-weight: 750;
-    }
-    .cta .small{
-      color: rgba(240,230,255,.62);
-      line-height: 1.45;
-      max-width: 70ch;
-    }
-    .cta .actions{
-      display:flex;
-      gap: 10px;
-      flex-wrap:wrap;
-    }
-    .btn{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      height: 38px;
-      padding: 0 14px;
-      border-radius: 999px;
-      text-decoration:none;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-      font-size: .82rem;
-      border: 1px solid rgba(216,180,254,.62);
-      color: rgba(255,255,255,.92);
-      background: radial-gradient(circle at top left, rgba(168,85,247,.95), rgba(107,33,168,.82));
-      box-shadow: 0 16px 40px rgba(88,28,135,.35);
-      transition: transform .14s ease, filter .14s ease, border-color .14s ease;
-    }
-    .btn:hover{ transform: translateY(-1px); filter: brightness(1.05); }
-    .btn.ghost{
-      background: rgba(0,0,0,.18);
-      border-color: rgba(255,255,255,.16);
-      box-shadow: none;
-      color: rgba(240,230,255,.86);
-    }
-
-    /* Footer */
     footer{
-      padding: 16px 18px 18px;
-      border-top: 1px solid rgba(255,255,255,.06);
-      color: rgba(240,230,255,.55);
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 12px;
-      flex-wrap:wrap;
-      background: rgba(0,0,0,.14);
+      margin-top: 60px;
+      padding: 26px 0 0;
+      border-top: 1px solid rgba(244,240,255,.08);
+      color: rgba(244,240,255,.50);
+      text-align:center;
+      font-size: 13px;
     }
-    footer .links{
-      display:flex; gap: 10px; flex-wrap:wrap;
-    }
-    footer a{
-      color: rgba(196,181,253,.82);
-      text-decoration: none;
-      border-bottom: 1px solid rgba(196,181,253,.22);
-    }
-    footer a:hover{
-      border-bottom-color: rgba(196,181,253,.55);
-    }
-
-    /* Mobile nav spacing */
-    @media (max-width: 860px){
-      .topbar{ align-items:flex-start; }
-      .brand{ min-width: unset; }
-      .tabs{ justify-content:flex-start; }
-    }
+    footer a{color: rgba(244,240,255,.75)}
   </style>
 </head>
 
 <body>
-  <main class="shell">
+  <div class="bgwash" aria-hidden="true"></div>
+  <div class="dots" aria-hidden="true"></div>
 
-    <!-- ======= TOP NAV ======= -->
-    <header class="topbar">
-      <div class="brand">
-        <div class="mark" aria-hidden="true">
-          <img src="/assets/sns-logo-purple.png" alt="" />
+  <header class="top">
+    <div class="wrap">
+      <div class="toprow">
+        <div class="brand">
+          <div class="mark">
+            <img src="/assets/sns-logo-purple.png" alt="SNS" />
+          </div>
+          <div>
+            <div class="name">Saku Network Solutions</div>
+            <div class="tag">Network infrastructure, done clean.</div>
+          </div>
         </div>
-        <div class="text">
-          <div class="name">Saku Network Solutions</div>
-          <div class="tag">Network infrastructure, done clean.</div>
+
+        <nav class="center" aria-label="Primary">
+          <a class="navlink" href="/home/">Home</a>
+          <a class="navlink" href="/sns/">Services</a>
+          <a class="navlink active" href="/experience/">Experience</a>
+          <a class="navlink" href="/credibility/">Credibility</a>
+          <a class="navlink" href="/resources/">Resources</a>
+          <a class="navlink" href="/contact/">Contact</a>
+        </nav>
+
+        <div class="actions">
+          <a class="btn ghost" href="/sns-login/">Client Login</a>
         </div>
       </div>
+    </div>
+  </header>
 
-      <nav class="tabs" aria-label="Primary navigation">
-        <a class="nav-pill" href="/home/">Home</a>
-        <a class="nav-pill" href="/sns/">Services</a>
-        <a class="nav-pill active" href="/experience/">Experience</a>
-        <a class="nav-pill" href="/other/">Other Stuff</a>
-        <a class="nav-pill" href="/socials/">Socials</a>
-      </nav>
+  <main>
+    <div class="wrap">
+      <section class="hero">
+        <div class="heroLogo">
+          <img src="/assets/sns-logo-purple.png" alt="SNS" />
+        </div>
 
-      <a class="client-login" href="/sns-login/">Client Login</a>
-    </header>
+        <span class="pill">OPERATIONS · INSTALLS · TROUBLESHOOTING</span>
 
-    <!-- ======= HERO ======= -->
-    <section class="hero">
-      <div class="hero-grid">
-        <div class="hero-card">
-          <div class="kicker"><span class="dot"></span><span>Field-tested network ops • enterprise installs</span></div>
-          <h1>
-            Proof, not hype — <span class="grad">hands-on</span> network experience.
-          </h1>
-          <p>
-            I’ve installed, secured, and supported network infrastructure in controlled environments and high-tempo operations.
-            My style is simple: verify the physical layer, document the work, and keep systems stable under real load.
-          </p>
+        <h1>Experience that keeps networks stable under real usage.</h1>
 
-          <div class="stat-row">
-            <div class="stat">
-              <div class="label">Recent Role</div>
-              <div class="val">Network Administrator</div>
-              <div class="sub">Enterprise switch deployments, cabling, UPS, and site work.</div>
+        <p class="sub">
+          I build and maintain business networks with a documentation-first approach: clean installs,
+          secure configurations, and practical fixes that stop recurring outages.
+        </p>
+
+        <div class="cta">
+          <a class="btn primary" href="/sns-inquiry/">Start an Inquiry</a>
+          <a class="btn ghost" href="/sns/">View Services</a>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="grid cols3">
+          <div class="card">
+            <h3>4+ Years</h3>
+            <p>Hands-on network operations: routing, switching, Wi-Fi, and structured cabling.</p>
+          </div>
+          <div class="card">
+            <h3>Security-Minded</h3>
+            <p>Configuration and documentation habits aligned with controlled environments.</p>
+          </div>
+          <div class="card">
+            <h3>Clean Execution</h3>
+            <p>Labeling, cable discipline, diagrams, and “leave it better than you found it.”</p>
+          </div>
+        </div>
+
+        <div class="sectionTitle">Professional Experience</div>
+
+        <div class="timeline">
+          <div class="card role">
+            <div class="roleTop">
+              <div>
+                <div class="roleTitle">Network Administrator · Defense / Enterprise Support</div>
+                <div class="roleMeta">Greater Los Angeles Area · 2024–Present</div>
+              </div>
+              <div class="roleMeta">Implementation + Support</div>
             </div>
-            <div class="stat">
-              <div class="label">Security</div>
-              <div class="val">Security+ • Secret clearance</div>
-              <div class="sub">Security-minded operations and controlled-access discipline.</div>
+            <ul class="bullets">
+              <li>Deploy and support switching, routing, and networked infrastructure in production environments.</li>
+              <li>Troubleshoot outages and performance issues (Wi-Fi under load, VLAN issues, port activation, misconfigs).</li>
+              <li>Deliver clean installs: cable management, labeling, documentation, and stable handoff.</li>
+            </ul>
+          </div>
+
+          <div class="card role">
+            <div class="roleTop">
+              <div>
+                <div class="roleTitle">United States Marine Corps · Network Administrator</div>
+                <div class="roleMeta">2020–2024</div>
+              </div>
+              <div class="roleMeta">Network Ops + Leadership</div>
             </div>
-            <div class="stat">
-              <div class="label">Scale</div>
-              <div class="val">$50M+ assets • 600+ devices</div>
-              <div class="sub">Inventory, accountability, and audit-ready documentation.</div>
-            </div>
+            <ul class="bullets">
+              <li>Designed, deployed, and maintained secure network architecture supporting operational requirements.</li>
+              <li>Led network execution during field operations: setup, validation, troubleshooting, and continuity.</li>
+              <li>Taught networking fundamentals and procedures to junior personnel; improved readiness through repetition-based training.</li>
+            </ul>
           </div>
         </div>
 
-        <aside class="rail" aria-label="Work principles">
-          <div class="mini-card">
-            <div class="mini-title">Clean installs</div>
-            <div class="mini-body">Rack, cable paths, labeling, and power continuity done like someone else has to maintain it.</div>
-          </div>
-          <div class="mini-card">
-            <div class="mini-title">Root-cause mindset</div>
-            <div class="mini-body">Trace the fault, validate the fix, and prove it with repeatable checks — no guessing.</div>
-          </div>
-          <div class="mini-card">
-            <div class="mini-title">Documentation-first</div>
-            <div class="mini-body">Port maps, as-builts, and notes that still make sense six months later.</div>
-          </div>
-        </aside>
-      </div>
-    </section>
+        <div class="sectionTitle">Core Strengths</div>
 
-    <!-- ======= EXPERIENCE ======= -->
-    <section class="section" id="timeline">
-      <div class="section-head">
-        <h2>Experience</h2>
-        <div class="hint">Highlights that matter for clients and real environments</div>
-      </div>
-
-      <div class="grid">
-        <!-- Beacon Hill -->
-        <article class="card span-7">
-          <div class="top">
-            <div class="title">Beacon Hill — Network Administrator</div>
-            <div class="meta">09/2025 – Present</div>
+        <div class="grid cols2">
+          <div class="card">
+            <h3>Routing & Switching</h3>
+            <p>VLAN design, trunk/access configuration, port activation, clean standards, and stable L2/L3 behavior.</p>
           </div>
-          <div class="body">
-            Enterprise network support across secured sites — focused on switch deployments, port activations, cabling, and keeping server rooms clean and operational.
+          <div class="card">
+            <h3>Wi-Fi Reliability</h3>
+            <p>Fix drops under load: channel planning, AP placement, airtime contention, and right-sized hardware.</p>
           </div>
-          <ul class="bullets">
-            <li>Installed and deployed Cisco switching supporting production networks.</li>
-            <li>Executed port activations, new drops, and full builds in live environments.</li>
-            <li>Performed site assessments, rack deployments, cable management, and UPS installs for power continuity.</li>
-            <li>Handled ticket-based service work with consistent documentation and verification.</li>
-          </ul>
-        </article>
-
-        <!-- USMC -->
-        <article class="card span-5">
-          <div class="top">
-            <div class="title">United States Marine Corps — Network Administrator / Chief</div>
-            <div class="meta">05/2020 – 01/2024</div>
+          <div class="card">
+            <h3>Install Quality</h3>
+            <p>Rack layout, patch discipline, labeling, documentation, and post-change validation.</p>
           </div>
-          <div class="body">
-            Mission-critical network operations and infrastructure builds supporting field exercises and enterprise environments.
+          <div class="card">
+            <h3>Operational Mindset</h3>
+            <p>Root-cause focus, repeatable procedures, and changes that don’t create new problems.</p>
           </div>
-          <ul class="bullets">
-            <li>Designed and sustained LAN/WAN builds for 15+ field operations.</li>
-            <li>Maintained and protected classified/unclassified systems; served as ISSO during deployment.</li>
-            <li>Supported routers, switches, firewalls, wireless, and encryption devices (including TACLANE-Micro KG-175D).</li>
-            <li>Supervised and mentored 30+ technicians; maintained audit-ready accountability.</li>
-          </ul>
-        </article>
-
-        <!-- NWN Carousel -->
-        <article class="card span-6">
-          <div class="top">
-            <div class="title">NWN Carousel — Associate Solutions Engineer (Intern)</div>
-            <div class="meta">02/2024 – 07/2024</div>
-          </div>
-          <div class="body">
-            Preventive/corrective maintenance on network infrastructure in regulated environments — with validation, documentation, and continuity as priorities.
-          </div>
-          <ul class="bullets">
-            <li>Performed firmware upgrades, patching, and operational validation.</li>
-            <li>Supported routers, switches, firewalls, and electronics tied to federal operations.</li>
-            <li>Helped execute multi-site upgrades while maintaining service continuity.</li>
-          </ul>
-        </article>
-
-        <!-- Creds -->
-        <article class="card span-6">
-          <div class="top">
-            <div class="title">Credentials that matter</div>
-            <div class="meta">Security + controlled environments</div>
-          </div>
-          <div class="body">
-            Security posture and operational discipline built into the workflow — not bolted on later.
-          </div>
-          <ul class="bullets">
-            <li><strong>CompTIA Security+</strong> certified.</li>
-            <li><strong>Active Secret clearance</strong> experience in controlled-access operations.</li>
-            <li>As-builts, port maps, SOPs, labeling, and asset documentation as default deliverables.</li>
-          </ul>
-        </article>
-      </div>
-    </section>
-
-    <!-- ======= SKILLS ======= -->
-    <section class="section" id="skills">
-      <div class="section-head">
-        <h2>Skills & Tools</h2>
-        <div class="hint">Short list — only what I actually use</div>
-      </div>
-
-      <div class="grid">
-        <article class="card span-12">
-          <div class="top">
-            <div class="title">Core lanes</div>
-            <div class="meta">Networking • infrastructure • security discipline</div>
-          </div>
-
-          <div class="pillrow">
-            <div class="pill"><span class="k">Switching</span><span class="v">Cisco IOS • VLANs • Layer 2 deployments</span></div>
-            <div class="pill"><span class="k">Physical</span><span class="v">Rack & stack • labeling • cable management</span></div>
-            <div class="pill"><span class="k">Cabling</span><span class="v">Copper + fiber • termination • testing</span></div>
-            <div class="pill"><span class="k">Power</span><span class="v">UPS installs • continuity checks • safe layouts</span></div>
-            <div class="pill"><span class="k">Ops</span><span class="v">Ticket workflows • documentation • repeatable checks</span></div>
-            <div class="pill"><span class="k">Security</span><span class="v">Controlled-access discipline • PKI awareness • ISSO experience</span></div>
-          </div>
-        </article>
-      </div>
-    </section>
-
-    <!-- ======= AWARDS (kept simple) ======= -->
-    <section class="section" id="awards">
-      <div class="section-head">
-        <h2>Awards</h2>
-        <div class="hint">Signals of performance, not decoration</div>
-      </div>
-
-      <div class="grid">
-        <article class="card span-6">
-          <div class="top">
-            <div class="title">Navy & Marine Corps Achievement Medal</div>
-            <div class="meta">Military award</div>
-          </div>
-          <div class="body">Recognition for operational performance and impact in assigned duties.</div>
-        </article>
-
-        <article class="card span-6">
-          <div class="top">
-            <div class="title">Meritorious Mast</div>
-            <div class="meta">Military award</div>
-          </div>
-          <div class="body">Awarded for strong performance and professionalism in role.</div>
-        </article>
-      </div>
-    </section>
-
-    <!-- ======= CTA ======= -->
-    <section class="cta" aria-label="Contact call to action">
-      <div class="left">
-        <div class="big">Want a clean network install — or a second set of eyes?</div>
-        <div class="small">
-          If you’re a business client, use the inquiry flow from the Home page. If you’re reaching out for professional opportunities, email is best.
         </div>
-      </div>
-      <div class="actions">
-        <a class="btn ghost" href="/home/">Back to Home</a>
-        <a class="btn" href="mailto:brandon.sns@proton.me">Email Brandon</a>
-      </div>
-    </section>
 
-    <footer>
-      <div>© <span id="year"></span> Saku Network Solutions. Built clean. Documented.</div>
-      <div class="links">
-        <a href="/sns/">Services</a>
-        <a href="/home/">Inquiry</a>
-        <a href="/sns-login/">Client Login</a>
-      </div>
-    </footer>
+        <div class="sectionTitle">Awards & Proof Points</div>
+
+        <div class="grid cols2">
+          <div class="card">
+            <h3>Meritorious Recognition</h3>
+            <p>Recognized for performance during military technical training and operational execution.</p>
+          </div>
+          <div class="card">
+            <h3>Documentation-First</h3>
+            <p>Network changes are documented with clear notes so systems remain maintainable long-term.</p>
+          </div>
+        </div>
+      </section>
+
+      <footer>
+        © 2025 Saku Network Solutions. Built clean. Documented.
+      </footer>
+    </div>
   </main>
-
-  <script>
-    document.getElementById("year").textContent = new Date().getFullYear().toString();
-  </script>
 </body>
 </html>
