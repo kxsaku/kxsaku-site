@@ -3,30 +3,29 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Resources | Saku Network Solutions</title>
+  <title>SNS · Resources</title>
 
   <style>
     :root{
-      --bg0:#060212;
-      --bg1:#0a0420;
+      --bg0:#050315;
+      --bg1:#07031b;
+      --bg2:#030012;
+
       --ink:#f4f0ff;
-      --muted:rgba(244,240,255,.72);
-      --muted2:rgba(244,240,255,.58);
+      --muted:rgba(244,240,255,.74);
+      --muted2:rgba(244,240,255,.62);
 
-      --line:rgba(255,255,255,.10);
-      --line2:rgba(196,181,253,.22);
+      --card:rgba(12,10,28,.62);
+      --card2:rgba(12,10,28,.46);
+      --stroke:rgba(255,255,255,.10);
 
-      --accent:#a855f7;
-      --accent2:#c4b5fd;
+      --accent:#b67bff;
+      --accent2:#8a5dff;
 
-      --glass:rgba(8,4,20,.58);
-      --glass2:rgba(18,10,50,.62);
+      --shadow: 0 18px 60px rgba(0,0,0,.45);
+      --radius: 22px;
 
-      --shadow: 0 22px 60px rgba(0,0,0,.70);
-      --r-xl:28px;
-      --r-lg:20px;
-      --r-md:16px;
-      --ease: cubic-bezier(.2,.8,.2,1);
+      --wrap: 1120px;
     }
 
     *{ box-sizing:border-box; }
@@ -36,748 +35,855 @@
       color:var(--ink);
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
       background:
-        radial-gradient(1200px 700px at 15% 10%, rgba(168,85,247,.25), transparent 60%),
-        radial-gradient(900px 600px at 85% 20%, rgba(99,102,241,.18), transparent 55%),
-        radial-gradient(circle at 50% 0%, rgba(196,181,253,.10), transparent 60%),
-        linear-gradient(180deg, #060212 0%, #050014 40%, #030010 100%);
+        radial-gradient(1200px 700px at 30% 10%, rgba(182,123,255,.18), transparent 60%),
+        radial-gradient(900px 600px at 85% 20%, rgba(124,92,255,.14), transparent 60%),
+        radial-gradient(900px 700px at 50% 120%, rgba(182,123,255,.10), transparent 60%),
+        linear-gradient(180deg, #050315 0%, #060318 35%, #030012 100%);
       overflow-x:hidden;
     }
 
-    /* ====== Top Bar (match SNS pages) ====== */
-    .topbar{
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      border-bottom: 1px solid rgba(255,255,255,.06);
-      background: linear-gradient(180deg, rgba(0,0,0,.55), rgba(0,0,0,.18));
-      backdrop-filter: blur(14px);
+    /* animated moving veil (no snow on this page) */
+    .bg{
+      position:fixed;
+      inset:0;
+      z-index:-3;
+      pointer-events:none;
     }
-    .topbar-inner{
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 14px 18px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 14px;
+    .bg::before{
+      content:"";
+      position:absolute;
+      inset:-30%;
+      background:
+        radial-gradient(900px 600px at 20% 25%, rgba(182,123,255,.20), transparent 62%),
+        radial-gradient(800px 600px at 85% 30%, rgba(124,92,255,.14), transparent 64%),
+        radial-gradient(700px 500px at 50% 75%, rgba(182,123,255,.10), transparent 62%);
+      filter: blur(22px);
+      opacity:.9;
+      animation: drift 12s ease-in-out infinite alternate;
+      transform: translate3d(0,0,0);
+    }
+    @keyframes drift{
+      from{ transform: translate(-1.5%, -1.0%) scale(1.02); }
+      to{ transform: translate(1.5%, 1.0%) scale(1.06); }
+    }
+    .bg::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,.06), transparent 35%),
+        repeating-linear-gradient(
+          135deg,
+          rgba(255,255,255,.05) 0px,
+          rgba(255,255,255,.05) 1px,
+          transparent 1px,
+          transparent 14px
+        );
+      opacity:.10;
+      mix-blend-mode: overlay;
     }
 
+    .wrap{
+      max-width: var(--wrap);
+      margin: 0 auto;
+      padding: 0 1.1rem;
+    }
+
+    /* Top nav (MATCH SNS) */
+    .topnav{
+      position:sticky;
+      top:0;
+      z-index:50;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      background: rgba(5,3,21,.58);
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    .navrow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:1rem;
+      padding: 1.1rem 0;
+    }
     .brand{
       display:flex;
       align-items:center;
-      gap: 12px;
-      min-width: 260px;
+      gap:.75rem;
+      min-width: 270px;
     }
-    .brand-logo{
-      width: 38px;
-      height: 38px;
+    .brand .mark{
+      width: 40px; height: 40px;
       border-radius: 12px;
-      display:grid;
-      place-items:center;
-      background: rgba(0,0,0,.22);
-      border: 1px solid rgba(196,181,253,.18);
-      box-shadow: 0 10px 30px rgba(0,0,0,.35);
-      overflow:hidden;
-    }
-    .brand-logo img{
-      width: 22px;
-      height: 22px;
-      object-fit: contain;
-      display:block;
-      filter: drop-shadow(0 6px 10px rgba(0,0,0,.35));
-    }
-    .brand-text{
-      display:flex;
-      flex-direction:column;
-      gap:2px;
-      line-height:1.1;
-    }
-    .brand-text .name{
-      font-weight: 900;
-      letter-spacing: .14em;
-      text-transform: uppercase;
-      font-size: .92rem;
-    }
-    .brand-text .tag{
-      font-size: .82rem;
-      color: var(--muted2);
-    }
-
-    .nav{
+      background: rgba(182,123,255,.10);
+      border: 1px solid rgba(255,255,255,.10);
+      box-shadow: 0 14px 40px rgba(0,0,0,.35);
       display:flex;
       align-items:center;
       justify-content:center;
-      gap: 12px;
+      overflow:hidden;
+    }
+    .brand .mark img{
+      width: 28px;
+      height: 28px;
+      object-fit: contain;
+      display:block;
+      filter: drop-shadow(0 10px 22px rgba(182,123,255,.25));
+    }
+    .brand strong{
+      display:block;
+      letter-spacing:.14em;
+      font-size:.86rem;
+    }
+    .brand span{
+      display:block;
+      color: rgba(244,240,255,.65);
+      font-size:.82rem;
+      margin-top:.14rem;
+    }
+
+    .navlinks{
+      display:flex;
+      align-items:center;
+      gap: .55rem;
       flex-wrap: wrap;
-      padding: 6px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.08);
-      background: rgba(0,0,0,.18);
-      box-shadow: 0 10px 30px rgba(0,0,0,.25);
+      justify-content:center;
     }
-    .nav a{
+    .navlinks a{
       text-decoration:none;
-      color: rgba(244,240,255,.76);
-      font-size: .78rem;
-      letter-spacing: .14em;
-      text-transform: uppercase;
-      padding: 10px 12px;
+      color: rgba(244,240,255,.72);
+      padding: .55rem .85rem;
       border-radius: 999px;
-      transition: transform .14s var(--ease), background .14s var(--ease), color .14s var(--ease), border-color .14s var(--ease);
+      border: 1px solid transparent;
+      letter-spacing:.12em;
+      font-size: .78rem;
+      text-transform: uppercase;
+      transition: transform .15s ease, background .15s ease, border-color .15s ease, color .15s ease;
     }
-    .nav a:hover{
+    .navlinks a:hover{
+      color: rgba(244,240,255,.95);
+      background: rgba(182,123,255,.10);
+      border-color: rgba(255,255,255,.10);
       transform: translateY(-1px);
-      color: rgba(244,240,255,.92);
-      background: rgba(255,255,255,.06);
     }
-    .nav a.active{
-      color: #fff;
-      background: radial-gradient(circle at top left, rgba(168,85,247,.55), rgba(76,29,149,.35));
-      border: 1px solid rgba(196,181,253,.20);
+    .navlinks a.active{
+      color: rgba(244,240,255,.95);
+      background: rgba(182,123,255,.16);
+      border-color: rgba(255,255,255,.12);
     }
 
     .actions{
       display:flex;
+      gap:.65rem;
       align-items:center;
-      gap: 10px;
-      min-width: 180px;
-      justify-content: flex-end;
+      justify-content:flex-end;
+      min-width: 170px;
     }
-    .client-login-pill{
+
+    .btn{
       display:inline-flex;
       align-items:center;
       justify-content:center;
-      height: 38px;
-      padding: 0 14px;
+      gap:.5rem;
+      padding: .72rem 1.05rem;
       border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.20);
-      color: #f4f0ff;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.14);
+      color: rgba(244,240,255,.92);
       text-decoration:none;
-      font-size: .78rem;
-      letter-spacing: .12em;
+      font-weight: 700;
+      letter-spacing:.12em;
+      font-size:.78rem;
       text-transform: uppercase;
-      box-shadow: 0 10px 30px rgba(0,0,0,.35);
-      backdrop-filter: blur(10px);
-      transition: transform .15s var(--ease), border-color .15s var(--ease), background .15s var(--ease);
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);
+      transition: transform .15s ease, background .15s ease, border-color .15s ease, filter .15s ease;
+      will-change: transform;
       white-space: nowrap;
     }
-    .client-login-pill:hover{
-      transform: translateY(-1px);
-      border-color: rgba(255,255,255,.22);
-      background: rgba(0,0,0,.28);
+    .btn:hover{
+      transform: translateY(-2px);
+      border-color: rgba(255,255,255,.16);
+      background: rgba(182,123,255,.10);
+      filter: brightness(1.05);
+    }
+    .btn.primary{
+      background: linear-gradient(90deg, rgba(182,123,255,.95), rgba(138,93,255,.95));
+      border-color: rgba(255,255,255,.18);
+      color: #12061f;
+      box-shadow: 0 18px 60px rgba(182,123,255,.20);
+    }
+    .btn.primary:hover{
+      background: linear-gradient(90deg, rgba(182,123,255,1), rgba(138,93,255,1));
+      filter:none;
     }
 
-    /* ====== Page Layout ====== */
-    .wrap{
-      /* Full-width layout (still with nice gutters) */
-      max-width: none;
-      width: 100%;
-      margin: 0 auto;
-      padding: 34px 36px 80px;
-    }
-
-    @media (max-width: 900px){
-      .wrap{ padding: 28px 18px 70px; }
-    }
-
-
-    .hero{
-      /* Full-width section feel */
-      border-radius: 34px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: linear-gradient(180deg, rgba(10,5,25,.55), rgba(0,0,0,.10));
-      box-shadow: 0 22px 70px rgba(0,0,0,.55);
-      overflow:hidden;
-      position: relative;
-      padding: 38px 34px;
-      width: 100%;
-    }
-    @media (max-width: 900px){
-      .hero{ padding: 28px 18px; border-radius: 26px; }
-    }
-
-    .hero::before{
-      content:"";
-      position:absolute;
-      inset:-2px;
-      background:
-        radial-gradient(500px 260px at 18% 20%, rgba(168,85,247,.28), transparent 65%),
-        radial-gradient(520px 300px at 82% 15%, rgba(196,181,253,.16), transparent 60%),
-        linear-gradient(90deg, rgba(255,255,255,.06), rgba(255,255,255,0));
-      pointer-events:none;
-      opacity:.9;
-    }
-    .hero-inner{
-      position:relative;
-      display:grid;
-      gap: 18px;
-      grid-template-columns: 1.2fr .8fr;
-      align-items: start;
-    }
-    @media (max-width: 900px){
-      .hero-inner{ grid-template-columns: 1fr; }
-      .actions{ min-width:auto; }
-      .brand{ min-width:auto; }
-    }
+    /* Sections */
+    .section{ padding: 4.2rem 0; position:relative; }
+    .section.tight{ padding: 3.2rem 0; }
 
     .kicker{
       display:inline-flex;
       align-items:center;
-      gap:10px;
-      padding: 8px 12px;
+      gap:.55rem;
+      padding: .42rem .8rem;
       border-radius: 999px;
-      border: 1px solid rgba(196,181,253,.18);
-      background: rgba(0,0,0,.18);
-      color: rgba(244,240,255,.72);
-      font-size: .74rem;
-      letter-spacing: .16em;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(182,123,255,.08);
+      color: rgba(244,240,255,.82);
+      letter-spacing:.16em;
+      font-size:.72rem;
       text-transform: uppercase;
-      width: fit-content;
+    }
+    .kicker .dot{
+      width: 8px; height: 8px;
+      border-radius: 999px;
+      background: rgba(182,123,255,.9);
+      box-shadow: 0 0 0 6px rgba(182,123,255,.15);
     }
 
-    h1{
-      margin: 10px 0 8px;
-      font-size: clamp(2.0rem, 4vw, 3.2rem);
-      line-height: 1.05;
-      letter-spacing: .02em;
+    /* Hero */
+    .hero{ padding: 4.5rem 0 2.2rem; }
+    .heroGrid{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 2.2rem;
+      align-items: start;
     }
-    .lede{
-      color: var(--muted);
+    .hero h1{
+      margin:.9rem 0 .8rem;
+      font-size: clamp(2.1rem, 4.7vw, 3.6rem);
+      line-height: 1.06;
+      letter-spacing: -.02em;
+    }
+    .hero h1 .grad{
+      background: linear-gradient(90deg, rgba(244,240,255,.95), rgba(182,123,255,.78));
+      -webkit-background-clip: text;
+      background-clip:text;
+      color: transparent;
+    }
+    .hero p{
+      margin:0;
+      max-width: 68ch;
+      color: rgba(244,240,255,.74);
       line-height: 1.65;
-      max-width: 64ch;
-      margin: 0;
       font-size: 1.02rem;
     }
+    .heroCtas{
+      display:flex;
+      gap:.85rem;
+      margin-top: 1.4rem;
+      flex-wrap:wrap;
+    }
 
-    .hero-card{
-      border-radius: var(--r-lg);
+    /* Panel (right side hero) */
+    .panel{
+      border-radius: var(--radius);
       border: 1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.22);
-      padding: 16px 16px 14px;
-      box-shadow: 0 16px 44px rgba(0,0,0,.35);
+      background: rgba(12,10,28,.52);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      position:relative;
+      isolation:isolate;
     }
-    .hero-card .label{
-      font-size: .72rem;
-      letter-spacing: .16em;
-      text-transform: uppercase;
-      color: rgba(244,240,255,.70);
-      margin-bottom: 10px;
+    .panel::before{
+      content:"";
+      position:absolute;
+      inset:-30%;
+      background:
+        radial-gradient(520px 380px at 25% 25%, rgba(182,123,255,.28), transparent 55%),
+        radial-gradient(520px 380px at 75% 55%, rgba(138,93,255,.18), transparent 55%),
+        radial-gradient(520px 380px at 55% 85%, rgba(182,123,255,.12), transparent 55%);
+      filter: blur(18px);
+      opacity:.95;
+      animation: drift 10s ease-in-out infinite alternate;
+      z-index:-1;
     }
-    .hero-card ul{
-      margin: 0;
-      padding-left: 18px;
+    .panel::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background: linear-gradient(180deg, rgba(0,0,0,.12), rgba(0,0,0,.58));
+      z-index:-1;
+    }
+    .panelTop{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding: 1.05rem 1.1rem;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      gap:1rem;
+      flex-wrap:wrap;
+    }
+    .chipRow{ display:flex; gap:.5rem; flex-wrap:wrap; }
+    .chip{
+      padding: .42rem .72rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.12);
       color: rgba(244,240,255,.78);
-      line-height: 1.55;
-      font-size: .95rem;
+      font-size: .72rem;
+      letter-spacing:.12em;
+      text-transform: uppercase;
+      white-space:nowrap;
     }
-    .hero-card li + li{ margin-top: 8px; }
 
-    .grid{
+    .panelBody{
+      padding: 1.1rem;
       display:grid;
-      grid-template-columns: 1.6fr 1fr;
-      gap: 22px;
-      margin-top: 22px;
-      width: 100%;
-    }
-    @media (max-width: 980px){
-      .grid{ grid-template-columns: 1fr; }
+      grid-template-columns: 1fr;
+      gap: .85rem;
     }
 
-    @media (max-width: 980px){
-      .grid{ grid-template-columns: 1fr; }
+    .miniCard{
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(12,10,28,.55);
+      padding: .95rem .95rem;
+      display:flex;
+      align-items:flex-start;
+      gap: .8rem;
+      transition: transform .18s ease, border-color .18s ease, background .18s ease;
+    }
+    .miniCard:hover{
+      transform: translateY(-2px);
+      border-color: rgba(255,255,255,.14);
+      background: rgba(182,123,255,.07);
+    }
+    .ico{
+      width: 42px; height: 42px;
+      border-radius: 14px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(182,123,255,.10);
+      flex: 0 0 auto;
+      position:relative;
+      overflow:hidden;
+    }
+    .ico::before{
+      content:"";
+      position:absolute;
+      inset:-50%;
+      background: radial-gradient(circle at 40% 40%, rgba(182,123,255,.55), transparent 55%);
+      filter: blur(10px);
+      opacity:.8;
+    }
+    .ico svg{ width: 22px; height: 22px; opacity:.95; z-index:1; }
+    .miniCard h4{
+      margin:0;
+      font-size: .95rem;
+      letter-spacing:.06em;
+      text-transform: uppercase;
+    }
+    .miniCard p{
+      margin:.35rem 0 0;
+      color: rgba(244,240,255,.70);
+      line-height: 1.55;
+      font-size:.92rem;
+    }
+
+    /* “No pills” content blocks */
+    .grid2{
+      display:grid;
+      grid-template-columns: 1.45fr .95fr;
+      gap: 1.2rem;
+      margin-top: 1.8rem;
+      align-items:start;
     }
 
     .card{
-      border-radius: var(--r-xl);
+      border-radius: var(--radius);
       border: 1px solid rgba(255,255,255,.10);
-      background: linear-gradient(180deg, rgba(18,10,50,.50), rgba(0,0,0,.10));
-      box-shadow: 0 18px 50px rgba(0,0,0,.45);
+      background: rgba(12,10,28,.52);
+      box-shadow: var(--shadow);
+      padding: 1.25rem 1.25rem;
+      position:relative;
       overflow:hidden;
+      transition: transform .18s ease, border-color .18s ease, background .18s ease;
     }
-    .card-header{
-      padding: 18px 18px 10px;
-      border-bottom: 1px solid rgba(255,255,255,.06);
+    .card:hover{
+      transform: translateY(-3px);
+      border-color: rgba(255,255,255,.14);
+      background: rgba(182,123,255,.06);
+    }
+
+    .cardHeader{
       display:flex;
       align-items:flex-end;
-      justify-content: space-between;
-      gap: 12px;
+      justify-content:space-between;
+      gap: 1rem;
+      flex-wrap:wrap;
+      padding-bottom: .9rem;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      margin-bottom: .9rem;
     }
-    .card-title{
+    .cardHeader h2{
       margin:0;
-      font-size: .92rem;
-      letter-spacing: .18em;
+      letter-spacing:.10em;
       text-transform: uppercase;
-      color: rgba(244,240,255,.88);
+      font-size: 1.05rem;
     }
-    .card-sub{
+    .subnote{
       margin:0;
-      color: rgba(244,240,255,.58);
-      font-size: .86rem;
-    }
-    .card-body{
-      padding: 12px 18px 18px;
-    }
-
-    /* ====== Accordion (details/summary) ====== */
-    .acc{
-      display:flex;
-      flex-direction:column;
-      gap: 10px;
-    }
-    details{
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.18);
-      overflow:hidden;
-      transform: translateZ(0);
-      transition: border-color .18s var(--ease), background .18s var(--ease);
-    }
-    details:hover{
-      border-color: rgba(196,181,253,.20);
-      background: rgba(0,0,0,.22);
-    }
-    summary{
-      list-style:none;
-      cursor:pointer;
-      padding: 14px 14px;
-      display:flex;
-      align-items:center;
-      justify-content: space-between;
-      gap: 14px;
-      user-select:none;
-    }
-    summary::-webkit-details-marker{ display:none; }
-
-    .sum-left{
-      display:flex;
-      flex-direction:column;
-      gap: 4px;
-    }
-    .sum-title{
-      font-weight: 850;
-      letter-spacing: .06em;
-      color: rgba(244,240,255,.92);
-      font-size: .94rem;
-    }
-    .sum-note{
       color: rgba(244,240,255,.62);
-      font-size: .86rem;
-      line-height: 1.35;
+      font-size: .9rem;
+      letter-spacing:.02em;
     }
-    .chev{
-      width: 34px;
-      height: 34px;
-      border-radius: 12px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.04);
-      display:grid;
-      place-items:center;
-      transition: transform .18s var(--ease), border-color .18s var(--ease);
-      flex: 0 0 auto;
-    }
-    details[open] .chev{ transform: rotate(180deg); border-color: rgba(196,181,253,.20); }
 
-    .panel{
-      padding: 0 14px 14px;
-      color: rgba(244,240,255,.76);
-      line-height: 1.65;
+    .term{
+      padding: .9rem 0;
+      border-top: 1px solid rgba(255,255,255,.06);
+    }
+    .term:first-child{ border-top: 0; padding-top: 0; }
+    .term h3{
+      margin:0 0 .35rem;
       font-size: .95rem;
-      animation: rise .18s var(--ease) both;
-    }
-    @keyframes rise{
-      from{ opacity:0; transform: translateY(-4px); }
-      to{ opacity:1; transform: translateY(0); }
-    }
-
-        /* ===== Reveal Animations (site-wide feel) ===== */
-    .reveal{
-      opacity: 0;
-      transform: translateY(14px);
-      filter: blur(2px);
-      transition:
-        opacity .65s var(--ease),
-        transform .65s var(--ease),
-        filter .65s var(--ease);
-      transition-delay: var(--d, 0ms);
-      will-change: opacity, transform, filter;
-    }
-
-    .reveal.in-view{
-      opacity: 1;
-      transform: translateY(0);
-      filter: blur(0);
-    }
-
-    /* Subtle polish on hover (keeps it modern) */
-    .card, .hero, details{
-      transition: transform .22s var(--ease), border-color .22s var(--ease), background .22s var(--ease);
-    }
-    .card:hover, .hero:hover{
-      transform: translateY(-2px);
-      border-color: rgba(196,181,253,.20);
-    }
-
-
-    .mini{
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.18);
-      padding: 14px;
-    }
-    .mini h3{
-      margin: 0 0 10px;
-      font-size: .86rem;
-      letter-spacing: .18em;
+      letter-spacing:.08em;
       text-transform: uppercase;
-      color: rgba(244,240,255,.90);
     }
-    .mini p{
-      margin: 0 0 12px;
-      color: rgba(244,240,255,.66);
-      line-height: 1.6;
-      font-size: .92rem;
+    .term p{
+      margin:0;
+      color: rgba(244,240,255,.72);
+      line-height: 1.65;
     }
-    .mini .row{
+    .term ul{
+      margin: .65rem 0 0;
+      padding-left: 1.1rem;
+      color: rgba(244,240,255,.70);
+      line-height: 1.75;
+    }
+
+    .callout{
+      border-radius: var(--radius);
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(12,10,28,.50);
+      box-shadow: var(--shadow);
+      padding: 1.15rem 1.15rem;
+      overflow:hidden;
+      position:relative;
+    }
+    .callout h3{
+      margin:0 0 .5rem;
+      font-size: .95rem;
+      letter-spacing:.10em;
+      text-transform: uppercase;
+    }
+    .callout p{
+      margin:0;
+      color: rgba(244,240,255,.70);
+      line-height: 1.65;
+    }
+    .callout .stack{
+      margin-top: .9rem;
       display:flex;
       flex-direction:column;
-      gap: 10px;
+      gap:.6rem;
+    }
+    .divider{
+      height: 1px;
+      background: rgba(255,255,255,.08);
+      margin: 1rem 0;
     }
 
-    .pill{
-      display:inline-flex;
+    /* CTA panel */
+    .ctaPanel{
+      border-radius: calc(var(--radius) + 6px);
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(12,10,28,.52);
+      box-shadow: var(--shadow);
+      padding: 1.65rem 1.35rem;
+      display:flex;
       align-items:center;
-      gap: 8px;
-      padding: 9px 12px;
-      border-radius: 999px;
-      border: 1px solid rgba(196,181,253,.18);
-      background: rgba(0,0,0,.18);
-      color: rgba(244,240,255,.78);
-      font-size: .78rem;
-      letter-spacing: .08em;
-      width: fit-content;
-      text-decoration:none;
-      transition: transform .14s var(--ease), background .14s var(--ease), border-color .14s var(--ease);
+      justify-content:space-between;
+      gap: 1rem;
+      overflow:hidden;
+      position:relative;
     }
-    .pill:hover{
-      transform: translateY(-1px);
-      background: rgba(0,0,0,.22);
-      border-color: rgba(196,181,253,.24);
+    .ctaPanel::before{
+      content:"";
+      position:absolute;
+      inset:-35%;
+      background:
+        radial-gradient(520px 380px at 35% 45%, rgba(182,123,255,.26), transparent 60%),
+        radial-gradient(520px 380px at 75% 55%, rgba(138,93,255,.18), transparent 60%);
+      filter: blur(18px);
+      opacity:.9;
+      z-index:-1;
+    }
+    .ctaPanel h2{
+      margin:0;
+      font-size: 1.25rem;
+      letter-spacing:.06em;
+      text-transform: uppercase;
+    }
+    .ctaPanel p{
+      margin:.55rem 0 0;
+      color: rgba(244,240,255,.70);
+      line-height: 1.6;
+      max-width: 62ch;
+    }
+    .ctaPanel .right{
+      display:flex;
+      gap:.75rem;
+      flex-wrap:wrap;
+      justify-content:flex-end;
     }
 
     footer{
-      margin-top: 18px;
-      text-align:center;
-      color: rgba(244,240,255,.52);
-      font-size: .82rem;
-    }
-    footer .links{
-      margin-top: 10px;
-      display:flex;
-      justify-content:center;
-      gap: 12px;
-      flex-wrap:wrap;
+      padding: 2.8rem 0 3.4rem;
+      color: rgba(244,240,255,.55);
+      border-top: 1px solid rgba(255,255,255,.06);
+      background: rgba(0,0,0,.08);
     }
     footer a{
-      color: rgba(244,240,255,.68);
+      color: rgba(244,240,255,.72);
       text-decoration:none;
       border-bottom: 1px solid rgba(244,240,255,.18);
-      padding-bottom: 2px;
+      padding-bottom:2px;
     }
-    footer a:hover{
-      color: rgba(244,240,255,.88);
-      border-bottom-color: rgba(244,240,255,.34);
+    footer a:hover{ color: rgba(244,240,255,.92); }
+
+    /* reveal animation */
+    .reveal{
+      opacity:0;
+      transform: translateY(14px);
+      transition: opacity .55s ease, transform .55s ease;
+    }
+    .reveal.on{
+      opacity:1;
+      transform: translateY(0);
+    }
+
+    /* responsive */
+    @media (max-width: 980px){
+      .heroGrid{ grid-template-columns: 1fr; }
+      .grid2{ grid-template-columns: 1fr; }
+      .actions{ min-width:auto; }
+      .brand{ min-width:auto; }
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      .bg::before{ animation:none !important; }
+      .btn, .card, .miniCard{ transition:none !important; }
+      .reveal{ opacity:1 !important; transform:none !important; }
     }
   </style>
 </head>
 
 <body>
-  <!-- ===== Top Nav ===== -->
-  <header class="topbar">
-    <div class="topbar-inner">
-      <a class="brand" href="/home/" style="text-decoration:none; color:inherit;">
-        <div class="brand-logo" aria-hidden="true">
-          <img src="/assets/sns-logo-purple.png" alt="" />
-        </div>
-        <div class="brand-text">
-          <div class="name">SAKU NETWORK SOLUTIONS</div>
-          <div class="tag">Network infrastructure, done clean.</div>
-        </div>
-      </a>
+  <div class="bg" aria-hidden="true"></div>
 
-      <nav class="nav" aria-label="Primary">
-        <a href="/home/">Home</a>
-        <a href="/sns/">Services</a>
-        <a href="/experience/">Credibility</a>
-        <a class="active" href="/other/">Resources</a>
-        <a href="/socials/">Contact</a>
-      </nav>
+  <!-- Top Nav (same tabs as SNS; Resources active) -->
+  <header class="topnav">
+    <div class="wrap">
+      <div class="navrow">
+        <div class="brand">
+          <div class="mark">
+            <img src="/assets/sns-logo-purple.png" alt="Saku Network Solutions logo">
+          </div>
+          <div>
+            <strong>SAKU NETWORK SOLUTIONS</strong>
+            <span>Network infrastructure, done clean.</span>
+          </div>
+        </div>
 
-      <div class="actions">
-        <a class="client-login-pill" href="/sns-login/">Client Login</a>
+        <nav class="navlinks" aria-label="Primary">
+          <a href="/home/">Home</a>
+          <a href="/sns/">Services</a>
+          <a href="/experience/">Credibility</a>
+          <a class="active" href="/other/">Resources</a>
+          <a href="/socials/">Contact</a>
+        </nav>
+
+        <div class="actions">
+          <a class="btn" href="/sns-login/">Client Login</a>
+        </div>
       </div>
     </div>
   </header>
 
-  <main class="wrap">
-    <!-- ===== Hero ===== -->
-    <section class="hero reveal" style="--d: 0ms" aria-label="Resources hero">
-      <div class="hero-inner">
-        <div>
-          <div class="kicker">Resources · Terms · Policies</div>
-          <h1>Clear expectations. Clean work. No surprises.</h1>
-          <p class="lede">
-            This page covers how SNS works with clients: payments, subscriptions, cancellations,
-            access, data handling, and basic service boundaries. It’s written to be readable,
-            not buried in fluff.
-          </p>
-        </div>
+  <main>
+    <!-- HERO -->
+    <section class="hero section tight">
+      <div class="wrap">
+        <div class="heroGrid">
+          <div>
+            <div class="kicker reveal">
+              <span class="dot"></span>
+              Resources · Terms · Policies
+            </div>
 
-        <aside class="hero-card" aria-label="Quick summary">
-          <div class="label">Quick Summary</div>
-          <ul>
-            <li>Work begins after scope + approval (and deposit if required).</li>
-            <li>Subscriptions are billed on schedule; non-payment can pause service.</li>
-            <li>Client-owned accounts stay client-owned. Access is permission-based.</li>
-            <li>Sensitive info is minimized; only what’s needed to do the job.</li>
-          </ul>
-        </aside>
-      </div>
-    </section>
+            <h1 class="reveal">
+              Clear expectations. <span class="grad">Clean work.</span> No surprises.
+            </h1>
 
-    <!-- ===== Content ===== -->
-    <section class="grid" aria-label="Resources content">
-      <!-- Left: Terms accordion -->
-      <section class="card reveal" style="--d: 90ms" aria-label="Terms & policies">
-        <div class="card-header">
-          <h2 class="card-title">Client Terms & Policies</h2>
-          <p class="card-sub">Last updated: <span id="lastUpdated"></span></p>
-        </div>
-
-        <div class="card-body">
-          <div class="acc">
-
-            <details class="reveal" style="--d: 260ms" open>
-              <summary>
-                <div class="sum-left">
-                  <div class="sum-title">1) Scope of Work</div>
-                  <div class="sum-note">What’s included, what isn’t, and how changes are handled.</div>
-                </div>
-                <div class="chev">⌄</div>
-              </summary>
-              <div class="panel">
-                Work is based on the agreed scope (what’s being installed/configured, where, and why).
-                If the job changes midstream (new rooms, new equipment, new requirements), I’ll confirm the change
-                before continuing so time + cost stay predictable.
-              </div>
-            </details>
-
-            <details class="reveal" style="--d: 300ms">
-              <summary>
-                <div class="sum-left">
-                  <div class="sum-title">2) Estimates, Deposits, and Scheduling</div>
-                  <div class="sum-note">How booking works for on-site visits and projects.</div>
-                </div>
-                <div class="chev">⌄</div>
-              </summary>
-              <div class="panel">
-                Estimates are based on the information available at the time. Some issues only become visible on-site
-                (cabling quality, interference, ISP constraints, legacy config, unmanaged switches, etc.).
-                For certain projects, a deposit may be required to reserve time and/or procure equipment.
-              </div>
-            </details>
-
-            <details class="reveal" style="--d: 340ms">
-              <summary>
-                <div class="sum-left">
-                  <div class="sum-title">3) Payments (One-Time Work)</div>
-                  <div class="sum-note">Invoices, due dates, and what happens if payment is late.</div>
-                </div>
-                <div class="chev">⌄</div>
-              </summary>
-              <div class="panel">
-                One-time work is invoiced after completion unless otherwise agreed in writing.
-                If an invoice becomes overdue, support may pause until the balance is resolved.
-                If hardware was procured on your behalf, it remains payable regardless of deployment status.
-              </div>
-            </details>
-
-            <details class="reveal" style="--d: 380ms">
-              <summary>
-                <div class="sum-left">
-                  <div class="sum-title">4) Subscription Support (Membership)</div>
-                  <div class="sum-note">Ongoing support rules, billing, and termination for non-payment.</div>
-                </div>
-                <div class="chev">⌄</div>
-              </summary>
-              <div class="panel">
-                Subscription support is billed on the schedule shown at checkout. If a subscription payment fails or
-                becomes past due, service can be paused until the subscription is brought current. Repeated non-payment
-                may result in cancellation and removal of ongoing access (admin accounts, dashboards, monitoring links, etc.).
-              </div>
-            </details>
-
-            <details class="reveal" style="--d: 420ms">
-              <summary>
-                <div class="sum-left">
-                  <div class="sum-title">5) Access, Admin Accounts, and Ownership</div>
-                  <div class="sum-note">Who owns what, and how credentials are handled.</div>
-                </div>
-                <div class="chev">⌄</div>
-              </summary>
-              <div class="panel">
-                Client-owned systems remain client-owned (ISP account, router cloud account, domain/DNS, Wi-Fi controller, etc.).
-                If SNS is granted admin access, it’s for performing the agreed work only. When requested, access can be reduced
-                or removed after the job is complete.
-              </div>
-            </details>
-
-            <details class="reveal" style="--d: 460ms">
-              <summary>
-                <div class="sum-left">
-                  <div class="sum-title">6) Data Handling and Privacy</div>
-                  <div class="sum-note">What information is collected and how it’s used.</div>
-                </div>
-                <div class="chev">⌄</div>
-              </summary>
-              <div class="panel">
-                SNS minimizes data collection. Personal details submitted through the site (name, email, phone, service address)
-                are used only to respond, schedule, and deliver service. Device details (models, configs, screenshots/logs) are used
-                for troubleshooting and may be retained to support continuity—especially for subscription clients.
-              </div>
-            </details>
-
-            <details class="reveal" style="--d: 500ms">
-              <summary>
-                <div class="sum-left">
-                  <div class="sum-title">7) Third-Party Services</div>
-                  <div class="sum-note">ISP, cloud portals, Stripe, vendors, and platform dependencies.</div>
-                </div>
-                <div class="chev">⌄</div>
-              </summary>
-              <div class="panel">
-                Some services depend on third parties (ISP uptime, vendor cloud portals, authentication providers, payment processors).
-                SNS can configure and harden, but cannot guarantee third-party availability. If a third party changes terms, pricing,
-                or features, SNS will adapt the implementation where reasonable.
-              </div>
-            </details>
-
-            <details class="reveal" style="--d: 540ms">
-              <summary>
-                <div class="sum-left">
-                  <div class="sum-title">8) Acceptable Use (Client Portal + Website)</div>
-                  <div class="sum-note">Rules for using the site, inquiry forms, and client access.</div>
-                </div>
-                <div class="chev">⌄</div>
-              </summary>
-              <div class="panel">
-                Do not submit false information, impersonate others, attempt unauthorized access, or abuse automated systems.
-                SNS may block access to protect systems, clients, and service quality.
-              </div>
-            </details>
-
-            <details class="reveal" style="--d: 580ms">
-              <summary>
-                <div class="sum-left">
-                  <div class="sum-title">9) Service Limitations</div>
-                  <div class="sum-note">What SNS can and cannot guarantee in real networks.</div>
-                </div>
-                <div class="chev">⌄</div>
-              </summary>
-              <div class="panel">
-                Networking work involves variables outside any one party’s control (building materials, RF congestion, aging cabling,
-                ISP limitations, vendor firmware behavior). SNS focuses on measurable improvement and stability, but does not guarantee
-                “perfect” Wi-Fi everywhere without addressing the real constraints discovered during assessment.
-              </div>
-            </details>
-
-            <details class="reveal" style="--d: 620ms">
-              <summary>
-                <div class="sum-left">
-                  <div class="sum-title">10) Changes to These Terms</div>
-                  <div class="sum-note">How updates are communicated.</div>
-                </div>
-                <div class="chev">⌄</div>
-              </summary>
-              <div class="panel">
-                SNS may update these terms to reflect product changes, policy improvements, or legal requirements.
-                The “Last updated” date above reflects the most recent revision.
-              </div>
-            </details>
-
-          </div>
-        </div>
-      </section>
-
-      <!-- Right: Helpful links / contact / highlights -->
-      <aside class="card reveal" style="--d: 160ms" aria-label="Helpful resources">
-        <div class="card-header">
-          <h2 class="card-title">Helpful Links</h2>
-          <p class="card-sub">Fast access</p>
-        </div>
-
-        <div class="card-body">
-          <div class="mini">
-            <h3>Need support?</h3>
-            <p>
-              If you’re an active client, use the site flows so everything stays logged and trackable.
-              If you’re new, start with the inquiry form.
+            <p class="reveal">
+              This page explains how SNS works with clients—scope, scheduling, billing, subscriptions, access,
+              privacy, and service boundaries. It’s written for clarity, not legal clutter.
             </p>
-            <div class="row">
-              <a class="pill" href="/inquiry/">Start an Inquiry</a>
-              <a class="pill" href="/sns/">View Services</a>
-              <a class="pill" href="/socials/">Contact</a>
+
+            <div class="heroCtas reveal">
+              <a class="btn primary" href="/sns-inquiry/">Start an Inquiry</a>
+              <a class="btn" href="#terms">View Terms</a>
             </div>
           </div>
 
-          <div style="height:12px;"></div>
+          <aside class="panel reveal" aria-label="Quick Summary Panel">
+            <div class="panelTop">
+              <div class="chipRow">
+                <span class="chip">Scope first</span>
+                <span class="chip">Clear billing</span>
+                <span class="chip">Permission-based access</span>
+              </div>
+              <span class="chip">SNS / RESOURCES</span>
+            </div>
 
-          <div class="mini">
-            <h3>What this page is</h3>
-            <p>
-              It’s the “expectations” layer—billing clarity, access boundaries, and privacy basics—so clients know how SNS operates.
-            </p>
-          </div>
+            <div class="panelBody">
+              <div class="miniCard">
+                <div class="ico" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M7 12h10M7 8h7M7 16h6" stroke="white" stroke-opacity=".9" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M6 4h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"
+                      stroke="white" stroke-opacity=".35" stroke-width="2" />
+                  </svg>
+                </div>
+                <div>
+                  <h4>Work starts with scope</h4>
+                  <p>We confirm what’s being done, where, and why—then execute cleanly against that plan.</p>
+                </div>
+              </div>
+
+              <div class="miniCard">
+                <div class="ico" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M12 3l8 4v6c0 5-3.5 8.5-8 9-4.5-.5-8-4-8-9V7l8-4Z"
+                      stroke="white" stroke-opacity=".9" stroke-width="2" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                <div>
+                  <h4>Access is controlled</h4>
+                  <p>Client systems remain client-owned. SNS access is permission-based and scoped to the work.</p>
+                </div>
+              </div>
+
+              <div class="miniCard">
+                <div class="ico" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M7 17l10-10" stroke="white" stroke-opacity=".9" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M7 7h10v10" stroke="white" stroke-opacity=".35" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                </div>
+                <div>
+                  <h4>Billing is straightforward</h4>
+                  <p>One-time invoices and subscription billing follow clear rules. Past-due accounts can pause service.</p>
+                </div>
+              </div>
+            </div>
+          </aside>
         </div>
-      </aside>
+      </div>
     </section>
 
-    <footer class="reveal" style="--d: 220ms">
-      © <span id="year"></span> Saku Network Solutions. Built clean. Documented.
-      <div class="links">
-        <a href="/home/">Home</a>
-        <a href="/sns/">Services</a>
-        <a href="/experience/">Credibility</a>
-        <a href="/other/">Resources</a>
-        <a href="/socials/">Contact</a>
+    <!-- TERMS -->
+    <section id="terms" class="section">
+      <div class="wrap">
+        <div class="kicker reveal">
+          <span class="dot"></span>
+          Client Terms & Policies
+        </div>
+
+        <div class="grid2">
+          <!-- Left: Terms (no accordion pills, just clean sections) -->
+          <section class="card reveal" aria-label="Terms list">
+            <div class="cardHeader">
+              <h2>Terms Overview</h2>
+              <p class="subnote">Last updated: <span id="lastUpdated"></span></p>
+            </div>
+
+            <div class="term">
+              <h3>1) Scope of Work</h3>
+              <p>
+                Work is performed against an agreed scope (what is being installed/configured, where it’s happening,
+                and the outcome you want). If the scope changes midstream, SNS confirms the change before continuing
+                so time and cost stay predictable.
+              </p>
+            </div>
+
+            <div class="term">
+              <h3>2) Scheduling, On-Site Visits, and Deposits</h3>
+              <p>
+                Some issues only become visible on-site (cabling quality, interference, ISP constraints, legacy configs).
+                For certain projects or equipment procurement, a deposit may be required to reserve time and/or purchase hardware.
+              </p>
+              <ul>
+                <li>Deposits apply to scheduled work windows and/or equipment procurement.</li>
+                <li>Reschedules should be requested as early as possible to keep timelines clean.</li>
+              </ul>
+            </div>
+
+            <div class="term">
+              <h3>3) Payments (One-Time Work)</h3>
+              <p>
+                One-time work is invoiced after completion unless otherwise agreed in writing. If an invoice becomes overdue,
+                ongoing support and follow-ups may pause until the balance is resolved.
+              </p>
+              <ul>
+                <li>Hardware procured on your behalf remains payable regardless of deployment status.</li>
+                <li>If additional work is required beyond scope, it is approved before execution.</li>
+              </ul>
+            </div>
+
+            <div class="term">
+              <h3>4) Subscription Support (Membership)</h3>
+              <p>
+                Subscription support is billed on the schedule shown at checkout. If a subscription payment fails or becomes past due,
+                service can be paused until the subscription is brought current. Repeated non-payment may result in cancellation and removal
+                of ongoing access (admin accounts, dashboards, monitoring links, etc.).
+              </p>
+            </div>
+
+            <div class="term">
+              <h3>5) Access, Admin Accounts, and Ownership</h3>
+              <p>
+                Client-owned systems remain client-owned (ISP account, router/cloud controller account, domain/DNS, Wi-Fi controller, etc.).
+                If SNS is granted admin access, it’s for performing the agreed work. When requested, access can be reduced or removed after the job.
+              </p>
+            </div>
+
+            <div class="term">
+              <h3>6) Data Handling and Privacy</h3>
+              <p>
+                SNS minimizes data collection. Information submitted through the site (name, email, phone, service address) is used to respond,
+                schedule, and deliver service. Technical details (device models/configs/logs) may be retained to maintain continuity—especially for subscription clients.
+              </p>
+            </div>
+
+            <div class="term">
+              <h3>7) Third-Party Services</h3>
+              <p>
+                Some outcomes depend on third parties (ISP uptime, vendor cloud portals, payment processors). SNS can configure and harden,
+                but cannot guarantee third-party availability or policy changes.
+              </p>
+            </div>
+
+            <div class="term">
+              <h3>8) Acceptable Use (Client Portal + Website)</h3>
+              <p>
+                Do not submit false information, impersonate others, attempt unauthorized access, or abuse automated systems.
+                SNS may restrict access to protect systems, clients, and service quality.
+              </p>
+            </div>
+
+            <div class="term">
+              <h3>9) Service Limitations</h3>
+              <p>
+                Networking work involves variables outside any one party’s control (building materials, RF congestion, aging cabling, ISP constraints,
+                vendor firmware behavior). SNS focuses on measurable improvement and stability, but cannot promise “perfect Wi-Fi everywhere” without addressing real constraints.
+              </p>
+            </div>
+
+            <div class="term">
+              <h3>10) Changes to These Terms</h3>
+              <p>
+                SNS may update these terms to reflect product changes, policy improvements, or legal requirements.
+                The “Last updated” date reflects the most recent revision.
+              </p>
+            </div>
+          </section>
+
+          <!-- Right: Practical resource box + links (no pills) -->
+          <aside class="reveal" aria-label="Helpful resources">
+            <div class="callout card">
+              <h3>Quick summary</h3>
+              <p>
+                SNS runs on clarity: scope agreed first, access is permission-based, and billing follows predictable rules.
+                If you want “no surprises,” this is the page you’ll reference.
+              </p>
+
+              <div class="divider"></div>
+
+              <h3>Need support?</h3>
+              <p>
+                If you’re an active client, use the site flows so everything stays logged and trackable.
+                If you’re new, start with an inquiry.
+              </p>
+
+              <div class="stack">
+                <a class="btn primary" href="/sns-inquiry/">Start an Inquiry</a>
+                <a class="btn" href="/sns/">View Services</a>
+                <a class="btn" href="/socials/">Contact</a>
+              </div>
+
+              <div class="divider"></div>
+
+              <h3>What this page is</h3>
+              <p>
+                A clean expectations layer: how work is scoped, how access is handled, how billing works, and what’s realistic in real-world networks.
+              </p>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="section">
+      <div class="wrap">
+        <div class="ctaPanel reveal">
+          <div>
+            <h2>Want a clean, predictable setup?</h2>
+            <p>
+              If you’re ready to stabilize your network, start an inquiry with what you’re seeing. SNS will recommend the cleanest next step based on your environment.
+            </p>
+          </div>
+          <div class="right">
+            <a class="btn primary" href="/sns-inquiry/">Start an Inquiry</a>
+            <a class="btn" href="/sns/">View Services</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="wrap">
+        <div>© <span id="year"></span> Saku Network Solutions. Built clean.</div>
+        <div style="margin-top:.9rem;">
+          <a href="/home/">Home</a> &nbsp;•&nbsp;
+          <a href="/sns/">Services</a> &nbsp;•&nbsp;
+          <a href="/experience/">Credibility</a> &nbsp;•&nbsp;
+          <a href="/other/">Resources</a> &nbsp;•&nbsp;
+          <a href="/socials/">Contact</a>
+        </div>
       </div>
     </footer>
   </main>
 
   <script>
-      // Reveal-on-scroll animations
-    const revealEls = document.querySelectorAll(".reveal");
-
-    const io = new IntersectionObserver((entries) => {
-      for (const e of entries){
-        if (e.isIntersecting){
-          e.target.classList.add("in-view");
-          io.unobserve(e.target);
-        }
+    // Reveal-on-scroll (same behavior as your Experience page)
+    (function(){
+      const els = Array.from(document.querySelectorAll('.reveal'));
+      if (!('IntersectionObserver' in window) || els.length === 0) {
+        els.forEach(el => el.classList.add('on'));
+        return;
       }
-    }, { threshold: 0.12 });
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+          if (e.isIntersecting) {
+            e.target.classList.add('on');
+            io.unobserve(e.target);
+          }
+        });
+      }, { threshold: 0.12 });
+      els.forEach(el => io.observe(el));
+    })();
 
-    revealEls.forEach(el => io.observe(el));
-
-
-    // footer year
+    // Footer year + last updated
     document.getElementById("year").textContent = new Date().getFullYear();
-
-    // last-updated label (you can hardcode if you prefer)
     const d = new Date();
     const pad = (n)=> String(n).padStart(2,"0");
-    const stamp = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-    document.getElementById("lastUpdated").textContent = stamp;
+    document.getElementById("lastUpdated").textContent =
+      `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
   </script>
 </body>
 </html>
