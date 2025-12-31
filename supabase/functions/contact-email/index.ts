@@ -4,6 +4,8 @@ import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Max-Age": "86400",
 };
 
 function json(status: number, data: unknown) {
@@ -15,18 +17,25 @@ function json(status: number, data: unknown) {
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  if (req.method !== "POST") return json(405, { error: "Method not allowed" });
 
   try {
     const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
     const TO_EMAIL = Deno.env.get("CONTACT_TO_EMAIL");
-    const FROM_EMAIL = Deno.env.get("CONTACT_FROM_EMAIL"); // must be a verified sender in Resend
+    const FROM_EMAIL = Deno.env.get("CONTACT_FROM_EMAIL"); // verified sender in Resend
 
     if (!RESEND_API_KEY || !TO_EMAIL || !FROM_EMAIL) {
-      return json(500, { error: "Missing RESEND_API_KEY / CONTACT_TO_EMAIL / CONTACT_FROM_EMAIL" });
+      return json(500, {
+        error: "Missing env var(s)",
+        missing: {
+          RESEND_API_KEY: !RESEND_API_KEY,
+          CONTACT_TO_EMAIL: !TO_EMAIL,
+          CONTACT_FROM_EMAIL: !FROM_EMAIL,
+        },
+      });
     }
 
     const { subject, message, page, userAgent } = await req.json();
-
     if (!subject || !message) return json(400, { error: "Missing subject/message" });
 
     const emailText =
@@ -43,11 +52,10 @@ Meta:
 - Time: ${new Date().toISOString()}
 `;
 
-    // Send via Resend
     const r = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${RESEND_API_KEY}`,
+        Authorization: `Bearer ${RESEND_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -58,12 +66,17 @@ Meta:
       }),
     });
 
+    const raw = await r.text();
+
     if (!r.ok) {
-      const t = await r.text();
-      return json(500, { error: "Email provider error", details: t });
+      return json(500, {
+        error: "Email provider error",
+        status: r.status,
+        details: raw,
+      });
     }
 
-    return json(200, { ok: true });
+    return json(200, { ok: true, provider: raw });
   } catch (e) {
     return json(500, { error: String(e?.message || e) });
   }
