@@ -407,36 +407,88 @@
       line-height:1.55;
     }
 
-    /* Toast */
+    /* ===== Toast (clean, animated, auto-hide) ===== */
     .toast{
       position: fixed;
       left: 50%;
       bottom: 22px;
-      transform: translateX(-50%) translateY(18px);
-      background: rgba(0,0,0,.55);
+      transform: translateX(-50%) translateY(18px) scale(.98);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 120;
+
+      width: min(520px, calc(100% - 2rem));
+      border-radius: 18px;
       border: 1px solid rgba(255,255,255,.12);
-      border-radius: 999px;
-      padding: .75rem 1rem;
-      color: rgba(244,240,255,.88);
-      font-size: .9rem;
-      letter-spacing:.02em;
-      box-shadow: 0 25px 80px rgba(0,0,0,.55);
-      opacity:0;
-      pointer-events:none;
-      transition: opacity .25s var(--ease), transform .25s var(--ease);
-      backdrop-filter: blur(10px);
-      z-index: 100;
-      display:flex;
-      align-items:center;
-      gap:.55rem;
-      max-width: min(560px, calc(100% - 2rem));
-      text-align:center;
-      justify-content:center;
+
+      background:
+        radial-gradient(600px 120px at 18% 0%, rgba(168,85,247,.22), transparent 65%),
+        radial-gradient(600px 120px at 82% 0%, rgba(124,58,237,.16), transparent 65%),
+        rgba(0,0,0,.56);
+
+      backdrop-filter: blur(12px);
+      box-shadow: 0 30px 90px rgba(0,0,0,.60);
+      padding: 14px 14px;
+
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      transition: opacity .22s var(--ease), transform .22s var(--ease), filter .22s var(--ease);
     }
+
     .toast.on{
-      opacity:1;
-      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+      transform: translateX(-50%) translateY(0) scale(1);
     }
+
+    .toastIcon{
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      font-size: 18px;
+      color: rgba(244,240,255,.95);
+
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.25);
+      box-shadow: 0 18px 55px rgba(0,0,0,.45);
+    }
+
+    .toastBody{ min-width: 0; }
+    .toastTitle{
+      font-weight: 900;
+      letter-spacing: .02em;
+      line-height: 1.1;
+    }
+    .toastMsg{
+      margin-top: 2px;
+      color: rgba(244,240,255,.68);
+      font-size: .92rem;
+      line-height: 1.35;
+    }
+
+    /* Variants */
+    .toast[data-type="ok"] .toastIcon{
+      background: radial-gradient(circle at top left, rgba(34,197,94,.28), rgba(0,0,0,.25));
+      border-color: rgba(34,197,94,.22);
+    }
+    .toast[data-type="warn"] .toastIcon{
+      background: radial-gradient(circle at top left, rgba(245,158,11,.28), rgba(0,0,0,.25));
+      border-color: rgba(245,158,11,.22);
+    }
+    .toast[data-type="err"] .toastIcon{
+      background: radial-gradient(circle at top left, rgba(239,68,68,.28), rgba(0,0,0,.25));
+      border-color: rgba(239,68,68,.22);
+    }
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce){
+      .toast{ transition:none !important; }
+    }
+
     .badge{
       width:10px; height:10px;
       border-radius: 999px;
@@ -615,10 +667,14 @@
     </footer>
   </main>
 
-  <div class="toast" id="toast" role="status" aria-live="polite">
-    <span class="badge" id="toastBadge" aria-hidden="true"></span>
-    <span id="toastText">Sent.</span>
+  <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true">
+    <div class="toastIcon" id="toastIcon" aria-hidden="true">✓</div>
+    <div class="toastBody">
+      <div class="toastTitle" id="toastTitle">Sent</div>
+      <div class="toastMsg" id="toastMsg">Message sent.</div>
+    </div>
   </div>
+
 
   <script>
     // ===== CONFIG (edit these 2 lines) =====
@@ -632,19 +688,22 @@
     // ===== small helpers =====
     const $ = (s) => document.querySelector(s);
 
-    function toast(msg, type="ok"){
+    function toast(title, msg, type="ok"){
       const t = $("#toast");
-      const b = $("#toastBadge");
-      $("#toastText").textContent = msg;
+      const icon = $("#toastIcon");
+      $("#toastTitle").textContent = title;
+      $("#toastMsg").textContent = msg;
 
-      b.className = "badge";
-      if(type === "warn") b.classList.add("warn");
-      if(type === "err") b.classList.add("err");
+      t.dataset.type = type;
+
+      // icon glyph by type
+      icon.textContent = type === "ok" ? "✓" : (type === "warn" ? "!" : "×");
 
       t.classList.add("on");
       clearTimeout(window.__toastTimer);
-      window.__toastTimer = setTimeout(()=> t.classList.remove("on"), 2600);
+      window.__toastTimer = setTimeout(() => t.classList.remove("on"), 3000);
     }
+
 
     // ===== nav/contact setup =====
     $("#year").textContent = new Date().getFullYear();
@@ -683,7 +742,7 @@
       const message = $("#message").value.trim();
 
       if(!subject || !message){
-        toast("Add a subject + message.", "warn");
+        toast("Missing info", "Add a subject + message.", "warn");
         return;
       }
 
@@ -712,11 +771,11 @@
 
         $("#subject").value = "";
         $("#message").value = "";
-        toast("Message sent. I’ll reply soon.", "ok");
+        toast("Sent", "Message delivered. I’ll reply soon.", "ok");
       } catch(err){
         // If backend isn't configured yet, user can still contact via mailto.
         console.error(err);
-        toast("Send failed. Use the email button for now.", "err");
+        toast("Not sent", "Send failed. Use the email button for now.", "err");
       } finally{
         btn.disabled = false;
         btn.style.opacity = "1";
@@ -725,63 +784,7 @@
     });
   </script>
 
-  <script>
-  const SUPABASE_URL = "https://jgvxmpsjtkedzgygynbl.supabase.co/functions/v1/contact-email";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpndnhtcHNqdGtlZHpneWd5bmJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0NzgxMjYsImV4cCI6MjA4MTA1NDEyNn0.OCh23RWm8COtxWuumYvKUmfMOLOW01B1zrbtzcr3w6Y";
 
-  const sendBtn = document.getElementById("sendBtn");
-  const subjectInput = document.getElementById("subject");
-  const messageInput = document.getElementById("message");
-
-  sendBtn.addEventListener("click", async () => {
-    const subject = subjectInput.value.trim();
-    const message = messageInput.value.trim();
-
-    if (!subject || !message) {
-      alert("Subject and message are required.");
-      return;
-    }
-
-    sendBtn.disabled = true;
-    sendBtn.textContent = "Sending...";
-
-    try {
-      const res = await fetch(
-        `${SUPABASE_URL}/functions/v1/contact-email`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "apikey": SUPABASE_ANON_KEY,
-            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
-          },
-          body: JSON.stringify({
-            subject,
-            message,
-            page: window.location.href,
-            userAgent: navigator.userAgent
-          })
-        }
-      );
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data?.details || data?.error || "Send failed");
-      }
-
-      alert("Message sent successfully.");
-      subjectInput.value = "";
-      messageInput.value = "";
-    } catch (err) {
-      console.error(err);
-      alert("Send failed. Use the email button for now.");
-    } finally {
-      sendBtn.disabled = false;
-      sendBtn.textContent = "SEND";
-    }
-  });
-</script>
 
 
 </body>
