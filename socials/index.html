@@ -591,24 +591,23 @@
 
         <p class="lede reveal">
           Use the form to send a message directly to my business inbox. If you prefer, use LinkedIn for professional outreach.
-          Keeping it simple on purpose.
         </p>
 
         <div class="grid">
           <!-- LEFT: Contact form -->
-          <section class="card reveal" aria-label="Send me a message">
+          <section class="card reveal" aria-label="Ask me a question!">
             <h2>Send me a message</h2>
-            <p class="sub">Subject + message only. No accounts. No fluff.</p>
+            <p class="sub">Messages are answered within 1-3 business days.</p>
 
             <form id="contactForm">
               <div class="field">
                 <label for="subject">Subject</label>
-                <input id="subject" name="subject" type="text" maxlength="120" placeholder="Example: Wi-Fi drops when busy hours hit" required>
+                <input id="subject" name="subject" type="text" maxlength="120" placeholder="Enter your Subject here." required>
               </div>
 
               <div class="field">
                 <label for="message">Message</label>
-                <textarea id="message" name="message" maxlength="4000" placeholder="Tell me what’s happening, how many users/devices, and what you want improved." required></textarea>
+                <textarea id="message" name="message" maxlength="4000" placeholder="Enter your message here." required></textarea>
               </div>
 
               <div class="formRow">
@@ -617,7 +616,7 @@
               </div>
 
               <p class="note">
-                This is for initial contact. If you’re an active client, use the site inquiry flows so everything stays tracked.
+                This is for initial contact and questions. If you’re an active client, please use your personal client dashboard.
               </p>
             </form>
           </section>
@@ -631,7 +630,7 @@
               <div class="line">
                 <div class="left">
                   <div class="label">LinkedIn</div>
-                  <div class="value" id="linkedinText">Replace-this-with-your-link</div>
+                  <div class="value" id="linkedinText">https://www.linkedin.com/in/brandon-ortiz-4b148326b/</div>
                 </div>
                 <a class="linkbtn" id="linkedinBtn" href="#" target="_blank" rel="noopener">Open</a>
               </div>
@@ -646,7 +645,7 @@
             </div>
 
             <p class="note" style="margin-top:1.1rem;">
-              Typical reply window: same day / next day. If it’s urgent and you’re already a client, use the client portal tools.
+              Emails are typically answered within 1-3 business days. But messages sent via this page get priority handling.
             </p>
           </aside>
         </div>
@@ -679,7 +678,7 @@
   <script>
     // ===== CONFIG (edit these 2 lines) =====
     const BUSINESS_EMAIL = "brandon.sns@proton.me";
-    const LINKEDIN_URL = "https://www.linkedin.com/in/YOUR-LINK-HERE/";
+    const LINKEDIN_URL = "https://www.linkedin.com/in/brandon-ortiz-4b148326b/";
 
     // Supabase Edge Function endpoint (you'll create this in step 2)
     // Replace YOUR_PROJECT_REF with your Supabase project ref.
