@@ -2,750 +2,688 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Saku Network Solutions | kxsaku</title>
+  <title>Saku Network Solutions | Services</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta
-    name="description"
-    content="Saku Network Solutions – small-business office networking design, installation, and ongoing network administration by Brandon Ortiz."
-  />
+  <meta name="description" content="SNS services: network assessments, Wi-Fi under load fixes, secure office networking, and ongoing support plans." />
 
-  <!-- Font / base styles -->
   <style>
-    :root {
-      --bg-main: #050414;
-      --bg-card: #0d0724;
-      --bg-card-soft: #12092f;
-      --accent: #b26bff;
-      --accent-soft: rgba(178, 107, 255, 0.22);
-      --accent-strong: #f16bff;
-      --text-main: #f5f2ff;
-      --text-soft: #d0c9ff;
-      --text-muted: #a39ad7;
-      --pill-bg: rgba(9, 5, 35, 0.9);
-      --pill-border: rgba(112, 97, 214, 0.8);
-      --radius-xl: 32px;
-      --radius-lg: 24px;
-      --radius-pill: 999px;
-      --shadow-soft: 0 22px 60px rgba(0, 0, 0, 0.75);
-      --transition-fast: 0.15s ease-out;
+    :root{
+      --bg0:#03010b;
+      --bg1:#060214;
+      --ink:#f4f0ff;
+      --muted: rgba(244,240,255,.72);
+      --muted2: rgba(244,240,255,.56);
+
+      --stroke: rgba(196, 181, 253, .18);
+      --stroke2: rgba(196, 181, 253, .28);
+
+      --glass: rgba(10, 6, 28, .42);
+      --glass2: rgba(12, 8, 34, .62);
+
+      --accent:#b37cff;
+      --accent2:#f973e2;
+      --accent3:#5eead4;
+
+      --max: 1160px;
+
+      --r-xl: 28px;
+      --r-lg: 18px;
+      --r-sm: 14px;
+
+      --shadow: 0 25px 90px rgba(0,0,0,.60);
+      --shadow2: 0 18px 50px rgba(0,0,0,.38);
     }
 
-    * {
-      box-sizing: border-box;
+    *{ box-sizing:border-box; }
+    html, body{ height:100%; }
+    body{
+      margin:0;
+      color: var(--ink);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      background: radial-gradient(1200px 800px at 25% 20%, rgba(179,124,255,.18), transparent 60%),
+                  radial-gradient(900px 650px at 85% 10%, rgba(94,234,212,.10), transparent 55%),
+                  radial-gradient(1100px 900px at 70% 80%, rgba(249,115,226,.12), transparent 55%),
+                  linear-gradient(180deg, var(--bg1), var(--bg0));
+      overflow-x:hidden;
     }
 
-    html,
-    body {
-      margin: 0;
-      padding: 0;
-      min-height: 100%;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
-        "Segoe UI", sans-serif;
-      color: var(--text-main);
-      background: radial-gradient(circle at top, #28145a 0, #050414 55%, #020010 100%);
+    /* Full-bleed animated background */
+    .bg{
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      pointer-events:none;
+      overflow:hidden;
+    }
+    .bg .glow{
+      position:absolute;
+      inset:-20%;
+      background:
+        radial-gradient(circle at 20% 25%, rgba(179,124,255,.22), transparent 55%),
+        radial-gradient(circle at 85% 15%, rgba(94,234,212,.12), transparent 55%),
+        radial-gradient(circle at 60% 80%, rgba(249,115,226,.14), transparent 55%);
+      filter: blur(10px);
+      animation: glowFloat 16s ease-in-out infinite alternate;
+      opacity:.9;
+    }
+    @keyframes glowFloat{
+      from{ transform: translate3d(0,0,0) scale(1); }
+      to{ transform: translate3d(-18px, 12px, 0) scale(1.03); }
     }
 
-    body {
-      display: flex;
-      justify-content: center;
-      padding: 2.5rem 1.25rem 3.5rem;
+    .bg .lines{
+      position:absolute;
+      inset:0;
+      background:
+        repeating-linear-gradient(
+          135deg,
+          rgba(255,255,255,.045) 0px,
+          rgba(255,255,255,.045) 1px,
+          transparent 1px,
+          transparent 90px
+        );
+      opacity:.18;
+      animation: lineDrift 22s linear infinite;
+    }
+    @keyframes lineDrift{
+      from{ transform: translate3d(0,0,0); }
+      to{ transform: translate3d(-140px, 140px, 0); }
     }
 
-    .page {
-      width: 100%;
-      max-width: 1120px;
-      background: radial-gradient(circle at top left, #5b30ff 0, #0b051c 45%, #050414 100%);
-      border-radius: var(--radius-xl);
-      padding: 1.8rem 1.6rem 2.4rem;
-      box-shadow: var(--shadow-soft);
-      border: 1px solid rgba(170, 143, 255, 0.35);
-      position: relative;
-      overflow: hidden;
+    .bg .dots{
+      position:absolute;
+      inset:0;
+      background-image:
+        radial-gradient(rgba(255,255,255,.20) 1px, transparent 1px),
+        radial-gradient(rgba(255,255,255,.10) 1px, transparent 1px);
+      background-size: 140px 140px, 220px 220px;
+      background-position: 0 0, 40px 80px;
+      opacity:.16;
+      animation: dotFloat 28s ease-in-out infinite alternate;
+    }
+    @keyframes dotFloat{
+      from{ transform: translate3d(0,0,0); }
+      to{ transform: translate3d(18px, -10px, 0); }
     }
 
-    @media (min-width: 900px) {
-      .page {
-        padding: 2.3rem 2.4rem 3rem;
-      }
+    .bg .vignette{
+      position:absolute;
+      inset:0;
+      background: radial-gradient(circle at 50% 0%, rgba(0,0,0,.08), rgba(0,0,0,.64) 62%, rgba(0,0,0,.78));
+      z-index: 1;
     }
 
-    .site-header{ display:flex; align-items:center; justify-content:space-between; gap:1rem; }
-    .header-actions{ display:flex; align-items:center; gap:.6rem; }
-
-    .btn-login{
-      appearance:none;
-      border:1px solid rgba(180,150,255,.35);
-      background: rgba(40,20,80,.35);
-      color:#f4f0ff;
-      padding:.65rem .95rem;
-      border-radius:999px;
-      text-decoration:none;
-      font-weight:800;
-      letter-spacing:.14em;
-      text-transform:uppercase;
-      font-size:.72rem;
-      transition: transform .12s ease, border-color .12s ease, background .12s ease;
-    }
-    .btn-login:hover{
-      transform: translateY(-1px);
-      border-color: rgba(200,170,255,.65);
-      background: rgba(60,30,120,.35);
+    .wrap{
+      width: min(var(--max), calc(100% - 2rem));
+      margin: 0 auto;
     }
 
-    /* ===== Client Login pill (site-wide) ===== */
-    .client-login-pill {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      height: 36px;
-      padding: 0 14px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.20);
-      color: #f4f0ff;
-      text-decoration: none;
-      font-size: .82rem;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-      box-shadow: 0 10px 30px rgba(0,0,0,.35);
-      backdrop-filter: blur(10px);
-      transition: transform .15s ease, border-color .15s ease, background .15s ease;
+    /* Top nav */
+    .topnav{
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      padding: 1.15rem 0;
+      backdrop-filter: blur(14px);
+      background: linear-gradient(180deg, rgba(3,1,11,.72), rgba(3,1,11,.18));
+      border-bottom: 1px solid rgba(196,181,253,.10);
     }
 
-    .client-login-pill:hover {
-      transform: translateY(-1px);
-      border-color: rgba(255,255,255,.22);
-      background: rgba(0,0,0,.28);
-    }
-
-    .client-login-pill:active {
-      transform: translateY(0);
-    }
-
-    .topnav-row{
+    .navrow{
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:12px;
-      flex-wrap:wrap;
+      gap: 1rem;
     }
 
-    .topnav-row .tabs{
+    .brand{
       display:flex;
-      gap:10px;
-      flex-wrap:wrap;
+      align-items:center;
+      gap:.75rem;
+      min-width: 240px;
+    }
+    .mark{
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      box-shadow: 0 18px 50px rgba(0,0,0,.45);
+      overflow:hidden;
+    }
+    .mark img{
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border-radius: 12px;
+      display:block;
     }
 
-    /* ---------- header / nav ---------- */
-
-    .header {
-      display: flex;
-      align-items: center;
-      gap: 1.4rem;
-      margin-bottom: 1.3rem;
-      flex-wrap: wrap;
-    }
-
-    .logo-circle {
-      width: 64px;
-      height: 64px;
-      border-radius: 999px;
-      background: conic-gradient(from 160deg, #ff6bcb, #7b5cff, #4df0ff, #ff6bcb);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 0 40px rgba(193, 144, 255, 0.7);
-      flex-shrink: 0;
-    }
-
-    .logo-circle span {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: #120620;
-    }
-
-    .header-main {
-      flex: 1;
-      min-width: 230px;
-    }
-
-    .headline-kxsaku {
-      font-size: clamp(1.8rem, 2.6vw + 1.2rem, 2.6rem);
-      letter-spacing: 0.23em;
+    .brand strong{
+      display:block;
+      font-size:.92rem;
+      letter-spacing:.14em;
       text-transform: uppercase;
-      margin: 0 0 0.3rem;
+      line-height:1.05;
+    }
+    .brand span{
+      display:block;
+      color: var(--muted2);
+      font-size:.84rem;
+      line-height:1.1;
+      margin-top:.15rem;
     }
 
-    .headline-kxsaku span {
-      color: #f8e7ff;
+    .navlinks{
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      gap:.6rem;
+      flex-wrap: nowrap;
+      white-space: nowrap;
     }
-
-    .subtitle {
-      margin: 0;
-      font-size: 0.95rem;
-      color: var(--text-soft);
-    }
-
-    .subtitle strong {
-      color: var(--accent-strong);
-      font-weight: 600;
-    }
-
-    .badge-availability {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.45rem;
-      padding: 0.28rem 0.9rem;
-      border-radius: var(--radius-pill);
-      background: linear-gradient(90deg, #0c3b26, #1a6041);
-      color: #e1fff0;
-      font-size: 0.78rem;
+    .navlinks a{
+      text-decoration:none;
+      color: var(--muted);
+      font-size:.78rem;
+      letter-spacing:.14em;
       text-transform: uppercase;
-      letter-spacing: 0.14em;
-      margin-top: 0.55rem;
-    }
-
-    .badge-dot {
-      width: 8px;
-      height: 8px;
+      padding: .55rem .85rem;
       border-radius: 999px;
-      background: #32ff8f;
-      box-shadow: 0 0 0 4px rgba(50, 255, 143, 0.2);
+      border: 1px solid transparent;
+      transition: transform .14s ease, background .14s ease, border-color .14s ease, color .14s ease;
+      will-change: transform;
+    }
+    .navlinks a:hover{
+      transform: translateY(-1px);
+      background: rgba(196,181,253,.08);
+      border-color: rgba(196,181,253,.14);
+      color: var(--ink);
+    }
+    .navlinks a.active{
+      background: rgba(179,124,255,.16);
+      border-color: rgba(179,124,255,.26);
+      color: var(--ink);
     }
 
-    .nav-tabs {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.7rem;
-      margin-top: 1.4rem;
-    }
-
-    .nav-tab {
-      border-radius: var(--radius-pill);
-      border: 1px solid rgba(121, 107, 214, 0.75);
-      background: rgba(8, 4, 33, 0.9);
-      color: var(--text-soft);
-      padding: 0.42rem 1.2rem;
-      font-size: 0.9rem;
-      text-decoration: none;
+    .btn{
       position: relative;
-      overflow: hidden;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      transition: background var(--transition-fast), transform var(--transition-fast),
-        box-shadow var(--transition-fast), color var(--transition-fast);
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      height: 40px;
+      padding: 0 16px;
+      border-radius: 999px;
+      border: 1px solid rgba(196,181,253,.18);
+      background: rgba(0,0,0,.18);
+      color: var(--ink);
+      text-decoration:none;
+      font-weight: 800;
+      font-size: .78rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      box-shadow: 0 12px 40px rgba(0,0,0,.32);
+      backdrop-filter: blur(10px);
+      transition: transform .14s ease, border-color .14s ease, filter .14s ease, background .14s ease;
+      will-change: transform;
+      overflow:hidden;
+      white-space: nowrap;
     }
-
-    .nav-tab::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.16), transparent 55%);
+    .btn::after{
+      content:"";
+      position:absolute;
+      inset:-40% -60%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.18), transparent);
+      transform: translateX(-60%) rotate(10deg);
       opacity: 0;
-      transition: opacity var(--transition-fast);
+      transition: transform .55s ease, opacity .18s ease;
     }
-
-    .nav-tab:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 0 0 1px rgba(184, 162, 255, 0.7);
-    }
-
-    .nav-tab:hover::before {
-      opacity: 1;
-    }
-
-    .nav-tab.active {
-      background: linear-gradient(135deg, #b26bff, #f16bff);
-      color: #130516;
-      box-shadow: 0 0 32px rgba(227, 167, 255, 0.6);
-      border-color: transparent;
-    }
-
-    /* Treat nav-active the same as active */
-.nav-tab.nav-active {
-  background: radial-gradient(circle at top left, var(--accent-3), #4c1d95);
-  box-shadow: 0 12px 26px rgba(88, 28, 135, 0.6);
-  border-color: rgba(216, 180, 254, 0.7);
-}
-
-    /* ---------- layout ---------- */
-
-    .grid-main {
-      display: grid;
-      grid-template-columns: minmax(0, 3fr) minmax(0, 2.6fr);
-      gap: 1.5rem;
-      margin-top: 1.4rem;
-      flex-wrap: wrap;
-    }
-
-    @media (max-width: 880px) {
-      .grid-main {
-        grid-template-columns: minmax(0, 1fr);
-      }
-    }
-
-    .card {
-      background: radial-gradient(circle at top left, #28145a 0, #0c0623 40%, #050414 100%);
-      border-radius: var(--radius-lg);
-      border: 1px solid rgba(135, 112, 235, 0.55);
-      padding: 1.3rem 1.3rem 1.4rem;
-      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.7);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .card + .card {
-      margin-top: 1rem;
-    }
-
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      gap: 1rem;
-      margin-bottom: 0.4rem;
-    }
-
-    .card-title {
-      font-size: 1rem;
-      letter-spacing: 0.19em;
-      text-transform: uppercase;
-    }
-
-    .card-tagline {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-    }
-
-    .card p {
-      font-size: 0.92rem;
-      color: var(--text-soft);
-      line-height: 1.55;
-    }
-
-    .pill-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.75rem;
-      margin-top: 0.9rem;
-    }
-
-    .pill {
-      border-radius: var(--radius-pill);
-      border: 1px solid var(--pill-border);
-      background: var(--pill-bg);
-      padding: 0.35rem 0.9rem;
-      font-size: 0.85rem;
-      color: var(--text-soft);
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      white-space: nowrap;
-    }
-
-    .pill-label {
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      font-size: 0.72rem;
-      color: var(--text-muted);
-    }
-
-    .list {
-      margin: 0.6rem 0 0.2rem;
-      padding-left: 1.1rem;
-      color: var(--text-soft);
-      font-size: 0.92rem;
-    }
-
-    .list li + li {
-      margin-top: 0.3rem;
-    }
-
-    .subdued {
-      font-size: 0.82rem;
-      color: var(--text-muted);
-    }
-
-    .split-two {
-      display: grid;
-      grid-template-columns: minmax(0, 1.15fr) minmax(0, 1.1fr);
-      gap: 1rem;
-      margin-top: 0.9rem;
-    }
-
-    @media (max-width: 720px) {
-      .split-two {
-        grid-template-columns: minmax(0, 1fr);
-      }
-    }
-
-    /* CTA / buttons */
-
-    .cta {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      gap: 0.9rem;
-      margin-top: 1.2rem;
-    }
-
-    .cta-main {
-      font-size: 0.92rem;
-      color: var(--text-soft);
-    }
-
-    /* Subtle inquiry CTA button */
-.sns-cta-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-
-  padding: 0.55rem 0.95rem;
-
-  font-size: 0.82rem;
-  font-weight: 500;
-  letter-spacing: 0.04em;
-  text-decoration: none;
-  text-transform: uppercase;
-
-  color: #d9ccff;
-
-  border-radius: var(--radius-pill);
-  border: 1px solid rgba(160, 140, 255, 0.45);
-  background: rgba(12, 7, 40, 0.85);
-
-  backdrop-filter: blur(10px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
-
-  transition:
-    background 0.18s ease,
-    border-color 0.18s ease,
-    box-shadow 0.18s ease,
-    transform 0.14s ease;
-}
-
-.sns-cta-link .arrow {
-  font-size: 0.95rem;
-  transition: transform 0.15s ease;
-}
-
-/* Hover */
-.sns-cta-link:hover {
-  background: rgba(26, 18, 80, 0.95);
-  border-color: rgba(200, 180, 255, 0.8);
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.65);
-  transform: translateY(-1px);
-}
-
-.sns-cta-link:hover .arrow {
-  transform: translateX(3px);
-}
-
-/* Active */
-.sns-cta-link:active {
-  transform: translateY(0);
-  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.5);
-}
-
-
-    .btn-link {
-      border-radius: var(--radius-pill);
-      padding: 0.55rem 1.4rem;
-      border: none;
-      outline: none;
-      background: linear-gradient(135deg, #b26bff, #f16bff);
-      color: #130516;
-      font-size: 0.9rem;
-      font-weight: 600;
-      cursor: pointer;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.4rem;
-      box-shadow: 0 16px 40px rgba(214, 150, 255, 0.5);
-      transition: transform var(--transition-fast), box-shadow var(--transition-fast),
-        filter var(--transition-fast);
-      white-space: nowrap;
-    }
-
-    .btn-link:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 20px 46px rgba(214, 150, 255, 0.75);
+    .btn:hover{
+      transform: translateY(-2px);
+      border-color: rgba(196,181,253,.30);
       filter: brightness(1.06);
     }
-
-    .btn-link.secondary {
-      background: rgba(8, 4, 33, 0.9);
-      border: 1px solid rgba(157, 139, 241, 0.9);
-      color: var(--text-soft);
-      box-shadow: none;
+    .btn:hover::after{
+      opacity: 1;
+      transform: translateX(60%) rotate(10deg);
+    }
+    .btn:active{ transform: translateY(0); }
+    .btn.primary{
+      background: linear-gradient(90deg, rgba(179,124,255,.92), rgba(249,115,226,.72));
+      border-color: rgba(255,255,255,.18);
     }
 
-    .btn-link.secondary:hover {
-      box-shadow: 0 0 0 1px rgba(189, 170, 255, 0.7);
+    .actions{
+      display:flex;
+      gap:.65rem;
+      justify-content:flex-end;
+      min-width: 240px;
+      flex-wrap: wrap;
     }
 
-    /* footer */
+    /* Page layout */
+    .section{ padding: 4.4rem 0; }
 
-    footer {
-      margin-top: 2.1rem;
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      text-align: center;
+    /* Services hero (no particles) */
+    .hero{
+      padding: 5.2rem 0 2.6rem;
+      text-align:center;
     }
 
-    /* small float animation for cards on hover */
-
-    .card {
-      transition: transform 0.16s ease-out, box-shadow 0.16s ease-out,
-        border-color 0.16s ease-out;
+    .hero-mark{
+      width: 56px;
+      height: 56px;
+      margin: 0 auto 1.2rem;
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      position: relative;
+      box-shadow: 0 22px 80px rgba(0,0,0,.55);
+      overflow:hidden;
+    }
+    .hero-mark img{
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border-radius: 14px;
+      display:block;
+    }
+    .hero-mark::after{
+      content:"";
+      position:absolute;
+      inset:-10px;
+      border-radius: 22px;
+      background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.18), transparent 60%);
+      filter: blur(8px);
+      opacity: .28;
+      pointer-events:none;
     }
 
-    .card:hover {
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:.5rem;
+      padding:.35rem .75rem;
+      border-radius: 999px;
+      border: 1px solid rgba(196,181,253,.18);
+      background: rgba(196,181,253,.06);
+      color: var(--muted);
+      font-size:.74rem;
+      letter-spacing:.14em;
+      text-transform: uppercase;
+    }
+
+    h1{
+      margin: 1.2rem auto .9rem;
+      max-width: 22ch;
+      font-size: clamp(2.2rem, 4.6vw, 3.4rem);
+      line-height: 1.06;
+      letter-spacing: .01em;
+    }
+    .hero h1{
+      background: linear-gradient(180deg,
+        rgba(179,124,255,.62),
+        rgba(244,240,255,.42) 60%,
+        rgba(249,115,226,.30)
+      );
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .lede{
+      margin: 0 auto;
+      max-width: 86ch;
+      color: var(--muted);
+      font-size: 1.05rem;
+      line-height: 1.75;
+    }
+
+    .cta{
+      margin-top: 1.6rem;
+      display:flex;
+      justify-content:center;
+      gap:.8rem;
+      flex-wrap: wrap;
+    }
+
+    /* Cards + grids */
+    .grid3{
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap: 1rem;
+      margin-top: 2.6rem;
+      align-items: stretch;
+    }
+    .grid2{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+      align-items: stretch;
+    }
+
+    .card{
+      border-radius: var(--r-xl);
+      border: 1px solid rgba(196,181,253,.16);
+      background: linear-gradient(180deg, rgba(10,6,28,.52), rgba(10,6,28,.30));
+      box-shadow: var(--shadow2);
+      padding: 1.35rem 1.25rem;
+      text-align:left;
+      transition: transform .16s ease, border-color .16s ease, filter .16s ease;
+      will-change: transform;
+    }
+    .card:hover{
       transform: translateY(-3px);
-      box-shadow: 0 26px 70px rgba(0, 0, 0, 0.85);
-      border-color: rgba(189, 170, 255, 0.9);
+      border-color: rgba(196,181,253,.26);
+      filter: brightness(1.03);
     }
 
-    @media (min-width: 900px) {
-  .sns-cta-link {
-    font-size: 0.85rem;
-    padding: 0.6rem 1.1rem;
-  }
-}
+    .kicker{
+      color: var(--muted2);
+      font-size: .74rem;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      margin: 0 0 .55rem;
+    }
+    .card h3{
+      margin:0;
+      font-size: 1.05rem;
+      letter-spacing: .02em;
+    }
+    .card p{
+      margin: .65rem 0 0;
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: .98rem;
+    }
 
+    .bullets{
+      margin: .85rem 0 0;
+      padding-left: 1.05rem;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+    .bullets li + li{ margin-top: .35rem; }
+
+    /* Section headings */
+    .sectionTitle{
+      margin:0;
+      font-size: .92rem;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: var(--muted2);
+    }
+
+    .sectionH2{
+      margin:.6rem 0 0;
+      font-size: 1.6rem;
+      letter-spacing: .01em;
+    }
+
+    /* Footer */
+    footer{
+      padding: 3.5rem 0 2.5rem;
+      border-top: 1px solid rgba(196,181,253,.10);
+      color: var(--muted2);
+      text-align:center;
+    }
+    footer a{
+      color: var(--muted);
+      text-decoration:none;
+      border-bottom: 1px solid rgba(196,181,253,.22);
+    }
+    footer a:hover{
+      color: var(--ink);
+      border-bottom-color: rgba(196,181,253,.38);
+    }
+
+    /* reveal */
+    .reveal{ opacity:0; transform: translateY(16px); transition: opacity .60s ease, transform .60s cubic-bezier(.2,.9,.2,1); }
+    .reveal.in{ opacity:1; transform: translateY(0); }
+
+    @media (max-width: 980px){
+      .navrow{ align-items:flex-start; }
+      .navlinks{ flex-wrap: wrap; white-space: normal; }
+      .brand{ min-width: unset; }
+      .actions{ min-width: unset; }
+      .grid3{ grid-template-columns: 1fr; }
+      .grid2{ grid-template-columns: 1fr; }
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      .bg .glow, .bg .lines, .bg .dots{ animation:none; }
+      .btn, .card, .navlinks a{ transition:none; }
+      .reveal{ opacity:1; transform:none; transition:none; }
+    }
   </style>
 </head>
+
 <body>
-  <main class="page">
-    <!-- ====== Header / Nav ====== -->
-    <header class="header">
-      <div class="logo-circle">
-        <span>kx</span>
-      </div>
-
-      <div class="header-main">
-        <h1 class="headline-kxsaku"><span>BRANDON ORTIZ</span></h1>
-        <p class="subtitle">
-          <strong>Saku Network Solutions (SNS)</strong> &mdash; small-business office networking,
-          designed and deployed by a USMC veteran Network Administrator.
-        </p>
-        <div class="badge-availability">
-          <span class="badge-dot"></span>
-          <span>Accepting new small-office projects</span>
-        </div>
-
-<div class="topnav-row">
-  <div class="tabs">
-
-        <!-- Main nav tabs – make sure these match across all pages -->
-<nav class="nav-tabs" aria-label="Primary navigation">
-  <a href="/" class="nav-tab"><span>Home</span></a>
-
-  <a href="/sns" class="nav-tab active"><span>Saku Network Solutions</span></a>
-
-  <a href="/experience" class="nav-tab"><span>Experience</span></a>
-
-  <a href="/other" class="nav-tab"><span>Other Stuff</span></a>
-
-  <a href="/socials" class="nav-tab"><span>Socials</span></a>
-</nav>
-
+  <div class="bg">
+    <div class="glow"></div>
+    <div class="lines"></div>
+    <div class="dots"></div>
+    <div class="vignette"></div>
   </div>
 
-  <a class="client-login-pill" href="/sns-login/">Client Login</a>
-</div>
+  <!-- Top Nav -->
+  <header class="topnav">
+    <div class="wrap">
+      <div class="navrow">
+        <div class="brand">
+          <div class="mark">
+            <img src="/assets/sns-logo-purple.png" alt="Saku Network Solutions logo">
+          </div>
+          <div>
+            <strong>SAKU NETWORK SOLUTIONS</strong>
+            <span>Network infrastructure, done clean.</span>
+          </div>
+        </div>
 
+        <nav class="navlinks" aria-label="Primary">
+          <a href="/home/">Home</a>
+          <a class="active" href="/sns/">Services</a>
+          <a href="/experience/">Credibility</a>
+          <a href="/other/">Resources</a>
+          <a href="/socials/">Contact</a>
+        </nav>
 
-
-
-
+        <div class="actions">
+          <a class="btn" href="/sns-login/">Client Login</a>
+        </div>
       </div>
-    </header>
+    </div>
+  </header>
 
-    <!-- ====== Main content grid ====== -->
-    <section class="grid-main">
-      <!-- Left column: What SNS does / how it works -->
-      <div>
-        <article class="card">
-          <div class="card-header">
-            <h2 class="card-title">WHAT I DO</h2>
-            <span class="card-tagline">Small-office networking, end to end</span>
-          </div>
+  <main>
+    <!-- Services Hero -->
+    <section class="hero">
+      <div class="wrap">
+        <div class="hero-mark reveal">
+          <img src="/assets/sns-logo-purple.png" alt="Saku Network Solutions logo">
+        </div>
 
-          <p>
-            Saku Network Solutions is my boutique service for small businesses that need a
-            reliable office network without enterprise-consultant pricing. I help you plan,
-            purchase, install, and configure your network &mdash; then keep it healthy with
-            ongoing network administration.
-          </p>
+        <div class="eyebrow reveal">Services • Small office IT • Los Angeles</div>
 
-          <ul class="list">
-            <li>Design small-office networks based on users, growth plans, and speed needs.</li>
-            <li>Recommend the right switches, routers, racks, and access points (no overkill).</li>
-            <li>Order equipment on your behalf, then install and configure it on-site.</li>
-            <li>
-              Offer ongoing network administration on a monthly subscription for maintenance and
-              support.
-            </li>
-          </ul>
+        <h1 class="reveal">Clear scope. Clean installs. Networks that stay stable.</h1>
 
-          <div class="pill-row">
-            <div class="pill">
-              <span class="pill-label">Ideal size</span>
-              <span>3 &ndash; 50 users</span>
-            </div>
-            <div class="pill">
-              <span class="pill-label">Focus</span>
-              <span>Small offices, clinics, studios</span>
-            </div>
-            <div class="pill">
-              <span class="pill-label">Location</span>
-              <span>Los Angeles area &middot; Remote design available</span>
-            </div>
-          </div>
-        </article>
+        <p class="lede reveal">
+          SNS is built for small businesses that need enterprise-style execution without the enterprise overhead.
+          Everything starts with getting the environment right, validating the bottleneck, and delivering a plan you can trust.
+        </p>
 
-        <article class="card">
-          <div class="card-header">
-            <h2 class="card-title">HOW A PROJECT WORKS</h2>
-            <span class="card-tagline">From idea to working network</span>
-          </div>
-
-          <div class="split-two">
-            <div>
-              <p><strong>1. Discovery &amp; goals (email)</strong></p>
-              <p>
-                You email me a quick overview: what your business does, how many people you have,
-                your current internet connection, and what&rsquo;s not working today.
-              </p>
-
-              <p><strong>2. Design &amp; quote</strong></p>
-              <p>
-                I propose a network layout and recommended hardware (rack, router, switches, APs,
-                etc.). Pricing is <strong>project-based and quote-only</strong> so small offices
-                aren&rsquo;t paying enterprise rates.
-              </p>
-            </div>
-            <div>
-              <p><strong>3. Procurement &amp; install</strong></p>
-              <p>
-                With your approval, I order the agreed equipment. I bring and install what fits in
-                my vehicle; larger items can ship directly to your office. I don&rsquo;t handle
-                heavy construction or forklift moves.
-              </p>
-
-              <p><strong>4. Configuration &amp; handover</strong></p>
-              <p>
-                I configure the network, connect to your ISP, verify key workstations, and provide
-                simple documentation so you know what&rsquo;s installed and where.
-              </p>
-            </div>
-          </div>
-
-          <p class="subdued">
-            Note: I assume you already have an internet provider. If you don&rsquo;t, I can advise
-            on what to ask for when ordering service.
-          </p>
-        </article>
+        <div class="cta reveal">
+          <a class="btn primary" href="/sns-inquiry/">Start an Inquiry</a>
+          <a class="btn" href="/experience/">See Credibility</a>
+        </div>
       </div>
+    </section>
 
-      <!-- Right column: Ongoing care + why me + contact -->
-      <div>
-        <article class="card">
-          <div class="card-header">
-            <h2 class="card-title">ONGOING NETWORK CARE</h2>
-            <span class="card-tagline">Optional monthly subscription</span>
-          </div>
+    <!-- Core Services -->
+    <section class="section">
+      <div class="wrap">
+        <div class="reveal">
+          <div class="sectionTitle">Core services</div>
+          <div class="sectionH2">What SNS delivers</div>
+        </div>
 
-          <p>
-            After the initial build-out, you can keep me on as your part-time network admin.
-            Instead of hiring full-time IT, you get a dedicated person who already knows your
-            environment.
-          </p>
+        <div class="grid3">
+          <article class="card reveal">
+            <div class="kicker">Step 1</div>
+            <h3>Network Assessment</h3>
+            <p>
+              On-site survey + a written plan. I identify the failure points (coverage, interference, uplink, switching, layout)
+              and map a clean path to stability.
+            </p>
+            <ul class="bullets">
+              <li>Physical + cabling review (rack/IDF, pathways, patching)</li>
+              <li>Wi-Fi coverage + under-load checks</li>
+              <li>Inventory + topology snapshot</li>
+              <li>Action plan: priority fixes + budget ranges</li>
+            </ul>
+          </article>
 
-          <ul class="list">
-            <li>Firmware/OS updates for agreed network devices.</li>
-            <li>Configuration changes as you grow: new users, VLANs, ports, Wi-Fi tweaks.</li>
-            <li>Remote troubleshooting for network-related issues during agreed hours.</li>
-            <li>Upgrade planning when you start to outgrow the original design.</li>
-          </ul>
+          <article class="card reveal">
+            <div class="kicker">Most common</div>
+            <h3>Wi-Fi Under Load Fix</h3>
+            <p>
+              When Wi-Fi looks “fine” until the office gets busy. This targets drops, retries, congestion, and roaming issues with clean configuration.
+            </p>
+            <ul class="bullets">
+              <li>Band/Channel planning + transmit power sanity</li>
+              <li>Client load balancing + roaming tuning</li>
+              <li>QoS guidance where it actually helps</li>
+              <li>AP placement recommendations (no overkill)</li>
+            </ul>
+          </article>
 
-          <p class="subdued">
-            Monthly pricing is custom and depends on devices under management, number of locations,
-            and expected ticket volume. All support starts via email and will move into a proper
-            ticketing system as the service grows.
-          </p>
-        </article>
+          <article class="card reveal">
+            <div class="kicker">Security-minded</div>
+            <h3>Office Network Build / Upgrade</h3>
+            <p>
+              New buildouts or cleanup projects. Right-sized router/switching, segmented networks, and a stable design that scales with your headcount.
+            </p>
+            <ul class="bullets">
+              <li>Router/switch configuration (VLANs, trunks, port roles)</li>
+              <li>Guest vs staff segmentation</li>
+              <li>Firewall baseline + secure remote admin approach</li>
+              <li>Documentation handoff (so you’re never blind)</li>
+            </ul>
+          </article>
+        </div>
 
-        <article class="card">
-          <div class="card-header">
-            <h2 class="card-title">WHY WORK WITH ME</h2>
-            <span class="card-tagline">USMC veteran &amp; hands-on network admin</span>
-          </div>
+        <div class="grid2">
+          <article class="card reveal">
+            <div class="kicker">Optional</div>
+            <h3>Ongoing Support</h3>
+            <p>
+              Monthly membership for continuous administration, monitoring, and changes as your office grows — without hiring full-time IT.
+            </p>
+            <ul class="bullets">
+              <li>Planned changes: users, ports, VLANs, Wi-Fi adjustments</li>
+              <li>Device updates (agreed scope)</li>
+              <li>Network issue triage during agreed hours</li>
+            </ul>
+          </article>
 
-          <p>
-            I&rsquo;m Brandon Ortiz &mdash; a <strong>USMC Veteran Network Administrator</strong>
-            with over four years of experience building and maintaining production networks, plus an
-            ever-growing homelab that mirrors real-world environments.
-          </p>
+          <article class="card reveal">
+            <div class="kicker">Best practices</div>
+            <h3>Documentation + “Clean Room” Standards</h3>
+            <p>
+              The deliverable isn’t just “it works.” It’s a network you can understand, maintain, and expand without mystery cables or undocumented changes.
+            </p>
+            <ul class="bullets">
+              <li>Logical + physical notes (what/where)</li>
+              <li>Naming, labeling, and port maps (as needed)</li>
+              <li>Handover checklist + next-step roadmap</li>
+            </ul>
+          </article>
+        </div>
 
-          <ul class="list">
-            <li>Real-world experience with Cisco routing/switching, VLANs, and secure office design.</li>
-            <li>Background supporting missions, not just lab gear &mdash; reliability matters.</li>
-            <li>
-              Pricing intentionally structured to beat large consulting firms for small-office work.
-            </li>
-            <li>No upsell, no fluff &mdash; I recommend what you actually need, with room to grow.</li>
-          </ul>
+        <div class="cta reveal" style="margin-top:2.2rem;">
+          <a class="btn primary" href="/sns-inquiry/">Start an Inquiry</a>
+          <a class="btn" href="/socials/">Contact</a>
+        </div>
+      </div>
+    </section>
 
-          <div class="cta">
-            <div class="cta-main">
-              <strong>Ready to talk about your office network?</strong>
-              <br />
-              Fill out a simple Inquiry Form here.
-            </div>
-            <a href="/sns-inquiry/index.html" class="sns-cta-link">
-              Get Started with Saku Network Solutions
-              <span class="arrow">→</span>
-            </a>
-          </div>
+    <!-- How it works -->
+    <section class="section">
+      <div class="wrap">
+        <div class="reveal">
+          <div class="sectionTitle">Process</div>
+          <div class="sectionH2">How a project runs</div>
+        </div>
 
-          <p class="subdued" style="margin-top: 0.8rem;">
-            Hours are flexible and scheduled around my full-time role. All initial contact is via
-            email so I can respond with focused questions and a realistic timeline.
-          </p>
-        </article>
+        <div class="grid2">
+          <article class="card reveal">
+            <div class="kicker">1 — Discovery</div>
+            <h3>Scope + constraints</h3>
+            <p>
+              You submit the Inquiry Form. I confirm goals, environment constraints, and what “success” looks like.
+              If an on-site survey is required, we schedule it before any buildout decisions.
+            </p>
+          </article>
+
+          <article class="card reveal">
+            <div class="kicker">2 — Plan</div>
+            <h3>Design + quote</h3>
+            <p>
+              You get a clear recommendation and quote. No upsell. The design is right-sized with growth headroom,
+              and every change ties back to stability and supportability.
+            </p>
+          </article>
+
+          <article class="card reveal">
+            <div class="kicker">3 — Execute</div>
+            <h3>Install + configuration</h3>
+            <p>
+              Clean install, clean configuration, clean results. Then we validate under realistic load and lock the “known-good” baseline.
+            </p>
+          </article>
+
+          <article class="card reveal">
+            <div class="kicker">4 — Support</div>
+            <h3>Handover or membership</h3>
+            <p>
+              You either take ownership with documentation, or you keep SNS on as ongoing network admin for maintenance and planned changes.
+            </p>
+          </article>
+        </div>
       </div>
     </section>
 
     <footer>
-      &copy; <span id="year"></span> kxsaku &middot; Built from the homelab.
-      <a href="/sns-admin/index.html" class="admin-icon" aria-label="Admin Login" title="Admin">
-  ⛭
-</a>
-
-<script>
-  (function(){
-    const a = document.getElementById("adminLink");
-    if (!a) return;
-    const here = window.location.href;
-    a.href = `/sns-admin/index.html?from=${encodeURIComponent(here)}`;
-  })();
-</script>
-
+      <div class="wrap">
+        <div>© 2025 Saku Network Solutions. Built clean. Documented.</div>
+        <div style="margin-top:.9rem;">
+          <a href="/sns-inquiry/">Inquiry</a> &nbsp;•&nbsp;
+          <a href="/sns/">Services</a> &nbsp;•&nbsp;
+          <a href="/sns-login/">Client Login</a>
+        </div>
+      </div>
     </footer>
   </main>
 
   <script>
-    // Set footer year
-    document.getElementById("year").textContent = new Date().getFullYear();
+    // Lightweight reveal-on-scroll (same as Home)
+    (function(){
+      const els = Array.from(document.querySelectorAll('.reveal'));
+      if (!('IntersectionObserver' in window) || els.length === 0) {
+        els.forEach(el => el.classList.add('in'));
+        return;
+      }
+      const io = new IntersectionObserver((entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            e.target.classList.add('in');
+            io.unobserve(e.target);
+          }
+        }
+      }, { threshold: 0.14 });
+      els.forEach(el => io.observe(el));
+    })();
   </script>
 </body>
 </html>
