@@ -645,9 +645,9 @@
   const p = [];
 
   function resetParticle(s){
-    // Spawn from top-right "edge cloud" (off-screen)
-    s.x = w + rand(0, 120);
-    s.y = rand(-40, h * 0.65);
+    // Spawn from a TOP-RIGHT window (not the corner)
+    s.x = rand(w * 0.62, w * 0.92);
+    s.y = rand(-70, -10);
 
     s.r = rand(0.7, 2.0);
     s.a = rand(0.16, 0.48);
@@ -697,10 +697,11 @@
       // slight sideways oscillation to keep it organic
       s.x += Math.sin(s.phase) * 0.04 * dt;
 
-      // If particle leaves bottom or left, respawn at top-right
-      if (s.y > h + 12 || s.x < -12){
+      // Reset before reaching the extreme bottom-left corner
+      if (s.y > h * 0.86 || s.x < w * 0.06){
         resetParticle(s);
       }
+
 
       ctx.fillStyle = `rgba(230,220,255,${s.a})`;
       ctx.beginPath();
