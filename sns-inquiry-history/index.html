@@ -26,23 +26,143 @@
     .pill { display:inline-flex; align-items:center; gap:.45rem; padding:.35rem .65rem; border-radius:999px; border:1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.06); font-size:.75rem; }
     .muted { opacity:.8; }
     .empty { padding: 2rem 1.25rem; opacity:.85; }
+
+    /* ============================
+   SNS Dashboard-style Motion/UI
+   ============================ */
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+
+:root{
+  --bg0:#050315;
+  --bg1:#0a0524;
+  --card: rgba(10, 6, 32, .62);
+  --border: rgba(140, 130, 255, .20);
+  --text:#f4f0ff;
+  --muted: rgba(244,240,255,.72);
+  --muted2: rgba(244,240,255,.55);
+  --glow: rgba(125, 95, 255, .22);
+  --shadow: 0 22px 80px rgba(0,0,0,.55);
+  --radius: 20px;
+}
+
+body{
+  background:
+    radial-gradient(1100px 420px at 50% -120px, rgba(120,95,255,.35), transparent 60%),
+    radial-gradient(900px 520px at 20% 10%, rgba(70,35,160,.30), transparent 55%),
+    radial-gradient(circle at top, #342067, #050315 55%, #020010);
+  color: var(--text);
+}
+
+/* Entrance animations */
+@keyframes snsFadeUp {
+  from { opacity: 0; transform: translateY(10px); filter: blur(2px); }
+  to   { opacity: 1; transform: translateY(0);   filter: blur(0); }
+}
+
+@keyframes snsSheen {
+  0%   { transform: translateX(-35%) rotate(12deg); opacity: 0; }
+  20%  { opacity: .10; }
+  60%  { opacity: .08; }
+  100% { transform: translateX(140%) rotate(12deg); opacity: 0; }
+}
+
+/* Apply animation to the main title area and the history card */
+.sns-anim-1 { animation: snsFadeUp .55s ease-out both; }
+.sns-anim-2 { animation: snsFadeUp .65s ease-out both; animation-delay: .06s; }
+
+/* Card styling to match dashboard */
+.sns-card{
+  position: relative;
+  background: linear-gradient(180deg, rgba(12,8,36,.70), rgba(8,5,28,.50));
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(16px);
+  overflow: hidden;
+}
+
+.sns-card::before{
+  content:"";
+  position:absolute; inset:-2px;
+  background: radial-gradient(520px 220px at 18% 0%, var(--glow), transparent 55%);
+  pointer-events:none;
+  opacity:.9;
+}
+
+.sns-card::after{
+  content:"";
+  position:absolute;
+  top:-30%;
+  left:-60%;
+  width: 50%;
+  height: 160%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.10), transparent);
+  transform: rotate(12deg);
+  animation: snsSheen 7.5s ease-in-out infinite;
+  pointer-events:none;
+  opacity:.08;
+}
+
+.sns-card > *{ position:relative; z-index:1; }
+
+/* Row hover lift like dashboard */
+.sns-row{
+  transition: transform .12s ease, border-color .12s ease, box-shadow .12s ease, background .12s ease;
+  border-radius: 14px;
+}
+
+.sns-row:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 14px 34px rgba(0,0,0,.28);
+}
+
+/* Buttons consistent with dashboard */
+.sns-btn{
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(160,150,255,.32);
+  background: linear-gradient(180deg, rgba(140,125,255,.22), rgba(110,95,255,.10));
+  color: var(--text);
+  cursor:pointer;
+  font-weight:700;
+  letter-spacing:.10em;
+  text-transform:uppercase;
+  font-size: 12px;
+  transition: transform .12s ease, border-color .12s ease, box-shadow .12s ease;
+  box-shadow: 0 10px 24px rgba(0,0,0,.22);
+}
+.sns-btn:hover{
+  transform: translateY(-1px);
+  border-color: rgba(190,180,255,.45);
+  box-shadow: 0 14px 34px rgba(0,0,0,.28);
+}
+.sns-btn:active{ transform: translateY(0); }
+
+/* Subtle text tones */
+.sns-muted{ color: var(--muted); }
+.sns-muted2{ color: var(--muted2); }
+
+
   </style>
 </head>
 
 <body>
   <div class="wrap">
-    <div class="toprow">
+    <div class="toprow sns-anim-1">
       <div>
         <h1>INQUIRY HISTORY</h1>
         <div id="who" class="sub">Loading…</div>
       </div>
       <div class="btnrow">
-        <button id="backBtn" class="btn">Back to Dashboard</button>
-        <button id="logoutBtn" class="btn">Logout</button>
+        <button id="backBtn" class="btn sns-btn">Back to Dashboard</button>
+        <button id="logoutBtn" class="btn sns-btn">Logout</button>
       </div>
     </div>
 
-    <div class="card">
+    <div class="card sns-card sns-anim-2">
       <div class="banner">
         <div class="sub">All inquiries created under your account email. Newest first.</div>
       </div>
@@ -162,6 +282,7 @@
 
       for (const r of data) {
         const tr = document.createElement("tr");
+        tr.className = "sns-row";
 
         const tdDate = document.createElement("td");
         tdDate.textContent = fmtDate(r.created_at);
