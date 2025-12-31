@@ -170,20 +170,33 @@
 
     /* ====== Page Layout ====== */
     .wrap{
-      max-width: 1200px;
+      /* Full-width layout (still with nice gutters) */
+      max-width: none;
+      width: 100%;
       margin: 0 auto;
-      padding: 34px 18px 70px;
+      padding: 34px 36px 80px;
     }
 
+    @media (max-width: 900px){
+      .wrap{ padding: 28px 18px 70px; }
+    }
+
+
     .hero{
-      border-radius: var(--r-xl);
+      /* Full-width section feel */
+      border-radius: 34px;
       border: 1px solid rgba(255,255,255,.10);
       background: linear-gradient(180deg, rgba(10,5,25,.55), rgba(0,0,0,.10));
-      box-shadow: var(--shadow);
+      box-shadow: 0 22px 70px rgba(0,0,0,.55);
       overflow:hidden;
       position: relative;
-      padding: 34px 26px;
+      padding: 38px 34px;
+      width: 100%;
     }
+    @media (max-width: 900px){
+      .hero{ padding: 28px 18px; border-radius: 26px; }
+    }
+
     .hero::before{
       content:"";
       position:absolute;
@@ -262,10 +275,15 @@
 
     .grid{
       display:grid;
-      grid-template-columns: 1.25fr .75fr;
-      gap: 16px;
-      margin-top: 18px;
+      grid-template-columns: 1.6fr 1fr;
+      gap: 22px;
+      margin-top: 22px;
+      width: 100%;
     }
+    @media (max-width: 980px){
+      .grid{ grid-template-columns: 1fr; }
+    }
+
     @media (max-width: 980px){
       .grid{ grid-template-columns: 1fr; }
     }
@@ -372,6 +390,35 @@
       to{ opacity:1; transform: translateY(0); }
     }
 
+        /* ===== Reveal Animations (site-wide feel) ===== */
+    .reveal{
+      opacity: 0;
+      transform: translateY(14px);
+      filter: blur(2px);
+      transition:
+        opacity .65s var(--ease),
+        transform .65s var(--ease),
+        filter .65s var(--ease);
+      transition-delay: var(--d, 0ms);
+      will-change: opacity, transform, filter;
+    }
+
+    .reveal.in-view{
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0);
+    }
+
+    /* Subtle polish on hover (keeps it modern) */
+    .card, .hero, details{
+      transition: transform .22s var(--ease), border-color .22s var(--ease), background .22s var(--ease);
+    }
+    .card:hover, .hero:hover{
+      transform: translateY(-2px);
+      border-color: rgba(196,181,253,.20);
+    }
+
+
     .mini{
       border-radius: 18px;
       border: 1px solid rgba(255,255,255,.10);
@@ -474,7 +521,7 @@
 
   <main class="wrap">
     <!-- ===== Hero ===== -->
-    <section class="hero" aria-label="Resources hero">
+    <section class="hero reveal" style="--d: 0ms" aria-label="Resources hero">
       <div class="hero-inner">
         <div>
           <div class="kicker">Resources · Terms · Policies</div>
@@ -501,7 +548,7 @@
     <!-- ===== Content ===== -->
     <section class="grid" aria-label="Resources content">
       <!-- Left: Terms accordion -->
-      <section class="card" aria-label="Terms & policies">
+      <section class="card reveal" style="--d: 90ms" aria-label="Terms & policies">
         <div class="card-header">
           <h2 class="card-title">Client Terms & Policies</h2>
           <p class="card-sub">Last updated: <span id="lastUpdated"></span></p>
@@ -510,7 +557,7 @@
         <div class="card-body">
           <div class="acc">
 
-            <details open>
+            <details class="reveal" style="--d: 260ms" open>
               <summary>
                 <div class="sum-left">
                   <div class="sum-title">1) Scope of Work</div>
@@ -525,7 +572,7 @@
               </div>
             </details>
 
-            <details>
+            <details class="reveal" style="--d: 300ms">
               <summary>
                 <div class="sum-left">
                   <div class="sum-title">2) Estimates, Deposits, and Scheduling</div>
@@ -540,7 +587,7 @@
               </div>
             </details>
 
-            <details>
+            <details class="reveal" style="--d: 340ms">
               <summary>
                 <div class="sum-left">
                   <div class="sum-title">3) Payments (One-Time Work)</div>
@@ -555,7 +602,7 @@
               </div>
             </details>
 
-            <details>
+            <details class="reveal" style="--d: 380ms">
               <summary>
                 <div class="sum-left">
                   <div class="sum-title">4) Subscription Support (Membership)</div>
@@ -570,7 +617,7 @@
               </div>
             </details>
 
-            <details>
+            <details class="reveal" style="--d: 420ms">
               <summary>
                 <div class="sum-left">
                   <div class="sum-title">5) Access, Admin Accounts, and Ownership</div>
@@ -585,7 +632,7 @@
               </div>
             </details>
 
-            <details>
+            <details class="reveal" style="--d: 460ms">
               <summary>
                 <div class="sum-left">
                   <div class="sum-title">6) Data Handling and Privacy</div>
@@ -600,7 +647,7 @@
               </div>
             </details>
 
-            <details>
+            <details class="reveal" style="--d: 500ms">
               <summary>
                 <div class="sum-left">
                   <div class="sum-title">7) Third-Party Services</div>
@@ -615,7 +662,7 @@
               </div>
             </details>
 
-            <details>
+            <details class="reveal" style="--d: 540ms">
               <summary>
                 <div class="sum-left">
                   <div class="sum-title">8) Acceptable Use (Client Portal + Website)</div>
@@ -629,7 +676,7 @@
               </div>
             </details>
 
-            <details>
+            <details class="reveal" style="--d: 580ms">
               <summary>
                 <div class="sum-left">
                   <div class="sum-title">9) Service Limitations</div>
@@ -644,7 +691,7 @@
               </div>
             </details>
 
-            <details>
+            <details class="reveal" style="--d: 620ms">
               <summary>
                 <div class="sum-left">
                   <div class="sum-title">10) Changes to These Terms</div>
@@ -663,7 +710,7 @@
       </section>
 
       <!-- Right: Helpful links / contact / highlights -->
-      <aside class="card" aria-label="Helpful resources">
+      <aside class="card reveal" style="--d: 160ms" aria-label="Helpful resources">
         <div class="card-header">
           <h2 class="card-title">Helpful Links</h2>
           <p class="card-sub">Fast access</p>
@@ -695,7 +742,7 @@
       </aside>
     </section>
 
-    <footer>
+    <footer class="reveal" style="--d: 220ms">
       © <span id="year"></span> Saku Network Solutions. Built clean. Documented.
       <div class="links">
         <a href="/home/">Home</a>
@@ -708,6 +755,21 @@
   </main>
 
   <script>
+      // Reveal-on-scroll animations
+    const revealEls = document.querySelectorAll(".reveal");
+
+    const io = new IntersectionObserver((entries) => {
+      for (const e of entries){
+        if (e.isIntersecting){
+          e.target.classList.add("in-view");
+          io.unobserve(e.target);
+        }
+      }
+    }, { threshold: 0.12 });
+
+    revealEls.forEach(el => io.observe(el));
+
+
     // footer year
     document.getElementById("year").textContent = new Date().getFullYear();
 
