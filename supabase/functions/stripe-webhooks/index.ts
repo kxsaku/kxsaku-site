@@ -1,6 +1,7 @@
 // supabase/functions/stripe-webhooks/index.ts
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import Stripe from "https://esm.sh/stripe@14.21.0?target=deno";
 
 function getEnv(name: string) {
   const v = Deno.env.get(name);
@@ -60,6 +61,10 @@ serve(async (req) => {
     console.log("stripe-webhooks:", type);
 
     const sb = createClient(SB_URL, SB_SERVICE_ROLE_KEY);
+    const stripe = new Stripe(getEnv("STRIPE_SECRET_KEY"), {
+      apiVersion: "2023-10-16",
+      httpClient: Stripe.createFetchHttpClient(),
+    });
 
     const upsertByCustomer = async (stripeCustomerId: string, patch: Record<string, unknown>) => {
       const { data: row, error } = await sb
@@ -69,7 +74,9 @@ serve(async (req) => {
         .maybeSingle();
 
       if (error) throw error;
-      if (!row?.user_id) return;
+
+      // Return whether we matched a row so callers can fallback to metadata/user_id
+      if (!row?.user_id) return { matched: false as const };
 
       const { error: upErr } = await sb.from("billing_subscriptions").upsert({
         user_id: row.user_id,
@@ -79,13 +86,32 @@ serve(async (req) => {
       });
 
       if (upErr) throw upErr;
+      return { matched: true as const };
     };
+
+    const upsertByUser = async (
+      userId: string,
+      email: string | null,
+      stripeCustomerId: string | null,
+      patch: Record<string, unknown>
+    ) => {
+      const payload: Record<string, unknown> = {
+        user_id: userId,
+        ...(email ? { email } : {}),
+        ...(stripeCustomerId ? { stripe_customer_id: stripeCustomerId } : {}),
+        ...patch,
+      };
+
+      const { error: upErr } = await sb.from("billing_subscriptions").upsert(payload);
+      if (upErr) throw upErr;
+    };
+
 
     switch (type) {
 
 
     case "checkout.session.completed": {
-      const session = event.data.object as Stripe.Checkout.Session;
+      const session = event.data.object as any;
 
       // Only relevant for subscription checkout
       if (session.mode !== "subscription") break;
@@ -131,27 +157,56 @@ serve(async (req) => {
       const sub = event.data.object;
       const customer = sub.customer as string;
       const status = sub.status as string;
-      const cancelAtPeriodEnd = !!obj.cancel_at_period_end;
-
-      const itemPeriodEnd = obj.items?.data?.[0]?.current_period_end ?? null;
-      const rawPeriodEnd = obj.current_period_end ?? itemPeriodEnd;
-
-      const currentPeriodEnd = rawPeriodEnd
-        ? new Date(rawPeriodEnd * 1000).toISOString()
+      const cancelAtPeriodEnd = Boolean(sub.cancel_at_period_end);
+      const currentPeriodEnd = sub.current_period_end
+        ? new Date(Number(sub.current_period_end) * 1000).toISOString()
         : null;
 
-      await upsertByCustomer(stripeCustomerId, {
-        status: obj.status,
+      const patch = {
+        stripe_subscription_id: sub.id,
+        status,
         cancel_at_period_end: cancelAtPeriodEnd,
         current_period_end: currentPeriodEnd,
-      });
+      };
 
+      const res = await upsertByCustomer(customer, patch);
 
+      // Fallback: subscription metadata (we add this in Step A)
+      if (!res.matched) {
+        const metaUserId = sub.metadata?.user_id as string | undefined;
+        const metaEmail = sub.metadata?.email as string | undefined;
 
-
+        if (metaUserId) {
+          await upsertByUser(metaUserId, metaEmail ?? null, customer, patch);
+        }
+      }
     }
 
-    if (type === "invoice.payment_succeeded" || type === "invoice_payment_succeeded") {
+    const upsertSubscription = async (
+      userId: string,
+      email: string,
+      stripeCustomerId: string,
+      sub: any
+    ) => {
+      const currentPeriodEnd =
+        sub?.current_period_end ? new Date(Number(sub.current_period_end) * 1000).toISOString() : null;
+
+      await upsertByUser(userId, email || null, stripeCustomerId, {
+        stripe_subscription_id: sub?.id ?? null,
+        status: sub?.status ?? null,
+        cancel_at_period_end: Boolean(sub?.cancel_at_period_end),
+        current_period_end: currentPeriodEnd,
+      });
+    };
+
+
+
+    if (
+      type === "invoice.payment_succeeded" ||
+      type === "invoice_payment_succeeded" ||
+      type === "invoice.paid" ||
+      type === "invoice_payment.paid"
+    ) {
       const inv = event.data.object;
 
       const stripeCustomerId = inv.customer as string | null;

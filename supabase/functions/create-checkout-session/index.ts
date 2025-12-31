@@ -116,10 +116,15 @@ serve(async (req) => {
     );
     params.set("cancel_url", `${SITE_URL}/sns-subscribe-cancel/index.html`);
 
-    // Helpful mapping
+    // Helpful mapping (checkout session)
     params.set("client_reference_id", user.id);
     params.set("metadata[user_id]", user.id);
     params.set("metadata[email]", email);
+
+    // IMPORTANT: also attach mapping to the *subscription* so customer.subscription.* events can map to user
+    params.set("subscription_data[metadata][user_id]", user.id);
+    params.set("subscription_data[metadata][email]", email);
+
 
     const session = await stripePost("checkout/sessions", params);
 
