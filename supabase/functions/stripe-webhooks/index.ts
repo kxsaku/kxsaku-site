@@ -35,16 +35,20 @@ async function verifyStripeSignature(req: Request, body: string) {
 
   const parts = sigHeader.split(",").map((p) => p.trim());
   const tPart = parts.find((p) => p.startsWith("t="));
-  const v1Part = parts.find((p) => p.startsWith("v1="));
-  if (!tPart || !v1Part) throw new Error("Missing Stripe signature parts.");
+  const v1Parts = parts.filter((p) => p.startsWith("v1="));
+  if (!tPart || v1Parts.length === 0) throw new Error("Missing Stripe signature parts.");
 
   const t = tPart.slice(2);
-  const v1 = v1Part.slice(3);
-
   const signedPayload = `${t}.${body}`;
   const expected = await computeHmacSHA256Hex(secret, signedPayload);
 
-  if (!timingSafeEqual(expected, v1)) throw new Error("Invalid Stripe signature.");
+  // Accept if ANY v1 signature matches
+  const ok = v1Parts
+    .map((p) => p.slice(3))
+    .some((sig) => timingSafeEqual(expected, sig));
+
+  if (!ok) throw new Error("Invalid Stripe signature.");
+
 }
 
 serve(async (req) => {
@@ -129,6 +133,23 @@ serve(async (req) => {
 
       const { error: upErr } = await sb.from("billing_subscriptions").upsert(payload);
       if (upErr) throw upErr;
+    };
+
+        const upsertSubscription = async (
+      userId: string,
+      email: string,
+      stripeCustomerId: string,
+      sub: any
+    ) => {
+      const currentPeriodEnd =
+        sub?.current_period_end ? new Date(Number(sub.current_period_end) * 1000).toISOString() : null;
+
+      await upsertByUser(userId, email || null, stripeCustomerId, {
+        stripe_subscription_id: sub?.id ?? null,
+        status: sub?.status ?? null,
+        cancel_at_period_end: Boolean(sub?.cancel_at_period_end),
+        current_period_end: currentPeriodEnd,
+      });
     };
 
 
@@ -228,22 +249,7 @@ serve(async (req) => {
     }
 
 
-    const upsertSubscription = async (
-      userId: string,
-      email: string,
-      stripeCustomerId: string,
-      sub: any
-    ) => {
-      const currentPeriodEnd =
-        sub?.current_period_end ? new Date(Number(sub.current_period_end) * 1000).toISOString() : null;
 
-      await upsertByUser(userId, email || null, stripeCustomerId, {
-        stripe_subscription_id: sub?.id ?? null,
-        status: sub?.status ?? null,
-        cancel_at_period_end: Boolean(sub?.cancel_at_period_end),
-        current_period_end: currentPeriodEnd,
-      });
-    };
 
 
 
