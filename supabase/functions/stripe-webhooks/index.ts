@@ -66,6 +66,31 @@ serve(async (req) => {
       httpClient: Stripe.createFetchHttpClient(),
     });
 
+    const pickBestSubscription = (subs: any[]) => {
+      // Prefer statuses in this order
+      const rank: Record<string, number> = {
+        active: 1,
+        trialing: 2,
+        past_due: 3,
+        unpaid: 4,
+        incomplete: 5,
+        incomplete_expired: 6,
+        canceled: 7,
+      };
+
+      return subs
+        .slice()
+        .sort((a, b) => {
+          const ra = rank[a.status] ?? 99;
+          const rb = rank[b.status] ?? 99;
+          if (ra !== rb) return ra - rb;
+
+          // tie-breaker: newest created wins
+          return Number(b.created ?? 0) - Number(a.created ?? 0);
+        })[0] ?? null;
+    };
+
+
     const upsertByCustomer = async (stripeCustomerId: string, patch: Record<string, unknown>) => {
       const { data: row, error } = await sb
         .from("billing_subscriptions")
@@ -154,33 +179,54 @@ serve(async (req) => {
       type === "customer.subscription.updated" ||
       type === "customer.subscription.deleted"
     ) {
-      const sub = event.data.object;
-      const customer = sub.customer as string;
-      const status = sub.status as string;
-      const cancelAtPeriodEnd = Boolean(sub.cancel_at_period_end);
-      const currentPeriodEnd = sub.current_period_end
-        ? new Date(Number(sub.current_period_end) * 1000).toISOString()
-        : null;
+      const subEvent = event.data.object as any;
+      const customer = subEvent.customer as string;
 
-      const patch = {
-        stripe_subscription_id: sub.id,
-        status,
-        cancel_at_period_end: cancelAtPeriodEnd,
-        current_period_end: currentPeriodEnd,
-      };
+      // IMPORTANT: when a customer has multiple subs, pick the best one (active/trialing wins)
+      const list = await stripe.subscriptions.list({ customer, limit: 100, status: "all" });
+      const best = pickBestSubscription(list.data);
 
-      const res = await upsertByCustomer(customer, patch);
+      if (!best) {
+        // No subscriptions at all — mark inactive
+        const patch = {
+          stripe_subscription_id: null,
+          status: "canceled",
+          cancel_at_period_end: false,
+          current_period_end: null,
+        };
+        const res = await upsertByCustomer(customer, patch);
+        if (!res.matched) {
+          const metaUserId = subEvent.metadata?.user_id as string | undefined;
+          const metaEmail = subEvent.metadata?.email as string | undefined;
+          if (metaUserId) await upsertByUser(metaUserId, metaEmail ?? null, customer, patch);
+        }
+        // done
+      } else {
+        const currentPeriodEnd = best.current_period_end
+          ? new Date(Number(best.current_period_end) * 1000).toISOString()
+          : null;
 
-      // Fallback: subscription metadata (we add this in Step A)
-      if (!res.matched) {
-        const metaUserId = sub.metadata?.user_id as string | undefined;
-        const metaEmail = sub.metadata?.email as string | undefined;
+        const patch = {
+          stripe_subscription_id: best.id,
+          status: best.status,
+          cancel_at_period_end: Boolean(best.cancel_at_period_end),
+          current_period_end: currentPeriodEnd,
+        };
 
-        if (metaUserId) {
-          await upsertByUser(metaUserId, metaEmail ?? null, customer, patch);
+        const res = await upsertByCustomer(customer, patch);
+
+        // fallback to metadata if row didn't exist yet
+        if (!res.matched) {
+          const metaUserId = (best.metadata?.user_id || subEvent.metadata?.user_id) as string | undefined;
+          const metaEmail = (best.metadata?.email || subEvent.metadata?.email) as string | undefined;
+
+          if (metaUserId) {
+            await upsertByUser(metaUserId, metaEmail ?? null, customer, patch);
+          }
         }
       }
     }
+
 
     const upsertSubscription = async (
       userId: string,
