@@ -85,7 +85,9 @@
           transparent 90px
         );
       opacity:.18;
-      mask-image: radial-gradient(circle at 50% 20%, black 0 60%, transparent 78%);
+      -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 45%, transparent 100%);
+      mask-image: linear-gradient(to bottom, #000 0%, #000 45%, transparent 100%);
+
       animation: lineDrift 22s linear infinite;
     }
     @keyframes lineDrift{
@@ -103,7 +105,8 @@
       background-size: 140px 140px, 220px 220px;
       background-position: 0 0, 40px 80px;
       opacity:.20;
-      mask-image: radial-gradient(circle at 50% 18%, black 0 55%, transparent 78%);
+      -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 50%, transparent 100%);
+      mask-image: linear-gradient(to bottom, #000 0%, #000 50%, transparent 100%);
       animation: dotFloat 28s ease-in-out infinite alternate;
     }
     @keyframes dotFloat{
