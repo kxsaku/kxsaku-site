@@ -174,11 +174,21 @@
       min-width: 240px;
     }
     .mark{
-      width: 42px; height: 42px;
+      width: 42px;
+      height: 42px;
       border-radius: 14px;
-      background: conic-gradient(from 220deg, rgba(249,115,226,.95), rgba(179,124,255,.95), rgba(94,234,212,.75), rgba(249,115,226,.95));
+      display: grid;
+      place-items: center;
       box-shadow: 0 18px 50px rgba(0,0,0,.45);
     }
+
+    .mark img{
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border-radius: 12px;
+    }
+
     .brand strong{
       display:block;
       font-size:.92rem;
@@ -297,21 +307,25 @@
 
         /* Nexros-style logo tile above title */
     .hero-mark{
-      width: 46px;
-      height: 46px;
-      margin: 0 auto 1.1rem;
-      border-radius: 16px;
-      background: conic-gradient(from 220deg,
-        rgba(249,115,226,.95),
-        rgba(179,124,255,.95),
-        rgba(94,234,212,.65),
-        rgba(249,115,226,.95)
-      );
+      width: 56px;
+      height: 56px;
+      margin: 0 auto 1.2rem;
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      position: relative;
       box-shadow:
         0 22px 80px rgba(0,0,0,.55),
         0 0 0 1px rgba(255,255,255,.14) inset;
-      position: relative;
     }
+
+    .hero-mark img{
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border-radius: 14px;
+    }
+
     .hero-mark::after{
       content:"";
       position:absolute;
@@ -494,7 +508,9 @@
     <div class="wrap">
       <div class="navrow">
         <div class="brand">
-          <div class="mark" aria-hidden="true"></div>
+          <div class="mark">
+            <img src="assets/sns-logo-purple.png" alt="Saku Network Solutions logo">
+          </div>
           <div>
             <strong>SAKU NETWORK SOLUTIONS</strong>
             <span>Network infrastructure, done clean.</span>
@@ -521,7 +537,10 @@
     <section class="hero">
       <canvas id="particles"></canvas>
       <div class="wrap">
-        <div class="hero-mark reveal" aria-hidden="true"></div>
+        <div class="hero-mark reveal">
+          <img src="assets/sns-logo-purple.png" alt="Saku Network Solutions logo">
+        </div>
+
         <div class="eyebrow reveal">Veteran-led • Los Angeles • Small Business IT</div>
 
         <h1 class="reveal">Reliable Wi-Fi and secure networks for offices that can’t afford downtime.</h1>
