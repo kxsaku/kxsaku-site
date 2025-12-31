@@ -755,7 +755,7 @@
         const res = await fetch(CONTACT_ENDPOINT, {
           method: "POST",
           headers: {
-            "content-type": "application/json"
+            "content-type": "application/json",
             "apikey": SUPABASE_ANON_KEY,
             "authorization": `Bearer ${SUPABASE_ANON_KEY}`,
           },
