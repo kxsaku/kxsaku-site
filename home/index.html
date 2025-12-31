@@ -119,6 +119,20 @@
       z-index: 1;
     }
 
+        /* Particle canvas overlay (snow drift) */
+    #particles{
+      position: fixed;
+      inset: 0;
+      z-index: -1;             /* above background layers, behind content */
+      pointer-events: none;
+      opacity: .55;            /* subtle like Nexros */
+      mix-blend-mode: screen;  /* gives a soft glow on dark */
+    }
+    @media (prefers-reduced-motion: reduce){
+      #particles{ display:none; }
+    }
+
+
     /* Layout */
     .wrap{
       width: min(var(--max), calc(100% - 2rem));
@@ -269,6 +283,34 @@
       text-align:center;
     }
 
+        /* Nexros-style logo tile above title */
+    .hero-mark{
+      width: 46px;
+      height: 46px;
+      margin: 0 auto 1.1rem;
+      border-radius: 16px;
+      background: conic-gradient(from 220deg,
+        rgba(249,115,226,.95),
+        rgba(179,124,255,.95),
+        rgba(94,234,212,.65),
+        rgba(249,115,226,.95)
+      );
+      box-shadow:
+        0 22px 80px rgba(0,0,0,.55),
+        0 0 0 1px rgba(255,255,255,.14) inset;
+      position: relative;
+    }
+    .hero-mark::after{
+      content:"";
+      position:absolute;
+      inset:-10px;
+      border-radius: 22px;
+      background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.22), transparent 60%);
+      filter: blur(8px);
+      opacity: .55;
+    }
+
+
     .eyebrow{
       display:inline-flex;
       align-items:center;
@@ -290,6 +332,19 @@
       line-height: 1.06;
       letter-spacing: .01em;
     }
+
+        /* Theme-matched headline gradient (like Nexros) */
+    .hero h1{
+      background: linear-gradient(180deg,
+        rgba(179,124,255,.60),
+        rgba(244,240,255,.42) 60%,
+        rgba(249,115,226,.32)
+      );
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
 
     .lede{
       margin: 0 auto;
@@ -419,6 +474,8 @@
     <div class="vignette"></div>
   </div>
 
+  <canvas id="particles"></canvas>
+
   <!-- Top Nav -->
   <header class="topnav">
     <div class="wrap">
@@ -451,6 +508,7 @@
   <main>
     <section class="hero">
       <div class="wrap">
+        <div class="hero-mark reveal" aria-hidden="true"></div>
         <div class="eyebrow reveal">Veteran-led • Los Angeles • Small Business IT</div>
 
         <h1 class="reveal">Reliable Wi-Fi and secure networks for offices that can’t afford downtime.</h1>
@@ -543,5 +601,88 @@
       els.forEach(el => io.observe(el));
     })();
   </script>
+
+  <script>
+(function(){
+  const c = document.getElementById("particles");
+  if (!c) return;
+
+  const ctx = c.getContext("2d", { alpha: true });
+  let w = 0, h = 0, dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+
+  const prefersReduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (prefersReduced) return;
+
+  function resize(){
+    w = Math.floor(window.innerWidth);
+    h = Math.floor(window.innerHeight);
+    c.width  = Math.floor(w * dpr);
+    c.height = Math.floor(h * dpr);
+    c.style.width = w + "px";
+    c.style.height = h + "px";
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  const N = Math.floor(Math.min(220, Math.max(90, (window.innerWidth * window.innerHeight) / 18000)));
+  const p = [];
+  function rand(min, max){ return Math.random() * (max - min) + min; }
+
+  function seed(){
+    p.length = 0;
+    for (let i = 0; i < N; i++){
+      p.push({
+        x: rand(0, w),
+        y: rand(0, h),
+        r: rand(0.6, 2.0),
+        vy: rand(0.25, 1.15),
+        vx: rand(-0.15, 0.15),
+        a: rand(0.18, 0.55),
+        phase: rand(0, Math.PI * 2),
+        drift: rand(0.2, 0.9)
+      });
+    }
+  }
+
+  let last = performance.now();
+
+  function tick(now){
+    const dt = Math.min(33, now - last);
+    last = now;
+
+    ctx.clearRect(0, 0, w, h);
+
+    for (let i = 0; i < p.length; i++){
+      const s = p[i];
+
+      s.phase += 0.0025 * dt * s.drift;
+      s.x += (s.vx * dt) + Math.sin(s.phase) * 0.06 * dt;
+      s.y += s.vy * dt;
+
+      if (s.y > h + 10){ s.y = -10; s.x = rand(0, w); }
+      if (s.x < -10) s.x = w + 10;
+      if (s.x > w + 10) s.x = -10;
+
+      // slight purple-tinted white so it matches your theme
+      ctx.fillStyle = `rgba(230,220,255,${s.a})`;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    requestAnimationFrame(tick);
+  }
+
+  resize();
+  seed();
+  requestAnimationFrame(tick);
+
+  window.addEventListener("resize", () => {
+    resize();
+    seed();
+  }, { passive: true });
+})();
+</script>
+
+
 </body>
 </html>
