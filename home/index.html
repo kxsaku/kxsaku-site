@@ -2,888 +2,553 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Brandon Ortiz | kxsaku</title>
+  <title>Saku Network Solutions | Network Infrastructure & Support</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Saku Network Solutions (SNS) provides small-business network assessments, Wi-Fi stability upgrades, secure infrastructure installs, and ongoing network administration." />
 
-  <!--
-    Single-file version: HTML + CSS + tiny JS.
-    Everything is commented so you can edit it later.
-  -->
   <style>
-    :root {
-      --bg-main: #050014;
-      --bg-card: rgba(10, 5, 25, 0.95);
-      --bg-card-soft: rgba(18, 10, 50, 0.96);
-      --accent-1: #f973e2;
-      --accent-2: #c4b5fd;
-      --accent-3: #a855f7;
-      --accent-soft: rgba(168, 85, 247, 0.16);
-      --text-main: #f9f5ff;
-      --text-muted: #cbd5ff;
-      --border-soft: rgba(148, 163, 255, 0.35);
-      --radius-xl: 28px;
-      --radius-lg: 20px;
-      --shadow-soft: 0 22px 60px rgba(0, 0, 0, 0.7);
+    :root{
+      --bg0:#050014;
+      --bg1:#07031a;
+
+      --card: rgba(10, 6, 28, .72);
+      --card2: rgba(15, 10, 45, .72);
+
+      --stroke: rgba(196, 181, 253, .18);
+      --stroke2: rgba(196, 181, 253, .28);
+
+      --text:#f4f0ff;
+      --muted: rgba(244,240,255,.72);
+      --muted2: rgba(244,240,255,.55);
+
+      --accent:#b37cff;
+      --accent2:#f973e2;
+      --accent3:#5eead4;
+
+      --shadow: 0 22px 70px rgba(0,0,0,.62);
+
+      --r-xl: 28px;
+      --r-lg: 18px;
+      --r-sm: 14px;
+
+      --maxw: 1120px;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-        sans-serif;
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+
+    body{
+      margin:0;
+      color: var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      background:
+        radial-gradient(1100px 700px at 10% 15%, rgba(179,124,255,.28), transparent 60%),
+        radial-gradient(900px 550px at 85% 10%, rgba(94,234,212,.18), transparent 55%),
+        radial-gradient(1200px 900px at 70% 80%, rgba(249,115,226,.18), transparent 55%),
+        linear-gradient(180deg, var(--bg1), var(--bg0));
+      overflow-x:hidden;
     }
 
-    body {
-      min-height: 100vh;
-      color: var(--text-main);
-      display: flex;
-      justify-content: center;
-      padding: 2.5rem 1.2rem;
-
-      /* Animated background gradient */
-      background: radial-gradient(circle at 0% 0%, #5342a5 0, #080313 55%, #02000a 100%);
-      background-size: 200% 200%;
-      animation: gradientShift 25s ease-in-out infinite alternate;
+    /* Ambient background layers */
+    .bg{
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: -1;
+    }
+    .bg::before{
+      content:"";
+      position:absolute;
+      inset:-2px;
+      background:
+        repeating-linear-gradient(90deg, rgba(255,255,255,.03) 0 1px, transparent 1px 120px),
+        repeating-linear-gradient(0deg, rgba(255,255,255,.02) 0 1px, transparent 1px 120px);
+      opacity:.20;
+      mask-image: radial-gradient(circle at 50% 25%, black 0 55%, transparent 75%);
+      animation: gridDrift 26s ease-in-out infinite alternate;
+    }
+    .bg::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background: radial-gradient(circle at 50% 0%, rgba(0,0,0,.0), rgba(0,0,0,.50) 55%, rgba(0,0,0,.75));
+    }
+    @keyframes gridDrift{
+      from{ transform: translate3d(0,0,0) scale(1); }
+      to{ transform: translate3d(-28px, 16px, 0) scale(1.02); }
     }
 
-    @keyframes gradientShift {
-      0% {
-        background-position: 0% 0%;
-      }
-      50% {
-        background-position: 50% 100%;
-      }
-      100% {
-        background-position: 100% 0%;
-      }
+    .container{
+      width: min(var(--maxw), calc(100% - 2rem));
+      margin: 0 auto;
     }
 
-        /* ===== Client Login pill (site-wide) ===== */
-    .client-login-pill {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
+    .shell{
+      margin: 1.5rem auto 3.5rem;
+      border-radius: var(--r-xl);
+      border: 1px solid rgba(196,181,253,.20);
+      background: rgba(6, 4, 18, .42);
+      backdrop-filter: blur(14px);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    /* Top bar */
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:1rem;
+      padding: 1.1rem 1.1rem;
+      border-bottom: 1px solid rgba(196,181,253,.12);
+      background: linear-gradient(180deg, rgba(10,6,28,.72), rgba(10,6,28,.45));
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:.75rem;
+      min-width: 220px;
+    }
+    .brand .mark{
+      width:42px; height:42px;
+      border-radius: 14px;
+      background: conic-gradient(from 220deg, rgba(249,115,226,.95), rgba(179,124,255,.95), rgba(94,234,212,.75), rgba(249,115,226,.95));
+      box-shadow: 0 18px 45px rgba(0,0,0,.45);
+    }
+    .brand .name{
+      display:flex; flex-direction:column; gap:.1rem;
+    }
+    .brand .name strong{
+      letter-spacing:.14em;
+      text-transform: uppercase;
+      font-size:.88rem;
+      line-height: 1.1;
+    }
+    .brand .name span{
+      color: var(--muted2);
+      font-size:.82rem;
+      line-height: 1.1;
+    }
+
+    .nav{
+      display:flex;
+      align-items:center;
+      gap:.55rem;
+      flex-wrap: wrap;
+      justify-content:center;
+    }
+    .nav a{
+      text-decoration:none;
+      color: var(--muted);
+      font-size:.78rem;
+      letter-spacing:.14em;
+      text-transform: uppercase;
+      padding: .55rem .8rem;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      transition: transform .12s ease, background .12s ease, border-color .12s ease, color .12s ease;
+    }
+    .nav a:hover{
+      transform: translateY(-1px);
+      background: rgba(196,181,253,.08);
+      border-color: rgba(196,181,253,.14);
+      color: var(--text);
+    }
+    .nav a.active{
+      background: rgba(179,124,255,.16);
+      border-color: rgba(179,124,255,.25);
+      color: var(--text);
+    }
+
+    .actions{
+      display:flex;
+      align-items:center;
+      gap:.55rem;
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
       height: 36px;
       padding: 0 14px;
       border-radius: 999px;
       border: 1px solid rgba(255,255,255,.14);
       background: rgba(0,0,0,.20);
-      color: #f4f0ff;
-      text-decoration: none;
-      font-size: .82rem;
+      color: var(--text);
+      text-decoration:none;
+      font-size: .78rem;
       letter-spacing: .12em;
       text-transform: uppercase;
-      box-shadow: 0 10px 30px rgba(0,0,0,.35);
       backdrop-filter: blur(10px);
-      transition: transform .15s ease, border-color .15s ease, background .15s ease;
-    }
-
-    .client-login-pill:hover {
-      transform: translateY(-1px);
-      border-color: rgba(255,255,255,.22);
-      background: rgba(0,0,0,.28);
-    }
-
-    .client-login-pill:active {
-      transform: translateY(0);
-    }
-
-    .topnav-row{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      flex-wrap:wrap;
-}
-
-    .topnav-row .tabs{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-
-
-    /*  MAIN SHELL (big rounded rectangle)  */
-    .shell {
-      width: 100%;
-      max-width: 1120px;
-      background: var(--bg-card);
-      border-radius: var(--radius-xl);
-      box-shadow: var(--shadow-soft);
-      border: 1px solid rgba(182, 142, 255, 0.4);
-      padding: 1.9rem 1.7rem 1.8rem;
-      backdrop-filter: blur(14px);
-      display: flex;
-      flex-direction: column;
-      gap: 1.6rem;
-      animation: fadeInUp 0.8s ease-out;
-    }
-
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .site-header{ display:flex; align-items:center; justify-content:space-between; gap:1rem; }
-    .header-actions{ display:flex; align-items:center; gap:.6rem; }
-
-    .btn-login{
-      appearance:none;
-      border:1px solid rgba(180,150,255,.35);
-      background: rgba(40,20,80,.35);
-      color:#f4f0ff;
-      padding:.65rem .95rem;
-      border-radius:999px;
-      text-decoration:none;
-      font-weight:800;
-      letter-spacing:.14em;
-      text-transform:uppercase;
-      font-size:.72rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,.35);
       transition: transform .12s ease, border-color .12s ease, background .12s ease;
+      white-space: nowrap;
     }
-    .btn-login:hover{
-      transform: translateY(-1px);
-      border-color: rgba(200,170,255,.65);
-      background: rgba(60,30,120,.35);
-    }
+    .pill:hover{ transform: translateY(-1px); border-color: rgba(255,255,255,.22); background: rgba(0,0,0,.28); }
+    .pill:active{ transform: translateY(0); }
 
+    /* Sections */
+    .section{ padding: 2.2rem 1.1rem; }
+    .section + .section{ border-top: 1px solid rgba(196,181,253,.10); }
 
-    /*  HEADER: logo + name + tagline + avatar + status  */
-
-    .header-row {
-      display: grid;
-      grid-template-columns: auto 1fr auto;
-      gap: 1.4rem;
-      align-items: center;
-    }
-
-    .logo-circle {
-      width: 78px;
-      height: 78px;
-      flex-shrink: 0;
+    .h-eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:.5rem;
+      padding:.35rem .7rem;
       border-radius: 999px;
-      background: conic-gradient(
-        from 220deg,
-        #f5e1ff,
-        #f973e2,
-        #a855f7,
-        #6366f1,
-        #f5e1ff
-      );
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.7);
-      transition: transform 0.18s ease, box-shadow 0.18s ease;
-    }
-
-    .logo-circle span {
-      font-weight: 800;
-      font-size: 1.8rem;
-      color: #050012;
-      text-shadow: 0 0 12px rgba(255, 255, 255, 0.7);
-    }
-
-    .logo-circle:hover {
-      transform: translateY(-1px) scale(1.03);
-      box-shadow: 0 22px 50px rgba(0, 0, 0, 0.9);
-    }
-
-    .title-block {
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
-      min-width: 220px;
-    }
-
-    .title-block .name-line {
-      font-size: 2.4rem;
-      letter-spacing: 0.08em;
+      border: 1px solid rgba(196,181,253,.18);
+      background: rgba(196,181,253,.06);
+      color: var(--muted);
+      font-size:.74rem;
+      letter-spacing:.14em;
       text-transform: uppercase;
     }
 
-    .title-block .name-line span {
-      background: linear-gradient(90deg, var(--accent-1), var(--accent-2));
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
+    .h1{
+      margin: .9rem 0 .65rem;
+      font-size: clamp(2.1rem, 4.4vw, 3.25rem);
+      letter-spacing: .02em;
+      line-height: 1.05;
     }
 
-    .title-block .subname {
-      font-size: 1.05rem;
-      font-weight: 500;
-      color: var(--text-muted);
+    .lede{
+      color: var(--muted);
+      max-width: 70ch;
+      font-size: 1.02rem;
+      line-height: 1.65;
     }
 
-    .title-block .tagline {
-      font-size: 0.92rem;
-      color: var(--text-muted);
-      max-width: 28rem;
+    .hero-grid{
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 1rem;
+      align-items: start;
+      margin-top: 1.25rem;
     }
 
-    /* AVATAR – your real photo */
-    .avatar-wrapper {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 0.6rem;
+    .card{
+      border-radius: var(--r-lg);
+      border: 1px solid rgba(196,181,253,.16);
+      background: linear-gradient(180deg, var(--card), rgba(10, 6, 28, .55));
+      box-shadow: 0 22px 70px rgba(0,0,0,.35);
+      padding: 1.1rem 1.05rem;
     }
-
-    .avatar {
-      width: 82px;
-      height: 82px;
-      border-radius: 999px;
-      overflow: hidden;
-      border: 2px solid rgba(216, 180, 254, 0.7);
-      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.85);
-    }
-
-    .avatar img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-
-    /* status pill (AVAILABLE FOR OPPORTUNITIES) */
-
-    .status-pill {
-      padding: 0.45rem 1.1rem;
-      border-radius: 999px;
-      border: 1px solid rgba(196, 181, 253, 0.55);
+    .card h3{
+      margin:0;
+      font-size: .95rem;
+      letter-spacing: .10em;
       text-transform: uppercase;
-      letter-spacing: 0.16em;
-      font-size: 0.75rem;
-      color: #e9d5ff;
-      background: radial-gradient(circle at top, #22c55e33, #0b1120);
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.95);
+    }
+    .card p{
+      margin: .55rem 0 0;
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: .98rem;
     }
 
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 999px;
-      background: #22c55e;
-      box-shadow: 0 0 10px #22c55e;
+    .kpis{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: .75rem;
+      margin-top: .9rem;
     }
-
-    /* NAV TABS */
-
-    .nav-tabs {
-      width: 100%;
-      margin-top: 1rem;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.55rem;
-    }
-
-    .nav-tab {
-      text-decoration: none;
-      padding: 0.4rem 0.9rem;
-      border-radius: 999px;
-      border: 1px solid rgba(148, 163, 255, 0.45);
-      font-size: 0.82rem;
-      color: #e5e7ff;
-      background: rgba(15, 23, 42, 0.9);
-      display: inline-flex;
-      align-items: center;
-      gap: 0.25rem;
-      transition: background 0.16s ease, transform 0.12s ease,
-        box-shadow 0.16s ease, border-color 0.16s ease;
-    }
-
-    .nav-tab.active {
-      background: radial-gradient(circle at top left, var(--accent-3), #4c1d95);
-      box-shadow: 0 12px 26px rgba(88, 28, 135, 0.6);
-      border-color: rgba(216, 180, 254, 0.7);
-    }
-
-    /* Treat nav-active the same as active */
-.nav-tab.nav-active {
-  background: radial-gradient(circle at top left, var(--accent-3), #4c1d95);
-  box-shadow: 0 12px 26px rgba(88, 28, 135, 0.6);
-  border-color: rgba(216, 180, 254, 0.7);
-}
-
-    .nav-tab:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 12px 26px rgba(15, 23, 42, 0.7);
-      border-color: rgba(191, 219, 254, 0.7);
-    }
-
-    /*  MAIN GRID LAYOUT  */
-
-    .grid {
-      display: grid;
-      gap: 1.3rem;
-    }
-
-    @media (min-width: 880px) {
-      .grid.grid-2 {
-        grid-template-columns: 3fr 2.2fr;
-      }
-      .grid.grid-2-balanced {
-        grid-template-columns: 1.2fr 1.1fr;
-      }
-    }
-
-    /*  GENERIC CARD COMPONENT  */
-
-    .card {
-      background: var(--bg-card-soft);
-      border-radius: var(--radius-lg);
-      border: 1px solid var(--border-soft);
-      padding: 1.4rem 1.5rem;
-      transition: transform 0.16s ease, box-shadow 0.16s ease,
-        border-color 0.16s ease, background 0.16s ease;
-    }
-
-    .card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 20px 50px rgba(15, 23, 42, 0.95);
-      border-color: rgba(191, 219, 254, 0.7);
-      background: rgba(22, 13, 65, 0.98);
-      
-    }
-
-        /* ===== Fix dropdown glitch / stacking ===== */
-
-    /* Make cards participate in z-index layering */
-    .card { position: relative; z-index: 0; }
-    .card:hover { z-index: 1; }
-
-    /* Keep the About Me card above others when dropdown is open */
-    .hero-intro { position: relative; z-index: 2; }
-
-    /* When "More" is open, force this card to the top (prevents spazzing) */
-    .hero-intro:has(.home-actions-more[open]) { z-index: 200; }
-
-    /* Disable the hover "lift" while dropdown is open (prevents jitter) */
-    .hero-intro:has(.home-actions-more[open]):hover {
-      transform: none;
-    }
-
-    /* Ensure the dropdown itself is above everything */
-    .home-actions-menu { z-index: 999; }
-
-
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      gap: 0.5rem;
-      margin-bottom: 0.65rem;
-    }
-
-    .card-title {
-      font-size: 0.98rem;
-      text-transform: uppercase;
-      letter-spacing: 0.22em;
-      color: #e9d5ff;
-    }
-
-    .card-subtitle {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      opacity: 0.9;
-    }
-
-    .card-body {
-      font-size: 0.95rem;
-      color: #d4d4ff;
-      line-height: 1.55;
-    }
-
-    /* HERO INTRO TEXT */
-
-    .hero-intro p {
-      margin-bottom: 0.8rem;
-    }
-
-    .pill-row {
-      margin-top: 0.5rem;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.45rem;
-    }
-
-    .pill {
-      font-size: 0.8rem;
-      padding: 0.25rem 0.7rem;
-      border-radius: 999px;
-      border: 1px solid rgba(148, 163, 255, 0.45);
-      background: rgba(15, 23, 42, 0.9);
-      color: #e5e7ff;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.3rem;
-    }
-
-    .pill-label {
-      font-size: 0.73rem;
-      text-transform: uppercase;
-      letter-spacing: 0.16em;
-      opacity: 0.85;
-    }
-
-    /* QUICK FACTS LIST */
-
-    .facts-list {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 0.55rem;
-      margin-top: 0.2rem;
-      font-size: 0.9rem;
-    }
-
-    .fact-label {
-      font-size: 0.78rem;
-      text-transform: uppercase;
-      letter-spacing: 0.18em;
-      color: #a5b4fc;
-    }
-
-    .fact-main {
-      color: #fef9ff;
-    }
-
-    .fact-note {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-    }
-
-    /* SIMPLE BUTTON LINKS */
-
-    .btn-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      margin-top: 0.7rem;
-      padding: 0.5rem 1.1rem;
-      border-radius: 999px;
-      border: 1px solid rgba(216, 180, 254, 0.65);
-      text-decoration: none;
-      font-size: 0.88rem;
-      color: #fdf2ff;
-      background: radial-gradient(circle at top left, var(--accent-3), #6b21a8);
-      box-shadow: 0 14px 32px rgba(88, 28, 135, 0.7);
-      transition: transform 0.14s ease, box-shadow 0.14s ease,
-        border-color 0.14s ease, filter 0.14s ease;
-    }
-
-    .btn-link.secondary {
-      border-color: rgba(148, 163, 255, 0.55);
-      background: transparent;
-      box-shadow: none;
-      color: #bfdbfe;
-    }
-
-    .btn-link:hover {
-      transform: translateY(-1px) scale(1.01);
-      box-shadow: 0 18px 40px rgba(88, 28, 135, 0.95);
-      filter: brightness(1.05);
-    }
-
-    .btn-link.secondary:hover {
-      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.95);
-    }
-
-    /* IMAGE STRIP – small photo + caption tiles */
-
-    .image-strip {
-      margin-top: 1rem;
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 0.6rem;
-    }
-
-    .image-tile {
+    .kpi{
       border-radius: 18px;
-      overflow: hidden;
-      border: 1px solid rgba(148, 163, 255, 0.45);
-      background: rgba(15, 23, 42, 0.9);
-      display: flex;
-      flex-direction: column;
-      min-height: 110px;
+      border: 1px solid rgba(196,181,253,.14);
+      background: rgba(0,0,0,.18);
+      padding: .9rem .85rem;
+    }
+    .kpi strong{
+      display:block;
+      font-size: 1.35rem;
+      letter-spacing: .02em;
+    }
+    .kpi span{ color: var(--muted2); font-size: .88rem; }
+
+    .btnrow{ display:flex; gap:.65rem; flex-wrap: wrap; margin-top: 1.15rem; }
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:.55rem;
+      padding: .8rem 1.05rem;
+      border-radius: 999px;
+      border: 1px solid rgba(196,181,253,.18);
+      background: rgba(196,181,253,.08);
+      color: var(--text);
+      text-decoration:none;
+      font-weight: 700;
+      letter-spacing: .10em;
+      text-transform: uppercase;
+      font-size: .78rem;
+      transition: transform .12s ease, border-color .12s ease, background .12s ease, filter .12s ease;
+      white-space: nowrap;
+    }
+    .btn:hover{ transform: translateY(-1px); border-color: rgba(196,181,253,.28); filter: brightness(1.06); }
+    .btn.primary{
+      background: linear-gradient(90deg, rgba(179,124,255,.85), rgba(249,115,226,.75));
+      border-color: rgba(255,255,255,.18);
+    }
+    .btn.ghost{ background: rgba(0,0,0,.14); }
+
+    .grid3{
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap: .75rem;
+      margin-top: 1rem;
     }
 
-    .image-tile img {
-      width: 100%;
-      height: 70px;
-      object-fit: cover;
-      display: block;
+    .steps{
+      display:grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap: .75rem;
+      margin-top: 1rem;
+    }
+    .step{
+      position: relative;
+      padding-top: 1.25rem;
+    }
+    .step .num{
+      position:absolute;
+      top: .55rem;
+      right: .75rem;
+      color: rgba(179,124,255,.65);
+      font-weight: 900;
+      letter-spacing: .08em;
     }
 
-    .image-tile span {
-      padding: 0.4rem 0.55rem 0.5rem;
-      font-size: 0.78rem;
-      color: #e5e7ff;
+    /* Footer */
+    .footer{
+      padding: 1.2rem 1.1rem;
+      color: var(--muted2);
+      font-size: .88rem;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .footer a{
+      color: var(--muted);
+      text-decoration:none;
+      border-bottom: 1px solid rgba(196,181,253,.22);
+    }
+    .footer a:hover{ color: var(--text); border-bottom-color: rgba(196,181,253,.38); }
+
+    /* Reveal animation (JS adds .in) */
+    .reveal{
+      opacity: 0;
+      transform: translateY(14px);
+      transition: opacity .55s ease, transform .55s cubic-bezier(.2,.9,.2,1);
+      will-change: opacity, transform;
+    }
+    .reveal.in{ opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 980px){
+      .hero-grid{ grid-template-columns: 1fr; }
+      .steps{ grid-template-columns: 1fr 1fr; }
+      .brand{ min-width: unset; }
+    }
+    @media (max-width: 920px){
+      .grid3{ grid-template-columns: 1fr; }
+    }
+    @media (max-width: 560px){
+      .steps{ grid-template-columns: 1fr; }
+      .actions{ flex-wrap: wrap; justify-content:flex-end; }
     }
 
-    /* BULLET LISTS */
-
-    .bullet-list {
-      margin-top: 0.3rem;
-      padding-left: 1.1rem;
-      font-size: 0.9rem;
-      color: #d4d4ff;
+    @media (prefers-reduced-motion: reduce){
+      .bg::before{ animation: none; }
+      .reveal{ opacity: 1; transform: none; transition: none; }
+      .pill, .btn, .nav a{ transition: none; }
     }
-
-    .bullet-list li + li {
-      margin-top: 0.25rem;
-    }
-
-    /* FOOTER */
-
-    footer {
-      margin-top: 0.6rem;
-      text-align: center;
-      font-size: 0.76rem;
-      color: #a5b4fc;
-      opacity: 0.85;
-    }
-
-    /* RESPONSIVE TWEAKS */
-
-    @media (max-width: 780px) {
-      .header-row {
-        grid-template-columns: auto 1fr;
-        grid-template-rows: auto auto;
-      }
-      .avatar-wrapper {
-        grid-column: 2 / -1;
-        align-items: flex-start;
-        margin-top: 0.6rem;
-      }
-    }
-
-    @media (max-width: 640px) {
-      .shell {
-        padding: 1.5rem 1.2rem 1.4rem;
-        border-radius: 22px;
-      }
-      .title-block .name-line {
-        font-size: 1.9rem;
-      }
-    }
-
-/* Home action buttons (less clutter) */
-.home-actions{
-  margin-top: 1rem;
-  display: flex;
-  gap: .75rem;
-  flex-wrap: wrap;
-  align-items: center;
-}
-
-.home-actions-primary{
-  display: flex;
-  gap: .75rem;
-  flex-wrap: wrap;
-  align-items: center;
-}
-
-.home-actions-more{ position: relative; }
-
-.home-actions-more > summary{
-  list-style: none;
-  cursor: pointer;
-}
-.home-actions-more > summary::-webkit-details-marker{ display:none; }
-
-.home-actions-menu{
-  position: absolute;
-  top: calc(100% + .6rem);
-  left: 0;
-  min-width: 220px;
-  padding: .45rem;
-  border-radius: 14px;
-  border: 1px solid rgba(196,181,253,.22);
-  background: rgba(8, 6, 26, .82);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 20px 60px rgba(0,0,0,.45);
-  z-index: 50;
-}
-
-.home-actions-item{
-  display: block;
-  padding: .65rem .75rem;
-  border-radius: 12px;
-  text-decoration: none;
-  color: inherit;
-  border: 1px solid transparent;
-}
-.home-actions-item:hover{
-  border-color: rgba(196,181,253,.25);
-  background: rgba(196,181,253,.08);
-}
-
-@media (max-width: 560px){
-  .home-actions-primary{ width: 100%; }
-  .home-actions-primary a{ flex: 1 1 auto; text-align: center; }
-  .home-actions-more{ width: 100%; }
-  .home-actions-more > summary{ width: 100%; text-align: center; }
-  .home-actions-menu{ width: 100%; min-width: unset; }
-}
-
   </style>
 </head>
+
 <body>
-  <main class="shell">
-    <!-- =======================================================
-         HEADER: Logo + Name + Tagline + Avatar + Status + Nav Tabs
-         ======================================================= -->
-    <header>
-      <div class="header-row">
-        <!-- Brand circle (kx) -->
-        <div class="logo-circle">
-          <span>kx</span>
-        </div>
+  <div class="bg"></div>
 
-        <!-- Name / summary -->
-        <div class="title-block">
-          <div class="name-line">
-            <span>Brandon Ortiz</span>
-          </div>
-          <div class="subname">
-            USMC Veteran · Network Administrator · Saku Network Solutions
-          </div>
-          <p class="tagline">
-            Network administration, infrastructure builds, and small-business IT work — clean, modern, and documented.
-          </p>
-        </div>
+  <div class="container">
+    <div class="shell">
 
-        <!-- Avatar + status -->
-        <div class="avatar-wrapper">
-          <!--
-            Replace src with the path to your picture.
-            Example: put your image at assets/brandon.jpg
-            and use src="assets/brandon.jpg".
-          -->
-          <div class="avatar">
-            <img src="/assets/brandon.jpg" alt="Photo of Brandon Ortiz" />
-          </div>
-          <div class="status-pill">
-            <span class="status-dot"></span>
-            <span>Available for opportunities</span>
+      <!-- Top bar -->
+      <header class="topbar">
+        <div class="brand">
+          <div class="mark" aria-hidden="true"></div>
+          <div class="name">
+            <strong>SAKU NETWORK SOLUTIONS</strong>
+            <span>Network infrastructure, done clean.</span>
           </div>
         </div>
-      </div>
 
-      <!-- NAVIGATION TABS
-           NOTE: these now point to separate pages (you'll create them later).
-      -->
+        <nav class="nav" aria-label="Primary">
+          <a class="active" href="/home/">Home</a>
+          <a href="/sns/">Services</a>
+          <a href="/experience/">Credibility</a>
+          <a href="/other/">Resources</a>
+          <a href="/socials/">Contact</a>
+        </nav>
 
-<div class="topnav-row">
-  <div class="tabs">
+        <div class="actions">
+          <a class="pill" href="/sns-login/">Client Login</a>
+          <a class="pill" href="/sns-inquiry/">Start Inquiry</a>
+        </div>
+      </header>
 
-<nav class="nav-tabs" aria-label="Primary navigation">
-  <a href="/" class="nav-tab active"><span>Home</span></a>
+      <!-- Hero -->
+      <section class="section">
+        <span class="h-eyebrow reveal">Veteran-led • Los Angeles • Small Business IT</span>
 
-  <a href="/sns" class="nav-tab"><span>Saku Network Solutions</span></a>
+        <h1 class="h1 reveal">
+          Reliable Wi-Fi and secure networks for offices that can’t afford downtime.
+        </h1>
 
-  <a href="/experience" class="nav-tab"><span>Experience</span></a>
+        <p class="lede reveal">
+          SNS designs, installs, and supports business networks with a focus on stability, clean implementation,
+          and security-minded configuration. If your connection drops under load, your coverage is inconsistent,
+          or your equipment is unmanaged — we fix the root cause and leave you with a system you can trust.
+        </p>
 
-  <a href="/other" class="nav-tab"><span>Other Stuff</span></a>
+        <div class="btnrow reveal">
+          <a class="btn primary" href="/sns-inquiry/">Start an Inquiry</a>
+          <a class="btn ghost" href="/sns/">View Services</a>
+        </div>
 
-  <a href="/socials" class="nav-tab"><span>Socials</span></a>
-</nav>
+        <div class="hero-grid">
+          <div class="card reveal">
+            <h3>What you get</h3>
+            <p>
+              A practical plan, clean deployment, and ongoing support. No clutter, no overkill —
+              just a network that performs under real usage.
+            </p>
 
+            <div class="kpis">
+              <div class="kpi">
+                <strong>4+ Years</strong>
+                <span>Network operations experience</span>
+              </div>
+              <div class="kpi">
+                <strong>Enterprise Style</strong>
+                <span>Documentation-first approach</span>
+              </div>
+              <div class="kpi">
+                <strong>Security-Minded</strong>
+                <span>Segmentation & access control</span>
+              </div>
+              <div class="kpi">
+                <strong>Ongoing Support</strong>
+                <span>Membership option available</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card reveal">
+            <h3>Best starting point</h3>
+            <p>
+              A quick on-site environment survey + network assessment. You’ll know exactly what’s wrong,
+              what needs to change, and what it costs — before any installs begin.
+            </p>
+
+            <div class="btnrow" style="margin-top:.95rem">
+              <a class="btn" href="/sns/">Assessment Details</a>
+              <a class="btn ghost" href="/experience/">Proof & History</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- What we do -->
+      <section class="section">
+        <span class="h-eyebrow reveal">Core services</span>
+        <h2 class="h1 reveal" style="font-size: clamp(1.6rem, 3.0vw, 2.2rem); margin-top:.75rem;">
+          Built for performance, clarity, and uptime.
+        </h2>
+
+        <div class="grid3">
+          <div class="card reveal">
+            <h3>Network Assessments</h3>
+            <p>Signal + load behavior, equipment review, topology map, bottleneck identification, and a clean action plan.</p>
+          </div>
+          <div class="card reveal">
+            <h3>Wi-Fi Stability Upgrades</h3>
+            <p>Fix drops under load, improve roaming, reduce interference, and match hardware to the real client count.</p>
+          </div>
+          <div class="card reveal">
+            <h3>Secure Office Networks</h3>
+            <p>Segmentation, guest isolation, managed switching, visibility, and baseline hardening for modern small businesses.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- How it works -->
+      <section class="section">
+        <span class="h-eyebrow reveal">Process</span>
+        <h2 class="h1 reveal" style="font-size: clamp(1.6rem, 3.0vw, 2.2rem); margin-top:.75rem;">
+          Simple execution. Professional outcome.
+        </h2>
+
+        <div class="steps">
+          <div class="card step reveal">
+            <div class="num">01</div>
+            <h3>Survey</h3>
+            <p>On-site environment review, current equipment snapshot, and usage discussion.</p>
+          </div>
+          <div class="card step reveal">
+            <div class="num">02</div>
+            <h3>Design</h3>
+            <p>Topology plan, hardware recommendations, segmentation approach, and timeline.</p>
+          </div>
+          <div class="card step reveal">
+            <div class="num">03</div>
+            <h3>Deploy</h3>
+            <p>Clean install, cable discipline, configuration, and validation under load.</p>
+          </div>
+          <div class="card step reveal">
+            <div class="num">04</div>
+            <h3>Support</h3>
+            <p>Monitoring, changes, and rapid response — including membership-based ongoing admin.</p>
+          </div>
+        </div>
+
+        <div class="btnrow reveal">
+          <a class="btn primary" href="/sns-inquiry/">Start an Inquiry</a>
+          <a class="btn ghost" href="/socials/">Contact</a>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer class="footer">
+        <div>© 2025 Saku Network Solutions. Built clean. Documented.</div>
+        <div style="display:flex; gap:.9rem; flex-wrap:wrap;">
+          <a href="/sns-inquiry/">Inquiry</a>
+          <a href="/sns-login/">Client Login</a>
+          <a href="/sns/">Services</a>
+        </div>
+      </footer>
+
+    </div>
   </div>
 
-  <a class="client-login-pill" href="/sns-login/">Client Login</a>
-</div>
-
-
-
-
-    </header>
-
-    <!-- =======================================================
-         HERO AREA (LEFT: intro / RIGHT: quick facts)
-         ======================================================= -->
-    <section class="grid grid-2" id="top">
-      <!-- LEFT: HERO INTRO / SUMMARY -->
-      <section class="card hero-intro" aria-labelledby="hero-heading">
-        <div class="card-header">
-          <h2 class="card-title" id="hero-heading">About me</h2>
-          <span class="card-subtitle">Who I am &amp; what I do</span>
-        </div>
-        <div class="card-body">
-          <p>
-            I’m <strong>Brandon Ortiz</strong>, a <strong>USMC veteran</strong> and
-            network administrator with over <strong>4 years</strong> of
-            hands-on experience working with real infrastructure – routers,
-            switches, servers, and the people who rely on them.
-          </p>
-          <p>
-            I like taking messy, unreliable systems and turning them into
-            something stable, documented, and actually pleasant to use – whether
-            that’s on base, in an enterprise environment, or inside my own
-            homelab.
-          </p>
-
-          <!-- KEY PILL STATS -->
-          <div class="pill-row">
-            <div class="pill">
-              <span class="pill-label">Role</span>
-              <span>Network Admin / Infra Nerd</span>
-            </div>
-            <div class="pill">
-              <span class="pill-label">Background</span>
-              <span>USMC Communications · Enterprise Support</span>
-            </div>
-            <div class="pill">
-              <span class="pill-label">Focus</span>
-              <span>Reliable networks, clean design, security-minded builds</span>
-            </div>
-          </div>
-
-          <!-- CONTACT BUTTON -->
-          <div class="home-actions">
-            <div class="home-actions-primary">
-              <a class="btn-link" href="/sns">Saku Network Solutions</a>
-              <a class="btn-link secondary" href="/sns-inquiry">Start an Inquiry</a>
-            </div>
-
-            <details class="home-actions-more">
-              <summary class="btn-link secondary">More</summary>
-              <div class="home-actions-menu">
-                <a class="home-actions-item" href="/experience">Experience</a>
-                <a class="home-actions-item" href="/other">Other Stuff</a>
-                <a class="home-actions-item" href="/socials">Socials</a>
-              </div>
-            </details>
-          </div>
-
-        </div>
-      </section>
-
-      <!-- RIGHT: QUICK FACTS CARD -->
-      <aside class="card" aria-label="Quick facts">
-        <div class="card-header">
-          <h2 class="card-title">Experience Timeline</h2>
-          <span class="card-subtitle">At a glance</span>
-        </div>
-        <div class="card-body">
-          <ul class="facts-list">
-            <li>
-              <div class="fact-label">Location</div>
-              <div class="fact-main">Los Angeles, California</div>
-              <div class="fact-note">
-                Working in and around real-world infrastructure.
-              </div>
-            </li>
-            <li>
-              <div class="fact-label">Experience</div>
-              <div class="fact-main">
-                4+ years hands-on networking &amp; systems work
-              </div>
-              <div class="fact-note">
-                From USMC communications missions to supporting enterprise-style
-                environments.
-              </div>
-            </li>
-            <li>
-              <div class="fact-label">Recent roles</div>
-              <div class="fact-main">
-                USMC Network Admin (2020–2024) · Network Admin supporting USAF
-                via Beacon Hill / Trace Systems
-              </div>
-              <div class="fact-note">
-                Installing, maintaining, and troubleshooting switches, routers,
-                UPS units, and server rooms.
-              </div>
-            </li>
-            <li>
-              <div class="fact-label">Certs &amp; training</div>
-              <div class="fact-main">
-                CompTIA Security+ · USMC Communications-Electronics School
-              </div>
-              <div class="fact-note">
-                Always leveling up with cybersecurity &amp; advanced networking.
-              </div>
-            </li>
-          </ul>
-        </div>
-      </aside>
-    </section>
-
-    <!-- =======================================================
-         EXPERIENCE + HOMELAB SNAPSHOT
-         ======================================================= -->
-    <section class="grid grid-2-balanced" id="experience">
-      <!-- LEFT: PROFESSIONAL JOURNEY -->
-      <section class="card" aria-labelledby="experience-heading">
-        <div class="card-header">
-          <h2 class="card-title" id="experience-heading">
-            Professional Journey
-          </h2>
-          <span class="card-subtitle">How I got here</span>
-        </div>
-        <div class="card-body">
-          <ul class="bullet-list">
-            <li>
-              <strong>United States Marine Corps – Network Administrator (2020–2024)</strong><br />
-              Deployed and maintained mission-critical communications, supported
-              live-fire training and operations, and trained Marines on
-              networking fundamentals and troubleshooting.
-            </li>
-            <li>
-              <strong>Network Administrator – Contractor supporting USAF</strong><br />
-              Working through Beacon Hill / Trace Systems to support base
-              infrastructure: switch installations, port activations, UPS
-              replacements, documentation, and keeping closets clean and sane.
-            </li>
-            <li>
-              <strong>Teacher &amp; teammate</strong><br />
-              I enjoy breaking down complex topics into something people can
-              actually use – whether that’s junior Marines, coworkers, or
-              friends trying to understand “why the Wi-Fi sucks.”
-            </li>
-          </ul>
-        </div>
-      </section>
-
-
-    </section>
-    
-    <!-- =======================================================
-         FOOTER
-         ======================================================= -->
-    <footer>
-      © <span id="year"></span> kxsaku · Built from the homelab.
-      <a href="/sns-admin/index.html" class="admin-icon" aria-label="Admin Login" title="Admin">
-  ⛭
-</a>
-
-<script>
-  (function(){
-    const a = document.getElementById("adminLink");
-    if (!a) return;
-    const here = window.location.href;
-    a.href = `/sns-admin/index.html?from=${encodeURIComponent(here)}`;
-  })();
-</script>
-
-    </footer>
-  </main>
-
-  <!-- Simple script just to keep the year up to date -->
   <script>
-    document.getElementById("year").textContent =
-      new Date().getFullYear().toString();
+    // Lightweight reveal-on-scroll (fast, no libraries)
+    (function(){
+      const els = Array.from(document.querySelectorAll('.reveal'));
+      if (!('IntersectionObserver' in window) || els.length === 0) {
+        els.forEach(el => el.classList.add('in'));
+        return;
+      }
+      const io = new IntersectionObserver((entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            e.target.classList.add('in');
+            io.unobserve(e.target);
+          }
+        }
+      }, { threshold: 0.12 });
+      els.forEach(el => io.observe(el));
+    })();
   </script>
 </body>
 </html>
