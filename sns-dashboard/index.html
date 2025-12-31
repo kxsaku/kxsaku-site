@@ -72,7 +72,6 @@
   </div>
 
   <script type="module">
-    const FN_BASE = "https://jgvxmpsjtkedzgygynbl.supabase.co/functions/v1";
     import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
     const SUPABASE_URL = "https://jgvxmpsjtkedzgygynbl.supabase.co";
@@ -160,56 +159,59 @@ Budget: ${r.budget || ""}
     });
 
     async function loadSubscription(userId){
-  // Always refresh from Stripe before rendering
-  const { data: row, error: freshErr } = await sb.functions.invoke("get-billing-status");
-  if (freshErr) throw freshErr;
+      // Fetch subscription snapshot (server reads billing_subscriptions via RLS)
+      const { data: resp, error: freshErr } = await sb.functions.invoke("get-billing-status");
+      if (freshErr) throw freshErr;
 
-  if (!row) {
-    subState.innerHTML = `<div class="muted">No subscription record found yet.</div>`;
-    elSubStatus.textContent = "—";
-    elPayStatus.textContent = "—";
-    elPaidAmount.textContent = "—";
-    elPeriodEnd.textContent = "—";
-    manageBtn.style.display = "none";
-    return;
-  }
+      // get-billing-status returns: { subscription: null | { ... } }
+      const sub = resp?.subscription ?? null;
 
-  // Normalize display strings
-  const statusRaw = (row.status || "unknown").toString();
-  const statusPretty = statusRaw.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+      if (!sub) {
+        subState.innerHTML = `<div class="muted">No subscription record found yet.</div>`;
+        elSubStatus.textContent = "Status: —";
+        elPayStatus.textContent = "Payment: —";
+        elPaidAmount.textContent = "Paid: —";
+        elPeriodEnd.textContent = "Current Period End: —";
+        manageBtn.style.display = "none";
+        return;
+      }
 
-  const paymentRaw = (row.payment_status || "unknown").toString();
-  const paymentPretty = paymentRaw.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+      // Normalize display strings
+      const statusRaw = (sub.status || "unknown").toString();
+      const statusPretty = statusRaw.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
 
-  // Amounts / dates
-  const paid = (row.last_payment_amount_cents != null)
-    ? `$${(row.last_payment_amount_cents / 100).toFixed(2)}`
-    : "—";
+      const paymentRaw = (sub.last_payment_status || "unknown").toString();
+      const paymentPretty = paymentRaw.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
 
-  const periodEnd = row.current_period_end
-    ? new Date(row.current_period_end).toLocaleString()
-    : "—";
+      // Amounts / dates (your function returns last_payment_amount in dollars)
+      const paid = (sub.last_payment_amount != null)
+        ? `$${Number(sub.last_payment_amount).toFixed(2)}`
+        : "—";
 
-  elSubStatus.textContent = statusPretty;
-  elPayStatus.textContent = paymentPretty;
-  elPaidAmount.textContent = paid;
-  elPeriodEnd.textContent = periodEnd;
+      const periodEnd = sub.current_period_end
+        ? new Date(sub.current_period_end).toLocaleString()
+        : "—";
 
-  // Buttons
-  const activeish = ["active","trialing","past_due","unpaid"].includes(statusRaw);
-  manageBtn.style.display = activeish ? "inline-flex" : "none";
+      elSubStatus.textContent = `Status: ${statusPretty}`;
+      elPayStatus.textContent = `Payment: ${paymentPretty}`;
+      elPaidAmount.textContent = `Paid: ${paid}`;
+      elPeriodEnd.textContent = `Current Period End: ${periodEnd}`;
 
-  // Helpful note line
-  subState.innerHTML = `<div class="muted">${
-    statusRaw === "active"
-      ? "Subscription is active."
-      : statusRaw === "trialing"
-      ? "Trial is active."
-      : statusRaw === "past_due"
-      ? "Payment is past due — update billing to restore service."
-      : "No active subscription."
-  }</div>`;
-}
+      // Buttons
+      const activeish = ["active","trialing","past_due","unpaid"].includes(statusRaw);
+      manageBtn.style.display = activeish ? "inline-flex" : "none";
+
+      // Helpful note line
+      subState.innerHTML = `<div class="muted">${
+        statusRaw === "active"
+          ? "Subscription is active."
+          : statusRaw === "trialing"
+          ? "Trial is active."
+          : statusRaw === "past_due"
+          ? "Payment is past due — update billing to restore service."
+          : "No active subscription."
+      }</div>`;
+    }
 
 
     async function getAccessTokenOrThrow() {
@@ -269,28 +271,24 @@ Budget: ${r.budget || ""}
     });
 
     const user = await requireUser();
-    if (user){
+    if (user) {
       await loadInquiry(user.email);
+
       try {
-      await loadSubscription(user.id);
-    } catch (e) {
-      console.error("loadSubscription failed:", e);
+        await loadSubscription(user.id);
+      } catch (e) {
+        console.error("loadSubscription failed:", e);
 
-      // Hard-fail UI so it doesn't sit on Loading forever
-      const elSubLoading = document.getElementById("subLoading");
-      const subState = document.getElementById("subState");
-      const payState = document.getElementById("payState");
-      const paidAmount = document.getElementById("paidAmount");
-      const periodEnd = document.getElementById("periodEnd");
-
-      if (elSubLoading) elSubLoading.textContent = "Subscription unavailable";
-      if (subState) subState.textContent = "Unknown";
-      if (payState) payState.textContent = "—";
-      if (paidAmount) paidAmount.textContent = "—";
-      if (periodEnd) periodEnd.textContent = "—";
+        // Hard-fail UI so it doesn't sit on Loading forever
+        subState.innerHTML = `<div class="muted">Subscription unavailable.</div>`;
+        elSubStatus.textContent = "Status: Unknown";
+        elPayStatus.textContent = "Payment: —";
+        elPaidAmount.textContent = "Paid: —";
+        elPeriodEnd.textContent = "Current Period End: —";
+        manageBtn.style.display = "none";
+      }
     }
 
-    }
   </script>
 </body>
 </html>
