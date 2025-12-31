@@ -198,6 +198,119 @@
     color: var(--muted);
     font-size: 13px;
   }
+
+  /* --------------------------
+   Page + card animations
+-------------------------- */
+
+/* Respect accessibility */
+@media (prefers-reduced-motion: reduce){
+  *{ animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+
+/* Subtle background drift */
+@keyframes bgFloat {
+  0%   { background-position: 50% 0%, 20% 10%, 0% 0%; }
+  50%  { background-position: 52% 6%, 18% 14%, 0% 0%; }
+  100% { background-position: 50% 0%, 20% 10%, 0% 0%; }
+}
+
+/* Top header fades in */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Cards “pop in” */
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(14px) scale(.985); filter: blur(6px); }
+  to   { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+
+/* Soft highlight sweep across cards */
+@keyframes sheen {
+  0%   { transform: translateX(-120%) rotate(12deg); opacity: 0; }
+  15%  { opacity: .22; }
+  40%  { opacity: .10; }
+  100% { transform: translateX(140%) rotate(12deg); opacity: 0; }
+}
+
+/* Pills gently appear */
+@keyframes pillIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Apply bg drift to body */
+body{
+  animation: bgFloat 14s ease-in-out infinite;
+}
+
+/* Animate header + grid on load */
+.top{
+  animation: fadeUp .55s ease both;
+}
+
+/* Cards animate in with stagger */
+.card{
+  opacity: 0;
+  animation: cardIn .65s cubic-bezier(.2,.9,.2,1) both;
+}
+.card:nth-child(1){ animation-delay: .10s; }
+.card:nth-child(2){ animation-delay: .22s; }
+
+/* Add a sheen layer on cards */
+.card::after{
+  content:"";
+  position:absolute;
+  top:-40%;
+  left:-30%;
+  width: 40%;
+  height: 180%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255,255,255,.10),
+    transparent
+  );
+  filter: blur(1px);
+  pointer-events:none;
+  opacity: 0;
+  transform: translateX(-120%) rotate(12deg);
+  animation: sheen 4.8s ease-in-out infinite;
+  animation-delay: 1.2s; /* lets the initial card-in finish */
+}
+
+/* Pills animate in when visible (simple: animate whenever rendered) */
+.pillrow .pill{
+  opacity: 0;
+  animation: pillIn .45s ease both;
+}
+.pillrow .pill:nth-child(1){ animation-delay: .35s; }
+.pillrow .pill:nth-child(2){ animation-delay: .42s; }
+.pillrow .pill:nth-child(3){ animation-delay: .49s; }
+.pillrow .pill:nth-child(4){ animation-delay: .56s; }
+
+/* Make the cards feel more “alive” on hover */
+.card:hover{
+  transform: translateY(-2px);
+  border-color: rgba(190,180,255,.32);
+  box-shadow: 0 26px 95px rgba(0,0,0,.62);
+}
+.card{
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+
+/* Dynamic content fade-in */
+@keyframes contentIn{
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fadeIn{
+  animation: contentIn .35s ease both;
+}
+
+
 </style>
 
 </head>
@@ -338,6 +451,11 @@
         </div>
       `;
 
+      inqBox.classList.remove("fadeIn");
+      void inqBox.offsetWidth;
+      inqBox.classList.add("fadeIn");
+
+
     }
 
     viewHistory.addEventListener("click", () => {
@@ -398,6 +516,12 @@
           ? "Payment is past due — update billing to restore service."
           : "No active subscription."
       }</div>`;
+
+      subState.classList.remove("fadeIn");
+      void subState.offsetWidth;
+      subState.classList.add("fadeIn");
+
+
     }
 
 
