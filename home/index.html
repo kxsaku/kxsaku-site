@@ -4,6 +4,24 @@
   <meta charset="UTF-8" />
   <title>Saku Network Solutions | Reliable Networks, Done Clean</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script>
+  (function () {
+    // If user explicitly chose desktop, do not redirect
+    if (localStorage.getItem("sns_force_desktop") === "1") return;
+
+    // Treat as "phone" if small viewport + touch capable
+    var isPhone = window.matchMedia("(max-width: 740px)").matches &&
+                  ("ontouchstart" in window || navigator.maxTouchPoints > 0);
+
+    // Avoid redirect loop
+    var alreadyMobile = location.pathname.endsWith("/home/mobile.html");
+
+    if (isPhone && !alreadyMobile) {
+      location.replace("/home/mobile.html");
+    }
+  })();
+</script>
+
   <meta name="description" content="Saku Network Solutions (SNS) provides network assessments, Wi-Fi stability upgrades, secure office networks, and ongoing administration." />
 
   <style>
