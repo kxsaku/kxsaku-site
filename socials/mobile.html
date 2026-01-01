@@ -2,25 +2,31 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SNS · Contact (Mobile)</title>
-  <meta name="description" content="Contact Saku Network Solutions. Send a message, start an inquiry, or reach out directly." />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SNS · Contact</title>
 
   <style>
     :root{
-      --bg0:#050315;
+      --bg0:#020010;
+      --bg1:#050315;
       --ink:#f4f0ff;
-      --muted:rgba(244,240,255,.74);
-      --muted2:rgba(244,240,255,.56);
-      --stroke:rgba(255,255,255,.10);
-      --stroke2:rgba(255,255,255,.14);
-      --accent:#b67bff;
-      --accent2:#8a5dff;
-      --shadow: 0 18px 60px rgba(0,0,0,.45);
-      --shadow2: 0 14px 45px rgba(0,0,0,.36);
-      --r-xl: 26px;
-      --r-lg: 20px;
-      --max: 640px;
+      --muted: rgba(244,240,255,.72);
+      --muted2: rgba(244,240,255,.55);
+
+      --accent:#a855f7;
+      --accent2:#7c3aed;
+      --accent3:#c4b5fd;
+
+      --card: rgba(12, 7, 33, .62);
+      --card2: rgba(16, 9, 45, .72);
+      --border: rgba(255,255,255,.10);
+      --border2: rgba(196,181,253,.18);
+
+      --shadow: 0 30px 90px rgba(0,0,0,.55);
+      --radius: 22px;
+      --radius2: 18px;
+
+      --ease: cubic-bezier(.2,.8,.2,1);
     }
 
     *{ box-sizing:border-box; }
@@ -30,363 +36,493 @@
       color:var(--ink);
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
       background:
-        radial-gradient(1200px 700px at 30% 10%, rgba(182,123,255,.18), transparent 60%),
-        radial-gradient(900px 600px at 85% 20%, rgba(124,92,255,.14), transparent 60%),
-        radial-gradient(900px 700px at 50% 120%, rgba(182,123,255,.10), transparent 60%),
-        linear-gradient(180deg, #050315 0%, #060318 35%, #030012 100%);
+        radial-gradient(900px 500px at 12% 8%, rgba(168,85,247,.25), transparent 65%),
+        radial-gradient(800px 520px at 85% 22%, rgba(124,58,237,.22), transparent 62%),
+        radial-gradient(1000px 650px at 40% 90%, rgba(196,181,253,.14), transparent 68%),
+        linear-gradient(180deg, var(--bg1), var(--bg0));
       overflow-x:hidden;
     }
 
-    /* animated veil */
-    .bg{ position:fixed; inset:0; z-index:-3; pointer-events:none; }
+    /* animated background layer (no particle snow) */
+    .bg{
+      position:fixed; inset:0;
+      pointer-events:none;
+      opacity:.9;
+      filter: blur(0px);
+    }
     .bg::before{
       content:"";
-      position:absolute; inset:-30%;
+      position:absolute; inset:-40px;
       background:
-        radial-gradient(900px 600px at 20% 25%, rgba(182,123,255,.20), transparent 62%),
-        radial-gradient(800px 600px at 85% 30%, rgba(124,92,255,.14), transparent 64%),
-        radial-gradient(700px 500px at 50% 75%, rgba(182,123,255,.10), transparent 62%);
-      filter: blur(22px);
-      opacity:.9;
-      animation: drift 12s ease-in-out infinite alternate;
-      transform: translate3d(0,0,0);
+        radial-gradient(600px 340px at 18% 18%, rgba(168,85,247,.22), transparent 65%),
+        radial-gradient(520px 300px at 82% 26%, rgba(124,58,237,.18), transparent 62%),
+        radial-gradient(740px 420px at 52% 84%, rgba(196,181,253,.12), transparent 70%);
+      animation: floatGlow 10s var(--ease) infinite alternate;
+      transform: translateZ(0);
     }
-    @keyframes drift{
-      from{ transform: translate(-1.5%, -1.0%) scale(1.02); }
-      to{ transform: translate(1.5%, 1.0%) scale(1.06); }
-    }
-    .bg::after{
-      content:"";
-      position:absolute; inset:0;
-      background:
-        linear-gradient(135deg, rgba(255,255,255,.06), transparent 35%),
-        repeating-linear-gradient(135deg,
-          rgba(255,255,255,.05) 0px,
-          rgba(255,255,255,.05) 1px,
-          transparent 1px,
-          transparent 14px
-        );
-      opacity:.10;
-      mix-blend-mode: overlay;
+    @keyframes floatGlow{
+      from{ transform: translate3d(0,0,0) scale(1); opacity:.85; }
+      to{ transform: translate3d(0,-18px,0) scale(1.02); opacity:1; }
     }
 
-    .wrap{ width: min(var(--max), calc(100% - 1.25rem)); margin: 0 auto; }
+    .wrap{
+      width: min(1180px, calc(100% - 2.2rem));
+      margin: 0 auto;
+    }
 
-    /* Header */
+    /* Top nav (matches Experience style) */
     .topnav{
-      position: sticky;
-      top: 0;
-      z-index: 60;
-      padding: .9rem 0;
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      background: rgba(5,3,21,.62);
-      border-bottom: 1px solid rgba(255,255,255,.06);
+      position:sticky;
+      top:0;
+      z-index:50;
+      backdrop-filter: blur(14px);
+      background: linear-gradient(180deg, rgba(5,3,21,.72), rgba(5,3,21,.40));
+      border-bottom: 1px solid rgba(255,255,255,.08);
     }
-    .navrow{ display:flex; align-items:center; justify-content:space-between; gap:.75rem; }
-    .brand{ display:flex; align-items:center; gap:.7rem; min-width:0; }
+    .navrow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 1rem;
+      padding: .95rem 0;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:.85rem;
+      min-width: 300px;
+    }
     .mark{
-      width: 42px; height: 42px;
-      border-radius: 14px;
-      background: rgba(182,123,255,.10);
-      border: 1px solid rgba(255,255,255,.10);
-      box-shadow: 0 14px 40px rgba(0,0,0,.35);
-      display:flex; align-items:center; justify-content:center;
-      overflow:hidden;
-      flex: 0 0 auto;
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      display:grid;
+      place-items:center;
+      background: radial-gradient(circle at top left, rgba(168,85,247,.35), rgba(0,0,0,.35));
+      border: 1px solid rgba(196,181,253,.22);
+      box-shadow: 0 18px 50px rgba(0,0,0,.35);
     }
     .mark img{
-      width: 28px; height: 28px;
-      object-fit: contain; display:block;
-      filter: drop-shadow(0 10px 22px rgba(182,123,255,.25));
-    }
-    .brandText{ min-width:0; }
-    .brand strong{
+      width: 22px;
+      height: 22px;
+      object-fit: contain;
       display:block;
-      letter-spacing:.14em;
+      filter: drop-shadow(0 10px 20px rgba(168,85,247,.25));
+    }
+    .brand strong{
+      letter-spacing:.16em;
       font-size:.86rem;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      max-width: 70vw;
-      line-height:1.05;
-      text-transform: uppercase;
+      text-transform:uppercase;
+      display:block;
+      line-height: 1.05;
     }
     .brand span{
       display:block;
-      color: rgba(244,240,255,.65);
       font-size:.82rem;
-      margin-top:.14rem;
+      color: rgba(244,240,255,.62);
+      margin-top:.2rem;
       white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      max-width: 70vw;
-      line-height:1.1;
     }
 
-    .iconBtn{
-      width: 44px; height: 44px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.14);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      box-shadow: 0 12px 40px rgba(0,0,0,.28);
-      display:grid; place-items:center;
-      cursor:pointer;
-      transition: transform .14s ease, border-color .14s ease, filter .14s ease;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .iconBtn:active{ transform: translateY(0); filter: brightness(1.04); }
-
-    /* Menu */
-    .scrim{
-      position: fixed; inset: 0; z-index: 70;
-      background: rgba(0,0,0,.55);
-      opacity: 0; pointer-events: none;
-      transition: opacity .18s ease;
-    }
-    .scrim.open{ opacity:1; pointer-events:auto; }
-
-    .menu{
-      position: fixed; left: 0; right: 0; top: 0;
-      z-index: 80;
-      transform: translateY(-110%);
-      transition: transform .24s cubic-bezier(.2,.9,.2,1);
-      padding: 0.95rem 0 .9rem;
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      background: linear-gradient(180deg, rgba(5,3,21,.92), rgba(5,3,21,.62));
-      border-bottom: 1px solid rgba(255,255,255,.10);
-    }
-    .menu.open{ transform: translateY(0); }
-
-    .menuHeader{
-      display:flex; align-items:center; justify-content:space-between; gap:.75rem;
-      padding-bottom: .75rem;
-      border-bottom: 1px solid rgba(255,255,255,.08);
-    }
-
-    .menuLinks{ display:grid; gap: .55rem; padding-top: .85rem; }
-    .menuLinks a{
-      text-decoration:none;
-      color: rgba(244,240,255,.72);
-      font-size: .80rem;
-      letter-spacing:.14em;
-      text-transform: uppercase;
-      padding: .8rem .95rem;
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.10);
-      transition: transform .14s ease, border-color .14s ease, filter .14s ease, background .14s ease, color .14s ease;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .menuLinks a:active{
-      transform: translateY(0);
-      border-color: rgba(255,255,255,.14);
-      filter: brightness(1.05);
-      color: rgba(244,240,255,.92);
-      background: rgba(182,123,255,.08);
-    }
-    .menuLinks a.active{
-      background: rgba(182,123,255,.14);
-      border-color: rgba(255,255,255,.12);
-      color: rgba(244,240,255,.92);
-    }
-
-    .btn{
-      display:inline-flex;
-      align-items:center;
+    .navlinks{
+      display:flex;
+      gap:.7rem;
+      flex-wrap:wrap;
       justify-content:center;
-      gap:.5rem;
-      height: 46px;
-      padding: 0 1.05rem;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.14);
-      color: rgba(244,240,255,.92);
-      text-decoration:none;
-      font-weight: 800;
-      letter-spacing:.12em;
-      font-size:.78rem;
-      text-transform: uppercase;
-      box-shadow: 0 10px 30px rgba(0,0,0,.25);
-      transition: transform .15s ease, background .15s ease, border-color .15s ease, filter .15s ease;
-      will-change: transform;
-      -webkit-tap-highlight-color: transparent;
-      white-space: nowrap;
-      overflow:hidden;
-      cursor:pointer;
     }
-    .btn:active{
-      transform: translateY(0);
-      border-color: rgba(255,255,255,.16);
-      background: rgba(182,123,255,.10);
-      filter: brightness(1.05);
+    .navlinks a{
+      text-decoration:none;
+      color: rgba(244,240,255,.74);
+      font-size:.82rem;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      padding: .55rem .95rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.12);
+      transition: transform .16s var(--ease), background .16s var(--ease), border-color .16s var(--ease), box-shadow .16s var(--ease);
+    }
+    .navlinks a:hover{
+      transform: translateY(-1px);
+      border-color: rgba(196,181,253,.32);
+      background: rgba(0,0,0,.22);
+      box-shadow: 0 18px 50px rgba(0,0,0,.35);
+    }
+    .navlinks a.active{
+      color: rgba(244,240,255,.92);
+      background: radial-gradient(circle at top left, rgba(168,85,247,.40), rgba(0,0,0,.18));
+      border-color: rgba(196,181,253,.45);
+      box-shadow: 0 18px 55px rgba(88,28,135,.28);
+    }
+
+    .actions{
+      display:flex;
+      align-items:center;
+      gap:.65rem;
+      min-width: 180px;
+      justify-content:flex-end;
+    }
+    .btn{
+      appearance:none;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      color: rgba(244,240,255,.88);
+      text-decoration:none;
+      padding: .62rem 1.05rem;
+      border-radius: 999px;
+      font-weight: 700;
+      letter-spacing:.10em;
+      font-size:.78rem;
+      text-transform:uppercase;
+      transition: transform .16s var(--ease), box-shadow .16s var(--ease), border-color .16s var(--ease), background .16s var(--ease), filter .16s var(--ease);
+      cursor:pointer;
+      user-select:none;
+    }
+    .btn:hover{
+      transform: translateY(-1px);
+      border-color: rgba(196,181,253,.34);
+      box-shadow: 0 22px 65px rgba(0,0,0,.50);
+      background: rgba(0,0,0,.28);
     }
     .btn.primary{
-      background: linear-gradient(90deg, rgba(182,123,255,.95), rgba(138,93,255,.95));
-      border-color: rgba(255,255,255,.18);
-      color: #12061f;
-      box-shadow: 0 18px 60px rgba(182,123,255,.20);
+      border-color: rgba(196,181,253,.42);
+      background: radial-gradient(circle at top left, rgba(168,85,247,.75), rgba(76,29,149,.55));
+      box-shadow: 0 22px 70px rgba(88,28,135,.30);
     }
-    .menuActions{ margin-top: .85rem; display:grid; gap:.65rem; }
-    .menuActions .btn{ width: 100%; }
+    .btn.primary:hover{
+      filter: brightness(1.04);
+      box-shadow: 0 26px 85px rgba(88,28,135,.38);
+    }
 
-    /* Sections */
-    .section{ padding: 2.35rem 0; }
+    /* Layout */
+    main{ padding: 2.2rem 0 3.8rem; }
+
+    .hero{
+      padding: 1.2rem 0 1.4rem;
+    }
 
     .kicker{
       display:inline-flex;
       align-items:center;
       gap:.55rem;
-      padding: .42rem .8rem;
+      padding: .55rem .9rem;
       border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(182,123,255,.08);
-      color: rgba(244,240,255,.82);
-      letter-spacing:.16em;
+      border: 1px solid rgba(196,181,253,.22);
+      background: rgba(0,0,0,.20);
+      color: rgba(244,240,255,.78);
+      letter-spacing:.14em;
+      text-transform:uppercase;
       font-size:.72rem;
-      text-transform: uppercase;
+      width: fit-content;
     }
     .dot{
       width: 8px; height: 8px;
       border-radius: 999px;
-      background: rgba(182,123,255,.9);
-      box-shadow: 0 0 0 6px rgba(182,123,255,.15);
+      background: #22c55e;
+      box-shadow: 0 0 12px rgba(34,197,94,.55);
     }
 
-    .hero{ padding: 2.8rem 0 1.1rem; text-align:center; }
     h1{
-      margin: 1.0rem 0 .75rem;
-      font-size: clamp(1.85rem, 6.3vw, 2.55rem);
-      line-height: 1.08;
-      letter-spacing: -.02em;
+      margin: .95rem 0 .65rem;
+      font-size: clamp(2.2rem, 4vw, 3.4rem);
+      line-height: 1.05;
+      letter-spacing:-.02em;
     }
     .grad{
-      background: linear-gradient(90deg, rgba(244,240,255,.95), rgba(182,123,255,.78));
-      -webkit-background-clip: text;
+      background: linear-gradient(90deg, rgba(196,181,253,1), rgba(168,85,247,1));
+      -webkit-background-clip:text;
       background-clip:text;
-      color: transparent;
+      color:transparent;
     }
     .lede{
-      margin:0 auto;
-      color: rgba(244,240,255,.74);
-      line-height: 1.70;
-      font-size: 1.00rem;
-      max-width: 62ch;
+      margin: 0;
+      color: rgba(244,240,255,.68);
+      line-height: 1.65;
+      max-width: 66ch;
     }
 
-    .stack{ display:grid; gap:.85rem; }
+    .grid{
+      margin-top: 1.5rem;
+      display:grid;
+      gap: 1.15rem;
+      grid-template-columns: 1fr;
+    }
+    @media (min-width: 980px){
+      .grid{ grid-template-columns: 1.05fr .95fr; align-items:start; }
+    }
 
     .card{
-      border-radius: var(--r-xl);
+      background: var(--card);
       border: 1px solid rgba(255,255,255,.10);
-      background: rgba(12,10,28,.52);
-      box-shadow: var(--shadow2);
-      padding: 1.15rem 1.05rem;
-      text-align:left;
-      overflow:hidden;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 1.35rem 1.35rem;
       position:relative;
+      overflow:hidden;
+      transition: transform .18s var(--ease), box-shadow .18s var(--ease), border-color .18s var(--ease), background .18s var(--ease);
     }
-    .pill{
-      display:inline-flex;
-      padding:.42rem .72rem;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.12);
-      color: rgba(244,240,255,.78);
-      font-size: .72rem;
-      letter-spacing:.14em;
-      text-transform: uppercase;
-      white-space:nowrap;
+    .card::before{
+      content:"";
+      position:absolute;
+      inset:-2px;
+      background: radial-gradient(520px 220px at 22% 10%, rgba(168,85,247,.14), transparent 60%),
+                  radial-gradient(420px 220px at 86% 30%, rgba(124,58,237,.12), transparent 62%);
+      opacity:.9;
+      pointer-events:none;
     }
-    .card h3{
-      margin: .85rem 0 .55rem;
-      font-size: 1.02rem;
-      letter-spacing:.06em;
-      text-transform: uppercase;
-    }
-    .card p{
-      margin:0;
-      color: rgba(244,240,255,.70);
-      line-height: 1.65;
-      font-size: .98rem;
+    .card > *{ position:relative; }
+
+    .card:hover{
+      transform: translateY(-2px);
+      border-color: rgba(196,181,253,.22);
+      box-shadow: 0 35px 110px rgba(0,0,0,.62);
+      background: rgba(16, 9, 45, .78);
     }
 
-    .grid2{
-      margin-top: .95rem;
+    .card h2{
+      margin:0;
+      font-size: 1.05rem;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+    }
+    .sub{
+      margin:.35rem 0 0;
+      color: rgba(244,240,255,.60);
+      font-size:.92rem;
+      line-height:1.55;
+    }
+
+    .row{
+      margin-top: 1.05rem;
       display:grid;
-      gap:.65rem;
+      gap:.8rem;
+    }
+    .line{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:.9rem;
+      padding: .9rem 1rem;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.16);
+      transition: transform .16s var(--ease), border-color .16s var(--ease), background .16s var(--ease);
+    }
+    .line:hover{
+      transform: translateY(-1px);
+      border-color: rgba(196,181,253,.22);
+      background: rgba(0,0,0,.22);
+    }
+    .line .left{
+      display:flex;
+      flex-direction:column;
+      gap:.15rem;
+      min-width: 0;
+    }
+    .line .label{
+      font-weight:800;
+      letter-spacing:.06em;
+      color: rgba(244,240,255,.92);
+      font-size:.92rem;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .line .value{
+      color: rgba(244,240,255,.62);
+      font-size:.9rem;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .linkbtn{
+      text-decoration:none;
+      padding: .55rem .85rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      color: rgba(244,240,255,.88);
+      font-size:.78rem;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      font-weight:800;
+      transition: transform .16s var(--ease), border-color .16s var(--ease), box-shadow .16s var(--ease), background .16s var(--ease);
+      flex: 0 0 auto;
+    }
+    .linkbtn:hover{
+      transform: translateY(-1px);
+      border-color: rgba(196,181,253,.28);
+      box-shadow: 0 18px 55px rgba(0,0,0,.45);
+      background: rgba(0,0,0,.26);
     }
 
     /* Form */
-    .field{ display:grid; gap:.4rem; margin-top:.75rem; }
+    form{ margin-top: 1.1rem; }
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:.45rem;
+      margin-top: .85rem;
+    }
     label{
-      font-size:.72rem;
+      font-size:.78rem;
       letter-spacing:.14em;
-      text-transform: uppercase;
-      color: rgba(244,240,255,.70);
+      text-transform:uppercase;
+      color: rgba(244,240,255,.66);
+      font-weight: 800;
     }
     input, textarea{
       width:100%;
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.14);
+      padding: .95rem 1rem;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.18);
       color: rgba(244,240,255,.92);
-      padding: .9rem .95rem;
+      outline:none;
       font-size: .98rem;
-      outline: none;
-      box-shadow: 0 12px 40px rgba(0,0,0,.22);
-      transition: border-color .14s ease, filter .14s ease, background .14s ease;
+      transition: border-color .16s var(--ease), box-shadow .16s var(--ease), background .16s var(--ease), transform .16s var(--ease);
     }
-    textarea{ min-height: 130px; resize: vertical; }
+    textarea{ min-height: 160px; resize: vertical; }
+
     input:focus, textarea:focus{
-      border-color: rgba(182,123,255,.35);
-      filter: brightness(1.03);
-      background: rgba(182,123,255,.06);
-    }
-    .help{
-      margin-top:.55rem;
-      color: rgba(244,240,255,.58);
-      line-height: 1.55;
-      font-size: .90rem;
+      border-color: rgba(196,181,253,.34);
+      box-shadow: 0 0 0 4px rgba(168,85,247,.14);
+      background: rgba(0,0,0,.24);
     }
 
-    .inlineBtns{ display:grid; gap:.65rem; margin-top: .95rem; }
-    .inlineBtns .btn{ width:100%; }
+    .formRow{
+      margin-top: 1rem;
+      display:flex;
+      gap:.7rem;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:flex-end;
+    }
 
+    .note{
+      margin-top: .85rem;
+      color: rgba(244,240,255,.52);
+      font-size:.88rem;
+      line-height:1.55;
+    }
+
+    /* ===== Toast (clean, animated, auto-hide) ===== */
     .toast{
       position: fixed;
       left: 50%;
-      bottom: 18px;
-      transform: translateX(-50%) translateY(20px);
-      background: rgba(12,10,28,.82);
-      border: 1px solid rgba(255,255,255,.12);
-      padding: .7rem .9rem;
-      border-radius: 999px;
-      box-shadow: 0 18px 60px rgba(0,0,0,.45);
-      color: rgba(244,240,255,.88);
-      font-size: .86rem;
-      letter-spacing:.04em;
+      bottom: 22px;
+      transform: translateX(-50%) translateY(18px) scale(.98);
       opacity: 0;
-      pointer-events:none;
-      transition: opacity .18s ease, transform .18s ease;
+      pointer-events: none;
       z-index: 120;
-      max-width: calc(100% - 1.25rem);
-      text-align:center;
+
+      width: min(520px, calc(100% - 2rem));
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.12);
+
+      background:
+        radial-gradient(600px 120px at 18% 0%, rgba(168,85,247,.22), transparent 65%),
+        radial-gradient(600px 120px at 82% 0%, rgba(124,58,237,.16), transparent 65%),
+        rgba(0,0,0,.56);
+
+      backdrop-filter: blur(12px);
+      box-shadow: 0 30px 90px rgba(0,0,0,.60);
+      padding: 14px 14px;
+
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      transition: opacity .22s var(--ease), transform .22s var(--ease), filter .22s var(--ease);
     }
+
     .toast.on{
+      opacity: 1;
+      transform: translateX(-50%) translateY(0) scale(1);
+    }
+
+    .toastIcon{
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      font-size: 18px;
+      color: rgba(244,240,255,.95);
+
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.25);
+      box-shadow: 0 18px 55px rgba(0,0,0,.45);
+    }
+
+    .toastBody{ min-width: 0; }
+    .toastTitle{
+      font-weight: 900;
+      letter-spacing: .02em;
+      line-height: 1.1;
+    }
+    .toastMsg{
+      margin-top: 2px;
+      color: rgba(244,240,255,.68);
+      font-size: .92rem;
+      line-height: 1.35;
+    }
+
+    /* Variants */
+    .toast[data-type="ok"] .toastIcon{
+      background: radial-gradient(circle at top left, rgba(34,197,94,.28), rgba(0,0,0,.25));
+      border-color: rgba(34,197,94,.22);
+    }
+    .toast[data-type="warn"] .toastIcon{
+      background: radial-gradient(circle at top left, rgba(245,158,11,.28), rgba(0,0,0,.25));
+      border-color: rgba(245,158,11,.22);
+    }
+    .toast[data-type="err"] .toastIcon{
+      background: radial-gradient(circle at top left, rgba(239,68,68,.28), rgba(0,0,0,.25));
+      border-color: rgba(239,68,68,.22);
+    }
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce){
+      .toast{ transition:none !important; }
+    }
+
+    .badge{
+      width:10px; height:10px;
+      border-radius: 999px;
+      background: #22c55e;
+      box-shadow: 0 0 10px rgba(34,197,94,.55);
+    }
+    .badge.warn{ background:#f59e0b; box-shadow: 0 0 10px rgba(245,158,11,.55); }
+    .badge.err{ background:#ef4444; box-shadow: 0 0 10px rgba(239,68,68,.55); }
+
+    /* reveal animation */
+    .reveal{
+      opacity:0;
+      transform: translateY(14px);
+      transition: opacity .55s var(--ease), transform .55s var(--ease);
+    }
+    .reveal.on{
       opacity:1;
-      transform: translateX(-50%) translateY(0);
+      transform: translateY(0);
     }
 
     footer{
-      padding: 2.4rem 0 2.8rem;
+      padding: 2.6rem 0 3.1rem;
       color: rgba(244,240,255,.55);
       border-top: 1px solid rgba(255,255,255,.06);
       background: rgba(0,0,0,.08);
-      text-align:center;
+      margin-top: 2.1rem;
+    }
+    footer .links{
+      margin-top: .65rem;
+      display:flex;
+      justify-content:center;
+      gap: 12px;
+      flex-wrap:wrap;
+      font-size:.86rem;
     }
     footer a{
       color: rgba(244,240,255,.72);
@@ -394,68 +530,102 @@
       border-bottom: 1px solid rgba(244,240,255,.18);
       padding-bottom:2px;
     }
+    footer a:hover{ color: rgba(244,240,255,.92); }
 
-    /* reveal */
-    .reveal{
-      opacity:0;
-      transform: translateY(14px);
-      transition: opacity .55s ease, transform .55s ease;
-    }
-    .reveal.on{
-      opacity:1;
-      transform: translateY(0);
+    @media (max-width: 980px){
+      .brand{ min-width:auto; }
+      .actions{ min-width:auto; }
     }
 
     @media (prefers-reduced-motion: reduce){
       .bg::before{ animation:none !important; }
-      .btn{ transition:none !important; }
+      .btn,.card,.line,.linkbtn,input,textarea{ transition:none !important; }
       .reveal{ opacity:1 !important; transform:none !important; }
-      .menu, .scrim, .toast{ transition:none !important; }
     }
+    /* ===== Mobile fitting (UI only - features/logic unchanged) ===== */
+    @media (max-width: 740px){
+      .wrap{ width: min(1180px, calc(100% - 1.4rem)); }
+
+      .topnav{ backdrop-filter: blur(16px); }
+
+      .navrow{
+        flex-direction: column;
+        align-items: stretch;
+        padding: .85rem 0;
+        gap: .75rem;
+      }
+
+      .brand{ min-width: 0; }
+      .brand span{ white-space: normal; }
+
+      /* keep same links, just prevent smooshing */
+      .navlinks{
+        width: 100%;
+        justify-content: flex-start;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: .15rem;
+        gap: .55rem;
+      }
+      .navlinks::-webkit-scrollbar{ height: 0; }
+      .navlinks a{ flex: 0 0 auto; font-size: .74rem; padding: .52rem .85rem; }
+
+      .actions{ min-width: 0; justify-content: flex-start; }
+      .actions .btn{ width: 100%; text-align: center; }
+
+      main{ padding: 1.6rem 0 3.2rem; }
+      .hero{ padding: .85rem 0 1.1rem; }
+
+      h1{ font-size: clamp(1.85rem, 7.2vw, 2.55rem); }
+      .lede{ max-width: none; }
+
+      .card{
+        padding: 1.15rem 1.05rem;
+        border-radius: 20px;
+      }
+
+      .line{
+        flex-direction: column;
+        align-items: flex-start;
+        gap: .65rem;
+        padding: .9rem .95rem;
+      }
+      .line .value{ white-space: normal; }
+
+      .linkbtn{
+        width: 100%;
+        text-align: center;
+        padding: .62rem .95rem;
+      }
+
+      textarea{ min-height: 140px; }
+
+      .formRow{
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: stretch;
+      }
+      .formRow .btn{ width: 100%; }
+
+      footer{ padding: 2.3rem 0 2.8rem; }
+      footer .links{ gap: 10px; }
+    }
+
+    @media (max-width: 390px){
+      .mark{ width: 40px; height: 40px; }
+      .brand strong{ font-size: .82rem; }
+      .btn{ padding: .62rem 1rem; }
+      input, textarea{ padding: .92rem .95rem; }
+    }
+
   </style>
 </head>
 
 <body>
   <div class="bg" aria-hidden="true"></div>
 
-  <div class="scrim" id="scrim" aria-hidden="true"></div>
-
-  <aside class="menu" id="menu" aria-label="Mobile Menu" aria-hidden="true">
-    <div class="wrap">
-      <div class="menuHeader">
-        <div class="brand" style="gap:.65rem;">
-          <div class="mark" style="width:40px;height:40px;border-radius:14px;">
-            <img src="/assets/sns-logo-purple.png" alt="Saku Network Solutions logo">
-          </div>
-          <div class="brandText">
-            <strong>SAKU NETWORK SOLUTIONS</strong>
-            <span>Network infrastructure, done clean.</span>
-          </div>
-        </div>
-
-        <button class="iconBtn" id="closeMenu" aria-label="Close menu">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-            <path d="M6 6l12 12M18 6L6 18" stroke="rgba(244,240,255,.92)" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-        </button>
-      </div>
-
-      <nav class="menuLinks" aria-label="Primary">
-        <a href="/home/">Home</a>
-        <a href="/sns/">Services</a>
-        <a href="/experience/">Credibility</a>
-        <a href="/other/">Resources</a>
-        <a class="active" href="/socials/mobile.html">Contact</a>
-      </nav>
-
-      <div class="menuActions">
-        <a class="btn" href="/sns-login/">Client Login</a>
-        <a class="btn primary" href="/sns-inquiry/">Start an Inquiry</a>
-        <a class="btn" href="#" id="viewDesktop">View Desktop Site</a>
-      </div>
-    </div>
-  </aside>
-
+  <!-- Top Nav (same as Experience/SNS) -->
   <header class="topnav">
     <div class="wrap">
       <div class="navrow">
@@ -463,246 +633,238 @@
           <div class="mark">
             <img src="/assets/sns-logo-purple.png" alt="Saku Network Solutions logo">
           </div>
-          <div class="brandText">
+          <div>
             <strong>SAKU NETWORK SOLUTIONS</strong>
-            <span>Fast contact. Clean intake.</span>
+            <span>Network infrastructure, done clean.</span>
           </div>
         </div>
 
-        <button class="iconBtn" id="openMenu" aria-label="Open menu">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-            <path d="M4 7h16M4 12h16M4 17h16" stroke="rgba(244,240,255,.92)" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-        </button>
+        <nav class="navlinks" aria-label="Primary">
+          <a href="/home/">Home</a>
+          <a href="/sns/">Services</a>
+          <a href="/experience/">Credibility</a>
+          <a href="/other/">Resources</a>
+          <a class="active" href="/socials/">Contact</a>
+        </nav>
+
+        <div class="actions">
+          <a class="btn" href="/sns-login/">Client Login</a>
+        </div>
       </div>
     </div>
   </header>
 
   <main>
-    <section class="hero section">
+    <section class="hero">
       <div class="wrap">
-        <div class="kicker reveal" style="justify-content:center;">
+        <div class="kicker reveal">
           <span class="dot"></span>
-          Contact
+          Direct contact · clean communication
         </div>
 
         <h1 class="reveal">
-          Send a message the <span class="grad">clean way</span>.
+          Reach me fast — <span class="grad">without the runaround</span>.
         </h1>
 
         <p class="lede reveal">
-          Fastest option is the Inquiry form. If you just need to reach me quickly, use the message form below.
+          Use the form to send a message directly to my business inbox. If you prefer, use LinkedIn for professional outreach.
         </p>
 
-        <div class="grid2 reveal">
-          <a class="btn primary" href="/sns-inquiry/">Start an Inquiry</a>
-          <a class="btn" href="#message">Send a Message</a>
-        </div>
-      </div>
-    </section>
+        <div class="grid">
+          <!-- LEFT: Contact form -->
+          <section class="card reveal" aria-label="Ask me a question!">
+            <h2>Send me a message</h2>
+            <p class="sub">Messages are answered within 1-3 business days.</p>
 
-    <!-- MESSAGE FORM (WORKING) -->
-    <section id="message" class="section">
-      <div class="wrap">
-        <div class="kicker reveal">
-          <span class="dot"></span>
-          Send me a message
-        </div>
+            <form id="contactForm">
+              <div class="field">
+                <label for="subject">Subject</label>
+                <input id="subject" name="subject" type="text" maxlength="120" placeholder="Enter your Subject here." required>
+              </div>
 
-        <div class="card reveal" style="margin-top:1.0rem;">
-          <span class="pill">Mobile-friendly</span>
-          <h3>Quick message</h3>
-          <p>Fill this out and your phone will open your mail app with everything pre-filled.</p>
+              <div class="field">
+                <label for="message">Message</label>
+                <textarea id="message" name="message" maxlength="4000" placeholder="Enter your message here." required></textarea>
+              </div>
 
-          <form id="msgForm" autocomplete="on">
-            <div class="field">
-              <label for="name">Name (optional)</label>
-              <input id="name" name="name" type="text" placeholder="Your name" />
+              <div class="formRow">
+                <button class="btn" type="button" id="mailtoFallback" title="Opens your email client (fallback)">Use email app</button>
+                <button class="btn primary" type="submit" id="sendBtn">Send</button>
+              </div>
+
+              <p class="note">
+                This is for initial contact and questions. If you’re an active client, please use your personal client dashboard.
+              </p>
+            </form>
+          </section>
+
+          <!-- RIGHT: Only the core info you asked for -->
+          <aside class="card reveal" aria-label="Contact details">
+            <h2>Contact details</h2>
+            <p class="sub">Professional links only.</p>
+
+            <div class="row">
+              <div class="line">
+                <div class="left">
+                  <div class="label">LinkedIn</div>
+                  <div class="value" id="linkedinText">https://www.linkedin.com/in/brandon-ortiz-4b148326b/</div>
+                </div>
+                <a class="linkbtn" id="linkedinBtn" href="#" target="_blank" rel="noopener">Open</a>
+              </div>
+
+              <div class="line">
+                <div class="left">
+                  <div class="label">Business Email</div>
+                  <div class="value" id="emailText">brandon.sns@proton.me</div>
+                </div>
+                <a class="linkbtn" id="emailBtn" href="mailto:brandon.sns@proton.me">Email</a>
+              </div>
             </div>
 
-            <div class="field">
-              <label for="email">Email (optional)</label>
-              <input id="email" name="email" type="email" placeholder="you@example.com" inputmode="email" />
-            </div>
-
-            <div class="field">
-              <label for="message">Message</label>
-              <textarea id="message" name="message" required placeholder="What do you need help with?"></textarea>
-              <div class="help">If this is urgent or detailed, the Inquiry form is still best.</div>
-            </div>
-
-            <div class="inlineBtns">
-              <button class="btn primary" type="submit">Send Message</button>
-              <button class="btn" type="button" id="copyEmailBtn">Copy Email</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </section>
-
-    <!-- DIRECT -->
-    <section class="section">
-      <div class="wrap">
-        <div class="kicker reveal">
-          <span class="dot"></span>
-          Direct options
-        </div>
-
-        <div class="stack" style="margin-top:1.0rem;">
-          <div class="card reveal">
-            <span class="pill">Email</span>
-            <h3>Business Email</h3>
-            <p>For attachments or formal requests.</p>
-            <div class="grid2" style="margin-top:.95rem;">
-              <a class="btn" href="mailto:brandon.sns@proton.me?subject=SNS%20Inquiry">Email SNS</a>
-              <a class="btn" href="/sns/">View Services</a>
-            </div>
-          </div>
-
-          <!-- You can add phone/socials here later if you want -->
+            <p class="note" style="margin-top:1.1rem;">
+              Emails are typically answered with lower priority- But messages sent via this page get priority handling.
+            </p>
+          </aside>
         </div>
       </div>
     </section>
 
     <footer>
-      <div class="wrap">
-        <div>© 2025 Saku Network Solutions. Built clean. Documented.</div>
-        <div style="margin-top:.9rem; line-height:2.1;">
-          <a href="/sns-inquiry/">Inquiry</a> &nbsp;•&nbsp;
-          <a href="/sns/">Services</a> &nbsp;•&nbsp;
-          <a href="/sns-login/">Client Login</a>
+      <div class="wrap" style="text-align:center;">
+        <div>© <span id="year"></span> Saku Network Solutions. Built clean.</div>
+        <div class="links">
+          <a href="/home/">Home</a>
+          <a href="/sns/">Services</a>
+          <a href="/experience/">Credibility</a>
+          <a href="/other/">Resources</a>
+          <a href="/socials/">Contact</a>
         </div>
       </div>
     </footer>
   </main>
 
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true">
+    <div class="toastIcon" id="toastIcon" aria-hidden="true">✓</div>
+    <div class="toastBody">
+      <div class="toastTitle" id="toastTitle">Sent</div>
+      <div class="toastMsg" id="toastMsg">Message sent.</div>
+    </div>
+  </div>
+
 
   <script>
-    // Reveal-on-scroll
-    (function(){
-      const els = Array.from(document.querySelectorAll('.reveal'));
-      if (!('IntersectionObserver' in window) || els.length === 0) {
-        els.forEach(el => el.classList.add('on'));
-        return;
-      }
-      const io = new IntersectionObserver((entries) => {
-        entries.forEach(e => {
-          if (e.isIntersecting) {
-            e.target.classList.add('on');
-            io.unobserve(e.target);
-          }
-        });
-      }, { threshold: 0.12 });
-      els.forEach(el => io.observe(el));
-    })();
-  </script>
+    // ===== CONFIG (edit these 2 lines) =====
+    const BUSINESS_EMAIL = "brandon.sns@proton.me";
+    const LINKEDIN_URL = "https://www.linkedin.com/in/brandon-ortiz-4b148326b/";
 
-  <script>
-    // Mobile menu
-    (function(){
-      const menu = document.getElementById("menu");
-      const scrim = document.getElementById("scrim");
-      const openBtn = document.getElementById("openMenu");
-      const closeBtn = document.getElementById("closeMenu");
+    // Supabase Edge Function endpoint (you'll create this in step 2)
+    // Replace YOUR_PROJECT_REF with your Supabase project ref.
+    const CONTACT_ENDPOINT = "https://jgvxmpsjtkedzgygynbl.supabase.co/functions/v1/contact-email";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpndnhtcHNqdGtlZHpneWd5bmJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0NzgxMjYsImV4cCI6MjA4MTA1NDEyNn0.OCh23RWm8COtxWuumYvKUmfMOLOW01B1zrbtzcr3w6Y";
 
-      function open(){
-        menu.classList.add("open");
-        scrim.classList.add("open");
-        menu.setAttribute("aria-hidden","false");
-        scrim.setAttribute("aria-hidden","false");
-        document.body.style.overflow = "hidden";
-      }
-      function close(){
-        menu.classList.remove("open");
-        scrim.classList.remove("open");
-        menu.setAttribute("aria-hidden","true");
-        scrim.setAttribute("aria-hidden","true");
-        document.body.style.overflow = "";
-      }
+    // ===== small helpers =====
+    const $ = (s) => document.querySelector(s);
 
-      openBtn.addEventListener("click", open);
-      closeBtn.addEventListener("click", close);
-      scrim.addEventListener("click", close);
-      window.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") close();
-      });
-    })();
-  </script>
+    function toast(title, msg, type="ok"){
+      const t = $("#toast");
+      const icon = $("#toastIcon");
+      $("#toastTitle").textContent = title;
+      $("#toastMsg").textContent = msg;
 
-  <script>
-    // View Desktop Site preference
-    (function(){
-      const a = document.getElementById("viewDesktop");
-      if (!a) return;
-      a.addEventListener("click", function(e){
-        e.preventDefault();
-        localStorage.setItem("sns_force_desktop", "1");
-        location.replace("/socials/");
-      });
-    })();
-  </script>
+      t.dataset.type = type;
 
-  <script>
-    // Toast utility
-    function toast(msg){
-      const t = document.getElementById("toast");
-      t.textContent = msg;
+      // icon glyph by type
+      icon.textContent = type === "ok" ? "✓" : (type === "warn" ? "!" : "×");
+
       t.classList.add("on");
       clearTimeout(window.__toastTimer);
-      window.__toastTimer = setTimeout(() => t.classList.remove("on"), 1800);
+      window.__toastTimer = setTimeout(() => t.classList.remove("on"), 3000);
     }
 
-    // Message form -> opens mail app with prefilled content (reliable, no backend required)
-    (function(){
-      const form = document.getElementById("msgForm");
-      const to = "brandon.sns@proton.me"; // SNS business email
 
-      form.addEventListener("submit", function(e){
-        e.preventDefault();
+    // ===== nav/contact setup =====
+    $("#year").textContent = new Date().getFullYear();
 
-        const name = (document.getElementById("name").value || "").trim();
-        const email = (document.getElementById("email").value || "").trim();
-        const msg = (document.getElementById("message").value || "").trim();
+    $("#emailText").textContent = BUSINESS_EMAIL;
+    $("#emailBtn").href = `mailto:${BUSINESS_EMAIL}`;
 
-        if (!msg) {
-          toast("Message is required.");
-          return;
-        }
+    $("#linkedinText").textContent = LINKEDIN_URL.replace(/^https?:\/\//, "");
+    $("#linkedinBtn").href = LINKEDIN_URL;
 
-        const subject = "SNS Message";
-        const lines = [
-          "New message from SNS mobile contact page:",
-          "",
-          name ? ("Name: " + name) : null,
-          email ? ("Email: " + email) : null,
-          "",
-          "Message:",
-          msg
-        ].filter(Boolean);
+    // mailto fallback button
+    $("#mailtoFallback").addEventListener("click", () => {
+      const subject = encodeURIComponent($("#subject").value || "SNS Inquiry");
+      const body = encodeURIComponent($("#message").value || "");
+      window.location.href = `mailto:${BUSINESS_EMAIL}?subject=${subject}&body=${body}`;
+    });
 
-        const body = lines.join("\n");
-
-        const href =
-          "mailto:" + encodeURIComponent(to) +
-          "?subject=" + encodeURIComponent(subject) +
-          "&body=" + encodeURIComponent(body);
-
-        // open mail client
-        window.location.href = href;
-      });
-
-      // Copy email button
-      const copyBtn = document.getElementById("copyEmailBtn");
-      copyBtn.addEventListener("click", async function(){
-        try{
-          await navigator.clipboard.writeText(to);
-          toast("Email copied.");
-        }catch(err){
-          toast("Copy failed. Tap & hold email to copy.");
+    // ===== reveal-on-scroll =====
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if(e.isIntersecting){
+          e.target.classList.add("on");
+          io.unobserve(e.target);
         }
       });
-    })();
+    }, { threshold: 0.14 });
+
+    document.querySelectorAll(".reveal").forEach(el => io.observe(el));
+
+    // ===== form submit -> Supabase Edge Function =====
+    $("#contactForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const btn = $("#sendBtn");
+      const subject = $("#subject").value.trim();
+      const message = $("#message").value.trim();
+
+      if(!subject || !message){
+        toast("Missing info", "Add a subject + message.", "warn");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.style.opacity = ".8";
+      btn.textContent = "Sending...";
+
+      try{
+        const res = await fetch(CONTACT_ENDPOINT, {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            "apikey": SUPABASE_ANON_KEY,
+            "authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+          },
+          body: JSON.stringify({
+            subject,
+            message,
+            page: window.location.href,
+            userAgent: navigator.userAgent
+          })
+        });
+
+        if(!res.ok){
+          const txt = await res.text().catch(()=> "");
+          throw new Error(txt || `HTTP ${res.status}`);
+        }
+
+        $("#subject").value = "";
+        $("#message").value = "";
+        toast("Sent", "Message delivered. I’ll reply soon.", "ok");
+      } catch(err){
+        // If backend isn't configured yet, user can still contact via mailto.
+        console.error(err);
+        toast("Not sent", "Send failed. Use the email button for now.", "err");
+      } finally{
+        btn.disabled = false;
+        btn.style.opacity = "1";
+        btn.textContent = "Send";
+      }
+    });
   </script>
+
+
+
+
 </body>
 </html>
