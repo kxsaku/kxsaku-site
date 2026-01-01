@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SNS · Credibility (Mobile)</title>
+  <meta name="description" content="Credibility: veteran-led network operations experience, clean deployments, documentation-first installs, and security-minded configuration." />
+
+  <style>
+    :root{
+      --bg0:#050315;
+      --bg1:#07031b;
+      --bg2:#020010;
+
+      --ink:#f4f0ff;
+      --muted:rgba(244,240,255,.74);
+      --muted2:rgba(244,240,255,.56);
+
+      --card:rgba(12,10,28,.62);
+      --card2:rgba(12,10,28,.46);
+      --stroke:rgba(255,255,255,.10);
+      --stroke2:rgba(255,255,255,.14);
+
+      --accent:#b67bff;
+      --accent2:#8a5dff;
+
+      --shadow: 0 18px 60px rgba(0,0,0,.45);
+      --shadow2: 0 14px 45px rgba(0,0,0,.36);
+
+      --r-xl: 26px;
+      --r-lg: 20px;
+      --r-md: 16px;
+
+      --max: 640px;
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      color:var(--ink);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      background:
+        radial-gradient(1200px 700px at 30% 10%, rgba(182,123,255,.18), transparent 60%),
+        radial-gradient(900px 600px at 85% 20%, rgba(124,92,255,.14), transparent 60%),
+        radial-gradient(900px 700px at 50% 120%, rgba(182,123,255,.10), transparent 60%),
+        linear-gradient(180deg, #050315 0%, #060318 35%, #030012 100%);
+      overflow-x:hidden;
+    }
+
+    /* animated moving veil */
+    .bg{
+      position:fixed;
+      inset:0;
+      z-index:-3;
+      pointer-events:none;
+    }
+    .bg::before{
+      content:"";
+      position:absolute;
+      inset:-30%;
+      background:
+        radial-gradient(900px 600px at 20% 25%, rgba(182,123,255,.20), transparent 62%),
+        radial-gradient(800px 600px at 85% 30%, rgba(124,92,255,.14), transparent 64%),
+        radial-gradient(700px 500px at 50% 75%, rgba(182,123,255,.10), transparent 62%);
+      filter: blur(22px);
+      opacity:.9;
+      animation: drift 12s ease-in-out infinite alternate;
+      transform: translate3d(0,0,0);
+    }
+    @keyframes drift{
+      from{ transform: translate(-1.5%, -1.0%) scale(1.02); }
+      to{ transform: translate(1.5%, 1.0%) scale(1.06); }
+    }
+    .bg::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,.06), transparent 35%),
+        repeating-linear-gradient(
+          135deg,
+          rgba(255,255,255,.05) 0px,
+          rgba(255,255,255,.05) 1px,
+          transparent 1px,
+          transparent 14px
+        );
+      opacity:.10;
+      mix-blend-mode: overlay;
+    }
+
+    .wrap{
+      width: min(var(--max), calc(100% - 1.25rem));
+      margin: 0 auto;
+    }
+
+    /* Sticky mobile header */
+    .topnav{
+      position: sticky;
+      top: 0;
+      z-index: 60;
+      padding: .9rem 0;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      background: rgba(5,3,21,.62);
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    .navrow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:.75rem;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:.7rem;
+      min-width:0;
+    }
+    .mark{
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      background: rgba(182,123,255,.10);
+      border: 1px solid rgba(255,255,255,.10);
+      box-shadow: 0 14px 40px rgba(0,0,0,.35);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+      flex: 0 0 auto;
+    }
+    .mark img{
+      width: 28px;
+      height: 28px;
+      object-fit: contain;
+      display:block;
+      filter: drop-shadow(0 10px 22px rgba(182,123,255,.25));
+    }
+    .brandText{ min-width:0; }
+    .brand strong{
+      display:block;
+      letter-spacing:.14em;
+      font-size:.86rem;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width: 70vw;
+      line-height:1.05;
+      text-transform: uppercase;
+    }
+    .brand span{
+      display:block;
+      color: rgba(244,240,255,.65);
+      font-size:.82rem;
+      margin-top:.14rem;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width: 70vw;
+      line-height:1.1;
+    }
+
+    .iconBtn{
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.14);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: 0 12px 40px rgba(0,0,0,.28);
+      display:grid;
+      place-items:center;
+      cursor:pointer;
+      transition: transform .14s ease, border-color .14s ease, filter .14s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .iconBtn:active{ transform: translateY(0); filter: brightness(1.04); }
+
+    /* Menu */
+    .scrim{
+      position: fixed;
+      inset: 0;
+      z-index: 70;
+      background: rgba(0,0,0,.55);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .18s ease;
+    }
+    .scrim.open{ opacity:1; pointer-events:auto; }
+
+    .menu{
+      position: fixed;
+      left: 0;
+      right: 0;
+      top: 0;
+      z-index: 80;
+      transform: translateY(-110%);
+      transition: transform .24s cubic-bezier(.2,.9,.2,1);
+      padding: 0.95rem 0 .9rem;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      background: linear-gradient(180deg, rgba(5,3,21,.92), rgba(5,3,21,.62));
+      border-bottom: 1px solid rgba(255,255,255,.10);
+    }
+    .menu.open{ transform: translateY(0); }
+
+    .menuHeader{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:.75rem;
+      padding-bottom: .75rem;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+
+    .menuLinks{
+      display:grid;
+      gap: .55rem;
+      padding-top: .85rem;
+    }
+    .menuLinks a{
+      text-decoration:none;
+      color: rgba(244,240,255,.72);
+      font-size: .80rem;
+      letter-spacing:.14em;
+      text-transform: uppercase;
+      padding: .8rem .95rem;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.10);
+      transition: transform .14s ease, border-color .14s ease, filter .14s ease, background .14s ease, color .14s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .menuLinks a:active{
+      transform: translateY(0);
+      border-color: rgba(255,255,255,.14);
+      filter: brightness(1.05);
+      color: rgba(244,240,255,.92);
+      background: rgba(182,123,255,.08);
+    }
+    .menuLinks a.active{
+      background: rgba(182,123,255,.14);
+      border-color: rgba(255,255,255,.12);
+      color: rgba(244,240,255,.92);
+    }
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:.5rem;
+      height: 46px;
+      padding: 0 1.05rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.14);
+      color: rgba(244,240,255,.92);
+      text-decoration:none;
+      font-weight: 800;
+      letter-spacing:.12em;
+      font-size:.78rem;
+      text-transform: uppercase;
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);
+      transition: transform .15s ease, background .15s ease, border-color .15s ease, filter .15s ease;
+      will-change: transform;
+      -webkit-tap-highlight-color: transparent;
+      white-space: nowrap;
+      overflow:hidden;
+    }
+    .btn:active{
+      transform: translateY(0);
+      border-color: rgba(255,255,255,.16);
+      background: rgba(182,123,255,.10);
+      filter: brightness(1.05);
+    }
+    .btn.primary{
+      background: linear-gradient(90deg, rgba(182,123,255,.95), rgba(138,93,255,.95));
+      border-color: rgba(255,255,255,.18);
+      color: #12061f;
+      box-shadow: 0 18px 60px rgba(182,123,255,.20);
+    }
+    .menuActions{
+      margin-top: .85rem;
+      display:grid;
+      gap:.65rem;
+    }
+    .menuActions .btn{ width: 100%; }
+
+    /* Sections */
+    .section{ padding: 2.35rem 0; }
+
+    .kicker{
+      display:inline-flex;
+      align-items:center;
+      gap:.55rem;
+      padding: .42rem .8rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(182,123,255,.08);
+      color: rgba(244,240,255,.82);
+      letter-spacing:.16em;
+      font-size:.72rem;
+      text-transform: uppercase;
+    }
+    .dot{
+      width: 8px; height: 8px;
+      border-radius: 999px;
+      background: rgba(182,123,255,.9);
+      box-shadow: 0 0 0 6px rgba(182,123,255,.15);
+    }
+
+    .hero{
+      padding: 2.8rem 0 1.1rem;
+      text-align:center;
+    }
+    h1{
+      margin: 1.0rem 0 .75rem;
+      font-size: clamp(1.85rem, 6.3vw, 2.55rem);
+      line-height: 1.08;
+      letter-spacing: -.02em;
+    }
+    .grad{
+      background: linear-gradient(90deg, rgba(244,240,255,.95), rgba(182,123,255,.78));
+      -webkit-background-clip: text;
+      background-clip:text;
+      color: transparent;
+    }
+    .lede{
+      margin:0 auto;
+      color: rgba(244,240,255,.74);
+      line-height: 1.70;
+      font-size: 1.00rem;
+      max-width: 62ch;
+    }
+    .heroCtas{
+      margin-top: 1.2rem;
+      display:grid;
+      gap:.65rem;
+    }
+    .heroCtas .btn{ width:100%; }
+
+    /* Stat grid */
+    .stats{
+      display:grid;
+      gap:.85rem;
+      margin-top:1.05rem;
+    }
+    .stat{
+      border-radius: var(--r-xl);
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(12,10,28,.52);
+      box-shadow: var(--shadow2);
+      padding: 1.05rem 1.05rem;
+      text-align:left;
+      overflow:hidden;
+    }
+    .stat .num{
+      font-size: 1.75rem;
+      font-weight: 950;
+      letter-spacing:-.02em;
+      margin-bottom:.35rem;
+      background: linear-gradient(90deg, rgba(244,240,255,.95), rgba(182,123,255,.78));
+      -webkit-background-clip:text;
+      background-clip:text;
+      color: transparent;
+    }
+    .stat .label{
+      font-weight: 900;
+      letter-spacing:.10em;
+      text-transform: uppercase;
+      font-size:.80rem;
+      margin-bottom:.35rem;
+    }
+    .stat .desc{
+      color: rgba(244,240,255,.70);
+      line-height:1.65;
+      margin:0;
+      font-size:.98rem;
+    }
+
+    /* Cards */
+    .stack{ display:grid; gap:.85rem; }
+    .card{
+      border-radius: var(--r-xl);
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(12,10,28,.52);
+      box-shadow: var(--shadow2);
+      padding: 1.15rem 1.05rem;
+      text-align:left;
+      transition: transform .16s ease, border-color .16s ease, filter .16s ease, background .16s ease;
+      will-change: transform;
+      overflow:hidden;
+    }
+    .card:active{
+      transform: translateY(0);
+      border-color: rgba(255,255,255,.14);
+      filter: brightness(1.03);
+      background: rgba(182,123,255,.06);
+    }
+    .pill{
+      display:inline-flex;
+      padding:.42rem .72rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.12);
+      color: rgba(244,240,255,.78);
+      font-size: .72rem;
+      letter-spacing:.14em;
+      text-transform: uppercase;
+      white-space:nowrap;
+    }
+    .card h3{
+      margin: .85rem 0 .55rem;
+      font-size: 1.02rem;
+      letter-spacing:.06em;
+      text-transform: uppercase;
+    }
+    .card p{
+      margin:0;
+      color: rgba(244,240,255,.70);
+      line-height: 1.65;
+      font-size: .98rem;
+    }
+
+    /* Timeline */
+    .timeline{
+      display:grid;
+      gap:.85rem;
+      margin-top:1.0rem;
+    }
+    .event{
+      border-radius: var(--r-xl);
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(12,10,28,.50);
+      box-shadow: var(--shadow2);
+      padding: 1.05rem 1.05rem;
+      position:relative;
+      overflow:hidden;
+    }
+    .event .top{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:.75rem;
+      flex-wrap:wrap;
+    }
+    .event .when{
+      font-weight: 950;
+      letter-spacing:.12em;
+      text-transform: uppercase;
+      font-size:.78rem;
+      color: rgba(244,240,255,.78);
+    }
+    .event .role{
+      font-weight: 950;
+      letter-spacing:.06em;
+      text-transform: uppercase;
+      font-size:.98rem;
+      margin:.55rem 0 .35rem;
+    }
+    .event .detail{
+      margin:0;
+      color: rgba(244,240,255,.70);
+      line-height:1.65;
+      font-size:.98rem;
+    }
+
+    /* Proof list */
+    .proof{
+      margin-top:1.0rem;
+      display:grid;
+      gap:.65rem;
+    }
+    .proof a{
+      text-decoration:none;
+      color: rgba(244,240,255,.86);
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.12);
+      border-radius: 18px;
+      padding: .9rem .95rem;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:.75rem;
+      box-shadow: 0 12px 40px rgba(0,0,0,.26);
+      letter-spacing:.06em;
+      text-transform: uppercase;
+      font-weight: 900;
+      font-size: .82rem;
+      -webkit-tap-highlight-color: transparent;
+      transition: transform .14s ease, border-color .14s ease, filter .14s ease, background .14s ease;
+    }
+    .proof a:active{
+      transform: translateY(0);
+      border-color: rgba(255,255,255,.14);
+      filter: brightness(1.05);
+      background: rgba(182,123,255,.08);
+    }
+    .arrow{
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(182,123,255,.10);
+      display:grid;
+      place-items:center;
+      flex: 0 0 auto;
+    }
+
+    /* CTA */
+    .ctaPanel{
+      border-radius: calc(var(--r-xl) + 2px);
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(12,10,28,.52);
+      box-shadow: var(--shadow);
+      padding: 1.25rem 1.05rem;
+      overflow:hidden;
+      position:relative;
+      text-align:left;
+    }
+    .ctaPanel::before{
+      content:"";
+      position:absolute;
+      inset:-35%;
+      background:
+        radial-gradient(520px 380px at 35% 45%, rgba(182,123,255,.26), transparent 60%),
+        radial-gradient(520px 380px at 75% 55%, rgba(138,93,255,.18), transparent 60%);
+      filter: blur(18px);
+      opacity:.9;
+      z-index:-1;
+    }
+    .ctaPanel h2{
+      margin:0;
+      font-size: 1.15rem;
+      letter-spacing:.06em;
+      text-transform: uppercase;
+    }
+    .ctaPanel p{
+      margin:.55rem 0 0;
+      color: rgba(244,240,255,.70);
+      line-height: 1.6;
+      max-width: 60ch;
+    }
+    .ctaPanel .right{
+      margin-top: 1.05rem;
+      display:grid;
+      gap:.65rem;
+    }
+    .ctaPanel .right .btn{ width:100%; }
+
+    footer{
+      padding: 2.4rem 0 2.8rem;
+      color: rgba(244,240,255,.55);
+      border-top: 1px solid rgba(255,255,255,.06);
+      background: rgba(0,0,0,.08);
+      text-align:center;
+    }
+    footer a{
+      color: rgba(244,240,255,.72);
+      text-decoration:none;
+      border-bottom: 1px solid rgba(244,240,255,.18);
+      padding-bottom:2px;
+    }
+    footer a:active{ color: rgba(244,240,255,.92); }
+
+    /* reveal */
+    .reveal{
+      opacity:0;
+      transform: translateY(14px);
+      transition: opacity .55s ease, transform .55s ease;
+    }
+    .reveal.on{
+      opacity:1;
+      transform: translateY(0);
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      .bg::before{ animation:none !important; }
+      .btn, .card, .proof a{ transition:none !important; }
+      .reveal{ opacity:1 !important; transform:none !important; }
+      .menu, .scrim{ transition:none !important; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="bg" aria-hidden="true"></div>
+
+  <div class="scrim" id="scrim" aria-hidden="true"></div>
+
+  <aside class="menu" id="menu" aria-label="Mobile Menu" aria-hidden="true">
+    <div class="wrap">
+      <div class="menuHeader">
+        <div class="brand" style="gap:.65rem;">
+          <div class="mark" style="width:40px;height:40px;border-radius:14px;">
+            <img src="/assets/sns-logo-purple.png" alt="Saku Network Solutions logo">
+          </div>
+          <div class="brandText">
+            <strong>SAKU NETWORK SOLUTIONS</strong>
+            <span>Network infrastructure, done clean.</span>
+          </div>
+        </div>
+
+        <button class="iconBtn" id="closeMenu" aria-label="Close menu">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M6 6l12 12M18 6L6 18" stroke="rgba(244,240,255,.92)" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <nav class="menuLinks" aria-label="Primary">
+        <a href="/home/">Home</a>
+        <a href="/sns/">Services</a>
+        <a class="active" href="/experience/mobile.html">Credibility</a>
+        <a href="/other/">Resources</a>
+        <a href="/socials/">Contact</a>
+      </nav>
+
+      <div class="menuActions">
+        <a class="btn" href="/sns-login/">Client Login</a>
+        <a class="btn primary" href="/sns-inquiry/">Start an Inquiry</a>
+
+        <!-- Desktop preference -->
+        <a class="btn" href="#" id="viewDesktop">View Desktop Site</a>
+      </div>
+    </div>
+  </aside>
+
+  <header class="topnav">
+    <div class="wrap">
+      <div class="navrow">
+        <div class="brand">
+          <div class="mark">
+            <img src="/assets/sns-logo-purple.png" alt="Saku Network Solutions logo">
+          </div>
+          <div class="brandText">
+            <strong>SAKU NETWORK SOLUTIONS</strong>
+            <span>Network infrastructure, done clean.</span>
+          </div>
+        </div>
+
+        <button class="iconBtn" id="openMenu" aria-label="Open menu">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M4 7h16M4 12h16M4 17h16" stroke="rgba(244,240,255,.92)" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- HERO -->
+    <section class="hero section">
+      <div class="wrap">
+        <div class="kicker reveal" style="justify-content:center;">
+          <span class="dot"></span>
+          Credibility, shown quietly
+        </div>
+
+        <h1 class="reveal">
+          Professional execution, backed by <span class="grad">real operational experience</span>.
+        </h1>
+
+        <p class="lede reveal">
+          SNS is built around clean deployments, documentation-first installs, and security-minded network design.
+          This page is your quick proof layer — not a sales pitch.
+        </p>
+
+        <div class="heroCtas reveal">
+          <a class="btn primary" href="/sns-inquiry/">Start an Inquiry</a>
+          <a class="btn" href="#proof">View Proof</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- STATS -->
+    <section class="section">
+      <div class="wrap">
+        <div class="kicker reveal">
+          <span class="dot"></span>
+          Snapshot
+        </div>
+
+        <div class="stats">
+          <div class="stat reveal">
+            <div class="num">4+</div>
+            <div class="label">Years Network Ops</div>
+            <p class="desc">Hands-on routing/switching, deployments, troubleshooting, and maintaining real networks under constraints.</p>
+          </div>
+
+          <div class="stat reveal">
+            <div class="num">$50M+</div>
+            <div class="label">Equipment Accountability</div>
+            <p class="desc">High-trust environments where documentation, change control, and precision matter.</p>
+          </div>
+
+          <div class="stat reveal">
+            <div class="num">30+</div>
+            <div class="label">Techs Led / Taught</div>
+            <p class="desc">Training, standardizing, and executing installs with repeatable outcomes.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- WHAT YOU GET -->
+    <section class="section">
+      <div class="wrap">
+        <div class="kicker reveal">
+          <span class="dot"></span>
+          What clients actually get
+        </div>
+
+        <div class="stack" style="margin-top:1.0rem;">
+          <article class="card reveal">
+            <span class="pill">Clean installs</span>
+            <h3>Repeatable deployments</h3>
+            <p>Structured installs with validation steps — not guesswork, not random “try this” fixes.</p>
+          </article>
+
+          <article class="card reveal">
+            <span class="pill">Documentation</span>
+            <h3>Maintainable networks</h3>
+            <p>Simple diagrams, device notes, and configuration intent so changes don’t become chaos later.</p>
+          </article>
+
+          <article class="card reveal">
+            <span class="pill">Security-minded</span>
+            <h3>Segmentation-first thinking</h3>
+            <p>Keep staff, guests, and critical devices separated when it matters — reduces risk and abuse.</p>
+          </article>
+
+          <article class="card reveal">
+            <span class="pill">Practical</span>
+            <h3>Fixes that match reality</h3>
+            <p>Tune and troubleshoot first. Recommend upgrades only when they’re the true bottleneck.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- TIMELINE -->
+    <section class="section">
+      <div class="wrap">
+        <div class="kicker reveal">
+          <span class="dot"></span>
+          Background timeline
+        </div>
+
+        <div class="timeline">
+          <div class="event reveal">
+            <div class="top">
+              <div class="when">2020–2024</div>
+              <span class="pill">USMC</span>
+            </div>
+            <div class="role">Network Administrator (Operational)</div>
+            <p class="detail">Field and garrison networking, installs, troubleshooting, and maintaining standards in high-trust environments.</p>
+          </div>
+
+          <div class="event reveal">
+            <div class="top">
+              <div class="when">Schoolhouse</div>
+              <span class="pill">Top performer</span>
+            </div>
+            <div class="role">Communications-Electronics Training</div>
+            <p class="detail">High-GPA performance and recognition, then applied directly in real deployments and support missions.</p>
+          </div>
+
+          <div class="event reveal">
+            <div class="top">
+              <div class="when">Now</div>
+              <span class="pill">SNS</span>
+            </div>
+            <div class="role">Small business network services</div>
+            <p class="detail">Bringing enterprise habits to offices that need stability, security, and clean implementation.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROOF LINKS -->
+    <section id="proof" class="section">
+      <div class="wrap">
+        <div class="kicker reveal">
+          <span class="dot"></span>
+          Proof layer
+        </div>
+
+        <p class="reveal" style="margin:.9rem 0 0; color:rgba(244,240,255,.70); line-height:1.7;">
+          Keep this lightweight. Add links as you publish them (homelab, diagrams, before/after, references, etc.).
+        </p>
+
+        <div class="proof">
+          <a class="reveal" href="/sns/">
+            Services Overview
+            <span class="arrow">→</span>
+          </a>
+          <a class="reveal" href="/sns-inquiry/">
+            Start an Inquiry
+            <span class="arrow">→</span>
+          </a>
+          <a class="reveal" href="/socials/">
+            Contact / Socials
+            <span class="arrow">→</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="section">
+      <div class="wrap">
+        <div class="ctaPanel reveal">
+          <div>
+            <h2>Want a clean plan first?</h2>
+            <p>Start an inquiry and describe your environment. I’ll guide the next step based on facts on-site.</p>
+          </div>
+          <div class="right">
+            <a class="btn primary" href="/sns-inquiry/">Start an Inquiry</a>
+            <a class="btn" href="/sns/">View Services</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="wrap">
+        <div>© 2025 Saku Network Solutions. Built clean. Documented.</div>
+        <div style="margin-top:.9rem; line-height:2.1;">
+          <a href="/sns-inquiry/">Inquiry</a> &nbsp;•&nbsp;
+          <a href="/sns/">Services</a> &nbsp;•&nbsp;
+          <a href="/sns-login/">Client Login</a>
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  <script>
+    // Reveal-on-scroll
+    (function(){
+      const els = Array.from(document.querySelectorAll('.reveal'));
+      if (!('IntersectionObserver' in window) || els.length === 0) {
+        els.forEach(el => el.classList.add('on'));
+        return;
+      }
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+          if (e.isIntersecting) {
+            e.target.classList.add('on');
+            io.unobserve(e.target);
+          }
+        });
+      }, { threshold: 0.12 });
+      els.forEach(el => io.observe(el));
+    })();
+  </script>
+
+  <script>
+    // Mobile menu
+    (function(){
+      const menu = document.getElementById("menu");
+      const scrim = document.getElementById("scrim");
+      const openBtn = document.getElementById("openMenu");
+      const closeBtn = document.getElementById("closeMenu");
+
+      function open(){
+        menu.classList.add("open");
+        scrim.classList.add("open");
+        menu.setAttribute("aria-hidden","false");
+        scrim.setAttribute("aria-hidden","false");
+        document.body.style.overflow = "hidden";
+      }
+      function close(){
+        menu.classList.remove("open");
+        scrim.classList.remove("open");
+        menu.setAttribute("aria-hidden","true");
+        scrim.setAttribute("aria-hidden","true");
+        document.body.style.overflow = "";
+      }
+
+      openBtn.addEventListener("click", open);
+      closeBtn.addEventListener("click", close);
+      scrim.addEventListener("click", close);
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") close();
+      });
+    })();
+  </script>
+
+  <script>
+    // View Desktop Site preference
+    (function(){
+      const a = document.getElementById("viewDesktop");
+      if (!a) return;
+      a.addEventListener("click", function(e){
+        e.preventDefault();
+        localStorage.setItem("sns_force_desktop", "1");
+        location.replace("/experience/");
+      });
+    })();
+  </script>
+</body>
+</html>

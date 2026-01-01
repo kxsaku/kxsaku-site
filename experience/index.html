@@ -3,6 +3,24 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script>
+  (function () {
+    // If user explicitly chose desktop, do not redirect
+    if (localStorage.getItem("sns_force_desktop") === "1") return;
+
+    // phone-ish: small viewport + touch
+    var isPhone = window.matchMedia("(max-width: 740px)").matches &&
+                  ("ontouchstart" in window || navigator.maxTouchPoints > 0);
+
+    // avoid loops
+    var alreadyMobile = location.pathname.endsWith("/experience/mobile.html");
+
+    if (isPhone && !alreadyMobile) {
+      location.replace("/experience/mobile.html");
+    }
+  })();
+</script>
+
   <title>SNS · Credibility</title>
 
   <style>
