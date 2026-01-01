@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>SNS · Start Your Network Project</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Keep your existing stylesheet reference (same as desktop) -->
+  <link rel="stylesheet" href="styles.css" />
+
+  <style>
+    /* =========================================================
+       NAV BAR (MATCHES YOUR REFERENCE mobile.html)
+       ========================================================= */
+    :root{
+      --bg0:#03010b;
+      --bg1:#060214;
+      --ink:#f4f0ff;
+      --muted: rgba(244,240,255,.72);
+      --muted2: rgba(244,240,255,.56);
+
+      --stroke: rgba(196, 181, 253, .18);
+      --stroke2: rgba(196, 181, 253, .28);
+
+      --glass: rgba(10, 6, 28, .42);
+      --glass2: rgba(12, 8, 34, .62);
+
+      --accent:#b37cff;
+      --accent2:#f973e2;
+      --accent3:#5eead4;
+
+      --r-xl: 26px;
+      --r-lg: 18px;
+      --r-sm: 14px;
+
+      --shadow: 0 25px 90px rgba(0,0,0,.60);
+      --shadow2: 0 18px 50px rgba(0,0,0,.38);
+
+      --max: 640px;
+
+      /* Inquiry page tokens (kept from desktop) */
+      --card: rgba(10, 6, 28, .72);
+      --card2: rgba(12, 9, 49, .55);
+      --border: rgba(196,181,253,.18);
+      --border2: rgba(156,136,255,.28);
+      --text: #f4f0ff;
+      --good:#7af9c4;
+      --bad:#ff9494;
+      --shadowForm: 0 28px 90px rgba(0,0,0,.55);
+      --radius: 26px;
+      --ease: cubic-bezier(.2,.8,.2,1);
+    }
+
+    *{ box-sizing:border-box; }
+    html, body { height: 100%; margin: 0; padding: 0; }
+    body{
+      background: #050315;
+      color: var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      overflow-x: hidden;
+    }
+
+    .wrap{
+      width: min(var(--max), calc(100% - 1.25rem));
+      margin: 0 auto;
+    }
+
+    /* Mobile sticky header */
+    .topnav{
+      position: sticky;
+      top: 0;
+      z-index: 60;
+      padding: .9rem 0;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      background: linear-gradient(180deg, rgba(3,1,11,.78), rgba(3,1,11,.22));
+      border-bottom: 1px solid rgba(196,181,253,.10);
+    }
+    .navrow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:.75rem;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:.7rem;
+      min-width: 0;
+    }
+    .mark{
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      display:grid;
+      place-items:center;
+      box-shadow: 0 18px 50px rgba(0,0,0,.45);
+      flex: 0 0 auto;
+      overflow:hidden;
+      background: rgba(12,9,49,.45);
+      border: 1px solid rgba(196,181,253,.18);
+    }
+    .mark img{
+      width: 26px;
+      height: 26px;
+      object-fit: contain;
+      opacity: .95;
+    }
+    .brandText{ min-width: 0; }
+    .brand strong{
+      display:block;
+      font-size:.88rem;
+      letter-spacing:.14em;
+      text-transform: uppercase;
+      line-height:1.05;
+      white-space: nowrap;
+      overflow:hidden;
+      text-overflow: ellipsis;
+      max-width: 70vw;
+    }
+    .brand span{
+      display:block;
+      color: var(--muted2);
+      font-size:.82rem;
+      line-height:1.1;
+      margin-top:.18rem;
+      white-space: nowrap;
+      overflow:hidden;
+      text-overflow: ellipsis;
+      max-width: 70vw;
+    }
+
+    .btn{
+      position: relative;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      height: 42px;
+      padding: 0 16px;
+      border-radius: 999px;
+      border: 1px solid rgba(196,181,253,.18);
+      background: rgba(0,0,0,.18);
+      color: var(--ink);
+      text-decoration:none;
+      font-weight: 800;
+      font-size: .78rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      box-shadow: 0 12px 40px rgba(0,0,0,.32);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transition: transform .14s ease, border-color .14s ease, filter .14s ease, background .14s ease;
+      will-change: transform;
+      overflow:hidden;
+      white-space: nowrap;
+      -webkit-tap-highlight-color: transparent;
+      cursor:pointer;
+    }
+    .btn:active{ transform: translateY(0); filter: brightness(1.03); }
+    .btn.primary{
+      background: linear-gradient(90deg, rgba(179,124,255,.92), rgba(249,115,226,.72));
+      border-color: rgba(255,255,255,.18);
+    }
+
+    .iconBtn{
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      border: 1px solid rgba(196,181,253,.18);
+      background: rgba(0,0,0,.18);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: 0 12px 40px rgba(0,0,0,.28);
+      display:grid;
+      place-items:center;
+      cursor:pointer;
+      transition: transform .14s ease, border-color .14s ease, filter .14s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .iconBtn:active{ transform: translateY(0); filter: brightness(1.04); }
+    .iconBtn svg{ opacity:.92; }
+
+    .menu{
+      position: fixed;
+      left: 0;
+      right: 0;
+      top: 0;
+      z-index: 80;
+      transform: translateY(-110%);
+      transition: transform .24s cubic-bezier(.2,.9,.2,1);
+      padding: 0.95rem 0 .9rem;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      background: linear-gradient(180deg, rgba(3,1,11,.92), rgba(3,1,11,.58));
+      border-bottom: 1px solid rgba(196,181,253,.14);
+    }
+    .menu.open{ transform: translateY(0); }
+
+    .menuHeader{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:.75rem;
+      padding-bottom: .75rem;
+      border-bottom: 1px solid rgba(196,181,253,.10);
+    }
+
+    .menuLinks{
+      display:grid;
+      gap: .55rem;
+      padding-top: .85rem;
+    }
+    .menuLinks a{
+      text-decoration:none;
+      color: var(--muted);
+      font-size: .80rem;
+      letter-spacing:.14em;
+      text-transform: uppercase;
+      padding: .8rem .95rem;
+      border-radius: 16px;
+      border: 1px solid rgba(196,181,253,.10);
+      background: rgba(196,181,253,.04);
+      transition: transform .14s ease, border-color .14s ease, filter .14s ease, background .14s ease, color .14s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .menuLinks a:active{
+      transform: translateY(0);
+      border-color: rgba(196,181,253,.22);
+      filter: brightness(1.04);
+      color: var(--ink);
+    }
+    .menuLinks a.active{
+      background: rgba(179,124,255,.16);
+      border-color: rgba(179,124,255,.26);
+      color: var(--ink);
+    }
+
+    .menuActions{
+      margin-top: .85rem;
+      display:grid;
+      gap:.65rem;
+    }
+    .menuActions .btn{ width: 100%; }
+
+    .scrim{
+      position: fixed;
+      inset: 0;
+      z-index: 70;
+      background: rgba(0,0,0,.55);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .18s ease;
+    }
+    .scrim.open{ opacity: 1; pointer-events: auto; }
+
+    /* =========================================================
+       INQUIRY PAGE (DESKTOP FEATURES PRESERVED; MOBILE FIT)
+       ========================================================= */
+
+    /* Background (no particles) */
+    .bg {
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      background:
+        radial-gradient(1200px 700px at 15% 10%, rgba(182,89,255,.22), transparent 60%),
+        radial-gradient(1100px 700px at 85% 25%, rgba(106,123,255,.18), transparent 55%),
+        radial-gradient(900px 600px at 55% 75%, rgba(179,124,255,.14), transparent 60%),
+        linear-gradient(180deg, rgba(52,32,103,.35), rgba(5,3,21,.9) 55%, rgba(2,0,16,1));
+    }
+    .bg::before, .bg::after{
+      content:"";
+      position:absolute;
+      inset:-30%;
+      background:
+        radial-gradient(circle at 30% 35%, rgba(182,89,255,.24), transparent 38%),
+        radial-gradient(circle at 70% 55%, rgba(106,123,255,.20), transparent 42%),
+        radial-gradient(circle at 50% 75%, rgba(255,255,255,.06), transparent 46%);
+      filter: blur(20px);
+      opacity: .9;
+      transform: translate3d(0,0,0);
+      animation: drift 18s ease-in-out infinite;
+    }
+    .bg::after{ opacity: .55; animation-duration: 26s; animation-direction: reverse; }
+    @keyframes drift{
+      0%{ transform: translate3d(-2%, -1%, 0) scale(1); }
+      50%{ transform: translate3d(2%, 1.5%, 0) scale(1.03); }
+      100%{ transform: translate3d(-2%, -1%, 0) scale(1); }
+    }
+
+    .page{
+      min-height: 100vh;
+      padding: 1.15rem 0 2.6rem;
+      display: grid;
+      place-items: start center;
+    }
+
+    .content{
+      width: min(980px, 100%);
+      display: grid;
+      gap: 1.05rem;
+      animation: pageIn .55s ease both;
+    }
+    @keyframes pageIn{ from{ opacity:0; transform: translateY(14px); } to{ opacity:1; transform: translateY(0);} }
+
+    /* Hero */
+    .hero{
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(10,6,28,.62), rgba(10,6,28,.38));
+      border: 1px solid rgba(196,181,253,.14);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: var(--shadowForm);
+      padding: 1.25rem 1.15rem 1.05rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before{
+      content:"";
+      position:absolute;
+      inset:-2px;
+      background:
+        radial-gradient(500px 220px at 15% 20%, rgba(182,89,255,.22), transparent 65%),
+        radial-gradient(520px 260px at 85% 15%, rgba(106,123,255,.18), transparent 60%);
+      filter: blur(10px);
+      opacity:.85;
+      pointer-events:none;
+    }
+    .hero-inner{ position: relative; display:grid; grid-template-columns: 1fr; gap: .9rem; }
+    .hero h2{ margin:0; font-size: clamp(1.55rem, 6.2vw, 2.05rem); line-height: 1.06; letter-spacing: .02em; }
+    .hero p{ margin: .55rem 0 0; color: rgba(189,180,255,.92); line-height: 1.55; }
+
+    .heroTopRow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: .75rem;
+      flex-wrap: wrap;
+    }
+
+    .backbtn{
+      display:inline-flex;
+      align-items:center;
+      gap:.45rem;
+      padding: .62rem .95rem;
+      border-radius: 999px;
+      color: #d8ceff;
+      text-decoration:none;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      font-weight: 800;
+      font-size: .72rem;
+      background: rgba(12,9,49,.40);
+      border: 1px solid rgba(156,136,255,.26);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transition: transform .14s ease, box-shadow .14s ease, border-color .14s ease, background .14s ease;
+      white-space: nowrap;
+    }
+    .backbtn:active{ transform: translateY(0); box-shadow:none; }
+
+    /* Panel */
+    .panel{
+      border-radius: var(--radius);
+      background: rgba(10,6,28,.55);
+      border: 1px solid rgba(196,181,253,.14);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: var(--shadowForm);
+      overflow:hidden;
+    }
+    .panel-inner{ padding: 1.05rem; }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+      margin-top: .25rem;
+    }
+    .full{ grid-column: 1 / -1; }
+
+    /* Fields */
+    .field{ opacity:0; transform: translateY(10px); animation: fieldIn .45s ease forwards; }
+    @keyframes fieldIn{ to{ opacity:1; transform: translateY(0);} }
+
+    .field label{
+      display:block;
+      font-size: .78rem;
+      font-weight: 900;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: rgba(216,206,255,.92);
+      margin-bottom: .42rem;
+    }
+    .field small{
+      display:block;
+      font-size: .78rem;
+      color: rgba(158,160,215,.92);
+      margin-top: .35rem;
+      line-height: 1.4;
+    }
+
+    .input, .select, .textarea{
+      width: 100%;
+      border-radius: 16px;
+      border: 1px solid rgba(156,136,255,.22);
+      background: rgba(9,6,34,.78);
+      color: var(--text);
+      padding: .92rem 1rem;
+      font-size: 1rem;
+      outline:none;
+      transition: border-color .18s ease, box-shadow .18s ease, transform .12s ease, background .18s ease;
+    }
+    .textarea{
+      min-height: 130px;
+      border-radius: 18px;
+      resize: vertical;
+      padding-top: 1rem;
+      line-height: 1.45;
+    }
+    .input:focus, .select:focus, .textarea:focus{
+      border-color: rgba(182,89,255,.65);
+      box-shadow: 0 0 0 5px rgba(182,89,255,.10);
+      background: rgba(12,9,49,.88);
+      transform: translateY(-1px);
+    }
+
+    /* Modern option toggles (kept) */
+    .pickGrid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-top: 14px;
+    }
+    .pick{ position: relative; display:block; cursor:pointer; user-select:none; }
+    .pick input{ position:absolute; opacity:0; pointer-events:none; }
+
+    .pickUi{
+      display:flex;
+      flex-direction:column;
+      gap: 6px;
+      padding: 14px 14px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.22);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: 0 18px 60px rgba(0,0,0,.35);
+      transition: transform .18s var(--ease), border-color .18s var(--ease), background .18s var(--ease), box-shadow .18s var(--ease);
+      position: relative;
+      overflow:hidden;
+    }
+
+    .pickTitle{ font-weight: 900; letter-spacing: .02em; color: rgba(244,240,255,.92); }
+    .pickMeta{ font-size: .92rem; color: rgba(244,240,255,.62); line-height: 1.25; }
+
+    .pick:active .pickUi{ transform: translateY(0); }
+
+    .pick input:checked + .pickUi{
+      border-color: rgba(168,85,247,.55);
+      background:
+        radial-gradient(900px 200px at 10% 0%, rgba(168,85,247,.26), transparent 55%),
+        radial-gradient(900px 200px at 90% 0%, rgba(124,58,237,.20), transparent 55%),
+        rgba(0,0,0,.18);
+    }
+    .pick input:checked + .pickUi::after{
+      content:"";
+      position:absolute;
+      top: 12px;
+      right: 12px;
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(168,85,247,.95);
+      box-shadow: 0 0 14px rgba(168,85,247,.55);
+    }
+
+    /* Actions */
+    .actions{
+      margin-top: 1.1rem;
+      display:grid;
+      gap: .85rem;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(196,181,253,.12);
+    }
+    .hint{ margin:0; font-size: .90rem; color: rgba(158,160,215,.95); line-height: 1.45; }
+
+    /* Inquiry submit button (kept look, full width on mobile) */
+    .submitBtn{
+      border: 0;
+      cursor:pointer;
+      border-radius: 999px;
+      padding: .98rem 1.25rem;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      font-size: .82rem;
+      color: white;
+      background-image: linear-gradient(135deg, #b659ff, #6a7bff);
+      box-shadow: 0 18px 55px rgba(0,0,0,.55);
+      transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
+      position: relative;
+      overflow:hidden;
+      width: 100%;
+    }
+    .submitBtn::after{
+      content:"";
+      position:absolute;
+      inset:-40% -20%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.16), transparent);
+      transform: rotate(20deg) translateX(-60%);
+      animation: sheen 3.2s ease-in-out infinite;
+      pointer-events:none;
+    }
+    @keyframes sheen{
+      0%, 55%{ transform: rotate(20deg) translateX(-70%); opacity:.0; }
+      70%{ opacity:.8; }
+      100%{ transform: rotate(20deg) translateX(70%); opacity:0; }
+    }
+    .submitBtn:active{ transform: translateY(1px); }
+    .submitBtn[disabled]{ opacity: .65; cursor:not-allowed; transform:none !important; filter:none !important; }
+
+    /* Inline message */
+    .inline-msg{
+      margin-top: .85rem;
+      display:none;
+      font-size: .92rem;
+      line-height: 1.4;
+      padding: .85rem 1rem;
+      border-radius: 16px;
+      border: 1px solid rgba(156,136,255,.20);
+      background: rgba(12,9,49,.35);
+    }
+    .inline-msg.bad{ color: var(--bad); border-color: rgba(255,148,148,.35); }
+    .inline-msg.good{ color: var(--good); border-color: rgba(122,249,196,.25); }
+
+    /* Toasts (kept) */
+    .toasts{
+      position: fixed;
+      right: 14px;
+      bottom: 14px;
+      z-index: 2000;
+      display:grid;
+      gap: .6rem;
+      pointer-events: none;
+    }
+    .toast{
+      pointer-events: none;
+      width: min(520px, calc(100vw - 28px));
+      border-radius: 18px;
+      border: 1px solid rgba(196,181,253,.16);
+      background: rgba(10,6,28,.78);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: 0 22px 70px rgba(0,0,0,.55);
+      padding: .95rem 1rem;
+      display:flex;
+      gap: .8rem;
+      align-items: flex-start;
+      opacity: 0;
+      transform: translateY(10px);
+      animation: toastIn .22s ease forwards;
+    }
+    @keyframes toastIn{ to{ opacity:1; transform: translateY(0);} }
+    .toast .ic{ width: 42px; height: 42px; border-radius: 14px; display:grid; place-items:center; border: 1px solid rgba(156,136,255,.18); background: rgba(12,9,49,.35); flex: 0 0 auto; }
+    .toast.good .ic{ border-color: rgba(122,249,196,.25); background: rgba(12,30,22,.25); }
+    .toast.bad .ic{ border-color: rgba(255,148,148,.28); background: rgba(45,12,18,.25); }
+    .toast h4{ margin: .05rem 0 .2rem; font-size: .95rem; letter-spacing: .02em; }
+    .toast p{ margin:0; color: rgba(189,180,255,.92); font-size: .9rem; line-height: 1.35; }
+    .toast.fade{ animation: toastOut .28s ease forwards; }
+    @keyframes toastOut{ to{ opacity:0; transform: translateY(8px); } }
+
+    /* OTP modal (kept) */
+    .otp-modal{
+      position: fixed;
+      inset: 0;
+      display: none;
+      place-items: center;
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      z-index: 1500;
+      padding: 1rem;
+    }
+    .otp-modal.open{ display: grid; }
+
+    .otp-card{
+      width: min(560px, 100%);
+      border-radius: 22px;
+      border: 1px solid rgba(196,181,253,.22);
+      background: rgba(10, 6, 28, .86);
+      box-shadow: 0 36px 110px rgba(0,0,0,.65);
+      padding: 1.25rem 1.15rem 1.05rem;
+      transform: translateY(10px) scale(.99);
+      opacity: 0;
+      animation: otpIn .25s ease forwards;
+    }
+    @keyframes otpIn{ to{ opacity: 1; transform: translateY(0) scale(1); } }
+
+    .otp-title{ margin:0; font-size: 1.05rem; letter-spacing: .10em; text-transform: uppercase; }
+    .otp-sub{ margin:.5rem 0 1.0rem; color: rgba(189,180,255,.92); line-height: 1.45; }
+
+    .otp-msg{
+      display:none;
+      margin: .1rem 0 .65rem;
+      padding: .75rem .85rem;
+      border-radius: 14px;
+      border: 1px solid rgba(156,136,255,.20);
+      background: rgba(12,9,49,.35);
+      color: rgba(244,240,255,.92);
+      font-size: .92rem;
+      line-height: 1.35;
+    }
+    .otp-msg.bad{ color: var(--bad); border-color: rgba(255,148,148,.35); }
+    .otp-msg.good{ color: var(--good); border-color: rgba(122,249,196,.25); }
+
+    .otp-input{
+      width: 100% !important;
+      display:block;
+      border-radius: 999px;
+      font-size: 1.10rem;
+      letter-spacing: .16em;
+      text-align:center;
+      padding: .95rem 1rem;
+    }
+
+    .otp-actions{ display:flex; gap:.65rem; justify-content: flex-end; margin-top: 1rem; flex-wrap: wrap; }
+
+    .otp-btn{
+      border-radius: 999px;
+      padding: .80rem 1.05rem;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      font-size: .75rem;
+      cursor:pointer;
+      border: 1px solid rgba(156,136,255,.28);
+      background: rgba(12,9,49,.45);
+      color: #d8ceff;
+      transition: transform .12s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .otp-btn:active{ transform: translateY(0); box-shadow:none; }
+
+    .otp-resend{
+      margin-top: .95rem;
+      margin-left: auto;
+      padding: .62rem .95rem;
+      border-radius: 999px;
+      border: 1px solid rgba(156,136,255,.24);
+      background: rgba(12, 9, 49, 0.35);
+      color: #d8ceff;
+      cursor: pointer;
+      text-decoration:none;
+      opacity: .95;
+      transition: opacity .14s ease, border-color .18s ease, background .18s ease;
+    }
+    .otp-resend:active{ opacity: 1; }
+
+    .foot{ margin-top: .25rem; text-align:center; color: rgba(158,160,215,.85); font-size: .85rem; padding: .85rem 0 0; }
+
+    @media (prefers-reduced-motion: reduce){
+      .menu, .scrim{ transition:none; }
+      .bg::before, .bg::after{ animation:none; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="bg" aria-hidden="true"></div>
+
+  <!-- Slide-down menu (matches your reference mobile nav) -->
+  <div class="scrim" id="scrim" aria-hidden="true"></div>
+
+  <aside class="menu" id="menu" aria-label="Mobile Menu" aria-hidden="true">
+    <div class="wrap">
+      <div class="menuHeader">
+        <div class="brand" style="gap:.65rem;">
+          <div class="mark" style="width:40px;height:40px;border-radius:14px;">
+            <img src="/assets/sns-logo-purple.png" alt="Saku Network Solutions logo">
+          </div>
+          <div class="brandText">
+            <strong>SAKU NETWORK SOLUTIONS</strong>
+            <span>Network infrastructure, done clean.</span>
+          </div>
+        </div>
+
+        <button class="iconBtn" id="closeMenu" aria-label="Close menu">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M6 6l12 12M18 6L6 18" stroke="rgba(244,240,255,.92)" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <nav class="menuLinks" aria-label="Primary">
+        <a href="/home/">Home</a>
+        <a href="/sns/">Services</a>
+        <a href="/experience/">Credibility</a>
+        <a href="/other/">Resources</a>
+        <a href="/socials/">Contact</a>
+      </nav>
+
+      <div class="menuActions">
+        <a class="btn" href="/sns-login/">Client Login</a>
+        <a class="btn primary" href="/sns-inquiry/">Start an Inquiry</a>
+        <a class="btn" href="#" id="viewDesktop">View Desktop Site</a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Top nav -->
+  <header class="topnav">
+    <div class="wrap">
+      <div class="navrow">
+        <div class="brand">
+          <div class="mark">
+            <img src="/assets/sns-logo-purple.png" alt="Saku Network Solutions logo">
+          </div>
+          <div class="brandText">
+            <strong>SAKU NETWORK SOLUTIONS</strong>
+            <span>Network infrastructure, done clean.</span>
+          </div>
+        </div>
+
+        <button class="iconBtn" id="openMenu" aria-label="Open menu">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M4 7h16M4 12h16M4 17h16" stroke="rgba(244,240,255,.92)" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="page">
+    <div class="wrap">
+      <div class="content">
+
+        <section class="hero">
+          <div class="hero-inner">
+            <div class="heroTopRow">
+              <h2 style="margin:0;">Start your network project.</h2>
+              <!-- Kept from desktop (not a new feature) -->
+              <a class="backbtn" href="/sns/" aria-label="Back to SNS">← Back to SNS</a>
+            </div>
+
+            <p>
+              Give me the basics so I can scope this correctly. No fluff — just what you need,
+              what you have today, and how fast you want to move.
+            </p>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-inner">
+
+            <form id="sns-inquiry-form" novalidate>
+              <div class="grid" id="fieldsGrid">
+
+                <!-- Contact -->
+                <div class="field" style="animation-delay:.02s">
+                  <label for="contactName">Your name *</label>
+                  <input id="contactName" name="contactName" type="text" class="input" required />
+                </div>
+
+                <div class="field" style="animation-delay:.06s">
+                  <label for="businessName">Business or organization name *</label>
+                  <input id="businessName" name="businessName" type="text" class="input" required />
+                </div>
+
+                <div class="field" style="animation-delay:.10s">
+                  <label for="email">Email *</label>
+                  <input id="email" name="email" type="email" class="input" required />
+                </div>
+
+                <div class="field" style="animation-delay:.14s">
+                  <label for="phone">Phone *</label>
+                  <input
+                    id="phone"
+                    name="phone"
+                    type="tel"
+                    class="input"
+                    required
+                    inputmode="tel"
+                    autocomplete="tel"
+                    placeholder="(555) 555-5555"
+                    pattern="^\\s*(?:\\+?1\\s*)?(?:\\(\\s*\\d{3}\\s*\\)|\\d{3})[\\s.-]?\\d{3}[\\s.-]?\\d{4}\\s*$"
+                    title="Enter a valid US phone number (10 digits)."
+                  />
+                  <small>Used for SMS verification only.</small>
+                </div>
+
+                <div class="field" style="animation-delay:.18s">
+                  <label for="location">Office location (city, state) *</label>
+                  <input id="location" name="location" type="text" class="input" required />
+                </div>
+
+                <div class="field" style="animation-delay:.22s">
+                  <label for="companySize">Approximate team size *</label>
+                  <select id="companySize" name="companySize" class="select" required>
+                    <option value="">Select one</option>
+                    <option value="1-10">1 – 10 people</option>
+                    <option value="11-25">11 – 25 people</option>
+                    <option value="26-50">26 – 50 people</option>
+                    <option value="51-100">51 – 100 people</option>
+                    <option value="100+">More than 100</option>
+                  </select>
+                </div>
+
+                <!-- Services -->
+                <div class="field full" style="animation-delay:.26s">
+                  <label>What do you need help with? *</label>
+                  <div class="pickGrid" id="helpWithGrid">
+                    <label class="pick">
+                      <input type="checkbox" name="help_with" value="new_office_network">
+                      <span class="pickUi">
+                        <span class="pickTitle">New office network</span>
+                        <span class="pickMeta">Design + install from scratch</span>
+                      </span>
+                    </label>
+
+                    <label class="pick">
+                      <input type="checkbox" name="help_with" value="upgrade_existing_network">
+                      <span class="pickUi">
+                        <span class="pickTitle">Upgrade existing network</span>
+                        <span class="pickMeta">Stability, speed, segmentation</span>
+                      </span>
+                    </label>
+
+                    <label class="pick">
+                      <input type="checkbox" name="help_with" value="wifi_aps">
+                      <span class="pickUi">
+                        <span class="pickTitle">Wi‑Fi / APs</span>
+                        <span class="pickMeta">Drops, roaming, coverage, tuning</span>
+                      </span>
+                    </label>
+
+                    <label class="pick">
+                      <input type="checkbox" name="help_with" value="nas_file_server">
+                      <span class="pickUi">
+                        <span class="pickTitle">NAS / file server</span>
+                        <span class="pickMeta">Storage, shares, backups</span>
+                      </span>
+                    </label>
+
+                    <label class="pick">
+                      <input type="checkbox" name="help_with" value="firewall_security">
+                      <span class="pickUi">
+                        <span class="pickTitle">Firewall / security</span>
+                        <span class="pickMeta">Rules, VPN, filtering, hardening</span>
+                      </span>
+                    </label>
+
+                    <label class="pick">
+                      <input type="checkbox" name="help_with" value="ongoing_support">
+                      <span class="pickUi">
+                        <span class="pickTitle">Ongoing support</span>
+                        <span class="pickMeta">Membership / continued admin</span>
+                      </span>
+                    </label>
+
+                    <label class="pick">
+                      <input type="checkbox" name="help_with" value="other">
+                      <span class="pickUi">
+                        <span class="pickTitle">Other</span>
+                        <span class="pickMeta">Explain it in the notes</span>
+                      </span>
+                    </label>
+                  </div>
+
+                  <small>
+                    Select everything that applies — it helps me estimate scope faster.
+                  </small>
+                </div>
+
+                <!-- Current setup -->
+                <div class="field full" style="animation-delay:.30s">
+                  <label for="currentSetup">Current situation</label>
+                  <textarea
+                    id="currentSetup"
+                    name="currentSetup"
+                    class="textarea"
+                    placeholder="Do you already have networking gear, cabling, a rack, ISP modem/router, or a server? Any pain points today?"
+                  ></textarea>
+                </div>
+
+                <!-- Goals -->
+                <div class="field full" style="animation-delay:.34s">
+                  <label for="goals">What do you want your network to do? *</label>
+                  <textarea
+                    id="goals"
+                    name="goals"
+                    class="textarea"
+                    required
+                    placeholder="Example: “Support 20 staff, separate staff/guest Wi‑Fi, file storage with backups, and room to grow.”"
+                  ></textarea>
+                </div>
+
+                <!-- Budget / timeline -->
+                <div class="field" style="animation-delay:.38s">
+                  <label for="budget">Rough budget range (USD) *</label>
+                  <select id="budget" name="budget" class="select" required>
+                    <option value="">Select one</option>
+                    <option value="under-2000">Under $2,000</option>
+                    <option value="2000-5000">$2,000 – $5,000</option>
+                    <option value="5000-10000">$5,000 – $10,000</option>
+                    <option value="10000+">More than $10,000</option>
+                    <option value="unsure">Not sure yet</option>
+                  </select>
+                </div>
+
+                <div class="field" style="animation-delay:.42s">
+                  <label for="timeline">Preferred timeline *</label>
+                  <select id="timeline" name="timeline" class="select" required>
+                    <option value="">Select one</option>
+                    <option value="asap">As soon as possible</option>
+                    <option value="30-days">Within 30 days</option>
+                    <option value="60-90-days">Within 60–90 days</option>
+                    <option value="planning">Still planning / exploring</option>
+                  </select>
+                </div>
+
+                <!-- Extra -->
+                <div class="field full" style="animation-delay:.46s">
+                  <label for="extraNotes">Anything else I should know?</label>
+                  <textarea
+                    id="extraNotes"
+                    name="extraNotes"
+                    class="textarea"
+                    placeholder="Access restrictions, building requirements, photos of network closet/rack, existing quotes, or any constraints that matter."
+                  ></textarea>
+                </div>
+              </div>
+
+              <div class="actions">
+                <p class="hint">
+                  By submitting, you agree to be contacted by email regarding this inquiry.
+                </p>
+
+                <button id="submitBtn" type="submit" class="submitBtn">
+                  Send inquiry
+                </button>
+              </div>
+
+              <div id="sns-message" class="inline-msg bad"></div>
+            </form>
+
+          </div>
+        </section>
+
+        <p class="foot">© 2025 Saku Network Solutions. Built clean.</p>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div class="toasts" id="toasts" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- OTP Modal -->
+  <div id="otpModal" class="otp-modal" aria-hidden="true">
+    <div class="otp-card" role="dialog" aria-modal="true" aria-labelledby="otpTitle">
+      <h2 id="otpTitle" class="otp-title">Verify your phone</h2>
+      <p class="otp-sub">
+        I sent you a text message with a 6-digit code. Enter it to send your inquiry.
+      </p>
+
+      <div id="otpMsg" class="otp-msg"></div>
+
+      <input
+        id="otpCode"
+        class="input otp-input"
+        inputmode="numeric"
+        autocomplete="one-time-code"
+        pattern="\d{6}"
+        placeholder="Enter code"
+        aria-label="6-digit code"
+      />
+
+      <div class="otp-actions">
+        <button id="otpCancel" type="button" class="otp-btn">Cancel</button>
+        <button id="otpVerify" type="button" class="btn" style="padding:.80rem 1.05rem; height:auto;">
+          Verify &amp; Send
+        </button>
+      </div>
+
+      <button id="otpResend" type="button" class="otp-resend">Resend code</button>
+    </div>
+  </div>
+
+  <!-- Mobile menu logic (matches your reference) -->
+  <script>
+    (function(){
+      const menu = document.getElementById("menu");
+      const scrim = document.getElementById("scrim");
+      const openBtn = document.getElementById("openMenu");
+      const closeBtn = document.getElementById("closeMenu");
+
+      function open(){
+        menu.classList.add("open");
+        scrim.classList.add("open");
+        menu.setAttribute("aria-hidden","false");
+        scrim.setAttribute("aria-hidden","false");
+        document.body.style.overflow = "hidden";
+      }
+      function close(){
+        menu.classList.remove("open");
+        scrim.classList.remove("open");
+        menu.setAttribute("aria-hidden","true");
+        scrim.setAttribute("aria-hidden","true");
+        document.body.style.overflow = "";
+      }
+
+      openBtn.addEventListener("click", open);
+      closeBtn.addEventListener("click", close);
+      scrim.addEventListener("click", close);
+      window.addEventListener("keydown", (e) => { if (e.key === "Escape") close(); });
+    })();
+  </script>
+
+  <script>
+    // View Desktop Site preference (matches other mobile pages)
+    (function(){
+      const a = document.getElementById("viewDesktop");
+      if (!a) return;
+      a.addEventListener("click", function(e){
+        e.preventDefault();
+        localStorage.setItem("sns_force_desktop", "1");
+        location.replace("/sns-inquiry/");
+      });
+    })();
+  </script>
+
+  <!-- Inquiry submit + OTP logic (UNCHANGED from desktop) -->
+  <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+    // Keep your current values (as you already had working before)
+    const supabaseUrl = "https://jgvxmpsjtkedzgygynbl.supabase.co";
+    const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpndnhtcHNqdGtlZHpneWd5bmJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0NzgxMjYsImV4cCI6MjA4MTA1NDEyNn0.OCh23RWm8COtxWuumYvKUmfMOLOW01B1zrbtzcr3w6Y";
+    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+    const form = document.getElementById("sns-inquiry-form");
+    const msgEl = document.getElementById("sns-message");
+    const submitBtn = document.getElementById("submitBtn");
+
+    const toasts = document.getElementById("toasts");
+    function toast(title, message, type="good", ms=3000){
+      const el = document.createElement("div");
+      el.className = `toast ${type}`;
+      el.innerHTML = `
+        <div class="ic">
+          ${type === "good"
+            ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="rgba(122,249,196,.95)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+            : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="rgba(255,148,148,.95)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+          }
+        </div>
+        <div>
+          <h4>${title}</h4>
+          <p>${message}</p>
+        </div>
+      `;
+      toasts.appendChild(el);
+
+      window.setTimeout(() => {
+        el.classList.add("fade");
+        window.setTimeout(() => el.remove(), 320);
+      }, ms);
+    }
+
+    let isSubmitting = false;
+
+    function showInline(text, isError = true){
+      msgEl.style.display = "block";
+      msgEl.classList.toggle("bad", isError);
+      msgEl.classList.toggle("good", !isError);
+      msgEl.textContent = text;
+    }
+    function clearInline(){
+      msgEl.style.display = "none";
+      msgEl.textContent = "";
+      msgEl.classList.add("bad");
+      msgEl.classList.remove("good");
+    }
+
+    // OTP elements
+    const otpModal = document.getElementById("otpModal");
+    const otpCode = document.getElementById("otpCode");
+    const otpCancel = document.getElementById("otpCancel");
+    const otpVerify = document.getElementById("otpVerify");
+    const otpResend = document.getElementById("otpResend");
+    const otpMsg = document.getElementById("otpMsg");
+
+    function otpShowMsg(text, isErr){
+      otpMsg.style.display = "block";
+      otpMsg.classList.toggle("bad", !!isErr);
+      otpMsg.classList.toggle("good", !isErr);
+      otpMsg.textContent = text;
+    }
+    function otpClearMsg(){
+      otpMsg.style.display = "none";
+      otpMsg.textContent = "";
+      otpMsg.classList.remove("bad","good");
+    }
+
+    function openOtpModal(phoneForResend, onVerify){
+      if (!otpModal || !otpCode || !otpCancel || !otpVerify || !otpResend || !otpMsg) {
+        showInline("OTP UI failed to load. Refresh the page.", true);
+        return;
+      }
+
+      otpModal.classList.add("open");
+      otpModal.setAttribute("aria-hidden","false");
+      otpCode.value = "";
+      otpClearMsg();
+      otpCode.focus();
+
+      const cleanup = () => {
+        otpModal.classList.remove("open");
+        otpModal.setAttribute("aria-hidden","true");
+        otpCancel.onclick = null;
+        otpVerify.onclick = null;
+        otpResend.onclick = null;
+      };
+
+      otpCancel.onclick = () => cleanup();
+
+      otpVerify.onclick = async () => {
+        const code = (otpCode.value || "").trim();
+        if (!/^\d{6}$/.test(code)) {
+          otpShowMsg("Enter the 6-digit code.", true);
+          return;
+        }
+        otpVerify.disabled = true;
+        try{
+          await onVerify(code);
+          cleanup();
+        } catch(e){
+          otpShowMsg(e?.message || "Verification failed.", true);
+        } finally{
+          otpVerify.disabled = false;
+        }
+      };
+
+      otpResend.onclick = async () => {
+        otpResend.disabled = true;
+        try{
+          await sendOtp(phoneForResend);
+          otpShowMsg("Code resent.", false);
+          toast("Code resent", "Check your phone for the new 6-digit code.", "good", 2600);
+        } catch(e){
+          otpShowMsg(e?.message || "Failed to resend.", true);
+          toast("Resend failed", "Use the email method or try again.", "bad", 3200);
+        } finally{
+          otpResend.disabled = false;
+        }
+      };
+    }
+
+    async function callOtpFunction(body){
+      const res = await fetch(`${supabaseUrl}/functions/v1/inquiry-otp`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": supabaseAnonKey,
+          "Authorization": `Bearer ${supabaseAnonKey}`
+        },
+        body: JSON.stringify(body),
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.ok === false) {
+        throw new Error(data.error || "OTP request failed");
+      }
+      return data;
+    }
+
+    async function sendOtp(phone){
+      await callOtpFunction({ action: "send", phone });
+    }
+
+    async function verifyOtpAndSubmit(phone, code, payload){
+      await callOtpFunction({ action: "check", phone, code, payload });
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (isSubmitting) return;
+
+      isSubmitting = true;
+      submitBtn.disabled = true;
+      clearInline();
+
+      try {
+        const fd = new FormData(form);
+
+        // Normalize / validate phone
+        const phoneRaw = (fd.get("phone") || "").toString();
+        const digits = phoneRaw.replace(/\D/g, "");
+        let d = digits;
+        if (d.length === 11 && d.startsWith("1")) d = d.slice(1);
+
+        const obviousFake = new Set([
+          "0000000000","1111111111","2222222222","3333333333","4444444444",
+          "5555555555","6666666666","7777777777","8888888888","9999999999",
+          "1234567890",
+        ]);
+
+        if (d.length !== 10 || obviousFake.has(d)) {
+          showInline("Please enter a valid US phone number (10 digits).", true);
+          toast("Not sent", "Invalid phone number.", "bad", 3200);
+          return;
+        }
+
+        const phoneDisplay = `(${d.slice(0,3)}) ${d.slice(3,6)}-${d.slice(6)}`;
+        const phoneE164 = `+1${d}`;
+
+        const helpWith = fd.getAll("help_with");
+        if (!helpWith.length) {
+          showInline("Please select at least one option.", true);
+          toast("Not sent", "Select at least one option.", "bad", 3200);
+          return;
+        }
+
+        const payload = {
+          contact_name: (fd.get("contactName") || "").toString().trim(),
+          business_name: (fd.get("businessName") || "").toString().trim(),
+          email: (fd.get("email") || "").toString().trim(),
+          phone: phoneE164,
+          location: (fd.get("location") || "").toString().trim(),
+          company_size: fd.get("companySize"),
+          services: helpWith,
+          current_setup: (fd.get("currentSetup") || "").toString().trim() || null,
+          goals: (fd.get("goals") || "").toString().trim(),
+          budget: fd.get("budget"),
+          timeline: fd.get("timeline"),
+          extra_notes: (fd.get("extraNotes") || "").toString().trim() || null,
+        };
+
+        // 1) Send OTP
+        await sendOtp(phoneE164);
+        toast("Code sent", `Text sent to ${phoneDisplay}. Enter the 6-digit code.`, "good", 2800);
+
+        // 2) Verify + submit
+        openOtpModal(phoneE164, async (code) => {
+          await verifyOtpAndSubmit(phoneE164, code, payload);
+          toast("Sent", "Inquiry submitted successfully.", "good", 2200);
+          window.location.href = "/sns-inquiry-success/index.html";
+        });
+
+      } catch (err) {
+        console.error("Inquiry submit failed:", err);
+        showInline(`Failed: ${err?.message || "Unknown error"}`, true);
+        toast("Not sent", err?.message || "Something failed sending your inquiry.", "bad", 3600);
+      } finally {
+        isSubmitting = false;
+        submitBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
