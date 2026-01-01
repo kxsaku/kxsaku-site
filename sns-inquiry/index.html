@@ -43,6 +43,94 @@
       overflow-x: hidden;
     }
 
+        /* ===== Modern option toggles (replaces ugly checkboxes) ===== */
+    .pickGrid{
+      display:grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    .pick{
+      grid-column: span 4;
+      position: relative;
+      display:block;
+      cursor:pointer;
+      user-select:none;
+    }
+
+    @media (max-width: 980px){
+      .pick{ grid-column: span 6; }
+    }
+    @media (max-width: 620px){
+      .pick{ grid-column: span 12; }
+    }
+
+    .pick input{
+      position:absolute;
+      opacity:0;
+      pointer-events:none;
+    }
+
+    .pickUi{
+      display:flex;
+      flex-direction:column;
+      gap: 6px;
+
+      padding: 14px 14px;
+      border-radius: 18px;
+
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.22);
+      backdrop-filter: blur(10px);
+
+      box-shadow: 0 18px 60px rgba(0,0,0,.35);
+      transition: transform .18s var(--ease), border-color .18s var(--ease), background .18s var(--ease), box-shadow .18s var(--ease);
+    }
+
+    .pickTitle{
+      font-weight: 900;
+      letter-spacing: .02em;
+      text-transform: none;
+      color: rgba(244,240,255,.92);
+    }
+
+    .pickMeta{
+      font-size: .92rem;
+      color: rgba(244,240,255,.62);
+      line-height: 1.25;
+    }
+
+    /* hover */
+    .pick:hover .pickUi{
+      transform: translateY(-2px);
+      border-color: rgba(168,85,247,.28);
+      box-shadow: 0 22px 80px rgba(0,0,0,.48);
+    }
+
+    /* checked = “selected” */
+    .pick input:checked + .pickUi{
+      border-color: rgba(168,85,247,.55);
+      background:
+        radial-gradient(900px 200px at 10% 0%, rgba(168,85,247,.26), transparent 55%),
+        radial-gradient(900px 200px at 90% 0%, rgba(124,58,237,.20), transparent 55%),
+        rgba(0,0,0,.18);
+    }
+
+    /* subtle selected indicator dot */
+    .pick input:checked + .pickUi::after{
+      content:"";
+      position:absolute;
+      top: 12px;
+      right: 12px;
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(168,85,247,.95);
+      box-shadow: 0 0 14px rgba(168,85,247,.55);
+    }
+
+
     /* ===== Animated background (no particles) ===== */
     .bg {
       position: fixed;
@@ -202,29 +290,9 @@
     .hero-inner{
       position: relative;
       display:grid;
-      grid-template-columns: 1.15fr .85fr;
+      grid-template-columns: 1fr;
       gap: 1.25rem;
       align-items: start;
-    }
-    .pillrow{
-      display:flex;
-      flex-wrap: wrap;
-      gap: .5rem;
-      margin-bottom: .85rem;
-    }
-    .pill{
-      display:inline-flex;
-      align-items:center;
-      gap:.45rem;
-      padding: .42rem .72rem;
-      border-radius: 999px;
-      background: rgba(12,9,49,.45);
-      border: 1px solid rgba(156,136,255,.22);
-      color: rgba(216,206,255,.92);
-      font-size: .72rem;
-      letter-spacing: .10em;
-      text-transform: uppercase;
-      backdrop-filter: blur(10px);
     }
     .hero h2{
       margin:0;
@@ -688,12 +756,6 @@
       <section class="hero">
         <div class="hero-inner">
           <div>
-            <div class="pillrow">
-              <span class="pill">Inquiry</span>
-              <span class="pill">Los Angeles</span>
-              <span class="pill">Small business IT</span>
-            </div>
-
             <h2>Start your network project.</h2>
             <p>
               Give me the basics so I can scope this correctly. No fluff — just what you need,
@@ -701,14 +763,6 @@
             </p>
           </div>
 
-          <aside class="steps">
-            <h3>How it works</h3>
-            <ul class="steplist">
-              <li class="step"><span class="dot"></span>Submit details</li>
-              <li class="step"><span class="dot"></span>Verify phone (SMS)</li>
-              <li class="step"><span class="dot"></span>I review + respond</li>
-            </ul>
-          </aside>
         </div>
       </section>
 
@@ -771,15 +825,64 @@
               <!-- Services -->
               <div class="field full" style="animation-delay:.26s">
                 <label>What do you need help with? *</label>
-                <div class="chips">
-                  <label class="chip"><input type="checkbox" name="services" value="New office network" /><span>New office network</span></label>
-                  <label class="chip"><input type="checkbox" name="services" value="Upgrade existing network" /><span>Upgrade existing network</span></label>
-                  <label class="chip"><input type="checkbox" name="services" value="Wi-Fi and access points" /><span>Wi-Fi / APs</span></label>
-                  <label class="chip"><input type="checkbox" name="services" value="NAS / file server setup" /><span>NAS / file server</span></label>
-                  <label class="chip"><input type="checkbox" name="services" value="Firewall / security" /><span>Firewall / security</span></label>
-                  <label class="chip"><input type="checkbox" name="services" value="Ongoing network maintenance" /><span>Ongoing support</span></label>
-                  <label class="chip"><input type="checkbox" name="services" value="Other" /><span>Other</span></label>
+                <div class="pickGrid" id="helpWithGrid">
+                  <label class="pick">
+                    <input type="checkbox" name="help_with" value="new_office_network">
+                    <span class="pickUi">
+                      <span class="pickTitle">New office network</span>
+                      <span class="pickMeta">Design + install from scratch</span>
+                    </span>
+                  </label>
+
+                  <label class="pick">
+                    <input type="checkbox" name="help_with" value="upgrade_existing_network">
+                    <span class="pickUi">
+                      <span class="pickTitle">Upgrade existing network</span>
+                      <span class="pickMeta">Stability, speed, segmentation</span>
+                    </span>
+                  </label>
+
+                  <label class="pick">
+                    <input type="checkbox" name="help_with" value="wifi_aps">
+                    <span class="pickUi">
+                      <span class="pickTitle">Wi-Fi / APs</span>
+                      <span class="pickMeta">Drops, roaming, coverage, tuning</span>
+                    </span>
+                  </label>
+
+                  <label class="pick">
+                    <input type="checkbox" name="help_with" value="nas_file_server">
+                    <span class="pickUi">
+                      <span class="pickTitle">NAS / file server</span>
+                      <span class="pickMeta">Storage, shares, backups</span>
+                    </span>
+                  </label>
+
+                  <label class="pick">
+                    <input type="checkbox" name="help_with" value="firewall_security">
+                    <span class="pickUi">
+                      <span class="pickTitle">Firewall / security</span>
+                      <span class="pickMeta">Rules, VPN, filtering, hardening</span>
+                    </span>
+                  </label>
+
+                  <label class="pick">
+                    <input type="checkbox" name="help_with" value="ongoing_support">
+                    <span class="pickUi">
+                      <span class="pickTitle">Ongoing support</span>
+                      <span class="pickMeta">Membership / continued admin</span>
+                    </span>
+                  </label>
+
+                  <label class="pick">
+                    <input type="checkbox" name="help_with" value="other">
+                    <span class="pickUi">
+                      <span class="pickTitle">Other</span>
+                      <span class="pickMeta">Explain it in the notes</span>
+                    </span>
+                  </label>
                 </div>
+
                 <small>
                   Select everything that applies — it helps me estimate scope faster.
                 </small>
@@ -1080,12 +1183,13 @@
 
         const phoneFormatted = `(${d.slice(0,3)}) ${d.slice(3,6)}-${d.slice(6)}`;
 
-        const services = fd.getAll("services");
-        if (!services.length) {
-          showInline("Please select at least one service.", true);
-          toast("Not sent", "Select at least one service.", "bad", 3200);
+        const helpWith = fd.getAll("help_with");
+        if (!helpWith.length) {
+          showInline("Please select at least one option.", true);
+          toast("Not sent", "Select at least one option.", "bad", 3200);
           return;
         }
+
 
         const payload = {
           contact_name: fd.get("contactName"),
@@ -1093,7 +1197,7 @@
           email: fd.get("email"),
           location: fd.get("location"),
           company_size: fd.get("companySize"),
-          services,
+          help_with: helpWith,
           current_setup: fd.get("currentSetup") || null,
           goals: fd.get("goals"),
           budget: fd.get("budget"),
