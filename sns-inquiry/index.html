@@ -4,806 +4,1089 @@
   <meta charset="UTF-8" />
   <title>SNS · Start Your Network Project</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- If you have a shared stylesheet, keep it -->
   <link rel="stylesheet" href="styles.css" />
 
-  <!-- Simple page-specific styles (can be moved into styles.css) -->
   <style>
+    :root{
+      --bg0:#050315;
+      --bg1:#1a0f33;
+      --bg2:#2b1451;
+
+      --card: rgba(10, 6, 28, .72);
+      --card2: rgba(12, 9, 49, .55);
+
+      --border: rgba(196,181,253,.18);
+      --border2: rgba(156,136,255,.28);
+
+      --text: #f4f0ff;
+      --muted:#bdb4ff;
+      --muted2:#9ea0d7;
+
+      --accent:#b659ff;
+      --accent2:#6a7bff;
+      --good:#7af9c4;
+      --bad:#ff9494;
+
+      --shadow: 0 28px 90px rgba(0,0,0,.55);
+      --radius: 26px;
+    }
 
     html, body {
-        height: 100%;
-        margin: 0;
-        padding: 0;
-        background: #050315; /* fallback so nothing shows white */
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background: var(--bg0);
+      color: var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      overflow-x: hidden;
     }
-    .page-shell {
+
+    /* ===== Animated background (no particles) ===== */
+    .bg {
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      background:
+        radial-gradient(1200px 700px at 15% 10%, rgba(182,89,255,.22), transparent 60%),
+        radial-gradient(1100px 700px at 85% 25%, rgba(106,123,255,.18), transparent 55%),
+        radial-gradient(900px 600px at 55% 75%, rgba(179,124,255,.14), transparent 60%),
+        linear-gradient(180deg, rgba(52,32,103,.35), rgba(5,3,21,.9) 55%, rgba(2,0,16,1));
+    }
+    .bg::before, .bg::after{
+      content:"";
+      position:absolute;
+      inset:-30%;
+      background:
+        radial-gradient(circle at 30% 35%, rgba(182,89,255,.24), transparent 38%),
+        radial-gradient(circle at 70% 55%, rgba(106,123,255,.20), transparent 42%),
+        radial-gradient(circle at 50% 75%, rgba(255,255,255,.06), transparent 46%);
+      filter: blur(20px);
+      opacity: .9;
+      transform: translate3d(0,0,0);
+      animation: drift 18s ease-in-out infinite;
+    }
+    .bg::after{
+      opacity: .55;
+      animation-duration: 26s;
+      animation-direction: reverse;
+    }
+    @keyframes drift{
+      0%{ transform: translate3d(-2%, -1%, 0) scale(1); }
+      50%{ transform: translate3d(2%, 1.5%, 0) scale(1.03); }
+      100%{ transform: translate3d(-2%, -1%, 0) scale(1); }
+    }
+
+    /* ===== Page shell ===== */
+    .page {
       min-height: 100vh;
-      background: radial-gradient(circle at top, #342067, #050315 55%, #020010);
-      color: #f4f0ff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 3rem 1rem 4rem;
-    }
-
-    .sns-form-card {
-      width: 100%;
-      max-width: 960px;
-      background: rgba(9, 6, 34, 0.95);
-      border-radius: 32px;
-      box-shadow: 0 25px 80px rgba(0, 0, 0, 0.65);
-      padding: 2.5rem 2.25rem 2.75rem;
-      border: 1px solid rgba(130, 106, 255, 0.3);
-      backdrop-filter: blur(16px);
-    }
-
-    /* Small "Back to SNS" button (top-right inside card) */
-.sns-form-card {
-  position: relative; /* required for absolute-position button */
-}
-
-.sns-home-btn {
-  position: absolute;
-  top: 18px;
-  right: 18px;
-
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-
-  padding: 0.45rem 0.75rem;
-  border-radius: 999px;
-
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  text-decoration: none;
-
-  color: #d8ceff;
-  background: rgba(12, 9, 49, 0.55);
-  border: 1px solid rgba(156, 136, 255, 0.35);
-  backdrop-filter: blur(10px);
-
-  transition: transform 0.14s ease, box-shadow 0.14s ease, border-color 0.14s ease, background 0.14s ease;
-}
-
-.sns-home-btn:hover {
-  transform: translateY(-1px);
-  background: rgba(12, 9, 49, 0.82);
-  border-color: rgba(156, 136, 255, 0.7);
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55);
-}
-
-.sns-home-btn:active {
-  transform: translateY(0px);
-  box-shadow: none;
-}
-
-
-    .sns-form-header {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      margin-bottom: 2rem;
-    }
-
-    .sns-form-header h1 {
-      font-size: 2rem;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: #f8f1ff;
-    }
-
-    .sns-form-header p {
-      max-width: 620px;
-      color: #c5bcff;
-      line-height: 1.5;
-    }
-
-    .sns-grid {
+      padding: 3.25rem 1.25rem 3rem;
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 1.5rem 1.75rem;
+      place-items: start center;
+    }
+    .wrap {
+      width: min(1220px, 100%);
+      display: grid;
+      gap: 1.25rem;
+      animation: pageIn .55s ease both;
+    }
+    @keyframes pageIn{
+      from{ opacity: 0; transform: translateY(14px); }
+      to{ opacity: 1; transform: translateY(0); }
     }
 
-    .sns-grid-full {
-      grid-column: 1 / -1;
+    /* ===== Top bar (no nav; just brand + back) ===== */
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 1rem;
+      padding: 1.05rem 1.15rem;
+      border-radius: 999px;
+      background: rgba(10,6,28,.40);
+      border: 1px solid rgba(196,181,253,.14);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 18px 55px rgba(0,0,0,.35);
     }
-
-    .sns-field label {
-      display: block;
-      font-size: 0.85rem;
-      font-weight: 600;
-      letter-spacing: 0.06em;
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:.85rem;
+      min-width: 0;
+    }
+    .brand .logo{
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: rgba(12,9,49,.55);
+      border: 1px solid rgba(156,136,255,.25);
+      display:grid;
+      place-items:center;
+      overflow:hidden;
+    }
+    .brand .logo img{
+      width: 26px;
+      height: 26px;
+      object-fit: contain;
+      opacity: .95;
+      transform: translateZ(0);
+    }
+    .brand h1{
+      margin:0;
+      font-size: .95rem;
+      letter-spacing: .16em;
       text-transform: uppercase;
-      color: #d5cffc;
-      margin-bottom: 0.4rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .brand p{
+      margin:.15rem 0 0;
+      color: rgba(189,180,255,.85);
+      font-size: .85rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    .sns-field small {
-      display: block;
-      font-size: 0.75rem;
-      color: #9ea0d7;
-      margin-top: 0.2rem;
-    }
-
-    .sns-input,
-    .sns-select,
-    .sns-textarea {
-      width: 100%;
+    .backbtn{
+      display:inline-flex;
+      align-items:center;
+      gap:.45rem;
+      padding: .62rem .95rem;
       border-radius: 999px;
-      border: 1px solid rgba(129, 118, 255, 0.35);
-      background: rgba(9, 6, 34, 0.95);
-      color: #f4f0ff;
-      padding: 0.7rem 1rem;
-      font-size: 0.95rem;
-      outline: none;
-      transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+      color: #d8ceff;
+      text-decoration:none;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      font-weight: 700;
+      font-size: .72rem;
+      background: rgba(12,9,49,.45);
+      border: 1px solid rgba(156,136,255,.28);
+      backdrop-filter: blur(10px);
+      transition: transform .14s ease, box-shadow .14s ease, border-color .14s ease, background .14s ease;
+    }
+    .backbtn:hover{
+      transform: translateY(-1px);
+      background: rgba(12,9,49,.72);
+      border-color: rgba(182,89,255,.55);
+      box-shadow: 0 14px 38px rgba(0,0,0,.45);
+    }
+    .backbtn:active{
+      transform: translateY(0);
+      box-shadow:none;
     }
 
-    .sns-textarea {
-      border-radius: 22px;
-      min-height: 110px;
-      padding-top: 0.9rem;
-      resize: vertical;
+    /* ===== Hero ===== */
+    .hero{
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(10,6,28,.62), rgba(10,6,28,.38));
+      border: 1px solid rgba(196,181,253,.14);
+      backdrop-filter: blur(14px);
+      box-shadow: var(--shadow);
+      padding: 1.65rem 1.65rem 1.5rem;
+      position: relative;
+      overflow: hidden;
     }
-
-    .sns-input:focus,
-    .sns-select:focus,
-    .sns-textarea:focus {
-      border-color: #9c88ff;
-      box-shadow: 0 0 0 1px rgba(156, 136, 255, 0.55);
-      background: rgba(12, 9, 49, 0.98);
+    .hero::before{
+      content:"";
+      position:absolute;
+      inset:-2px;
+      background: radial-gradient(500px 220px at 15% 20%, rgba(182,89,255,.22), transparent 65%),
+                  radial-gradient(520px 260px at 85% 15%, rgba(106,123,255,.18), transparent 60%);
+      filter: blur(10px);
+      opacity:.85;
+      pointer-events:none;
     }
-
-    .sns-checkbox-group {
-      display: flex;
+    .hero-inner{
+      position: relative;
+      display:grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap: 1.25rem;
+      align-items: start;
+    }
+    .pillrow{
+      display:flex;
       flex-wrap: wrap;
-      gap: 0.4rem;
+      gap: .5rem;
+      margin-bottom: .85rem;
     }
-
-    .sns-pill-checkbox {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-      padding: 0.45rem 0.85rem;
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:.45rem;
+      padding: .42rem .72rem;
       border-radius: 999px;
-      border: 1px solid rgba(129, 118, 255, 0.35);
-      background: rgba(15, 10, 55, 0.9);
-      font-size: 0.8rem;
-      cursor: pointer;
-      transition: background 0.18s ease, border-color 0.18s ease,
-                  box-shadow 0.18s ease, transform 0.1s ease;
+      background: rgba(12,9,49,.45);
+      border: 1px solid rgba(156,136,255,.22);
+      color: rgba(216,206,255,.92);
+      font-size: .72rem;
+      letter-spacing: .10em;
+      text-transform: uppercase;
+      backdrop-filter: blur(10px);
+    }
+    .hero h2{
+      margin:0;
+      font-size: clamp(1.75rem, 3.2vw, 2.55rem);
+      line-height: 1.05;
+      letter-spacing: .02em;
+    }
+    .hero p{
+      margin: .75rem 0 0;
+      color: rgba(189,180,255,.92);
+      max-width: 52ch;
+      line-height: 1.55;
     }
 
-    .sns-pill-checkbox input {
+    .steps{
+      background: rgba(12,9,49,.32);
+      border: 1px solid rgba(156,136,255,.20);
+      border-radius: 18px;
+      padding: 1rem 1rem .95rem;
+      backdrop-filter: blur(10px);
+    }
+    .steps h3{
+      margin:0 0 .55rem 0;
+      font-size: .85rem;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: rgba(244,240,255,.92);
+    }
+    .steplist{
+      display:grid;
+      gap:.55rem;
+      margin:0;
+      padding:0;
+      list-style:none;
+    }
+    .step{
+      display:flex;
+      align-items:center;
+      gap:.7rem;
+      color: rgba(189,180,255,.92);
+      font-size: .92rem;
+    }
+    .dot{
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(156,136,255,.35);
+      border: 1px solid rgba(156,136,255,.35);
+      box-shadow: 0 0 0 0 rgba(182,89,255,.0);
+      animation: pulseDot 2.6s ease-in-out infinite;
+    }
+    @keyframes pulseDot{
+      0%,100%{ box-shadow: 0 0 0 0 rgba(182,89,255,.0); }
+      50%{ box-shadow: 0 0 0 10px rgba(182,89,255,.12); }
+    }
+
+    /* ===== Main form shell (full-width, not a centered pill) ===== */
+    .panel{
+      border-radius: var(--radius);
+      background: rgba(10,6,28,.55);
+      border: 1px solid rgba(196,181,253,.14);
+      backdrop-filter: blur(16px);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .panel-inner{
+      display:grid;
+      grid-template-columns: 1fr;
+      padding: 1.35rem;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.15rem 1.3rem;
+      margin-top: .25rem;
+    }
+    .full{ grid-column: 1 / -1; }
+
+    /* ===== Fields ===== */
+    .field{
+      opacity: 0;
+      transform: translateY(10px);
+      animation: fieldIn .45s ease forwards;
+    }
+    @keyframes fieldIn{
+      to{ opacity:1; transform: translateY(0); }
+    }
+
+    .field label{
+      display:block;
+      font-size: .78rem;
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: rgba(216,206,255,.92);
+      margin-bottom: .42rem;
+    }
+    .field small{
+      display:block;
+      font-size: .78rem;
+      color: rgba(158,160,215,.92);
+      margin-top: .35rem;
+      line-height: 1.4;
+    }
+
+    .input, .select, .textarea{
+      width: 100%;
+      border-radius: 16px;
+      border: 1px solid rgba(156,136,255,.22);
+      background: rgba(9,6,34,.78);
+      color: var(--text);
+      padding: .9rem 1rem;
+      font-size: .98rem;
+      outline:none;
+      transition: border-color .18s ease, box-shadow .18s ease, transform .12s ease, background .18s ease;
+      box-sizing: border-box;
+    }
+    .textarea{
+      min-height: 120px;
+      border-radius: 18px;
+      resize: vertical;
+      padding-top: 1rem;
+      line-height: 1.45;
+    }
+    .input:focus, .select:focus, .textarea:focus{
+      border-color: rgba(182,89,255,.65);
+      box-shadow: 0 0 0 5px rgba(182,89,255,.10);
+      background: rgba(12,9,49,.88);
+      transform: translateY(-1px);
+    }
+
+    /* ===== Services: compact chips (still “pills”, but modern + not the page layout constraint) ===== */
+    .chips{
+      display:flex;
+      flex-wrap: wrap;
+      gap: .55rem;
+      padding: .25rem 0 .15rem;
+    }
+    .chip{
+      position: relative;
+      display:inline-flex;
+      align-items:center;
+      gap:.55rem;
+      padding: .62rem .85rem;
+      border-radius: 999px;
+      border: 1px solid rgba(156,136,255,.22);
+      background: rgba(12,9,49,.35);
+      cursor:pointer;
+      user-select:none;
+      transition: transform .12s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease;
+      font-size: .92rem;
+      color: rgba(244,240,255,.92);
+    }
+    .chip:hover{
+      transform: translateY(-1px);
+      border-color: rgba(182,89,255,.50);
+      box-shadow: 0 0 0 5px rgba(182,89,255,.08);
+      background: rgba(12,9,49,.55);
+    }
+    .chip input{
+      width: 16px;
+      height: 16px;
       accent-color: #b37cff;
     }
 
-    .sns-pill-checkbox:hover {
-      border-color: #b37cff;
-      box-shadow: 0 0 0 1px rgba(179, 124, 255, 0.45);
-      transform: translateY(-1px);
-    }
-
-    .sns-actions {
-      margin-top: 2.2rem;
-      display: flex;
+    /* ===== Actions ===== */
+    .actions{
+      margin-top: 1.25rem;
+      display:flex;
+      align-items:center;
       justify-content: space-between;
-      align-items: center;
       gap: 1rem;
       flex-wrap: wrap;
+      padding-top: 1.1rem;
+      border-top: 1px solid rgba(196,181,253,.12);
+    }
+    .hint{
+      margin:0;
+      font-size: .85rem;
+      color: rgba(158,160,215,.95);
+      line-height: 1.35;
+      max-width: 70ch;
     }
 
-    .sns-actions .hint {
-      font-size: 0.8rem;
-      color: #9ea0d7;
-    }
-
-    .sns-submit-btn {
+    .btn{
+      border: 0;
+      cursor:pointer;
       border-radius: 999px;
-      padding: 0.85rem 1.8rem;
-      border: none;
-      cursor: pointer;
-      background-image: linear-gradient(135deg, #b659ff, #6a7bff);
-      color: white;
-      font-weight: 600;
-      letter-spacing: .03em;
+      padding: .92rem 1.75rem;
+      font-weight: 900;
+      letter-spacing: .08em;
       text-transform: uppercase;
-      font-size: 0.85rem;
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
-      transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.12s ease;
+      font-size: .80rem;
+      color: white;
+      background-image: linear-gradient(135deg, var(--accent), var(--accent2));
+      box-shadow: 0 18px 55px rgba(0,0,0,.55);
+      transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
+      position: relative;
+      overflow:hidden;
     }
-
-    .sns-submit-btn:hover {
+    .btn::after{
+      content:"";
+      position:absolute;
+      inset:-40% -20%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.16), transparent);
+      transform: rotate(20deg) translateX(-60%);
+      animation: sheen 3.2s ease-in-out infinite;
+      pointer-events:none;
+    }
+    @keyframes sheen{
+      0%, 55%{ transform: rotate(20deg) translateX(-70%); opacity:.0; }
+      70%{ opacity:.8; }
+      100%{ transform: rotate(20deg) translateX(70%); opacity:0; }
+    }
+    .btn:hover{
       transform: translateY(-1px);
-      box-shadow: 0 20px 55px rgba(0, 0, 0, 0.7);
       filter: brightness(1.05);
+      box-shadow: 0 24px 70px rgba(0,0,0,.65);
     }
-
-    .sns-submit-btn:active {
+    .btn:active{
       transform: translateY(1px);
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+      box-shadow: 0 14px 45px rgba(0,0,0,.55);
+    }
+    .btn[disabled]{
+      opacity: .65;
+      cursor:not-allowed;
+      transform: none !important;
+      filter: none !important;
+      box-shadow: 0 16px 40px rgba(0,0,0,.55);
     }
 
-    .sns-error {
+    /* ===== Inline message area ===== */
+    .inline-msg{
+      margin-top: .9rem;
+      display:none;
+      font-size: .9rem;
+      line-height: 1.35;
+      padding: .85rem 1rem;
+      border-radius: 16px;
+      border: 1px solid rgba(156,136,255,.20);
+      background: rgba(12,9,49,.35);
+    }
+    .inline-msg.bad{ color: var(--bad); border-color: rgba(255,148,148,.35); }
+    .inline-msg.good{ color: var(--good); border-color: rgba(122,249,196,.25); }
+
+    /* ===== Toast (animated; auto-fades) ===== */
+    .toasts{
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 2000;
+      display:grid;
+      gap: .6rem;
+      pointer-events: none;
+    }
+    .toast{
+      pointer-events: none;
+      width: min(520px, calc(100vw - 36px));
+      border-radius: 18px;
+      border: 1px solid rgba(196,181,253,.16);
+      background: rgba(10,6,28,.78);
+      backdrop-filter: blur(14px);
+      box-shadow: 0 22px 70px rgba(0,0,0,.55);
+      padding: .95rem 1rem;
+      display:flex;
+      gap: .8rem;
+      align-items: flex-start;
+      opacity: 0;
+      transform: translateY(10px);
+      animation: toastIn .22s ease forwards;
+    }
+    @keyframes toastIn{ to{ opacity:1; transform: translateY(0);} }
+    .toast .ic{
+      width: 42px; height: 42px;
+      border-radius: 14px;
+      display:grid; place-items:center;
+      border: 1px solid rgba(156,136,255,.18);
+      background: rgba(12,9,49,.35);
+      flex: 0 0 auto;
+    }
+    .toast.good .ic{
+      border-color: rgba(122,249,196,.25);
+      background: rgba(12,30,22,.25);
+    }
+    .toast.bad .ic{
+      border-color: rgba(255,148,148,.28);
+      background: rgba(45,12,18,.25);
+    }
+    .toast h4{
+      margin: .05rem 0 .2rem;
+      font-size: .95rem;
+      letter-spacing: .02em;
+    }
+    .toast p{
+      margin:0;
+      color: rgba(189,180,255,.92);
+      font-size: .9rem;
+      line-height: 1.35;
+    }
+    .toast.fade{
+      animation: toastOut .28s ease forwards;
+    }
+    @keyframes toastOut{
+      to{ opacity:0; transform: translateY(8px); }
+    }
+
+    /* ===== OTP modal (polished + animated) ===== */
+    .otp-modal{
+      position: fixed;
+      inset: 0;
+      display: none;
+      place-items: center;
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(10px);
+      z-index: 1500;
+      padding: 1rem;
+    }
+    .otp-modal.open{ display: grid; }
+
+    .otp-card{
+      width: min(560px, 100%);
+      border-radius: 22px;
+      border: 1px solid rgba(196,181,253,.22);
+      background: rgba(10, 6, 28, .86);
+      box-shadow: 0 36px 110px rgba(0,0,0,.65);
+      padding: 1.35rem 1.35rem 1.15rem;
+      transform: translateY(10px) scale(.99);
+      opacity: 0;
+      animation: otpIn .25s ease forwards;
+      box-sizing: border-box;
+    }
+    @keyframes otpIn{
+      to{ opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .otp-title{
+      margin:0;
+      font-size: 1.15rem;
+      letter-spacing: .10em;
+      text-transform: uppercase;
+    }
+    .otp-sub{
+      margin:.5rem 0 1.05rem;
+      color: rgba(189,180,255,.92);
+      line-height: 1.45;
+    }
+    .otp-msg{
+      display:none;
+      margin: .1rem 0 .65rem;
+      padding: .75rem .85rem;
+      border-radius: 14px;
+      border: 1px solid rgba(156,136,255,.20);
+      background: rgba(12,9,49,.35);
+      color: rgba(244,240,255,.92);
+      font-size: .9rem;
+      line-height: 1.35;
+    }
+    .otp-msg.bad{ color: var(--bad); border-color: rgba(255,148,148,.35); }
+    .otp-msg.good{ color: var(--good); border-color: rgba(122,249,196,.25); }
+
+    .otp-input{
+      width: 100% !important;
+      display:block;
+      border-radius: 999px;
+      font-size: 1.15rem;
+      letter-spacing: .16em;
+      text-align:center;
+      padding: .95rem 1rem;
+      box-sizing: border-box;
+    }
+    .otp-actions{
+      display:flex;
+      gap:.65rem;
+      justify-content: flex-end;
       margin-top: 1rem;
-      color: #ff9494;
-      font-size: 0.85rem;
+      flex-wrap: wrap;
+    }
+    .otp-btn{
+      border-radius: 999px;
+      padding: .80rem 1.25rem;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      font-size: .75rem;
+      cursor:pointer;
+      border: 1px solid rgba(156,136,255,.28);
+      background: rgba(12,9,49,.45);
+      color: #d8ceff;
+      transition: transform .12s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease;
+    }
+    .otp-btn:hover{
+      transform: translateY(-1px);
+      border-color: rgba(182,89,255,.55);
+      background: rgba(12,9,49,.70);
+      box-shadow: 0 14px 40px rgba(0,0,0,.45);
+    }
+    .otp-btn:active{ transform: translateY(0); box-shadow:none; }
+    .otp-resend{
+      margin-top: .95rem;
+      margin-left: auto;
+      padding: .62rem .95rem;
+      border-radius: 999px;
+      border: 1px solid rgba(156,136,255,.24);
+      background: rgba(12, 9, 49, 0.35);
+      color: #d8ceff;
+      cursor: pointer;
+      text-decoration:none;
+      opacity: .95;
+      transition: opacity .14s ease, border-color .18s ease, background .18s ease;
+    }
+    .otp-resend:hover{
+      opacity: 1;
+      border-color: rgba(182,89,255,.55);
+      background: rgba(12,9,49,.55);
     }
 
-    .sns-success {
-      margin-top: 1rem;
-      color: #7af9c4;
-      font-size: 0.85rem;
+    /* ===== Footer ===== */
+    .foot{
+      margin-top: .25rem;
+      text-align:center;
+      color: rgba(158,160,215,.85);
+      font-size: .85rem;
+      padding: .85rem 0 0;
     }
 
-    @media (max-width: 720px) {
-      .sns-grid {
-        grid-template-columns: minmax(0, 1fr);
-      }
-      .sns-form-card {
-        padding: 2rem 1.5rem 2.25rem;
-        border-radius: 24px;
-      }
-      .sns-form-header h1 {
-        font-size: 1.6rem;
-      }
+    /* ===== Responsive ===== */
+    @media (max-width: 920px){
+      .hero-inner{ grid-template-columns: 1fr; }
     }
-
-    /* OTP modal (SMS verification) */
-.otp-modal{
-  position: fixed;
-  inset: 0;
-  display: none;
-  place-items: center;
-  background: rgba(0,0,0,.55);
-  backdrop-filter: blur(8px);
-  z-index: 999;
-}
-.otp-modal.open{ display: grid; }
-
-.otp-card{
-  width: min(520px, calc(100% - 2rem));
-  border-radius: 18px;
-  border: 1px solid rgba(196,181,253,.22);
-  background: rgba(10, 5, 25, .92);
-  box-shadow: 0 30px 90px rgba(0,0,0,.55);
-  padding: 1.1rem 1.1rem 1rem;
-}
-
-.otp-title{
-  margin: 0 0 .35rem 0;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-}
-
-.otp-sub{
-  margin: 0 0 .9rem 0;
-  opacity: .9;
-}
-
-.otp-actions{
-  display: flex;
-  gap: .75rem;
-  justify-content: flex-end;
-  margin-top: .85rem;
-  flex-wrap: wrap;
-}
-
-/* Make your existing .btn-link styles apply to <button> and <summary> too */
-button.btn-link, summary.btn-link{
-  -webkit-appearance: none;
-  appearance: none;
-  font: inherit;
-  cursor: pointer;
-}
-
-.otp-resend{
-  margin-top: .95rem;
-  padding: .55rem .9rem;
-  border-radius: 999px;
-  border: 1px solid rgba(156, 136, 255, 0.28);
-  background: rgba(12, 9, 49, 0.35);
-  color: #d8ceff;
-  opacity: .92;
-  cursor: pointer;
-  text-decoration: none;   /* removes ugly underline */
-  width: fit-content;
-}
-
-.otp-resend:hover{
-  opacity: 1;
-  border-color: rgba(182, 89, 255, 0.55);
-}
-
-.otp-resend{ margin-left: auto; }
-
-/* ===== OTP polish (match SNS UI) ===== */
-.otp-card { padding: 1.35rem 1.5rem 1.15rem; }
-
-.otp-title{
-  font-size: 1.25rem;
-  letter-spacing: .08em
-}
-
-.otp-sub{
-  margin-top: .35rem;
-  margin-bottom: 1.1rem;
-  opacity: .9;
-}
-
-.otp-input{
-  border-radius: 999px;        /* match form pills */
-  font-size: 1.1rem;
-  letter-spacing: .10em;
-  text-transform: none;
-  text-align: center;
-  padding: .85rem 1rem;
-}
-
-.otp-actions{
-  margin-top: 1rem;
-  gap: .6rem;
-}
-
-.otp-btn{
-  border-radius: 999px;
-  padding: 0.78rem 1.25rem;
-  font-weight: 700;
-  letter-spacing: .03em;
-  text-transform: uppercase;
-  font-size: 0.78rem;
-  cursor: pointer;
-}
-
-.otp-btn-secondary{
-  background: rgba(12, 9, 49, 0.55);
-  border: 1px solid rgba(156, 136, 255, 0.35);
-  color: #d8ceff;
-}
-
-.otp-btn-secondary:hover{
-  border-color: rgba(182, 89, 255, 0.55);
-}
-
-.otp-btn-primary{
-  /* uses .sns-submit-btn already; this just keeps height consistent */
-  padding: 0.78rem 1.5rem;
-}
-
-.otp-resend{
-  margin-top: .9rem;
-  opacity: .9;
-}
-
-.otp-card{ box-sizing: border-box; }
-.otp-card *{ box-sizing: border-box; }
-
-.otp-input{
-  width: 100% !important;
-  max-width: 100% !important;
-  display: block;
-}
-
+    @media (max-width: 760px){
+      .page{ padding: 2.25rem 1rem 2.5rem; }
+      .grid{ grid-template-columns: 1fr; }
+      .topbar{ border-radius: 22px; }
+      .brand p{ display:none; }
+    }
   </style>
 </head>
+
 <body>
-  <div class="page-shell">
-    <div class="sns-form-card">
-      <a class="sns-home-btn" href="/sns/index.html" aria-label="Back to Saku Network Solutions">
-        ← Back to SNS
-      </a>
-      <header class="sns-form-header">
-        <h1>Project inquiry</h1>
-        <p>
-          Tell me about your business and what you need from your network.
-          This is not a commitment — it is the first step so I can review,
-          estimate scope, and respond with a plan.
-        </p>
-      </header>
+  <div class="bg" aria-hidden="true"></div>
 
-      <form id="sns-inquiry-form">
-        <div class="sns-grid">
-          <!-- Contact info -->
-          <div class="sns-field">
-            <label for="contactName">Your name *</label>
-            <input id="contactName" name="contactName" type="text"
-                   class="sns-input" required />
+  <div class="page">
+    <div class="wrap">
+
+      <div class="topbar">
+        <div class="brand">
+          <div class="logo" aria-hidden="true">
+            <img src="/assets/sns-logo-purple.png" alt="" />
           </div>
-
-          <div class="sns-field">
-            <label for="businessName">Business or organization name *</label>
-            <input id="businessName" name="businessName" type="text"
-                   class="sns-input" required />
+          <div style="min-width:0;">
+            <h1>Saku Network Solutions</h1>
+            <p>Network infrastructure, done clean.</p>
           </div>
+        </div>
 
-          <div class="sns-field">
-            <label for="email">Email *</label>
-            <input id="email" name="email" type="email"
-                   class="sns-input" required />
-          </div>
+        <a class="backbtn" href="/sns/" aria-label="Back to SNS">
+          ← Back to SNS
+        </a>
+      </div>
 
-          <div class="sns-field">
-            <label for="phone">Phone *</label>
-            <input
-              id="phone"
-              name="phone"
-              type="tel"
-              class="sns-input"
-              required
-              inputmode="tel"
-              autocomplete="tel"
-              placeholder="(555) 555-5555"
-              pattern="^\s*(?:\+?1\s*)?(?:\(\s*\d{3}\s*\)|\d{3})[\s.-]?\d{3}[\s.-]?\d{4}\s*$"
-              title="Enter a valid US phone number (10 digits)."
-            />
-          </div>
-
-          <div class="sns-field">
-            <label for="location">Office location (city, state) *</label>
-            <input id="location" name="location" type="text"
-                   class="sns-input" required />
-          </div>
-
-          <div class="sns-field">
-            <label for="companySize">Approximate team size *</label>
-            <select id="companySize" name="companySize"
-                    class="sns-select" required>
-              <option value="">Select one</option>
-              <option value="1-10">1 – 10 people</option>
-              <option value="11-25">11 – 25 people</option>
-              <option value="26-50">26 – 50 people</option>
-              <option value="51-100">51 – 100 people</option>
-              <option value="100+">More than 100</option>
-            </select>
-          </div>
-
-          <!-- Services needed -->
-          <div class="sns-field sns-grid-full">
-            <label>What do you need help with? *</label>
-            <div class="sns-checkbox-group">
-              <label class="sns-pill-checkbox">
-                <input type="checkbox" name="services" value="New office network" />
-                <span>New office network</span>
-              </label>
-              <label class="sns-pill-checkbox">
-                <input type="checkbox" name="services" value="Upgrade existing network" />
-                <span>Upgrade existing network</span>
-              </label>
-              <label class="sns-pill-checkbox">
-                <input type="checkbox" name="services" value="Wi-Fi and access points" />
-                <span>Wi-Fi and access points</span>
-              </label>
-              <label class="sns-pill-checkbox">
-                <input type="checkbox" name="services" value="NAS / file server setup" />
-                <span>NAS / file server setup</span>
-              </label>
-              <label class="sns-pill-checkbox">
-                <input type="checkbox" name="services" value="Firewall / security" />
-                <span>Firewall / security</span>
-              </label>
-              <label class="sns-pill-checkbox">
-                <input type="checkbox" name="services" value="Ongoing network maintenance" />
-                <span>Ongoing network maintenance</span>
-              </label>
-              <label class="sns-pill-checkbox">
-                <input type="checkbox" name="services" value="Other" />
-                <span>Other</span>
-              </label>
+      <section class="hero">
+        <div class="hero-inner">
+          <div>
+            <div class="pillrow">
+              <span class="pill">Inquiry</span>
+              <span class="pill">Los Angeles</span>
+              <span class="pill">Small business IT</span>
             </div>
-            <small>
-              This helps me understand whether you need design, hardware, installation,
-              ongoing support, or all of the above.
-            </small>
+
+            <h2>Start your network project.</h2>
+            <p>
+              Give me the basics so I can scope this correctly. No fluff — just what you need,
+              what you have today, and how fast you want to move.
+            </p>
           </div>
 
-          <!-- Current setup -->
-          <div class="sns-field sns-grid-full">
-            <label for="currentSetup">Current situation</label>
-            <textarea id="currentSetup" name="currentSetup"
-                      class="sns-textarea"
-                      placeholder="Do you already have any networking equipment, cabling, or a server rack? Any pain points today?"></textarea>
-          </div>
-
-          <!-- Goals -->
-          <div class="sns-field sns-grid-full">
-            <label for="goals">What do you want your network to do? *</label>
-            <textarea id="goals" name="goals"
-                      class="sns-textarea" required
-                      placeholder="For example: &quot;Support 20 people in the office, separate staff and guest Wi-Fi, central file storage with backups, and room to grow.&quot;"></textarea>
-          </div>
-
-          <!-- Budget / timeline -->
-          <div class="sns-field">
-            <label for="budget">Rough budget range (USD) *</label>
-            <select id="budget" name="budget"
-                    class="sns-select" required>
-              <option value="">Select one</option>
-              <option value="under-2000">Under $2,000</option>
-              <option value="2000-5000">$2,000 – $5,000</option>
-              <option value="5000-10000">$5,000 – $10,000</option>
-              <option value="10000+">More than $10,000</option>
-              <option value="unsure">Not sure yet</option>
-            </select>
-          </div>
-
-          <div class="sns-field">
-            <label for="timeline">Preferred timeline *</label>
-            <select id="timeline" name="timeline"
-                    class="sns-select" required>
-              <option value="">Select one</option>
-              <option value="asap">As soon as possible</option>
-              <option value="30-days">Within 30 days</option>
-              <option value="60-90-days">Within 60–90 days</option>
-              <option value="planning">Still planning / exploring</option>
-            </select>
-          </div>
-
-          <!-- Extra -->
-          <div class="sns-field sns-grid-full">
-            <label for="extraNotes">Anything else I should know?</label>
-            <textarea id="extraNotes" name="extraNotes"
-                      class="sns-textarea"
-                      placeholder="Access restrictions, building requirements, previous quotes, or anything that helps me give you a better response."></textarea>
-          </div>
+          <aside class="steps">
+            <h3>How it works</h3>
+            <ul class="steplist">
+              <li class="step"><span class="dot"></span>Submit details</li>
+              <li class="step"><span class="dot"></span>Verify phone (SMS)</li>
+              <li class="step"><span class="dot"></span>I review + respond</li>
+            </ul>
+          </aside>
         </div>
+      </section>
 
-        <div class="sns-actions">
-          <p class="hint">
-            By submitting, you agree to be contacted by email regarding this inquiry.
-          </p>
+      <section class="panel">
+        <div class="panel-inner">
 
-          <button type="submit" class="sns-submit-btn">
-            Send inquiry
-          </button>
+          <form id="sns-inquiry-form" novalidate>
+            <div class="grid" id="fieldsGrid">
+
+              <!-- Contact -->
+              <div class="field" style="animation-delay:.02s">
+                <label for="contactName">Your name *</label>
+                <input id="contactName" name="contactName" type="text" class="input" required />
+              </div>
+
+              <div class="field" style="animation-delay:.06s">
+                <label for="businessName">Business or organization name *</label>
+                <input id="businessName" name="businessName" type="text" class="input" required />
+              </div>
+
+              <div class="field" style="animation-delay:.10s">
+                <label for="email">Email *</label>
+                <input id="email" name="email" type="email" class="input" required />
+              </div>
+
+              <div class="field" style="animation-delay:.14s">
+                <label for="phone">Phone *</label>
+                <input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  class="input"
+                  required
+                  inputmode="tel"
+                  autocomplete="tel"
+                  placeholder="(555) 555-5555"
+                  pattern="^\\s*(?:\\+?1\\s*)?(?:\\(\\s*\\d{3}\\s*\\)|\\d{3})[\\s.-]?\\d{3}[\\s.-]?\\d{4}\\s*$"
+                  title="Enter a valid US phone number (10 digits)."
+                />
+                <small>Used for SMS verification only.</small>
+              </div>
+
+              <div class="field" style="animation-delay:.18s">
+                <label for="location">Office location (city, state) *</label>
+                <input id="location" name="location" type="text" class="input" required />
+              </div>
+
+              <div class="field" style="animation-delay:.22s">
+                <label for="companySize">Approximate team size *</label>
+                <select id="companySize" name="companySize" class="select" required>
+                  <option value="">Select one</option>
+                  <option value="1-10">1 – 10 people</option>
+                  <option value="11-25">11 – 25 people</option>
+                  <option value="26-50">26 – 50 people</option>
+                  <option value="51-100">51 – 100 people</option>
+                  <option value="100+">More than 100</option>
+                </select>
+              </div>
+
+              <!-- Services -->
+              <div class="field full" style="animation-delay:.26s">
+                <label>What do you need help with? *</label>
+                <div class="chips">
+                  <label class="chip"><input type="checkbox" name="services" value="New office network" /><span>New office network</span></label>
+                  <label class="chip"><input type="checkbox" name="services" value="Upgrade existing network" /><span>Upgrade existing network</span></label>
+                  <label class="chip"><input type="checkbox" name="services" value="Wi-Fi and access points" /><span>Wi-Fi / APs</span></label>
+                  <label class="chip"><input type="checkbox" name="services" value="NAS / file server setup" /><span>NAS / file server</span></label>
+                  <label class="chip"><input type="checkbox" name="services" value="Firewall / security" /><span>Firewall / security</span></label>
+                  <label class="chip"><input type="checkbox" name="services" value="Ongoing network maintenance" /><span>Ongoing support</span></label>
+                  <label class="chip"><input type="checkbox" name="services" value="Other" /><span>Other</span></label>
+                </div>
+                <small>
+                  Select everything that applies — it helps me estimate scope faster.
+                </small>
+              </div>
+
+              <!-- Current setup -->
+              <div class="field full" style="animation-delay:.30s">
+                <label for="currentSetup">Current situation</label>
+                <textarea
+                  id="currentSetup"
+                  name="currentSetup"
+                  class="textarea"
+                  placeholder="Do you already have networking gear, cabling, a rack, ISP modem/router, or a server? Any pain points today?"
+                ></textarea>
+              </div>
+
+              <!-- Goals -->
+              <div class="field full" style="animation-delay:.34s">
+                <label for="goals">What do you want your network to do? *</label>
+                <textarea
+                  id="goals"
+                  name="goals"
+                  class="textarea"
+                  required
+                  placeholder="Example: “Support 20 staff, separate staff/guest Wi-Fi, file storage with backups, and room to grow.”"
+                ></textarea>
+              </div>
+
+              <!-- Budget / timeline -->
+              <div class="field" style="animation-delay:.38s">
+                <label for="budget">Rough budget range (USD) *</label>
+                <select id="budget" name="budget" class="select" required>
+                  <option value="">Select one</option>
+                  <option value="under-2000">Under $2,000</option>
+                  <option value="2000-5000">$2,000 – $5,000</option>
+                  <option value="5000-10000">$5,000 – $10,000</option>
+                  <option value="10000+">More than $10,000</option>
+                  <option value="unsure">Not sure yet</option>
+                </select>
+              </div>
+
+              <div class="field" style="animation-delay:.42s">
+                <label for="timeline">Preferred timeline *</label>
+                <select id="timeline" name="timeline" class="select" required>
+                  <option value="">Select one</option>
+                  <option value="asap">As soon as possible</option>
+                  <option value="30-days">Within 30 days</option>
+                  <option value="60-90-days">Within 60–90 days</option>
+                  <option value="planning">Still planning / exploring</option>
+                </select>
+              </div>
+
+              <!-- Extra -->
+              <div class="field full" style="animation-delay:.46s">
+                <label for="extraNotes">Anything else I should know?</label>
+                <textarea
+                  id="extraNotes"
+                  name="extraNotes"
+                  class="textarea"
+                  placeholder="Access restrictions, building requirements, photos of network closet/rack, existing quotes, or any constraints that matter."
+                ></textarea>
+              </div>
+            </div>
+
+            <div class="actions">
+              <p class="hint">
+                By submitting, you agree to be contacted by email regarding this inquiry.
+              </p>
+
+              <button id="submitBtn" type="submit" class="btn">
+                Send inquiry
+              </button>
+            </div>
+
+            <div id="sns-message" class="inline-msg bad"></div>
+          </form>
+
         </div>
+      </section>
 
-        <div id="sns-message" class="sns-error" style="display:none;"></div>
-      </form>
+      <p class="foot">© 2025 Saku Network Solutions. Built clean.</p>
     </div>
+  </div>
 
-<div id="otpModal" class="otp-modal" aria-hidden="true">
-  <div class="otp-card" role="dialog" aria-modal="true" aria-labelledby="otpTitle">
-    <div class="otp-head">
+  <!-- Toast container -->
+  <div class="toasts" id="toasts" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- OTP Modal -->
+  <div id="otpModal" class="otp-modal" aria-hidden="true">
+    <div class="otp-card" role="dialog" aria-modal="true" aria-labelledby="otpTitle">
       <h2 id="otpTitle" class="otp-title">Verify your phone</h2>
-      <p class="otp-sub">I sent you a text message with a 6-digit code. Enter it to send your inquiry.</p>
+      <p class="otp-sub">
+        I sent you a text message with a 6-digit code. Enter it to send your inquiry.
+      </p>
+
+      <div id="otpMsg" class="otp-msg"></div>
+
+      <input
+        id="otpCode"
+        class="input otp-input"
+        inputmode="numeric"
+        autocomplete="one-time-code"
+        pattern="\\d{6}"
+        placeholder="Enter code"
+        aria-label="6-digit code"
+      />
+
+      <div class="otp-actions">
+        <button id="otpCancel" type="button" class="otp-btn">Cancel</button>
+        <button id="otpVerify" type="button" class="btn" style="padding:.80rem 1.25rem;">
+          Verify &amp; Send
+        </button>
+      </div>
+
+      <button id="otpResend" type="button" class="otp-resend">Resend code</button>
     </div>
-
-    <div id="otpMsg" class="otp-msg" style="display:none;"></div>
-
-    <input
-      id="otpCode"
-      class="sns-input otp-input"
-      inputmode="numeric"
-      autocomplete="one-time-code"
-      pattern="\d{6}"
-      placeholder="Enter code"
-      aria-label="6-digit code"
-    />
-
-    <div class="otp-actions">
-      <button id="otpCancel" type="button" class="otp-btn otp-btn-secondary">Cancel</button>
-      <button id="otpVerify" type="button" class="sns-submit-btn otp-btn-primary">Verify &amp; Send</button>
-    </div>
-
-    <button id="otpResend" type="button" class="otp-resend">Resend code</button>
-  </div>
-</div>
-
-
-    <footer style="margin-top: 1.75rem; font-size: 0.8rem; color: #7b78b6;">
-      © 2025 kxsaku · Built from the homelab.
-    </footer>
   </div>
 
-    <script type="module">
+  <script type="module">
     import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+    // Keep your current values (as you already had working before)
     const supabaseUrl = "https://jgvxmpsjtkedzgygynbl.supabase.co";
     const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpndnhtcHNqdGtlZHpneWd5bmJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0NzgxMjYsImV4cCI6MjA4MTA1NDEyNn0.OCh23RWm8COtxWuumYvKUmfMOLOW01B1zrbtzcr3w6Y";
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
     const form = document.getElementById("sns-inquiry-form");
     const msgEl = document.getElementById("sns-message");
-    const submitBtn = form.querySelector('button[type="submit"]');
+    const submitBtn = document.getElementById("submitBtn");
 
+    const toasts = document.getElementById("toasts");
+    function toast(title, message, type="good", ms=3000){
+      const el = document.createElement("div");
+      el.className = `toast ${type}`;
+      el.innerHTML = `
+        <div class="ic">
+          ${type === "good"
+            ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="rgba(122,249,196,.95)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+            : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="rgba(255,148,148,.95)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+          }
+        </div>
+        <div>
+          <h4>${title}</h4>
+          <p>${message}</p>
+        </div>
+      `;
+      toasts.appendChild(el);
 
-    // Prevent double submits
+      window.setTimeout(() => {
+        el.classList.add("fade");
+        window.setTimeout(() => el.remove(), 320);
+      }, ms);
+    }
+
     let isSubmitting = false;
 
-    // Retry wrapper for transient failures
-    async function withRetry(fn, { tries = 3, baseDelayMs = 350 } = {}) {
-        let lastErr;
-        for (let i = 0; i < tries; i++) {
-        try {
-            return await fn();
-        } catch (e) {
-            lastErr = e;
-            const delay = baseDelayMs * Math.pow(2, i);
-            await new Promise((r) => setTimeout(r, delay));
+    function showInline(text, isError = true){
+      msgEl.style.display = "block";
+      msgEl.classList.toggle("bad", isError);
+      msgEl.classList.toggle("good", !isError);
+      msgEl.textContent = text;
+    }
+    function clearInline(){
+      msgEl.style.display = "none";
+      msgEl.textContent = "";
+      msgEl.classList.add("bad");
+      msgEl.classList.remove("good");
+    }
+
+    // OTP elements
+    const otpModal = document.getElementById("otpModal");
+    const otpCode = document.getElementById("otpCode");
+    const otpCancel = document.getElementById("otpCancel");
+    const otpVerify = document.getElementById("otpVerify");
+    const otpResend = document.getElementById("otpResend");
+    const otpMsg = document.getElementById("otpMsg");
+
+    function otpShowMsg(text, isErr){
+      otpMsg.style.display = "block";
+      otpMsg.classList.toggle("bad", !!isErr);
+      otpMsg.classList.toggle("good", !isErr);
+      otpMsg.textContent = text;
+    }
+    function otpClearMsg(){
+      otpMsg.style.display = "none";
+      otpMsg.textContent = "";
+      otpMsg.classList.remove("bad","good");
+    }
+
+    function openOtpModal(phoneForResend, onVerify){
+      if (!otpModal || !otpCode || !otpCancel || !otpVerify || !otpResend || !otpMsg) {
+        showInline("OTP UI failed to load. Refresh the page.", true);
+        return;
+      }
+
+      otpModal.classList.add("open");
+      otpModal.setAttribute("aria-hidden","false");
+      otpCode.value = "";
+      otpClearMsg();
+      otpCode.focus();
+
+      const cleanup = () => {
+        otpModal.classList.remove("open");
+        otpModal.setAttribute("aria-hidden","true");
+        otpCancel.onclick = null;
+        otpVerify.onclick = null;
+        otpResend.onclick = null;
+      };
+
+      otpCancel.onclick = () => cleanup();
+
+      otpVerify.onclick = async () => {
+        const code = (otpCode.value || "").trim();
+        if (!/^\\d{6}$/.test(code)) {
+          otpShowMsg("Enter the 6-digit code.", true);
+          return;
         }
+        otpVerify.disabled = true;
+        try{
+          await onVerify(code);
+          cleanup();
+        } catch(e){
+          otpShowMsg(e?.message || "Verification failed.", true);
+        } finally{
+          otpVerify.disabled = false;
         }
-        throw lastErr;
-     }
+      };
 
-     function fmtSbError(error) {
-        if (!error) return "Unknown error";
-        return [
-        error.code ? `code=${error.code}` : null,
-        error.message ? `message=${error.message}` : null,
-        error.details ? `details=${error.details}` : null,
-        error.hint ? `hint=${error.hint}` : null,
-        ]
-        .filter(Boolean)
-        .join(" | ");
+      otpResend.onclick = async () => {
+        otpResend.disabled = true;
+        try{
+          await sendOtp(phoneForResend);
+          otpShowMsg("Code resent.", false);
+          toast("Code resent", "Check your phone for the new 6-digit code.", "good", 2600);
+        } catch(e){
+          otpShowMsg(e?.message || "Failed to resend.", true);
+          toast("Resend failed", "Use the email method or try again.", "bad", 3200);
+        } finally{
+          otpResend.disabled = false;
+        }
+      };
     }
 
-    function showMsg(text, isError = true) {
-        msgEl.style.display = "block";
-        msgEl.classList.toggle("sns-error", isError);
-        msgEl.classList.toggle("sns-success", !isError);
-        msgEl.textContent = text;
+    async function callOtpFunction(body){
+      const res = await fetch(`${supabaseUrl}/functions/v1/inquiry-otp`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": supabaseAnonKey,
+          "Authorization": `Bearer ${supabaseAnonKey}`
+        },
+        body: JSON.stringify(body),
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.ok === false) {
+        throw new Error(data.error || "OTP request failed");
+      }
+      return data;
     }
 
-    function clearMsg() {
-        msgEl.style.display = "none";
-        msgEl.textContent = "";
-        msgEl.classList.add("sns-error");
-        msgEl.classList.remove("sns-success");
+    async function sendOtp(phone){
+      await callOtpFunction({ action: "send", phone });
     }
 
-// ==============================
-// OTP (SMS verification helpers)
-// ==============================
-const otpModal = document.getElementById("otpModal");
-const otpCode = document.getElementById("otpCode");
-const otpCancel = document.getElementById("otpCancel");
-const otpVerify = document.getElementById("otpVerify");
-const otpResend = document.getElementById("otpResend");
-const otpMsg = document.getElementById("otpMsg");
-
-function otpShowMsg(text, isErr){
-  otpMsg.style.display = "block";
-  otpMsg.textContent = text;
-  otpMsg.style.color = isErr ? "#ffb4b4" : "var(--text)";
-}
-
-function openOtpModal(phoneForResend, onVerify){
-  if (!otpModal || !otpCode || !otpCancel || !otpVerify || !otpResend || !otpMsg) {
-    // hard fail with a visible message on the page
-    showMsg("OTP UI failed to load. Refresh the page.", true);
-    return;
-  }
-
-  otpModal.classList.add("open");
-  otpModal.setAttribute("aria-hidden","false");
-  otpCode.value = "";
-  otpMsg.style.display = "none";
-  otpCode.focus();
-
-  const cleanup = () => {
-    otpModal.classList.remove("open");
-    otpModal.setAttribute("aria-hidden","true");
-    otpCancel.onclick = null;
-    otpVerify.onclick = null;
-    otpResend.onclick = null;
-  };
-
-  otpCancel.onclick = () => cleanup();
-
-  otpVerify.onclick = async () => {
-    const code = (otpCode.value || "").trim();
-    if (!/^\d{6}$/.test(code)) {
-      otpShowMsg("Enter the 6-digit code.", true);
-      return;
+    async function verifyOtpAndSubmit(phone, code, payload){
+      await callOtpFunction({ action: "check", phone, code, payload });
     }
-    otpVerify.disabled = true;
-    try{
-      await onVerify(code);
-      cleanup();
-    } catch(e){
-      otpShowMsg(e?.message || "Verification failed.", true);
-    } finally{
-      otpVerify.disabled = false;
-    }
-  };
-
-  otpResend.onclick = async () => {
-    otpResend.disabled = true;
-    try{
-      await sendOtp(phoneForResend);
-      otpShowMsg("Code resent.", false);
-    } catch(e){
-      otpShowMsg(e?.message || "Failed to resend.", true);
-    } finally{
-      otpResend.disabled = false;
-    }
-  };
-}
-
-
-async function callOtpFunction(body){
-  const res = await fetch(
-    `${supabaseUrl}/functions/v1/inquiry-otp`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "apikey": supabaseAnonKey,
-        "Authorization": `Bearer ${supabaseAnonKey}`
-      },
-      body: JSON.stringify(body),
-    }
-  );
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok || data.ok === false) {
-    throw new Error(data.error || "OTP request failed");
-  }
-  return data;
-}
-
-async function sendOtp(phone){
-  await callOtpFunction({ action: "send", phone });
-}
-
-async function verifyOtpAndSubmit(phone, code, payload){
-  await callOtpFunction({ action: "check", phone, code, payload });
-}
-
-
 
     form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        if (isSubmitting) return;
+      e.preventDefault();
+      if (isSubmitting) return;
 
-        isSubmitting = true;
-        submitBtn.disabled = true;
-        submitBtn.style.opacity = "0.75";
-        submitBtn.style.cursor = "not-allowed";
+      isSubmitting = true;
+      submitBtn.disabled = true;
+      clearInline();
 
-        clearMsg();
-
-        try {
+      try {
         const fd = new FormData(form);
-                const phoneRaw = (fd.get("phone") || "").toString();
-        const digits = phoneRaw.replace(/\D/g, "");
 
-        // Normalize US numbers: allow optional leading 1
+        // Normalize / validate phone
+        const phoneRaw = (fd.get("phone") || "").toString();
+        const digits = phoneRaw.replace(/\\D/g, "");
         let d = digits;
         if (d.length === 11 && d.startsWith("1")) d = d.slice(1);
 
-        // Reject anything not exactly 10 digits
         const obviousFake = new Set([
-          "0000000000",
-          "1111111111",
-          "2222222222",
-          "3333333333",
-          "4444444444",
-          "5555555555",
-          "6666666666",
-          "7777777777",
-          "8888888888",
-          "9999999999",
+          "0000000000","1111111111","2222222222","3333333333","4444444444",
+          "5555555555","6666666666","7777777777","8888888888","9999999999",
           "1234567890",
         ]);
 
         if (d.length !== 10 || obviousFake.has(d)) {
-          showMsg("Please enter a valid US phone number (10 digits).", true);
+          showInline("Please enter a valid US phone number (10 digits).", true);
+          toast("Not sent", "Invalid phone number.", "bad", 3200);
           return;
         }
 
-        // Store a clean formatted version
         const phoneFormatted = `(${d.slice(0,3)}) ${d.slice(3,6)}-${d.slice(6)}`;
 
         const services = fd.getAll("services");
-
         if (!services.length) {
-            showMsg("Please select at least one service.", true);
-            return; // <-- safe now because we reset in finally
+          showInline("Please select at least one service.", true);
+          toast("Not sent", "Select at least one service.", "bad", 3200);
+          return;
         }
 
-        // Build the exact payload we want to store (same fields as before)
         const payload = {
           contact_name: fd.get("contactName"),
           business_name: fd.get("businessName"),
@@ -820,31 +1103,24 @@ async function verifyOtpAndSubmit(phone, code, payload){
 
         // 1) Send OTP
         await sendOtp(phoneFormatted);
+        toast("Code sent", "Enter the 6-digit SMS code to complete your inquiry.", "good", 2800);
 
-        // 2) Open modal for code entry; final submit happens after verify
+        // 2) Verify + submit
         openOtpModal(phoneFormatted, async (code) => {
           await verifyOtpAndSubmit(phoneFormatted, code, payload);
+          toast("Sent", "Inquiry submitted successfully.", "good", 2200);
           window.location.href = "/sns-inquiry-success/index.html";
         });
 
-
-        return; // stop normal flow here; modal will complete it
-
-
-        window.location.href = "/sns-inquiry-success/index.html";
-        } catch (err) {
+      } catch (err) {
         console.error("Inquiry submit failed:", err);
-        console.error(fmtSbError(err));
-        showMsg(`Failed: ${err?.message || "Unknown error"}`, true);
-        } finally {
+        showInline(`Failed: ${err?.message || "Unknown error"}`, true);
+        toast("Not sent", err?.message || "Something failed sending your inquiry.", "bad", 3600);
+      } finally {
         isSubmitting = false;
         submitBtn.disabled = false;
-        submitBtn.style.opacity = "1";
-        submitBtn.style.cursor = "pointer";
-        }
+      }
     });
-    </script>
-
-
+  </script>
 </body>
 </html>
