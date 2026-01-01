@@ -985,7 +985,7 @@
         class="input otp-input"
         inputmode="numeric"
         autocomplete="one-time-code"
-        pattern="\\d{6}"
+        pattern="\d{6}"
         placeholder="Enter code"
         aria-label="6-digit code"
       />
@@ -1096,7 +1096,7 @@
 
       otpVerify.onclick = async () => {
         const code = (otpCode.value || "").trim();
-        if (!/^\\d{6}$/.test(code)) {
+        if (!/^\d{6}$/.test(code)) {
           otpShowMsg("Enter the 6-digit code.", true);
           return;
         }
