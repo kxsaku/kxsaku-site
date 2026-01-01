@@ -1181,7 +1181,8 @@
           return;
         }
 
-        const phoneFormatted = `(${d.slice(0,3)}) ${d.slice(3,6)}-${d.slice(6)}`;
+        const phoneDisplay = `(${d.slice(0,3)}) ${d.slice(3,6)}-${d.slice(6)}`;
+        const phoneE164 = `+1${d}`;
 
         const helpWith = fd.getAll("help_with");
         if (!helpWith.length) {
@@ -1192,26 +1193,29 @@
 
 
         const payload = {
-          contact_name: fd.get("contactName"),
-          business_name: fd.get("businessName"),
-          email: fd.get("email"),
-          location: fd.get("location"),
+          contact_name: (fd.get("contactName") || "").toString().trim(),
+          business_name: (fd.get("businessName") || "").toString().trim(),
+          email: (fd.get("email") || "").toString().trim(),
+          phone: phoneE164,                  // <— add this
+          phone_display: phoneDisplay,        // <— optional but nice
+          location: (fd.get("location") || "").toString().trim(),
           company_size: fd.get("companySize"),
           help_with: helpWith,
-          current_setup: fd.get("currentSetup") || null,
-          goals: fd.get("goals"),
+          current_setup: (fd.get("currentSetup") || "").toString().trim() || null,
+          goals: (fd.get("goals") || "").toString().trim(),
           budget: fd.get("budget"),
           timeline: fd.get("timeline"),
-          extra_notes: fd.get("extraNotes") || null,
+          extra_notes: (fd.get("extraNotes") || "").toString().trim() || null,
         };
 
+
         // 1) Send OTP
-        await sendOtp(phoneFormatted);
-        toast("Code sent", "Enter the 6-digit SMS code to complete your inquiry.", "good", 2800);
+        await sendOtp(phoneE164);
+        toast("Code sent", `Text sent to ${phoneDisplay}. Enter the 6-digit code.`, "good", 2800);
 
         // 2) Verify + submit
-        openOtpModal(phoneFormatted, async (code) => {
-          await verifyOtpAndSubmit(phoneFormatted, code, payload);
+        openOtpModal(phoneE164, async (code) => {
+          await verifyOtpAndSubmit(phoneE164, code, payload);
           toast("Sent", "Inquiry submitted successfully.", "good", 2200);
           window.location.href = "/sns-inquiry-success/index.html";
         });
