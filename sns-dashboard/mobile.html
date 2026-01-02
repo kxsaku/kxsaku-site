@@ -1036,7 +1036,7 @@ body{
         detectSessionInUrl: true
       }
     });
-    const FN_BASE = `${SUPABASE_URL}/functions/v1`;
+
 
     const who = document.getElementById("who");
     const logoutBtn = document.getElementById("logout");
@@ -1127,14 +1127,27 @@ body{
       window.location.href = "/sns-inquiry-history/index.html";
     });
 
-    async function loadSubscription(userId){
-      // Fetch subscription snapshot (server reads billing_subscriptions via RLS)
-      const { data: resp, error: freshErr } = await sb.functions.invoke("get-billing-status");
-      if (freshErr) throw freshErr;
+    async function loadSubscription(userId) {
+      // Pull subscription snapshot from the Edge Function
+      let resp;
+      try {
+        resp = await callFn("get-billing-status");
+      } catch (e) {
+        console.error("get-billing-status failed:", e);
 
-      // get-billing-status returns: { subscription: null | { ... } }
+        // Safe UI fallback
+        subState.innerHTML = `<div class="muted">Subscription unavailable.</div>`;
+        elSubStatus.textContent = "Status: Unknown";
+        elPayStatus.textContent = "Payment: —";
+        elPaidAmount.textContent = "Paid: —";
+        elPeriodEnd.textContent = "Current Period End: —";
+        manageBtn.style.display = "none";
+        return;
+      }
+
       const sub = resp?.subscription ?? null;
 
+      // No subscription record yet
       if (!sub) {
         subState.innerHTML = `<div class="muted">No subscription record found yet.</div>`;
         elSubStatus.textContent = "Status: —";
@@ -1145,14 +1158,13 @@ body{
         return;
       }
 
-      // Normalize display strings
+      // Normalize + present
       const statusRaw = (sub.status || "unknown").toString();
       const statusPretty = statusRaw.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
 
       const paymentRaw = (sub.last_payment_status || "unknown").toString();
       const paymentPretty = paymentRaw.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
 
-      // Amounts / dates (your function returns last_payment_amount in dollars)
       const paid = (sub.last_payment_amount != null)
         ? `$${Number(sub.last_payment_amount).toFixed(2)}`
         : "—";
@@ -1166,27 +1178,17 @@ body{
       elPaidAmount.textContent = `Paid: ${paid}`;
       elPeriodEnd.textContent = `Current Period End: ${periodEnd}`;
 
-      // Buttons
-      const activeish = ["active","trialing","past_due","unpaid"].includes(statusRaw);
+      const activeish = ["active", "trialing", "past_due", "unpaid"].includes(statusRaw);
       manageBtn.style.display = activeish ? "inline-flex" : "none";
 
-      // Helpful note line
       subState.innerHTML = `<div class="muted">${
-        statusRaw === "active"
-          ? "Subscription is active."
-          : statusRaw === "trialing"
-          ? "Trial is active."
-          : statusRaw === "past_due"
-          ? "Payment is past due — update billing to restore service."
-          : "No active subscription."
+        statusRaw === "active" ? "Subscription is active."
+        : statusRaw === "trialing" ? "Trial is active."
+        : statusRaw === "past_due" ? "Payment is past due — update billing to restore service."
+        : "No active subscription."
       }</div>`;
-
-      subState.classList.remove("fadeIn");
-      void subState.offsetWidth;
-      subState.classList.add("fadeIn");
-
-
     }
+
 
 
     async function callFn(name, body) {
@@ -1194,12 +1196,16 @@ body{
       if (!session?.access_token) throw new Error("Not logged in.");
 
       const { data, error } = await sb.functions.invoke(name, {
-        body: body || {}
+        body: body || {},
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
       });
 
       if (error) throw new Error(error.message || "Edge function error");
       return data;
     }
+
 
 
 
