@@ -1238,7 +1238,7 @@ body{
       await loadInquiry(user.email);
 
       try {
-        await loadSubscription(user.id);
+        await loadSubscription();
       } catch (e) {
         console.error("loadSubscription failed:", e);
 
