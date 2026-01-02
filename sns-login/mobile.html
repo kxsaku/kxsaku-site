@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>SNS · Client Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="SNS client login to access your dashboard and subscription." />
+
+  <style>
+    /* ===== NAV + THEME (reference: provided mobile.html) ===== */
+    :root{
+      --bg0:#03010b;
+      --bg1:#060214;
+      --ink:#f4f0ff;
+      --muted: rgba(244,240,255,.72);
+      --muted2: rgba(244,240,255,.56);
+
+      --stroke: rgba(196, 181, 253, .18);
+      --stroke2: rgba(196, 181, 253, .28);
+
+      --glass: rgba(10, 6, 28, .42);
+      --glass2: rgba(12, 8, 34, .62);
+
+      --accent:#b37cff;
+      --accent2:#f973e2;
+      --accent3:#5eead4;
+
+      --r-xl: 26px;
+      --r-lg: 18px;
+      --r-sm: 14px;
+
+      --shadow: 0 25px 90px rgba(0,0,0,.60);
+      --shadow2: 0 18px 50px rgba(0,0,0,.38);
+
+      --max: 640px;
+    }
+
+    *{ box-sizing:border-box; }
+    html, body{ height:100%; }
+    body{
+      margin:0;
+      color: var(--ink);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      background:
+        radial-gradient(1200px 800px at 25% 20%, rgba(179,124,255,.18), transparent 60%),
+        radial-gradient(900px 650px at 85% 10%, rgba(94,234,212,.10), transparent 55%),
+        radial-gradient(1100px 900px at 70% 80%, rgba(249,115,226,.12), transparent 55%),
+        linear-gradient(180deg, var(--bg1), var(--bg0));
+      overflow-x:hidden;
+      min-height:100vh;
+    }
+
+    /* Full-bleed animated background */
+    .bg{
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      pointer-events:none;
+      overflow:hidden;
+    }
+    .bg .glow{
+      position:absolute;
+      inset:-20%;
+      background:
+        radial-gradient(circle at 20% 25%, rgba(179,124,255,.22), transparent 55%),
+        radial-gradient(circle at 85% 15%, rgba(94,234,212,.12), transparent 55%),
+        radial-gradient(circle at 60% 80%, rgba(249,115,226,.14), transparent 55%);
+      filter: blur(10px);
+      animation: glowFloat 16s ease-in-out infinite alternate;
+      opacity:.9;
+    }
+    @keyframes glowFloat{
+      from{ transform: translate3d(0,0,0) scale(1); }
+      to{ transform: translate3d(-18px, 12px, 0) scale(1.03); }
+    }
+    .bg .lines{
+      position:absolute;
+      inset:0;
+      background:
+        repeating-linear-gradient(
+          135deg,
+          rgba(255,255,255,.045) 0px,
+          rgba(255,255,255,.045) 1px,
+          transparent 1px,
+          transparent 90px
+        );
+      opacity:.18;
+      -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 45%, transparent 100%);
+      mask-image: linear-gradient(to bottom, #000 0%, #000 45%, transparent 100%);
+      animation: lineDrift 22s linear infinite;
+    }
+    @keyframes lineDrift{
+      from{ transform: translate3d(0,0,0); }
+      to{ transform: translate3d(-140px, 140px, 0); }
+    }
+    .bg .dots{
+      position:absolute;
+      inset:0;
+      background-image:
+        radial-gradient(rgba(255,255,255,.20) 1px, transparent 1px),
+        radial-gradient(rgba(255,255,255,.10) 1px, transparent 1px);
+      background-size: 140px 140px, 220px 220px;
+      background-position: 0 0, 40px 80px;
+      opacity:.20;
+      -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 50%, transparent 100%);
+      mask-image: linear-gradient(to bottom, #000 0%, #000 50%, transparent 100%);
+      animation: dotFloat 28s ease-in-out infinite alternate;
+    }
+    @keyframes dotFloat{
+      from{ transform: translate3d(0,0,0); }
+      to{ transform: translate3d(18px, -10px, 0); }
+    }
+    .bg .vignette{
+      position:absolute;
+      inset:0;
+      background: radial-gradient(circle at 50% 0%, rgba(0,0,0,.08), rgba(0,0,0,.64) 62%, rgba(0,0,0,.78));
+      z-index: 1;
+    }
+
+    .wrap{
+      width: min(var(--max), calc(100% - 1.25rem));
+      margin: 0 auto;
+    }
+
+    /* Mobile sticky header */
+    .topnav{
+      position: sticky;
+      top: 0;
+      z-index: 60;
+      padding: .9rem 0;
+      backdrop-filter: blur(14px);
+      background: linear-gradient(180deg, rgba(3,1,11,.78), rgba(3,1,11,.22));
+      border-bottom: 1px solid rgba(196,181,253,.10);
+    }
+    .navrow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:.75rem;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:.7rem;
+      min-width: 0;
+      text-decoration:none;
+      color: var(--ink);
+    }
+    .mark{
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      display:grid;
+      place-items:center;
+      box-shadow: 0 18px 50px rgba(0,0,0,.45);
+      flex: 0 0 auto;
+      overflow:hidden;
+    }
+    .mark img{
+      width:100%;
+      height:100%;
+      object-fit: contain;
+      border-radius: 12px;
+    }
+    .brandText{ min-width: 0; }
+    .brand strong{
+      display:block;
+      font-size:.88rem;
+      letter-spacing:.14em;
+      text-transform: uppercase;
+      line-height:1.05;
+      white-space: nowrap;
+      overflow:hidden;
+      text-overflow: ellipsis;
+      max-width: 70vw;
+    }
+    .brand span{
+      display:block;
+      color: var(--muted2);
+      font-size:.82rem;
+      line-height:1.1;
+      margin-top:.18rem;
+      white-space: nowrap;
+      overflow:hidden;
+      text-overflow: ellipsis;
+      max-width: 70vw;
+    }
+
+    .btn{
+      position: relative;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      height: 42px;
+      padding: 0 16px;
+      border-radius: 999px;
+      border: 1px solid rgba(196,181,253,.18);
+      background: rgba(0,0,0,.18);
+      color: var(--ink);
+      text-decoration:none;
+      font-weight: 800;
+      font-size: .78rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      box-shadow: 0 12px 40px rgba(0,0,0,.32);
+      backdrop-filter: blur(10px);
+      transition: transform .14s ease, border-color .14s ease, filter .14s ease, background .14s ease;
+      will-change: transform;
+      overflow:hidden;
+      white-space: nowrap;
+      -webkit-tap-highlight-color: transparent;
+      cursor:pointer;
+    }
+    .btn:active{
+      transform: translateY(0);
+      filter: brightness(1.03);
+    }
+    .btn.primary{
+      background: linear-gradient(90deg, rgba(179,124,255,.92), rgba(249,115,226,.72));
+      border-color: rgba(255,255,255,.18);
+    }
+
+    .iconBtn{
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      border: 1px solid rgba(196,181,253,.18);
+      background: rgba(0,0,0,.18);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 12px 40px rgba(0,0,0,.28);
+      display:grid;
+      place-items:center;
+      cursor:pointer;
+      transition: transform .14s ease, border-color .14s ease, filter .14s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .iconBtn:active{ transform: translateY(0); filter: brightness(1.04); }
+    .iconBtn svg{ opacity:.92; }
+
+    .scrim{
+      position: fixed;
+      inset: 0;
+      z-index: 70;
+      background: rgba(0,0,0,.55);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .18s ease;
+    }
+    .scrim.open{
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .menu{
+      position: fixed;
+      left: 0;
+      right: 0;
+      top: 0;
+      z-index: 80;
+      transform: translateY(-110%);
+      transition: transform .24s cubic-bezier(.2,.9,.2,1);
+      padding: 0.95rem 0 .9rem;
+      backdrop-filter: blur(16px);
+      background: linear-gradient(180deg, rgba(3,1,11,.92), rgba(3,1,11,.58));
+      border-bottom: 1px solid rgba(196,181,253,.14);
+    }
+    .menu.open{ transform: translateY(0); }
+
+    .menuHeader{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:.75rem;
+      padding-bottom: .75rem;
+      border-bottom: 1px solid rgba(196,181,253,.10);
+    }
+
+    .menuLinks{
+      display:grid;
+      gap: .55rem;
+      padding-top: .85rem;
+    }
+    .menuLinks a{
+      text-decoration:none;
+      color: var(--muted);
+      font-size: .80rem;
+      letter-spacing:.14em;
+      text-transform: uppercase;
+      padding: .8rem .95rem;
+      border-radius: 16px;
+      border: 1px solid rgba(196,181,253,.10);
+      background: rgba(196,181,253,.04);
+      transition: transform .14s ease, border-color .14s ease, filter .14s ease, background .14s ease, color .14s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .menuLinks a:active{
+      transform: translateY(0);
+      border-color: rgba(196,181,253,.22);
+      filter: brightness(1.04);
+      color: var(--ink);
+    }
+    .menuLinks a.active{
+      background: rgba(179,124,255,.16);
+      border-color: rgba(179,124,255,.26);
+      color: var(--ink);
+    }
+
+    .menuActions{
+      margin-top: .85rem;
+      display:grid;
+      gap:.65rem;
+    }
+    .menuActions .btn{ width: 100%; }
+
+    /* ===== Page-specific layout (login) ===== */
+    main{
+      padding: 1.4rem 0 3.4rem;
+    }
+
+    .hero{
+      padding: 1.0rem 0 1.2rem;
+    }
+
+    .kicker{
+      display:inline-flex;
+      align-items:center;
+      gap:.55rem;
+      padding: .42rem .8rem;
+      border-radius: 999px;
+      border: 1px solid rgba(196,181,253,.18);
+      background: rgba(179,124,255,.10);
+      color: rgba(244,240,255,.82);
+      letter-spacing:.16em;
+      font-size:.72rem;
+      text-transform: uppercase;
+    }
+    .kicker .dot{
+      width: 8px; height: 8px;
+      border-radius: 999px;
+      background: rgba(179,124,255,.92);
+      box-shadow: 0 0 0 6px rgba(179,124,255,.14);
+    }
+
+    h1{
+      margin: .95rem 0 .65rem;
+      font-size: clamp(1.85rem, 6.2vw, 2.35rem);
+      line-height: 1.06;
+      letter-spacing: -.02em;
+    }
+    .grad{
+      background: linear-gradient(90deg, rgba(244,240,255,.95), rgba(179,124,255,.78));
+      -webkit-background-clip: text;
+      background-clip:text;
+      color: transparent;
+    }
+    .lede{
+      margin:0;
+      color: rgba(244,240,255,.74);
+      line-height: 1.7;
+      font-size: 1.0rem;
+      max-width: 62ch;
+    }
+
+    .card{
+      margin-top: 1.25rem;
+      background: rgba(10, 6, 24, .55);
+      border: 1px solid rgba(196,181,253,.18);
+      border-radius: 20px;
+      box-shadow: var(--shadow2);
+      overflow:hidden;
+    }
+    .card-h{
+      padding: 1.1rem 1.05rem .9rem;
+      border-bottom: 1px solid rgba(196,181,253,.10);
+    }
+    .card-h h2{
+      margin:0;
+      font-size: .96rem;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+    }
+    .card-h p{ margin:.55rem 0 0; color: rgba(244,240,255,.78); line-height:1.55; }
+
+    .card-b{ padding: 1.05rem; display:grid; gap: .95rem; }
+
+    label{
+      font-size:.78rem;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+      color: rgba(244,240,255,.75);
+    }
+    input{
+      width:100%;
+      padding: .95rem 1rem;
+      border-radius: 16px;
+      border: 1px solid rgba(196,181,253,.18);
+      background: rgba(0,0,0,.18);
+      color: var(--ink);
+      outline:none;
+      box-shadow: 0 12px 40px rgba(0,0,0,.22);
+      transition: border-color .14s ease, filter .14s ease, background .14s ease;
+    }
+    input:focus{
+      border-color: rgba(179,124,255,.40);
+      filter: brightness(1.03);
+      background: rgba(179,124,255,.08);
+    }
+
+    .row{ display:grid; grid-template-columns: 1fr; gap:.45rem; }
+    .row > *{ min-width: 0; }
+
+    .actions{
+      display:grid;
+      gap:.65rem;
+      margin-top:.2rem;
+    }
+    .actions .btn{ width:100%; }
+    .muted-link{
+      color: rgba(200,170,255,.85);
+      text-decoration:none;
+      font-weight:800;
+      letter-spacing:.10em;
+      text-transform:uppercase;
+      font-size:.75rem;
+      padding: .85rem 1rem;
+      text-align:center;
+      border-radius: 999px;
+      border: 1px solid rgba(196,181,253,.14);
+      background: rgba(196,181,253,.04);
+    }
+    .muted-link:active{ filter: brightness(1.05); }
+
+    .msg{
+      display:none;
+      padding:.95rem 1rem;
+      border-radius: 16px;
+      border: 1px solid rgba(255,120,170,.35);
+      background: rgba(60,0,30,.25);
+      color:#ffd6e6;
+      line-height:1.55;
+    }
+
+    .reveal{
+      opacity:0;
+      transform: translateY(14px);
+      transition: opacity .55s ease, transform .55s ease;
+    }
+    .reveal.on{
+      opacity:1;
+      transform: translateY(0);
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      .menu, .scrim{ transition:none; }
+      .bg .glow, .bg .lines, .bg .dots{ animation:none !important; }
+      .reveal{ opacity:1 !important; transform:none !important; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="bg" aria-hidden="true">
+    <div class="glow"></div>
+    <div class="lines"></div>
+    <div class="dots"></div>
+    <div class="vignette"></div>
+  </div>
+
+  <!-- Slide-down menu -->
+  <div class="scrim" id="scrim" aria-hidden="true"></div>
+
+  <aside class="menu" id="menu" aria-label="Mobile Menu" aria-hidden="true">
+    <div class="wrap">
+      <div class="menuHeader">
+        <a class="brand" href="/sns/">
+          <div class="mark" style="width:40px;height:40px;border-radius:14px;">
+            <img src="/assets/sns-logo-purple.png" alt="Saku Network Solutions logo">
+          </div>
+          <div class="brandText">
+            <strong>SAKU NETWORK SOLUTIONS</strong>
+            <span>Network infrastructure, done clean.</span>
+          </div>
+        </a>
+
+        <button class="iconBtn" id="closeMenu" aria-label="Close menu">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M6 6l12 12M18 6L6 18" stroke="rgba(244,240,255,.92)" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <nav class="menuLinks" aria-label="Primary">
+        <a href="/home/">Home</a>
+        <a href="/sns/">Services</a>
+        <a href="/experience/">Credibility</a>
+        <a href="/other/">Resources</a>
+        <a href="/socials/">Contact</a>
+      </nav>
+
+      <div class="menuActions">
+        <a class="btn primary" href="/sns-inquiry/">Start an Inquiry</a>
+        <a class="btn" href="/sns-login/">Client Login</a>
+        <a class="btn" href="#" id="viewDesktop">View Desktop Site</a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Top nav -->
+  <header class="topnav">
+    <div class="wrap">
+      <div class="navrow">
+        <a class="brand" href="/sns/">
+          <div class="mark">
+            <img src="/assets/sns-logo-purple.png" alt="Saku Network Solutions logo">
+          </div>
+          <div class="brandText">
+            <strong>SAKU NETWORK SOLUTIONS</strong>
+            <span>Client portal access</span>
+          </div>
+        </a>
+
+        <button class="iconBtn" id="openMenu" aria-label="Open menu">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M4 7h16M4 12h16M4 17h16" stroke="rgba(244,240,255,.92)" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap">
+        <div class="kicker reveal"><span class="dot"></span>Client Portal</div>
+        <h1 class="reveal">Login to your <span class="grad">SNS Dashboard</span>.</h1>
+        <p class="lede reveal">Use your client credentials to access your dashboard and subscription status.</p>
+
+        <div class="card reveal">
+          <div class="card-h">
+            <h2>Client Login</h2>
+            <p>Log in to view your dashboard and subscription.</p>
+          </div>
+
+          <div class="card-b">
+            <div id="msg" class="msg"></div>
+
+            <div class="row">
+              <label for="email">Email</label>
+              <input id="email" type="email" autocomplete="email" placeholder="you@domain.com" />
+            </div>
+
+            <div class="row">
+              <label for="password">Password</label>
+              <input id="password" type="password" autocomplete="current-password" placeholder="••••••••" />
+            </div>
+
+            <div class="actions">
+              <a class="muted-link" href="/sns-portal-invite/">Have an invite?</a>
+              <button id="loginBtn" class="btn primary" type="button">Login</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // Reveal-on-scroll (same behavior as other mobile pages)
+    (function(){
+      const els = Array.from(document.querySelectorAll('.reveal'));
+      if (!('IntersectionObserver' in window) || els.length === 0) {
+        els.forEach(el => el.classList.add('on'));
+        return;
+      }
+      const io = new IntersectionObserver((entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            e.target.classList.add('on');
+            io.unobserve(e.target);
+          }
+        }
+      }, { threshold: 0.14 });
+      els.forEach(el => io.observe(el));
+    })();
+  </script>
+
+  <script>
+    // Mobile menu (reference)
+    (function(){
+      const menu = document.getElementById("menu");
+      const scrim = document.getElementById("scrim");
+      const openBtn = document.getElementById("openMenu");
+      const closeBtn = document.getElementById("closeMenu");
+
+      function open(){
+        menu.classList.add("open");
+        scrim.classList.add("open");
+        menu.setAttribute("aria-hidden","false");
+        scrim.setAttribute("aria-hidden","false");
+        document.body.style.overflow = "hidden";
+      }
+      function close(){
+        menu.classList.remove("open");
+        scrim.classList.remove("open");
+        menu.setAttribute("aria-hidden","true");
+        scrim.setAttribute("aria-hidden","true");
+        document.body.style.overflow = "";
+      }
+
+      openBtn.addEventListener("click", open);
+      closeBtn.addEventListener("click", close);
+      scrim.addEventListener("click", close);
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") close();
+      });
+    })();
+  </script>
+
+  <script>
+    // View Desktop Site preference (reference)
+    (function(){
+      const a = document.getElementById("viewDesktop");
+      if (!a) return;
+      a.addEventListener("click", function(e){
+        e.preventDefault();
+        localStorage.setItem("sns_force_desktop", "1");
+        location.replace("/sns-login/");
+      });
+    })();
+  </script>
+
+  <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+    // Keep these consistent with your other pages
+    const SUPABASE_URL = "https://jgvxmpsjtkedzgygynbl.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpndnhtcHNqdGtlZHpneWd5bmJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0NzgxMjYsImV4cCI6MjA4MTA1NDEyNn0.OCh23RWm8COtxWuumYvKUmfMOLOW01B1zrbtzcr3w6Y";
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const msg = document.getElementById("msg");
+    const emailEl = document.getElementById("email");
+    const passEl = document.getElementById("password");
+    const btn = document.getElementById("loginBtn");
+
+    function showMsg(text){
+      msg.textContent = text;
+      msg.style.display = "block";
+    }
+
+    // If already logged in, go straight to dashboard
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) window.location.href = "/sns-dashboard/";
+
+    btn.addEventListener("click", async () => {
+      msg.style.display = "none";
+      btn.disabled = true;
+
+      const email = emailEl.value.trim();
+      const password = passEl.value;
+
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error){
+        showMsg(error.message || "Login failed.");
+        btn.disabled = false;
+        return;
+      }
+
+      window.location.href = "/sns-dashboard/";
+    });
+  </script>
+</body>
+</html>

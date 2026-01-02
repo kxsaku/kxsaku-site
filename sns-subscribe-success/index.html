@@ -4,6 +4,18 @@
   <meta charset="UTF-8" />
   <title>SNS · Subscription Started</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script>
+  (function () {
+    const forceDesktop = localStorage.getItem("sns_force_desktop") === "1";
+    if (forceDesktop) return;
+
+    const isMobile = window.matchMedia("(max-width: 820px)").matches;
+    if (isMobile && !location.pathname.endsWith("/sns-subscribe-success/mobile.html")) {
+      location.replace("/sns-subscribe-success/mobile.html");
+    }
+  })();
+</script>
+
   <link rel="stylesheet" href="/styles.css" />
   <style>
     :root{

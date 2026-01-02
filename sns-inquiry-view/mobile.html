@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>SNS · View Inquiry</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="styles.css" />
+
+  
+
+  <style>
+:root{
+      --bg0:#03010b;
+      --bg1:#060214;
+      --ink:#f4f0ff;
+      --muted: rgba(244,240,255,.72);
+      --muted2: rgba(244,240,255,.56);
+
+      --stroke: rgba(196, 181, 253, .18);
+      --stroke2: rgba(196, 181, 253, .28);
+
+      --glass: rgba(10, 6, 28, .42);
+      --glass2: rgba(12, 8, 34, .62);
+
+      --accent:#b37cff;
+      --accent2:#f973e2;
+      --accent3:#5eead4;
+
+      --r-xl: 26px;
+      --r-lg: 18px;
+      --r-sm: 14px;
+
+      --shadow: 0 25px 90px rgba(0,0,0,.60);
+      --shadow2: 0 18px 50px rgba(0,0,0,.38);
+
+      --max: 640px;
+    }
+
+    *{ box-sizing:border-box; }
+    html, body{ height:100%; }
+    body{
+      margin:0;
+      color: var(--ink);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      background: radial-gradient(1200px 800px at 25% 20%, rgba(179,124,255,.18), transparent 60%),
+                  radial-gradient(900px 650px at 85% 10%, rgba(94,234,212,.10), transparent 55%),
+                  radial-gradient(1100px 900px at 70% 80%, rgba(249,115,226,.12), transparent 55%),
+                  linear-gradient(180deg, var(--bg1), var(--bg0));
+      overflow-x:hidden;
+    }
+
+    /* Full-bleed animated background */
+    .bg{
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      pointer-events:none;
+      overflow:hidden;
+    }
+    .bg .glow{
+      position:absolute;
+      inset:-20%;
+      background:
+        radial-gradient(circle at 20% 25%, rgba(179,124,255,.22), transparent 55%),
+        radial-gradient(circle at 85% 15%, rgba(94,234,212,.12), transparent 55%),
+        radial-gradient(circle at 60% 80%, rgba(249,115,226,.14), transparent 55%);
+      filter: blur(10px);
+      animation: glowFloat 16s ease-in-out infinite alternate;
+      opacity:.9;
+    }
+    @keyframes glowFloat{
+      from{ transform: translate3d(0,0,0) scale(1); }
+      to{ transform: translate3d(-18px, 12px, 0) scale(1.03); }
+    }
+    .bg .lines{
+      position:absolute;
+      inset:0;
+      background:
+        repeating-linear-gradient(
+          135deg,
+          rgba(255,255,255,.045) 0px,
+          rgba(255,255,255,.045) 1px,
+          transparent 1px,
+          transparent 90px
+        );
+      opacity:.18;
+      -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 45%, transparent 100%);
+      mask-image: linear-gradient(to bottom, #000 0%, #000 45%, transparent 100%);
+      animation: lineDrift 22s linear infinite;
+    }
+    @keyframes lineDrift{
+      from{ transform: translate3d(0,0,0); }
+      to{ transform: translate3d(-140px, 140px, 0); }
+    }
+    .bg .dots{
+      position:absolute;
+      inset:0;
+      background-image:
+        radial-gradient(rgba(255,255,255,.20) 1px, transparent 1px),
+        radial-gradient(rgba(255,255,255,.10) 1px, transparent 1px);
+      background-size: 140px 140px, 220px 220px;
+      background-position: 0 0, 40px 80px;
+      opacity:.20;
+      -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 50%, transparent 100%);
+      mask-image: linear-gradient(to bottom, #000 0%, #000 50%, transparent 100%);
+      animation: dotFloat 28s ease-in-out infinite alternate;
+    }
+    @keyframes dotFloat{
+      from{ transform: translate3d(0,0,0); }
+      to{ transform: translate3d(18px, -10px, 0); }
+    }
+    .bg .vignette{
+      position:absolute;
+      inset:0;
+      background: radial-gradient(circle at 50% 0%, rgba(0,0,0,.08), rgba(0,0,0,.64) 62%, rgba(0,0,0,.78));
+      z-index: 1;
+    }
+
+    /* Layout */
+    .wrap{
+      width: min(var(--max), calc(100% - 1.25rem));
+      margin: 0 auto;
+    }
+
+    /* Mobile sticky header */
+    .topnav{
+      position: sticky;
+      top: 0;
+      z-index: 60;
+      padding: .9rem 0;
+      backdrop-filter: blur(14px);
+      background: linear-gradient(180deg, rgba(3,1,11,.78), rgba(3,1,11,.22));
+      border-bottom: 1px solid rgba(196,181,253,.10);
+    }
+    .navrow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:.75rem;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:.7rem;
+      min-width: 0;
+    }
+    .mark{
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      display:grid;
+      place-items:center;
+      box-shadow: 0 18px 50px rgba(0,0,0,.45);
+      flex: 0 0 auto;
+    }
+    .mark img{
+      width:100%;
+      height:100%;
+      object-fit: contain;
+      border-radius: 12px;
+    }
+    .brandText{
+      min-width: 0;
+    }
+    .brand strong{
+      display:block;
+      font-size:.88rem;
+      letter-spacing:.14em;
+      text-transform: uppercase;
+      line-height:1.05;
+      white-space: nowrap;
+      overflow:hidden;
+      text-overflow: ellipsis;
+      max-width: 70vw;
+    }
+    .brand span{
+      display:block;
+      color: var(--muted2);
+      font-size:.82rem;
+      line-height:1.1;
+      margin-top:.18rem;
+      white-space: nowrap;
+      overflow:hidden;
+      text-overflow: ellipsis;
+      max-width: 70vw;
+    }
+
+    /* Buttons (same feel) */
+    .btn{
+      position: relative;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      height: 42px;
+      padding: 0 16px;
+      border-radius: 999px;
+      border: 1px solid rgba(196,181,253,.18);
+      background: rgba(0,0,0,.18);
+      color: var(--ink);
+      text-decoration:none;
+      font-weight: 800;
+      font-size: .78rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      box-shadow: 0 12px 40px rgba(0,0,0,.32);
+      backdrop-filter: blur(10px);
+      transition: transform .14s ease, border-color .14s ease, filter .14s ease, background .14s ease;
+      will-change: transform;
+      overflow:hidden;
+      white-space: nowrap;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn::after{
+      content:"";
+      position:absolute;
+      inset:-40% -60%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.18), transparent);
+      transform: translateX(-60%) rotate(10deg);
+      opacity: 0;
+      transition: transform .55s ease, opacity .18s ease;
+    }
+    .btn:active{
+      transform: translateY(0);
+      filter: brightness(1.03);
+    }
+    .btn.primary{
+      background: linear-gradient(90deg, rgba(179,124,255,.92), rgba(249,115,226,.72));
+      border-color: rgba(255,255,255,.18);
+    }
+
+    /* Icon button (hamburger) */
+    .iconBtn{
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      border: 1px solid rgba(196,181,253,.18);
+      background: rgba(0,0,0,.18);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 12px 40px rgba(0,0,0,.28);
+      display:grid;
+      place-items:center;
+      cursor:pointer;
+      transition: transform .14s ease, border-color .14s ease, filter .14s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .iconBtn:active{ transform: translateY(0); filter: brightness(1.04); }
+    .iconBtn svg{ opacity:.92; }
+
+    /* Slide-down menu */
+    .menu{
+      position: fixed;
+      left: 0;
+      right: 0;
+      top: 0;
+      z-index: 80;
+      transform: translateY(-110%);
+      transition: transform .24s cubic-bezier(.2,.9,.2,1);
+      padding: 0.95rem 0 .9rem;
+      backdrop-filter: blur(16px);
+      background: linear-gradient(180deg, rgba(3,1,11,.92), rgba(3,1,11,.58));
+      border-bottom: 1px solid rgba(196,181,253,.14);
+    }
+    .menu.open{ transform: translateY(0); }
+
+    .menuHeader{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:.75rem;
+      padding-bottom: .75rem;
+      border-bottom: 1px solid rgba(196,181,253,.10);
+    }
+
+    .menuLinks{
+      display:grid;
+      gap: .55rem;
+      padding-top: .85rem;
+    }
+    .menuLinks a{
+      text-decoration:none;
+      color: var(--muted);
+      font-size: .80rem;
+      letter-spacing:.14em;
+      text-transform: uppercase;
+      padding: .8rem .95rem;
+      border-radius: 16px;
+      border: 1px solid rgba(196,181,253,.10);
+      background: rgba(196,181,253,.04);
+      transition: transform .14s ease, border-color .14s ease, filter .14s ease, background .14s ease, color .14s ease;
+    }
+    .menuLinks a:active{
+      transform: translateY(0);
+      border-color: rgba(196,181,253,.22);
+      filter: brightness(1.04);
+      color: var(--ink);
+    }
+    .menuLinks a.active{
+      background: rgba(179,124,255,.16);
+      border-color: rgba(179,124,255,.26);
+      color: var(--ink);
+    }
+
+    .menuActions{
+      margin-top: .85rem;
+      display:grid;
+      gap:.65rem;
+    }
+    .menuActions .btn{ width: 100%; }
+
+    .scrim{
+      position: fixed;
+      inset: 0;
+      z-index: 70;
+      background: rgba(0,0,0,.55);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .18s ease;
+    }
+    .scrim.open{
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Hero + particles */
+    .hero{ position: relative; overflow: hidden; padding: 3.7rem 0 2.5rem; text-align:center; }
+    .hero .wrap{ position: relative; z-index: 2; }
+
+    #particles{
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+      opacity: .45;
+      mix-blend-mode: screen;
+    }
+
+    .hero-mark{
+      width: 56px;
+      height: 56px;
+      margin: 0 auto 1.05rem;
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      position: relative;
+      box-shadow: 0 22px 80px rgba(0,0,0,.55);
+    }
+    .hero-mark img{
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border-radius: 14px;
+    }
+    .hero-mark::after{
+      content:"";
+      position:absolute;
+      inset:-10px;
+      border-radius: 22px;
+      background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.22), transparent 60%);
+      filter: blur(8px);
+      opacity: .38;
+    }
+
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:.5rem;
+      padding:.35rem .75rem;
+      border-radius: 999px;
+      border: 1px solid rgba(196,181,253,.18);
+      background: rgba(196,181,253,.06);
+      color: var(--muted);
+      font-size:.72rem;
+      letter-spacing:.14em;
+      text-transform: uppercase;
+    }
+
+    h1{
+      margin: 1.05rem auto .85rem;
+      max-width: 22ch;
+      font-size: clamp(1.85rem, 6.2vw, 2.55rem);
+      line-height: 1.08;
+      letter-spacing: .01em;
+    }
+    .hero h1{
+      background: linear-gradient(180deg,
+        rgba(179,124,255,.60),
+        rgba(244,240,255,.42) 60%,
+        rgba(249,115,226,.32)
+      );
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .lede{
+      margin: 0 auto;
+      max-width: 56ch;
+      color: var(--muted);
+      font-size: 1.00rem;
+      line-height: 1.72;
+    }
+
+    .cta{
+      margin-top: 1.25rem;
+      display:grid;
+      gap:.65rem;
+    }
+    .cta .btn{ width:100%; height: 46px; }
+
+    /* Mobile “service modules” chips */
+    .chips{
+      margin-top: 1.25rem;
+      display:flex;
+      flex-wrap: wrap;
+      gap: .55rem;
+      justify-content:center;
+    }
+    .chip{
+      padding: .55rem .75rem;
+      border-radius: 999px;
+      border: 1px solid rgba(196,181,253,.14);
+      background: rgba(196,181,253,.06);
+      color: var(--muted);
+      font-size: .74rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      text-decoration:none;
+      transition: transform .14s ease, border-color .14s ease, filter .14s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .chip:active{
+      transform: translateY(0);
+      border-color: rgba(196,181,253,.26);
+      filter: brightness(1.05);
+      color: var(--ink);
+    }
+
+    /* Cards + panels (stacked) */
+    .section{ padding: 2.2rem 0; }
+    .card{
+      border-radius: var(--r-xl);
+      border: 1px solid rgba(196,181,253,.16);
+      background: linear-gradient(180deg, rgba(10,6,28,.52), rgba(10,6,28,.30));
+      box-shadow: var(--shadow2);
+      padding: 1.15rem 1.05rem;
+      text-align:left;
+      transition: transform .16s ease, border-color .16s ease, filter .16s ease;
+      will-change: transform;
+    }
+    .card:active{
+      transform: translateY(0);
+      border-color: rgba(196,181,253,.26);
+      filter: brightness(1.03);
+    }
+    .card h3{
+      margin:0;
+      font-size: .90rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    .card p{
+      margin: .55rem 0 0;
+      color: var(--muted);
+      line-height: 1.65;
+      font-size: .98rem;
+    }
+
+    .stack{
+      display:grid;
+      gap: .85rem;
+    }
+
+    .panel{
+      border-radius: var(--r-xl);
+      border: 1px solid rgba(196,181,253,.14);
+      background: linear-gradient(180deg, rgba(10,6,28,.44), rgba(10,6,28,.24));
+      box-shadow: var(--shadow2);
+      padding: 1.2rem 1.1rem;
+      text-align:left;
+    }
+    .panel h2{
+      margin:0;
+      font-size: 1.02rem;
+      letter-spacing:.12em;
+      text-transform: uppercase;
+    }
+    .panel p{
+      margin:.7rem 0 0;
+      color: var(--muted);
+      line-height:1.7;
+    }
+
+    /* Footer */
+    footer{
+      padding: 2.6rem 0 2.2rem;
+      border-top: 1px solid rgba(196,181,253,.10);
+      color: var(--muted2);
+      text-align:center;
+    }
+    footer a{
+      color: var(--muted);
+      text-decoration:none;
+      border-bottom: 1px solid rgba(196,181,253,.22);
+    }
+    footer a:active{
+      color: var(--ink);
+      border-bottom-color: rgba(196,181,253,.38);
+    }
+
+    /* reveal */
+    .reveal{
+      opacity:0;
+      transform: translateY(16px);
+      transition: opacity .60s ease, transform .60s cubic-bezier(.2,.9,.2,1);
+    }
+    .reveal.in{ opacity:1; transform: translateY(0); }
+
+    /* Reduce motion */
+    @media (prefers-reduced-motion: reduce){
+      .bg .glow, .bg .lines, .bg .dots{ animation:none; }
+      .reveal{ opacity:1; transform:none; transition:none; }
+      #particles{ display:none; }
+      .menu, .scrim{ transition:none; }
+    }
+  
+
+    body { margin:0; background: radial-gradient(circle at top, #342067, #050315 55%, #020010); color:#f4f0ff; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial; }
+    .pageWrap { max-width: 1050px; margin: 0 auto; padding: 3rem 1rem 4rem; }
+
+    .toprow { display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; }
+    h1 { margin:0; letter-spacing:.18em; text-transform:uppercase; font-size: 1.2rem; }
+    .sub { color:#bdb7ff; margin-top:.6rem; }
+
+    .pill { display:inline-flex; align-items:center; gap:.5rem; padding:.55rem .95rem; border-radius:999px; border:1px solid rgba(129,118,255,.35); background: rgba(9,6,34,.65); color:#d9d3ff; font-size:.85rem; }
+
+    .card {
+      margin-top: 1.75rem;
+      background: rgba(9, 6, 34, 0.9);
+      border: 1px solid rgba(130, 106, 255, 0.3);
+      border-radius: 28px;
+      box-shadow: 0 25px 80px rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(16px);
+      padding: 1.25rem 1.25rem 1.1rem;
+      overflow:hidden;
+    }
+
+    .btn {
+      border-radius:999px;
+      padding:.65rem 1.05rem;
+      border:1px solid rgba(129,118,255,.35);
+      background: rgba(15, 10, 55, 0.8);
+      color:#f4f0ff;
+      cursor:pointer;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      font-size:.78rem;
+      transition: transform .08s ease, box-shadow .12s ease, border-color .12s ease, filter .12s ease;
+      user-select:none;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:.4rem;
+      white-space:nowrap;
+    }
+    .btn:hover { transform: translateY(-1px); border-color:#b37cff; box-shadow:0 0 0 1px rgba(179,124,255,.35); filter:brightness(1.05); }
+    .btn:active { transform: translateY(1px); }
+    .btn-danger { border-color: rgba(255,98,98,.45); }
+    .btn-danger:hover { border-color:#ff6262; box-shadow:0 0 0 1px rgba(255,98,98,.25); }
+
+    .toolbar { display:flex; flex-wrap:wrap; gap:.6rem; align-items:center; justify-content:space-between; margin-bottom: 1rem; }
+    .toolbar-left, .toolbar-right { display:flex; flex-wrap:wrap; gap:.6rem; align-items:center; }
+
+    .grid {
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem 1.25rem;
+      margin-top: 1rem;
+    }
+    .field { padding: .85rem .95rem; border:1px solid rgba(129,118,255,.18); border-radius:18px; background: rgba(9,6,34,.35); }
+    .k { display:block; font-size:.78rem; color:#cfc8ff; letter-spacing:.12em; text-transform:uppercase; margin-bottom:.35rem; }
+    .v { color:#f4f0ff; line-height:1.45; white-space: pre-wrap; overflow-wrap:anywhere; }
+    .full { grid-column: 1 / -1; }
+
+    .err { margin-top:.8rem; color:#ff9494; font-size:.95rem; }
+    .muted { color:#bdb7ff; font-size:.85rem; }
+
+    /* Login overlay */
+    .overlay {
+      position:fixed; inset:0;
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(8px);
+      display:flex; align-items:center; justify-content:center;
+      padding: 1rem;
+      z-index: 9999;
+    }
+    .login-card {
+      width: min(520px, 100%);
+      background: rgba(9, 6, 34, 0.95);
+      border: 1px solid rgba(130, 106, 255, 0.35);
+      border-radius: 28px;
+      box-shadow: 0 25px 90px rgba(0, 0, 0, 0.75);
+      padding: 1.75rem 1.5rem 1.4rem;
+    }
+    .login-title { margin:0; letter-spacing:.16em; text-transform:uppercase; font-size:1.05rem; }
+    .login-sub { margin:.6rem 0 1.1rem; color:#bdb7ff; line-height:1.45; font-size:.9rem; }
+    .field2 label { display:block; margin:.7rem 0 .35rem; font-size:.78rem; color:#d5cffc; letter-spacing:.1em; text-transform:uppercase; }
+    .field2 input {
+      width:100%;
+      border-radius: 999px;
+      border: 1px solid rgba(129,118,255,.35);
+      background: rgba(9,6,34,.95);
+      color:#f4f0ff;
+      padding:.75rem 1rem;
+      outline:none;
+    }
+    .field2 input:focus { border-color:#9c88ff; box-shadow:0 0 0 1px rgba(156,136,255,.55); }
+    .login-actions { display:flex; gap:.7rem; justify-content:space-between; align-items:center; margin-top: 1.1rem; flex-wrap:wrap; }
+    .tiny { font-size:.8rem; color:#9ea0d7; }
+  
+
+    /* Mobile fitting overrides */
+    .pageWrap { max-width: 680px; margin: 0 auto; padding: 1.2rem 1rem 4rem; }
+    .toprow { flex-direction: column; align-items: flex-start; }
+    .toprow > div:last-child { align-items: flex-start !important; }
+    .card { border-radius: 22px; padding: 1.05rem 1.0rem; }
+    .toolbar { flex-direction: column; align-items: stretch; gap: .75rem; }
+    .toolbar-left, .toolbar-right { width: 100%; justify-content: flex-start; }
+    .toolbar-left .btn, .toolbar-right .btn { flex: 1 1 auto; }
+    .grid { grid-template-columns: 1fr; gap: .85rem; }
+    .btn { width: 100%; justify-content: center; }
+    .toprow a.btn { width: auto; }
+    .login-card { padding: 1.4rem 1.15rem 1.15rem; }
+
+  </style>
+</head>
+
+<body>
+  <div class="bg" aria-hidden="true"></div>
+
+  <!-- Consistent mobile navbar (from your provided mobile.html reference) -->
+  <div class="scrim" id="scrim" aria-hidden="true"></div>
+
+  <aside class="menu" id="menu" aria-label="Mobile Menu" aria-hidden="true">
+    <div class="wrap">
+      <div class="menuHeader">
+        <div class="brand" style="gap:.65rem;">
+          <div class="mark" style="width:40px;height:40px;border-radius:14px;">
+            <img src="/assets/sns-logo-purple.png" alt="Saku Network Solutions logo">
+          </div>
+          <div class="brandText">
+            <strong>SAKU NETWORK SOLUTIONS</strong>
+            <span>Network infrastructure, done clean.</span>
+          </div>
+        </div>
+
+        <button class="iconBtn" id="closeMenu" aria-label="Close menu">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M6 6l12 12M18 6L6 18" stroke="rgba(244,240,255,.92)" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <nav class="menuLinks" aria-label="Primary">
+        <a class="active" href="/home/">Home</a>
+        <a href="/sns/">Services</a>
+        <a href="/experience/">Credibility</a>
+        <a href="/other/">Resources</a>
+        <a href="/socials/">Contact</a>
+      </nav>
+
+      <div class="menuActions">
+        <a class="btn" href="/sns-login/">Client Login</a>
+
+        <!-- Desktop preference -->
+        <a class="btn" href="#" id="viewDesktop">View Desktop Site</a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Top nav -->
+  <header class="topnav">
+    <div class="wrap">
+      <div class="navrow">
+        <div class="brand">
+          <div class="mark">
+            <img src="/assets/sns-logo-purple.png" alt="Saku Network Solutions logo">
+          </div>
+          <div class="brandText">
+            <strong>SAKU NETWORK SOLUTIONS</strong>
+            <span>Network infrastructure, done clean.</span>
+          </div>
+        </div>
+
+        <button class="iconBtn" id="openMenu" aria-label="Open menu">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M4 7h16M4 12h16M4 17h16" stroke="rgba(244,240,255,.92)" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  
+
+  <main>
+
+  <div class="pageWrap">
+    <div class="toprow">
+      <div>
+        <h1>VIEW INQUIRY</h1>
+        <div class="sub">Full details</div>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:.6rem; align-items:flex-end;">
+        <span class="pill" id="whoami">Not signed in</span>
+        <a class="btn" href="/sns-admin/index.html">Back to list</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <button class="btn" id="markWorkingBtn">Mark as Working</button>
+          <button class="btn" id="markCompletedBtn">Mark as Completed</button>
+          <button class="btn" id="resetAssignedBtn">Reset to Assigned</button>
+        </div>
+        <div class="toolbar-right">
+            <button class="btn" id="flagRedBtn">Flag Red</button>
+            <button class="btn" id="flagYellowBtn">Flag Yellow</button>
+            <button class="btn" id="flagGreenBtn">Flag Green</button>
+            <button class="btn" id="flagClearBtn">Reset Priority</button>
+            <button class="btn" id="refreshBtn">Refresh</button>
+            <button class="btn btn-danger" id="deleteBtn">Delete</button>
+        </div>
+      </div>
+
+      <div id="err" class="err" style="display:none;"></div>
+
+      <div id="content" style="display:none;">
+        <div class="grid">
+          <div class="field">
+            <span class="k">Created</span>
+            <div class="v" id="createdAt"></div>
+          </div>
+          <div class="field">
+            <span class="k">Status</span>
+            <div class="v" id="status"></div>
+          </div>
+
+          <div class="field">
+            <span class="k">Priority</span>
+            <div class="v" id="priority"></div>
+          </div>
+          <div class="field">
+            <span class="k">Team size</span>
+            <div class="v" id="companySize"></div>
+          </div>
+
+          <div class="field">
+            <span class="k">Contact name</span>
+            <div class="v" id="contactName"></div>
+          </div>
+          <div class="field">
+            <span class="k">Business</span>
+            <div class="v" id="businessName"></div>
+          </div>
+
+          <div class="field">
+            <span class="k">Email</span>
+            <div class="v" id="email"></div>
+          </div>
+          <div class="field">
+            <span class="k">Phone</span>
+            <div class="v" id="phone"></div>
+          </div>
+
+          <div class="field full">
+            <span class="k">Location</span>
+            <div class="v" id="location"></div>
+          </div>
+
+          <div class="field full">
+            <span class="k">Services requested</span>
+            <div class="v" id="services"></div>
+          </div>
+
+          <div class="field full">
+            <span class="k">Current setup</span>
+            <div class="v" id="currentSetup"></div>
+          </div>
+
+          <div class="field full">
+            <span class="k">Goals</span>
+            <div class="v" id="goals"></div>
+          </div>
+
+          <div class="field">
+            <span class="k">Budget</span>
+            <div class="v" id="budget"></div>
+          </div>
+          <div class="field">
+            <span class="k">Timeline</span>
+            <div class="v" id="timeline"></div>
+          </div>
+
+          <div class="field full">
+            <span class="k">Extra notes</span>
+            <div class="v" id="extraNotes"></div>
+          </div>
+
+          <div class="fieldbox" style="margin-top:14px;">
+  <div class="label">Notes (internal)</div>
+
+  <textarea id="notesBox" placeholder="Write notes for this inquiry..."
+    style="
+      width:100%;
+      min-height:160px;
+      resize:vertical;
+      border-radius:18px;
+      border:1px solid rgba(129,118,255,.35);
+      background: rgba(9,6,34,.95);
+      color:#f4f0ff;
+      padding: .9rem 1rem;
+      outline:none;
+      line-height:1.45;
+    "></textarea>
+
+  <div style="margin-top:.8rem; display:flex; gap:.6rem; justify-content:flex-end; flex-wrap:wrap;">
+    <button class="btn btn-primary" id="saveNotesBtn" type="button">Save Notes</button>
+  </div>
+
+  <div class="ok" id="okBox" style="display:none; margin-top:.6rem;"></div>
+  <div class="err" id="errBox" style="display:none; margin-top:.6rem;"></div>
+</div>
+
+        </div>
+
+        <div class="muted" style="margin-top:1rem;">
+          © 2025 kxsaku · Built from the homelab.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+  </main>
+
+  <!-- Login overlay -->
+<!-- Login overlay -->
+  <div class="overlay" id="loginOverlay" style="display:none;">
+    <div class="login-card" style="position:relative;">
+        <button class="login-close" id="loginCloseBtn" aria-label="Close">✕</button>
+        <h2 class="login-title">Admin login</h2>
+
+      <p class="login-sub">
+        Sign in to view this inquiry. Data is protected by Supabase policies.
+      </p>
+
+      <div class="field2">
+        <label for="loginEmail">Email</label>
+        <input id="loginEmail" type="email" autocomplete="username" placeholder="brandon.sns@pm.me">
+      </div>
+
+      <div class="field2">
+        <label for="loginPass">Password</label>
+        <input id="loginPass" type="password" autocomplete="current-password" placeholder="••••••••">
+      </div>
+
+      <div class="login-actions">
+        <span class="tiny" id="loginHint"></span>
+        <button class="btn" id="loginBtn">Sign in</button>
+      </div>
+
+      <div class="err" id="loginErr" style="display:none;"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    /**************************************************************
+     * REQUIRED: Paste your Supabase details below
+     **************************************************************/
+    const SUPABASE_URL = "https://jgvxmpsjtkedzgygynbl.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpndnhtcHNqdGtlZHpneWd5bmJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0NzgxMjYsImV4cCI6MjA4MTA1NDEyNn0.OCh23RWm8COtxWuumYvKUmfMOLOW01B1zrbtzcr3w6Y";
+    const ADMIN_EMAIL = "brandon.sns@pm.me";
+    /**************************************************************/
+
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const whoami = document.getElementById("whoami");
+    const errEl = document.getElementById("err");
+    const content = document.getElementById("content");
+
+    const loginOverlay = document.getElementById("loginOverlay");
+    const loginBtn = document.getElementById("loginBtn");
+    const loginEmail = document.getElementById("loginEmail");
+    const loginPass = document.getElementById("loginPass");
+    const loginErr = document.getElementById("loginErr");
+    const loginHint = document.getElementById("loginHint");
+
+    function showErr(msg) { errEl.style.display = "block"; errEl.textContent = msg; }
+    function clearErr() { errEl.style.display = "none"; errEl.textContent = ""; }
+
+    function showLogin(msg) {
+      loginOverlay.style.display = "flex";
+      loginErr.style.display = "none";
+      loginErr.textContent = "";
+      loginHint.textContent = msg || "";
+      loginEmail.value = ADMIN_EMAIL;
+    }
+    function hideLogin() { loginOverlay.style.display = "none"; }
+
+    function sanitize(s) {
+      return (s ?? "").toString().replace(/[&<>"']/g, m => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;" }[m]));
+    }
+
+    function fmtDate(iso) {
+      const d = new Date(iso);
+      return d.toLocaleString(undefined, { year:"numeric", month:"short", day:"2-digit", hour:"2-digit", minute:"2-digit" });
+    }
+
+    function qp(name) {
+      const u = new URL(location.href);
+      return u.searchParams.get(name);
+    }
+
+    const inquiryId = qp("id");
+
+
+
+
+    async function requireAdminSession() {
+      const { data: { user } } = await sb.auth.getUser();
+
+      if (!user) {
+        whoami.textContent = "Not signed in";
+        showLogin("Sign in to view this inquiry.");
+        return null;
+      }
+
+      if ((user.email || "").toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+        await sb.auth.signOut();
+        whoami.textContent = "Wrong account";
+        showLogin("Use your admin email to sign in.");
+        return null;
+      }
+
+      whoami.textContent = "Signed in: " + user.email;
+      hideLogin();
+      return user;
+    }
+
+    let current = null;
+
+    function setText(id, value) {
+      document.getElementById(id).textContent = value || "-";
+    }
+
+    async function loadInquiry() {
+      clearErr();
+      content.style.display = "none";
+
+      if (!inquiryId) {
+        showErr("Missing inquiry id in URL.");
+        return;
+      }
+
+
+
+
+      const user = await requireAdminSession();
+      if (!user) return;
+
+      const { data, error } = await sb
+        .from("inquiries")
+        .select("*")
+        .eq("id", inquiryId)
+        .single();
+
+      if (error || !data) {
+        showErr("Unable to load inquiry.");
+        return;
+      }
+
+      // Populate internal notes (NOW data exists)
+      const notesBoxEl = document.getElementById("notesBox");
+      if (notesBoxEl) notesBoxEl.value = data.notes || "";
+
+
+      current = data;
+
+      setText("createdAt", fmtDate(data.created_at));
+      setText("status", data.status || "assigned");
+      setText("priority", data.priority_flag || "none");
+
+      setText("contactName", data.contact_name);
+      setText("businessName", data.business_name);
+      setText("email", data.email);
+      setText("phone", data.phone);
+
+      setText("location", data.location);
+      setText("companySize", data.company_size);
+
+      const services = Array.isArray(data.services) ? data.services.join(", ") : (data.services || "");
+      setText("services", services);
+
+      setText("currentSetup", data.current_setup);
+      setText("goals", data.goals);
+
+      setText("budget", data.budget);
+      setText("timeline", data.timeline);
+
+      setText("extraNotes", data.extra_notes);
+
+      content.style.display = "block";
+    }
+
+    async function updateInquiry(patch) {
+      clearErr();
+      const user = await requireAdminSession();
+      if (!user) return;
+
+      const { error } = await sb.from("inquiries").update(patch).eq("id", inquiryId);
+      if (error) { showErr(error.message); return; }
+      await loadInquiry();
+    }
+
+    async function deleteInquiry() {
+      clearErr();
+      const user = await requireAdminSession();
+      if (!user) return;
+
+      const ok = confirm("Delete this inquiry? This cannot be undone.");
+      if (!ok) return;
+
+      const { error } = await sb.from("inquiries").delete().eq("id", inquiryId);
+      if (error) { showErr(error.message); return; }
+
+      location.href = "sns-admin.html";
+    }
+
+    document.getElementById("markWorkingBtn").addEventListener("click", () => updateInquiry({ status: "working" }));
+    document.getElementById("markCompletedBtn").addEventListener("click", () => updateInquiry({ status: "completed" }));
+    document.getElementById("resetAssignedBtn").addEventListener("click", () => updateInquiry({ status: "assigned" }));
+
+    document.getElementById("flagRedBtn").addEventListener("click", () => updateInquiry({ priority_flag: "red" }));
+    document.getElementById("flagYellowBtn").addEventListener("click", () => updateInquiry({ priority_flag: "yellow" }));
+    document.getElementById("flagGreenBtn").addEventListener("click", () => updateInquiry({ priority_flag: "green" }));
+    document.getElementById("flagClearBtn").addEventListener("click", () => updateInquiry({ priority_flag: "none" }));
+
+
+    document.getElementById("refreshBtn").addEventListener("click", loadInquiry);
+
+// Only enable delete if you actually added <button id="deleteBtn">
+const del = document.getElementById("deleteBtn");
+if (del) del.addEventListener("click", deleteInquiry);
+
+const notesBoxEl = document.getElementById("notesBox");
+const saveNotesBtn = document.getElementById("saveNotesBtn");
+const notesOk = document.getElementById("okBox");
+const notesErr = document.getElementById("errBox");
+
+function notesShowErr(msg){
+  if (!notesErr) return;
+  notesErr.style.display = "block";
+  notesErr.textContent = msg;
+}
+function notesClearErr(){
+  if (!notesErr) return;
+  notesErr.style.display = "none";
+  notesErr.textContent = "";
+}
+function notesShowOk(msg){
+  if (!notesOk) return;
+  notesOk.style.display = "block";
+  notesOk.textContent = msg;
+  setTimeout(() => (notesOk.style.display = "none"), 1400);
+}
+
+if (saveNotesBtn && notesBoxEl) {
+  saveNotesBtn.addEventListener("click", async () => {
+    notesClearErr();
+
+    const user = await requireAdminSession();
+    if (!user) return;
+
+    if (!inquiryId) { notesShowErr("Missing inquiry id."); return; }
+
+    saveNotesBtn.disabled = true;
+    saveNotesBtn.style.opacity = "0.6";
+
+    const newNotes = notesBoxEl.value || "";
+
+    const { data, error } = await sb
+      .from("inquiries")
+      .update({ notes: newNotes })
+      .eq("id", inquiryId)
+      .select("notes")
+      .single();
+
+    saveNotesBtn.disabled = false;
+    saveNotesBtn.style.opacity = "1";
+
+    if (error) {
+      notesShowErr("Save notes failed: " + error.message);
+      return;
+    }
+
+    // keep textarea consistent with DB response
+    notesBoxEl.value = data?.notes || "";
+    notesShowOk("Notes saved.");
+  });
+}
+
+
+    loginBtn.addEventListener("click", async () => {
+      loginErr.style.display = "none";
+      loginErr.textContent = "";
+
+      try {
+        const email = loginEmail.value.trim();
+        const password = loginPass.value;
+
+        const { error } = await sb.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+
+        await loadInquiry();
+      } catch (e) {
+        loginErr.style.display = "block";
+        loginErr.textContent = e.message || "Login failed.";
+      }
+    });
+
+    sb.auth.onAuthStateChange(() => { loadInquiry(); });
+
+    loadInquiry();
+  </script>
+
+
+  <script>
+    // Mobile menu
+    (function(){
+      const menu = document.getElementById("menu");
+      const scrim = document.getElementById("scrim");
+      const openBtn = document.getElementById("openMenu");
+      const closeBtn = document.getElementById("closeMenu");
+
+      function open(){
+        menu.classList.add("open");
+        scrim.classList.add("open");
+        menu.setAttribute("aria-hidden","false");
+        scrim.setAttribute("aria-hidden","false");
+        document.body.style.overflow = "hidden";
+      }
+      function close(){
+        menu.classList.remove("open");
+        scrim.classList.remove("open");
+        menu.setAttribute("aria-hidden","true");
+        scrim.setAttribute("aria-hidden","true");
+        document.body.style.overflow = "";
+      }
+
+      openBtn.addEventListener("click", open);
+      closeBtn.addEventListener("click", close);
+      scrim.addEventListener("click", close);
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") close();
+      });
+    })();
+  </script>
+
+  <script>
+    // View Desktop Site preference (matches your redirect approach)
+    (function(){
+      const a = document.getElementById("viewDesktop");
+      if (!a) return;
+      a.addEventListener("click", function(e){
+        e.preventDefault();
+        localStorage.setItem("sns_force_desktop", "1");
+        location.replace("/sns-inquiry-view/");
+      });
+    })();
+  </script>
+</body>
+</html>

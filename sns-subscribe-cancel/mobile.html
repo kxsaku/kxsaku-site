@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>SNS · Checkout Canceled</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Checkout canceled. No charges were made." />
+
+  <style>
+    /* =========================================================
+       NAV + base theme (reference: user's provided mobile.html)
+       ========================================================= */
+    :root{
+      --bg0:#03010b;
+      --bg1:#060214;
+      --ink:#f4f0ff;
+      --muted: rgba(244,240,255,.72);
+      --muted2: rgba(244,240,255,.56);
+
+      --stroke: rgba(196, 181, 253, .18);
+      --stroke2: rgba(196, 181, 253, .28);
+
+      --glass: rgba(10, 6, 28, .42);
+      --glass2: rgba(12, 8, 34, .62);
+
+      --accent:#b37cff;
+      --accent2:#f973e2;
+      --accent3:#5eead4;
+
+      --r-xl: 26px;
+      --r-lg: 18px;
+      --r-sm: 14px;
+
+      --shadow: 0 25px 90px rgba(0,0,0,.60);
+      --shadow2: 0 18px 50px rgba(0,0,0,.38);
+
+      --max: 640px;
+
+      /* Page-specific tokens */
+      --cardA: rgba(12,8,36,.72);
+      --cardB: rgba(8,5,28,.52);
+      --border: rgba(140,130,255,.20);
+      --glow: rgba(125,95,255,.22);
+    }
+
+    *{ box-sizing:border-box; }
+    html, body{ height:100%; }
+    body{
+      margin:0;
+      color: var(--ink);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      background:
+        radial-gradient(1200px 800px at 25% 20%, rgba(179,124,255,.18), transparent 60%),
+        radial-gradient(900px 650px at 85% 10%, rgba(94,234,212,.10), transparent 55%),
+        radial-gradient(1100px 900px at 70% 80%, rgba(249,115,226,.12), transparent 55%),
+        linear-gradient(180deg, var(--bg1), var(--bg0));
+      overflow-x:hidden;
+    }
+
+    /* Full-bleed animated background */
+    .bg{
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      pointer-events:none;
+      overflow:hidden;
+    }
+    .bg .glow{
+      position:absolute;
+      inset:-20%;
+      background:
+        radial-gradient(circle at 20% 25%, rgba(179,124,255,.22), transparent 55%),
+        radial-gradient(circle at 85% 15%, rgba(94,234,212,.12), transparent 55%),
+        radial-gradient(circle at 60% 80%, rgba(249,115,226,.14), transparent 55%);
+      filter: blur(10px);
+      animation: glowFloat 16s ease-in-out infinite alternate;
+      opacity:.9;
+    }
+    @keyframes glowFloat{
+      from{ transform: translate3d(0,0,0) scale(1); }
+      to{ transform: translate3d(-18px, 12px, 0) scale(1.03); }
+    }
+    .bg .lines{
+      position:absolute;
+      inset:0;
+      background:
+        repeating-linear-gradient(
+          135deg,
+          rgba(255,255,255,.045) 0px,
+          rgba(255,255,255,.045) 1px,
+          transparent 1px,
+          transparent 90px
+        );
+      opacity:.18;
+      -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 45%, transparent 100%);
+      mask-image: linear-gradient(to bottom, #000 0%, #000 45%, transparent 100%);
+      animation: lineDrift 22s linear infinite;
+    }
+    @keyframes lineDrift{
+      from{ transform: translate3d(0,0,0); }
+      to{ transform: translate3d(-140px, 140px, 0); }
+    }
+    .bg .dots{
+      position:absolute;
+      inset:0;
+      background-image:
+        radial-gradient(rgba(255,255,255,.20) 1px, transparent 1px),
+        radial-gradient(rgba(255,255,255,.10) 1px, transparent 1px);
+      background-size: 140px 140px, 220px 220px;
+      background-position: 0 0, 40px 80px;
+      opacity:.20;
+      -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 50%, transparent 100%);
+      mask-image: linear-gradient(to bottom, #000 0%, #000 50%, transparent 100%);
+      animation: dotFloat 28s ease-in-out infinite alternate;
+    }
+    @keyframes dotFloat{
+      from{ transform: translate3d(0,0,0); }
+      to{ transform: translate3d(18px, -10px, 0); }
+    }
+    .bg .vignette{
+      position:absolute;
+      inset:0;
+      background: radial-gradient(circle at 50% 0%, rgba(0,0,0,.08), rgba(0,0,0,.64) 62%, rgba(0,0,0,.78));
+      z-index: 1;
+    }
+
+    .wrap{
+      width: min(var(--max), calc(100% - 1.25rem));
+      margin: 0 auto;
+    }
+
+    /* Mobile sticky header */
+    .topnav{
+      position: sticky;
+      top: 0;
+      z-index: 60;
+      padding: .9rem 0;
+      backdrop-filter: blur(14px);
+      background: linear-gradient(180deg, rgba(3,1,11,.78), rgba(3,1,11,.22));
+      border-bottom: 1px solid rgba(196,181,253,.10);
+    }
+    .navrow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:.75rem;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:.7rem;
+      min-width: 0;
+    }
+    .mark{
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      display:grid;
+      place-items:center;
+      box-shadow: 0 18px 50px rgba(0,0,0,.45);
+      flex: 0 0 auto;
+    }
+    .mark img{
+      width:100%;
+      height:100%;
+      object-fit: contain;
+      border-radius: 12px;
+    }
+    .brandText{ min-width: 0; }
+    .brand strong{
+      display:block;
+      font-size:.88rem;
+      letter-spacing:.14em;
+      text-transform: uppercase;
+      line-height:1.05;
+      white-space: nowrap;
+      overflow:hidden;
+      text-overflow: ellipsis;
+      max-width: 70vw;
+    }
+    .brand span{
+      display:block;
+      color: var(--muted2);
+      font-size:.82rem;
+      line-height:1.1;
+      margin-top:.18rem;
+      white-space: nowrap;
+      overflow:hidden;
+      text-overflow: ellipsis;
+      max-width: 70vw;
+    }
+
+    /* Buttons (same feel) */
+    .btn{
+      position: relative;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      height: 42px;
+      padding: 0 16px;
+      border-radius: 999px;
+      border: 1px solid rgba(196,181,253,.18);
+      background: rgba(0,0,0,.18);
+      color: var(--ink);
+      text-decoration:none;
+      font-weight: 800;
+      font-size: .78rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      box-shadow: 0 12px 40px rgba(0,0,0,.32);
+      backdrop-filter: blur(10px);
+      transition: transform .14s ease, border-color .14s ease, filter .14s ease, background .14s ease;
+      will-change: transform;
+      overflow:hidden;
+      white-space: nowrap;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn::after{
+      content:"";
+      position:absolute;
+      inset:-40% -60%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.18), transparent);
+      transform: translateX(-60%) rotate(10deg);
+      opacity: 0;
+      transition: transform .55s ease, opacity .18s ease;
+    }
+    .btn:active{
+      transform: translateY(0);
+      filter: brightness(1.03);
+    }
+    .btn:active::after{
+      opacity: .8;
+      transform: translateX(40%) rotate(10deg);
+    }
+    .btn.primary{
+      background: linear-gradient(90deg, rgba(179,124,255,.92), rgba(249,115,226,.72));
+      border-color: rgba(255,255,255,.18);
+    }
+
+    .iconBtn{
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      border: 1px solid rgba(196,181,253,.18);
+      background: rgba(0,0,0,.18);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 12px 40px rgba(0,0,0,.28);
+      display:grid;
+      place-items:center;
+      cursor:pointer;
+      transition: transform .14s ease, border-color .14s ease, filter .14s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .iconBtn:active{ transform: translateY(0); filter: brightness(1.04); }
+    .iconBtn svg{ opacity:.92; }
+
+    .scrim{
+      position: fixed;
+      inset: 0;
+      z-index: 70;
+      background: rgba(0,0,0,.55);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .18s ease;
+    }
+    .scrim.open{
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .menu{
+      position: fixed;
+      left: 0;
+      right: 0;
+      top: 0;
+      z-index: 80;
+      transform: translateY(-110%);
+      transition: transform .24s cubic-bezier(.2,.9,.2,1);
+      padding: 0.95rem 0 .9rem;
+      backdrop-filter: blur(16px);
+      background: linear-gradient(180deg, rgba(3,1,11,.92), rgba(3,1,11,.58));
+      border-bottom: 1px solid rgba(196,181,253,.14);
+    }
+    .menu.open{ transform: translateY(0); }
+
+    .menuHeader{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:.75rem;
+      padding-bottom: .75rem;
+      border-bottom: 1px solid rgba(196,181,253,.10);
+    }
+
+    .menuLinks{
+      display:grid;
+      gap: .55rem;
+      padding-top: .85rem;
+    }
+    .menuLinks a{
+      text-decoration:none;
+      color: var(--muted);
+      font-size: .80rem;
+      letter-spacing:.14em;
+      text-transform: uppercase;
+      padding: .8rem .95rem;
+      border-radius: 16px;
+      border: 1px solid rgba(196,181,253,.10);
+      background: rgba(196,181,253,.04);
+      transition: transform .14s ease, border-color .14s ease, filter .14s ease, background .14s ease, color .14s ease;
+    }
+    .menuLinks a:active{
+      transform: translateY(0);
+      border-color: rgba(196,181,253,.22);
+      filter: brightness(1.04);
+      color: var(--ink);
+    }
+    .menuLinks a.active{
+      background: rgba(179,124,255,.16);
+      border-color: rgba(179,124,255,.26);
+      color: var(--ink);
+    }
+
+    .menuActions{
+      margin-top: .85rem;
+      display:grid;
+      gap:.65rem;
+    }
+    .menuActions .btn{ width: 100%; }
+
+    /* =========================================================
+       Page content (mobile-fit; no logic changes)
+       ========================================================= */
+    main{
+      min-height: calc(100vh - 76px);
+      display:grid;
+      place-items:center;
+      padding: 1.2rem 0 2.2rem;
+    }
+
+    .cardWrap{
+      width: min(520px, 100%);
+    }
+
+    .card{
+      position:relative;
+      border-radius: var(--r-xl);
+      padding: 18px 16px;
+      background: linear-gradient(180deg, var(--cardA), var(--cardB));
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+      overflow:hidden;
+
+      opacity:0;
+      transform: translateY(10px);
+      animation: enter .36s ease forwards;
+    }
+    @keyframes enter{
+      to{ opacity:1; transform: translateY(0); }
+    }
+
+    .card:before{
+      content:"";
+      position:absolute; inset:-2px;
+      background:
+        radial-gradient(520px 220px at 18% 0%, var(--glow), transparent 55%),
+        radial-gradient(520px 220px at 85% 10%, rgba(255,110,155,.10), transparent 55%);
+      pointer-events:none;
+      opacity:.95;
+    }
+    .card > *{ position:relative; z-index:1; }
+
+    .titleBlock{ display:flex; align-items:flex-start; gap:12px; }
+
+    .badge{
+      width: 44px; height: 44px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      display:grid;
+      place-items:center;
+      box-shadow: 0 14px 36px rgba(0,0,0,.30);
+      animation: floaty 4.6s ease-in-out infinite;
+      flex: 0 0 auto;
+      margin-top: 2px;
+    }
+    @keyframes floaty{
+      0%,100%{ transform: translateY(0); }
+      50%{ transform: translateY(-4px); }
+    }
+
+    h1{
+      margin:0;
+      font-size: 13px;
+      letter-spacing:.22em;
+      text-transform:uppercase;
+      line-height:1.2;
+    }
+    .sub{
+      margin-top:6px;
+      color: rgba(244,240,255,.60);
+      font-size: 13px;
+      line-height:1.45;
+    }
+
+    .divider{
+      height:1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.10), transparent);
+      margin: 14px 0 16px;
+    }
+
+    .pillrow{
+      display:flex; gap:10px; flex-wrap:wrap;
+      margin-top: 2px;
+    }
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:7px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      font-size: 12.5px;
+      color: rgba(244,240,255,.88);
+      line-height:1;
+    }
+    .pill strong{ color: rgba(244,240,255,.96); }
+
+    .actions{
+      display:flex;
+      flex-direction: column;
+      gap:10px;
+      margin-top: 16px;
+    }
+    .actions .btn{
+      width:100%;
+      height: 46px;
+      border-radius: 16px;
+      font-size: 12px;
+      letter-spacing: .12em;
+      box-shadow: 0 12px 40px rgba(0,0,0,.34);
+      border-color: rgba(196,181,253,.22);
+    }
+    .actions .btn.ghost{
+      background: rgba(255,255,255,.06);
+      border-color: rgba(255,255,255,.14);
+      box-shadow:none;
+    }
+
+    .helper{
+      margin-top: 12px;
+      color: rgba(244,240,255,.56);
+      font-size: 12.5px;
+      line-height: 1.55;
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      .bg .glow, .bg .lines, .bg .dots{ animation: none !important; }
+      .menu, .scrim{ transition: none !important; }
+      .card{ animation: none !important; opacity:1; transform:none; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="bg" aria-hidden="true">
+    <div class="glow"></div>
+    <div class="lines"></div>
+    <div class="dots"></div>
+    <div class="vignette"></div>
+  </div>
+
+  <!-- Slide-down menu -->
+  <div class="scrim" id="scrim" aria-hidden="true"></div>
+
+  <aside class="menu" id="menu" aria-label="Mobile Menu" aria-hidden="true">
+    <div class="wrap">
+      <div class="menuHeader">
+        <div class="brand" style="gap:.65rem;">
+          <div class="mark" style="width:40px;height:40px;border-radius:14px;">
+            <img src="/assets/sns-logo-purple.png" alt="Saku Network Solutions logo">
+          </div>
+          <div class="brandText">
+            <strong>SAKU NETWORK SOLUTIONS</strong>
+            <span>Network infrastructure, done clean.</span>
+          </div>
+        </div>
+
+        <button class="iconBtn" id="closeMenu" aria-label="Close menu">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M6 6l12 12M18 6L6 18" stroke="rgba(244,240,255,.92)" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <nav class="menuLinks" aria-label="Primary">
+        <a href="/home/">Home</a>
+        <a href="/sns/">Services</a>
+        <a href="/experience/">Credibility</a>
+        <a href="/other/">Resources</a>
+        <a href="/socials/">Contact</a>
+      </nav>
+
+      <div class="menuActions">
+        <a class="btn" href="/sns-login/">Client Login</a>
+        <a class="btn primary" href="/sns-inquiry/">Start an Inquiry</a>
+        <a class="btn" href="#" id="viewDesktop">View Desktop Site</a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Top nav -->
+  <header class="topnav">
+    <div class="wrap">
+      <div class="navrow">
+        <div class="brand">
+          <div class="mark">
+            <img src="/assets/sns-logo-purple.png" alt="Saku Network Solutions logo">
+          </div>
+          <div class="brandText">
+            <strong>SAKU NETWORK SOLUTIONS</strong>
+            <span>Network infrastructure, done clean.</span>
+          </div>
+        </div>
+
+        <button class="iconBtn" id="openMenu" aria-label="Open menu">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M4 7h16M4 12h16M4 17h16" stroke="rgba(244,240,255,.92)" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="wrap">
+      <div class="cardWrap">
+        <div class="card">
+          <div class="titleBlock">
+            <div class="badge" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path d="M18 6L6 18M6 6l12 12" stroke="rgba(244,240,255,.92)" stroke-width="2.2" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div>
+              <h1>Checkout Canceled</h1>
+              <div class="sub">No charges were made. You can start again anytime from your dashboard.</div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="pillrow" aria-label="Summary">
+            <div class="pill"><strong>Status</strong>: Not started</div>
+            <div class="pill"><strong>Next step</strong>: Return to dashboard</div>
+          </div>
+
+          <div class="actions">
+            <a class="btn primary" href="/sns-dashboard/index.html">Return to Dashboard</a>
+            <a class="btn ghost" href="/sns-dashboard/index.html">Try Again</a>
+          </div>
+
+          <div class="helper">
+            If you meant to subscribe, return to the dashboard and restart checkout when ready.
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Mobile menu (reference behavior)
+    (function(){
+      const menu = document.getElementById("menu");
+      const scrim = document.getElementById("scrim");
+      const openBtn = document.getElementById("openMenu");
+      const closeBtn = document.getElementById("closeMenu");
+
+      function open(){
+        menu.classList.add("open");
+        scrim.classList.add("open");
+        menu.setAttribute("aria-hidden","false");
+        scrim.setAttribute("aria-hidden","false");
+        document.body.style.overflow = "hidden";
+      }
+      function close(){
+        menu.classList.remove("open");
+        scrim.classList.remove("open");
+        menu.setAttribute("aria-hidden","true");
+        scrim.setAttribute("aria-hidden","true");
+        document.body.style.overflow = "";
+      }
+
+      openBtn.addEventListener("click", open);
+      closeBtn.addEventListener("click", close);
+      scrim.addEventListener("click", close);
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") close();
+      });
+    })();
+  </script>
+
+  <script>
+    // View Desktop Site preference (reference behavior)
+    (function(){
+      const a = document.getElementById("viewDesktop");
+      if (!a) return;
+      a.addEventListener("click", function(e){
+        e.preventDefault();
+        localStorage.setItem("sns_force_desktop", "1");
+        location.replace("/sns-subscribe-cancel/");
+      });
+    })();
+  </script>
+</body>
+</html>
