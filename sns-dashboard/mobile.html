@@ -1048,20 +1048,23 @@ body{
     const elPaidAmount = document.getElementById("paidAmount");
 
 
-    async function requireUser(){
-      const { data } = await sb.auth.getUser();
-      const user = data?.user;
+    async function requireUser() {
+      const { data: { session } } = await sb.auth.getSession();
+      const user = session?.user;
+
       if (!user) {
         window.location.href = "/sns-login/";
         return null;
       }
+
       who.textContent = user.email;
       return user;
     }
 
+
     logoutBtn.addEventListener("click", async () => {
       await sb.auth.signOut();
-      window.location.href = "/sns/index.html";
+      window.location.href = "/sns-login/";
     });
 
     function fmtDate(iso){
@@ -1180,36 +1183,18 @@ body{
     }
 
 
-    async function getAccessTokenOrThrow() {
-      // 1) Try current session
-      let { data: { session } } = await sb.auth.getSession();
-      if (session?.access_token) return session.access_token;
+    async function callFn(name, body) {
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session?.access_token) throw new Error("Not logged in.");
 
-      // 2) Attempt refresh (fixes the “logged in but session missing” edge case)
-      let refreshed = await sb.auth.refreshSession();
-      const token = refreshed.data?.session?.access_token;
-      if (token) return token;
-
-      throw new Error("Not logged in.");
-    }
-
-    async function callFn(name, body){
-      const token = await getAccessTokenOrThrow();
-
-      const r = await fetch(FN_BASE + "/" + name, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer " + token,
-        },
-        body: JSON.stringify(body || {})
+      const { data, error } = await sb.functions.invoke(name, {
+        body: body || {}
       });
 
-      let j = null;
-      try { j = await r.json(); } catch {}
-      if (!r.ok) throw new Error(j?.error || ("Edge error " + r.status));
-      return j;
+      if (error) throw new Error(error.message || "Edge function error");
+      return data;
     }
+
 
 
     subscribeBtn.addEventListener("click", async () => {
