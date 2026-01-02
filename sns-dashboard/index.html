@@ -484,12 +484,20 @@ body{
       window.location.href = "/sns-inquiry-history/index.html";
     });
 
-    async function loadSubscription(userId){
-      // Fetch subscription snapshot (server reads billing_subscriptions via RLS)
-      const resp = await callFn("get-billing-status");
-      if (freshErr) throw freshErr;
+    async function loadSubscription() {
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session?.access_token) return; // not logged in; requireUser() handles redirect
 
-      // get-billing-status returns: { subscription: null | { ... } }
+      const { data: resp, error } = await sb.functions.invoke("get-billing-status", {
+        headers: { Authorization: `Bearer ${session.access_token}` }
+      });
+
+      if (error) {
+        subState.innerHTML = `<div class="muted">Could not load subscription.</div>`;
+        console.error("get-billing-status error:", error);
+        return;
+      }
+
       const sub = resp?.subscription ?? null;
 
       if (!sub) {
@@ -502,14 +510,12 @@ body{
         return;
       }
 
-      // Normalize display strings
       const statusRaw = (sub.status || "unknown").toString();
       const statusPretty = statusRaw.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
 
       const paymentRaw = (sub.last_payment_status || "unknown").toString();
       const paymentPretty = paymentRaw.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
 
-      // Amounts / dates (your function returns last_payment_amount in dollars)
       const paid = (sub.last_payment_amount != null)
         ? `$${Number(sub.last_payment_amount).toFixed(2)}`
         : "—";
@@ -523,27 +529,17 @@ body{
       elPaidAmount.textContent = `Paid: ${paid}`;
       elPeriodEnd.textContent = `Current Period End: ${periodEnd}`;
 
-      // Buttons
       const activeish = ["active","trialing","past_due","unpaid"].includes(statusRaw);
       manageBtn.style.display = activeish ? "inline-flex" : "none";
 
-      // Helpful note line
       subState.innerHTML = `<div class="muted">${
-        statusRaw === "active"
-          ? "Subscription is active."
-          : statusRaw === "trialing"
-          ? "Trial is active."
-          : statusRaw === "past_due"
-          ? "Payment is past due — update billing to restore service."
-          : "No active subscription."
+        statusRaw === "active" ? "Subscription is active."
+        : statusRaw === "trialing" ? "Trial is active."
+        : statusRaw === "past_due" ? "Payment is past due — update billing to restore service."
+        : "No active subscription."
       }</div>`;
-
-      subState.classList.remove("fadeIn");
-      void subState.offsetWidth;
-      subState.classList.add("fadeIn");
-
-
     }
+
 
 
     async function callFn(name, body) {
