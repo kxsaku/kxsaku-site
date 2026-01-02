@@ -393,6 +393,7 @@ body{
         detectSessionInUrl: true
       }
     });
+    console.log("SESSION:", (await sb.auth.getSession()).data.session);
     const FN_BASE = `${SUPABASE_URL}/functions/v1`;
 
     const who = document.getElementById("who");
