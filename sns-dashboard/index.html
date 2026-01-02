@@ -486,7 +486,7 @@ body{
 
     async function loadSubscription(userId){
       // Fetch subscription snapshot (server reads billing_subscriptions via RLS)
-      const { data: resp, error: freshErr } = await sb.functions.invoke("get-billing-status");
+      const resp = await callFn("get-billing-status");
       if (freshErr) throw freshErr;
 
       // get-billing-status returns: { subscription: null | { ... } }
@@ -551,12 +551,16 @@ body{
       if (!session?.access_token) throw new Error("Not logged in.");
 
       const { data, error } = await sb.functions.invoke(name, {
-        body: body || {}
+        body: body || {},
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
       });
 
       if (error) throw new Error(error.message || "Edge function error");
       return data;
     }
+
 
 
 
