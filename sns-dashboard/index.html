@@ -405,20 +405,22 @@ body{
     const elPaidAmount = document.getElementById("paidAmount");
 
 
-    async function requireUser(){
-      const { data } = await sb.auth.getUser();
-      const user = data?.user;
+    async function requireUser() {
+      const { data: { session } } = await sb.auth.getSession();
+      const user = session?.user;
+
       if (!user) {
-        window.location.href = "/sns/index.html";
+        window.location.href = "/sns-login/";
         return null;
       }
+
       who.textContent = user.email;
       return user;
     }
 
     logoutBtn.addEventListener("click", async () => {
       await sb.auth.signOut();
-      window.location.href = "/sns/index.html";
+      window.location.href = "/sns-login/";
     });
 
     function fmtDate(iso){
