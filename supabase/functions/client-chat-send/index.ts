@@ -54,7 +54,16 @@ function getEnv(name: string) {
 type ReqBody = {
   body?: string;
   reply_to_message_id?: string | null;
+
+  // attachments passed from UI after upload
+  attachments?: Array<{
+    storage_path: string;
+    original_name: string;
+    mime_type: string;
+    size_bytes: number;
+  }>;
 };
+
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return json({ ok: true }, 200);
@@ -82,6 +91,8 @@ serve(async (req) => {
     const body = (await req.json().catch(() => ({}))) as ReqBody;
     const text = (body.body || "").trim();
     const replyTo = (body.reply_to_message_id || null) as string | null;
+    const attachments = Array.isArray(body.attachments) ? body.attachments : [];
+
 
     if (!text) return json({ error: "Missing body" }, 400);
 
@@ -146,6 +157,29 @@ serve(async (req) => {
       .single();
 
     if (insMsg.error) return json({ error: insMsg.error.message }, 500);
+
+    // If attachments were provided, link them to this message
+if (attachments.length > 0) {
+  const rows = attachments
+    .filter(a => a?.storage_path && a?.original_name && a?.mime_type)
+    .map(a => ({
+      thread_id: threadId,
+      message_id: insMsg.data.id,
+      uploader_user_id: uid,
+      uploader_role: "client",
+      storage_bucket: "chat-attachments",
+      storage_path: a.storage_path,
+      original_name: a.original_name,
+      mime_type: a.mime_type,
+      size_bytes: Number(a.size_bytes || 0),
+    }));
+
+  if (rows.length > 0) {
+    const insAtt = await sb.from("chat_attachments").insert(rows);
+    if (insAtt.error) return json({ error: insAtt.error.message }, 500);
+  }
+}
+
 
         // Email notify admin (throttled per-thread)
     try {
