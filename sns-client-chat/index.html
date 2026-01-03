@@ -762,14 +762,7 @@
     const origCurrent = document.getElementById("origCurrent");
     const origOriginal = document.getElementById("origOriginal");
 
-    function esc(s){
-    return String(s ?? "")
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
-    }
+
 
     function openOrigModal(){
     origModal.classList.add("on");
@@ -994,8 +987,9 @@
       }
 
       messagesEl.innerHTML = messages.map(m => {
-        const cls = m.deleted ? "deleted" : (m.sender_role === "admin" ? "admin" : "client");
-        const body = m.deleted ? "Deleted Message" : (m.body || "");
+        const isDeleted = !!m.deleted || !!m.deleted_at;
+        const cls = isDeleted ? "deleted" : (m.sender_role === "admin" ? "admin" : "client");
+        const body = isDeleted ? "Deleted Message" : (m.body || "");
         const receipts = [];
         if (m.delivered_at) receipts.push("Delivered");
         if (m.read_by_client_at) receipts.push("Read");
