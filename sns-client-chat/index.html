@@ -501,6 +501,85 @@
     @media (prefers-reduced-motion: reduce){
       *{ animation: none !important; transition: none !important; scroll-behavior: auto !important; }
     }
+
+    /* --------------------------
+    Admin "View Original" Modal
+    -------------------------- */
+    .origModal {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    z-index: 9999;
+    background: rgba(0,0,0,.55);
+    backdrop-filter: blur(8px);
+    }
+    .origModal.on { display: flex; }
+
+    .origCard{
+    width: min(680px, 96vw);
+    border-radius: 18px;
+    border: 1px solid rgba(255,255,255,.14);
+    background: rgba(255,255,255,.06);
+    backdrop-filter: blur(14px);
+    box-shadow: 0 18px 60px rgba(0,0,0,.45);
+    overflow: hidden;
+    }
+
+    .origHeader{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(255,255,255,.10);
+    }
+    .origTitle{
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    font-size: 12px;
+    color: rgba(244,240,255,.88);
+    }
+    .origClose{
+    cursor:pointer;
+    border-radius: 999px;
+    padding: 8px 10px;
+    border: 1px solid rgba(255,255,255,.14);
+    background: rgba(255,255,255,.06);
+    color: rgba(244,240,255,.86);
+    }
+
+    .origBody{
+    padding: 14px 16px 16px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    }
+
+    .origBlock{
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,.10);
+    background: rgba(10, 6, 32, .38);
+    padding: 10px 12px;
+    }
+    .origLabel{
+    font-size: 11px;
+    opacity: .75;
+    margin-bottom: 6px;
+    }
+    .origText{
+    white-space: pre-wrap;
+    line-height: 1.35;
+    font-size: 13.5px;
+    color: rgba(244,240,255,.92);
+    }
+    .origText.red{
+    color: rgba(255, 110, 110, .92);
+    }
+
+
   </style>
 </head>
 
@@ -651,6 +730,36 @@
 
     const exportBtn = document.getElementById("exportBtn");
     const broadcastBtn = document.getElementById("broadcastBtn");
+
+    // Admin: View Original modal refs
+    const origModal = document.getElementById("origModal");
+    const origClose = document.getElementById("origClose");
+    const origMeta = document.getElementById("origMeta");
+    const origCurrent = document.getElementById("origCurrent");
+    const origOriginal = document.getElementById("origOriginal");
+
+    function esc(s){
+    return String(s ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    function openOrigModal(){
+    origModal.classList.add("on");
+    origModal.setAttribute("aria-hidden","false");
+    }
+    function closeOrigModal(){
+    origModal.classList.remove("on");
+    origModal.setAttribute("aria-hidden","true");
+    }
+    origClose.addEventListener("click", closeOrigModal);
+    origModal.addEventListener("click", (e) => {
+    if (e.target === origModal) closeOrigModal();
+    });
+
 
     let clients = [];
     let activeClient = null;
@@ -976,5 +1085,33 @@
       if (ok) await loadClientList();
     })();
   </script>
+
+  <!-- Admin: View Original Modal -->
+<div id="origModal" class="origModal" aria-hidden="true">
+  <div class="origCard">
+    <div class="origHeader">
+      <div class="origTitle">Message Details</div>
+      <button id="origClose" class="origClose">Close</button>
+    </div>
+
+    <div class="origBody">
+      <div class="origBlock">
+        <div class="origLabel" id="origMeta">—</div>
+      </div>
+
+      <div class="origBlock">
+        <div class="origLabel">Current (what the client/admin sees)</div>
+        <div id="origCurrent" class="origText"></div>
+      </div>
+
+      <div class="origBlock">
+        <div class="origLabel">Original (admin-only)</div>
+        <div id="origOriginal" class="origText"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 </body>
 </html>
