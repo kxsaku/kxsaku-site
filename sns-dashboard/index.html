@@ -1020,7 +1020,48 @@ function chatSendTyping(on){
         chatInput.focus();
         return;
       }
-      });
+
+      if (act === "edit") {
+        const m = chatMessages.find(x => x.id === id);
+        if (!m || m.deleted) return;
+
+        const next = prompt("Edit your message:", m.body || "");
+        if (next == null) return;
+
+        try {
+          const j = await callFn("client-chat-edit", { message_id: id, body: next });
+          if (j?.message) {
+            const idx = chatMessages.findIndex(x => x.id === id);
+            if (idx !== -1) chatMessages[idx] = { ...chatMessages[idx], ...j.message, edited: true };
+            chatRender();
+          } else {
+            await chatLoadHistory();
+          }
+        } catch (e2) {
+          chatHint.textContent = e2?.message || String(e2);
+        }
+        return;
+      }
+
+      if (act === "delete") {
+        if (!confirm("Delete this message? It will show as 'Deleted Message'.")) return;
+
+        try {
+          const j = await callFn("client-chat-delete", { message_id: id });
+          if (j?.message) {
+            const idx = chatMessages.findIndex(x => x.id === id);
+            if (idx !== -1) chatMessages[idx] = { ...chatMessages[idx], ...j.message, deleted: true, body: "Deleted Message" };
+            chatRender();
+          } else {
+            await chatLoadHistory();
+          }
+        } catch (e2) {
+          chatHint.textContent = e2?.message || String(e2);
+        }
+        return;
+      }
+    });
+
 
 
       if (act === "edit") {
@@ -1064,7 +1105,7 @@ function chatSendTyping(on){
         return;
       }
 
-      chatStopRealtime();
+
     async function chatLoadHistory(){
       chatState.textContent = "Loading…";
       try{
