@@ -457,11 +457,17 @@
       const token = sess?.session?.access_token;
       if (!token) throw new Error("Not logged in.");
 
-      const res = await fetch(`${SUPABASE_URL}/functions/v1/${fnName}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
-        body: JSON.stringify(payload),
-      });
+      let res;
+      try{
+        res = await fetch(`${SUPABASE_URL}/functions/v1/${fnName}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+          body: JSON.stringify(payload),
+        });
+      }catch(fetchErr){
+        // Most common causes: missing Edge Function deployment, network/CORS error, adblock, or blocked third-party requests.
+        throw new Error(fetchErr?.message || "NetworkError when attempting to fetch resource.");
+      }
       const j = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(j?.error || "Request failed");
       return j;
@@ -669,8 +675,6 @@
         loginErr.textContent = e?.message || String(e);
       }
     });
-
-    sb.auth.onAuthStateChange(() => { location.reload(); });
 
     ensureAdminOrShowLogin();
   </script>
