@@ -746,6 +746,8 @@
     const chatSub = document.getElementById("chatSub");
     const chatErr = document.getElementById("chatErr");
     const messagesEl = document.getElementById("messages");
+    const typingLine = document.getElementById("typingLine");
+
 
     const composer = document.getElementById("composer");
     const sendBtn = document.getElementById("sendBtn");
@@ -780,7 +782,14 @@
 
     let clients = [];
     let activeClient = null;
+    let activeThreadId = null;
     let messages = [];
+
+    let rtChannel = null;
+    let typingHideTimer = null;
+    let typingSendTimer = null;
+    let typingOn = false;
+
 
     function sanitize(str){
       return String(str ?? "")
@@ -886,6 +895,116 @@
       if (!res.ok) throw new Error(j?.error || `This page requires the Edge Function: ${fnName}.`);
       return j;
     }
+
+    function stopRealtime(){
+  try{
+    if (rtChannel){
+      sb.removeChannel(rtChannel);
+      rtChannel = null;
+    }
+  }catch(_){}
+}
+
+function startRealtime(){
+  stopRealtime();
+  if (!activeThreadId) return;
+
+  rtChannel = sb
+    .channel(`chat:${activeThreadId}`)
+    .on("postgres_changes", {
+      event: "INSERT",
+      schema: "public",
+      table: "chat_messages",
+      filter: `thread_id=eq.${activeThreadId}`,
+    }, (payload) => {
+      const m = payload.new;
+      if (!m?.id) return;
+
+      // normalize to your UI shape
+      const msg = {
+        id: m.id,
+        sender_role: m.sender_role,
+        body: m.body,
+        created_at: m.created_at,
+        edited: !!m.edited_at,
+        original_body: m.original_body ?? null,
+        deleted: !!m.deleted_at,
+        delivered_at: m.delivered_at ?? null,
+        read_by_client_at: m.read_by_client_at ?? null,
+      };
+
+      // Dedup
+      if (messages.some(x => x.id === msg.id)) return;
+
+      const wasNear = (messagesEl.scrollHeight - messagesEl.scrollTop - messagesEl.clientHeight) < 140;
+
+      messages.push(msg);
+      renderMessages();
+
+      if (wasNear){
+        requestAnimationFrame(() => { messagesEl.scrollTop = messagesEl.scrollHeight; });
+      } else {
+        updateJump();
+      }
+
+      // If this is NOT the active client thread, refresh client list order/badges
+      // (simple + reliable)
+      loadClientList().catch(() => {});
+    })
+    .on("postgres_changes", {
+      event: "UPDATE",
+      schema: "public",
+      table: "chat_messages",
+      filter: `thread_id=eq.${activeThreadId}`,
+    }, (payload) => {
+      const m = payload.new;
+      if (!m?.id) return;
+
+      const idx = messages.findIndex(x => x.id === m.id);
+      if (idx === -1) return;
+
+      messages[idx] = {
+        ...messages[idx],
+        body: m.body,
+        edited: !!m.edited_at,
+        original_body: m.original_body ?? messages[idx].original_body,
+        deleted: !!m.deleted_at,
+        delivered_at: m.delivered_at ?? messages[idx].delivered_at,
+        read_by_client_at: m.read_by_client_at ?? messages[idx].read_by_client_at,
+      };
+
+      renderMessages();
+    })
+    .on("broadcast", { event: "typing" }, (payload) => {
+      // payload: { role: "client"|"admin", on: boolean }
+      const p = payload?.payload || {};
+      if (p.role !== "client") return;
+
+      typingLine.classList.toggle("on", !!p.on);
+
+      // auto-hide if they stop sending typing events
+      clearTimeout(typingHideTimer);
+      typingHideTimer = setTimeout(() => {
+        typingLine.classList.remove("on");
+      }, 1600);
+    })
+    .subscribe();
+}
+
+function sendTyping(on){
+  if (!rtChannel) return;
+
+  // avoid spamming identical state
+  if (typingOn === on) return;
+  typingOn = on;
+
+  rtChannel.send({
+    type: "broadcast",
+    event: "typing",
+    payload: { role: "admin", on: !!on },
+  });
+}
+
 
     async function adminViewOriginal(messageId){
         const j = await callEdge("admin-chat-view-original", { message_id: messageId });
@@ -994,8 +1113,8 @@
         if (m.delivered_at) receipts.push("Delivered");
         if (m.read_by_client_at) receipts.push("Read");
         const receiptText = receipts.length ? receipts.join(" · ") : "—";
-        const isEdited = !!m.edited_at;
-        const isDeleted = !!m.deleted;
+        const isEdited = !!m.edited || !!m.edited_at;
+
 
         return `
         <div class="msg ${cls}">
@@ -1022,6 +1141,9 @@
     }
 
     function setActiveClient(c){
+      stopRealtime();
+      typingLine.classList.remove("on");
+      activeThreadId = null;
       activeClient = c;
       chatTitle.textContent = `Chat · ${c.full_name || c.email || "Client"}`;
       chatSub.textContent = c.business_name ? c.business_name : (c.phone ? `Phone: ${c.phone}` : "—");
@@ -1055,16 +1177,23 @@
     }
 
     async function loadHistory(){
-      if (!activeClient) return;
-      messages = [];
-      renderMessages();
-      try{
-        const data = await callEdge("admin-chat-history", { user_id: activeClient.user_id, limit: 60 });
-        messages = Array.isArray(data?.messages) ? data.messages : [];
-        renderMessages();
-      }catch(e){
-        showChatErr(e?.message || String(e));
-      }
+    if (!activeClient) return;
+    messages = [];
+    renderMessages();
+    try{
+    const data = await callEdge("admin-chat-history", { user_id: activeClient.user_id, limit: 60 });
+
+    activeThreadId = data?.thread_id || null;
+
+    messages = Array.isArray(data?.messages) ? data.messages : [];
+    renderMessages();
+
+    // start realtime AFTER you have thread_id
+    startRealtime();
+    }catch(e){
+    showChatErr(e?.message || String(e));
+    }
+
     }
 
     async function sendMessage(){
@@ -1074,6 +1203,7 @@
 
       composer.value = "";
       composer.focus();
+      sendTyping(false);
 
       try{
         const data = await callEdge("admin-chat-send", { user_id: activeClient.user_id, body: text });
@@ -1125,11 +1255,18 @@
 
     sendBtn.addEventListener("click", sendMessage);
     composer.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" && !e.shiftKey){
-        e.preventDefault();
-        sendMessage();
-      }
-    });
+        // typing on (debounced off)
+        sendTyping(true);
+        clearTimeout(typingSendTimer);
+        typingSendTimer = setTimeout(() => sendTyping(false), 900);
+
+        if (e.key === "Enter" && !e.shiftKey){
+            e.preventDefault();
+            sendTyping(false);
+            sendMessage();
+        }
+        });
+
 
     logoutBtn.addEventListener("click", logout);
     loginBtn.addEventListener("click", login);

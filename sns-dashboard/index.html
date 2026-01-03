@@ -549,6 +549,8 @@ body{
     <div>
       <div class="cardTitle">Client Chat</div>
       <div id="chatState" class="cardStatus">Loading…</div>
+      <div id="chatTyping" class="mutedSm" style="margin-top:6px; display:none;">Admin is typing…</div>
+
 
       <div class="chatMeta">
         <div class="chatTag"><span id="chatOnlineDot" class="chatDot"></span><span id="chatOnlineText">Offline</span></div>
@@ -627,6 +629,12 @@ body{
     const chatRefresh = document.getElementById("chatRefresh");
     const chatSearch = document.getElementById("chatSearch");
     const chatHint = document.getElementById("chatHint");
+    const chatTyping = document.getElementById("chatTyping");
+
+    let chatTypingHideTimer = null;
+    let chatTypingSendTimer = null;
+    let chatTypingOn = false;
+
 
     const chatOnlineDot = document.getElementById("chatOnlineDot");
     const chatOnlineText = document.getElementById("chatOnlineText");
@@ -788,6 +796,101 @@ body{
       return data;
     }
 
+    function chatStopRealtime(){
+  try{
+    if (chatRealtimeSub){
+      sb.removeChannel(chatRealtimeSub);
+      chatRealtimeSub = null;
+    }
+  }catch(_){}
+}
+
+function chatStartRealtime(){
+  chatStopRealtime();
+  if (!chatThreadId) return;
+
+  chatRealtimeSub = sb
+    .channel(`chat:${chatThreadId}`)
+    .on("postgres_changes", {
+      event: "INSERT",
+      schema: "public",
+      table: "chat_messages",
+      filter: `thread_id=eq.${chatThreadId}`,
+    }, (payload) => {
+      const m = payload.new;
+      if (!m?.id) return;
+
+      const msg = {
+        id: m.id,
+        sender_role: m.sender_role,
+        body: m.body,
+        created_at: m.created_at,
+        edited: !!m.edited_at,
+        deleted: !!m.deleted_at,
+        reply_to_message_id: m.reply_to_message_id ?? null,
+      };
+
+      if (chatMessages.some(x => x.id === msg.id)) return;
+
+      const wasNear = chatNearBottom();
+
+      chatMessages.push(msg);
+      chatRender();
+
+      if (wasNear){
+        requestAnimationFrame(() => { chatBody.scrollTop = chatBody.scrollHeight; });
+      } else {
+        setUnread(true);
+      }
+    })
+    .on("postgres_changes", {
+      event: "UPDATE",
+      schema: "public",
+      table: "chat_messages",
+      filter: `thread_id=eq.${chatThreadId}`,
+    }, (payload) => {
+      const m = payload.new;
+      if (!m?.id) return;
+
+      const idx = chatMessages.findIndex(x => x.id === m.id);
+      if (idx === -1) return;
+
+      chatMessages[idx] = {
+        ...chatMessages[idx],
+        body: m.body,
+        edited: !!m.edited_at,
+        deleted: !!m.deleted_at,
+      };
+
+      chatRender();
+    })
+    .on("broadcast", { event: "typing" }, (payload) => {
+      const p = payload?.payload || {};
+      if (p.role !== "admin") return;
+
+      chatTyping.style.display = p.on ? "block" : "none";
+
+      clearTimeout(chatTypingHideTimer);
+      chatTypingHideTimer = setTimeout(() => {
+        chatTyping.style.display = "none";
+      }, 1600);
+    })
+    .subscribe();
+}
+
+function chatSendTyping(on){
+  if (!chatRealtimeSub) return;
+  if (chatTypingOn === on) return;
+  chatTypingOn = on;
+
+  chatRealtimeSub.send({
+    type: "broadcast",
+    event: "typing",
+    payload: { role: "client", on: !!on },
+  });
+}
+
+
     // --------------------
     // Client Chat helpers
     // --------------------
@@ -892,6 +995,8 @@ body{
         chatInput.focus();
         return;
       }
+      });
+
 
       if (act === "edit") {
         const m = chatMessages.find(x => x.id === id);
@@ -934,7 +1039,7 @@ body{
         return;
       }
 
-
+      chatStopRealtime();
     async function chatLoadHistory(){
       chatState.textContent = "Loading…";
       try{
@@ -943,6 +1048,7 @@ body{
         chatMessages = Array.isArray(j.messages) ? j.messages : [];
         chatState.textContent = "Ready";
         chatRender();
+        chatStartRealtime();
         requestAnimationFrame(() => { chatBody.scrollTop = chatBody.scrollHeight; });
       }catch(e){
         chatState.textContent = "Chat unavailable.";
@@ -960,6 +1066,7 @@ body{
         replyToId = null;
         chatHint.textContent = "";
         chatInput.value = "";
+        chatSendTyping(false);
 
         if (j?.message) {
           chatMessages.push(j.message);
@@ -977,11 +1084,17 @@ body{
 
     chatSend.addEventListener("click", chatSendMsg);
     chatInput.addEventListener("keydown", (e) => {
+      chatSendTyping(true);
+      clearTimeout(chatTypingSendTimer);
+      chatTypingSendTimer = setTimeout(() => chatSendTyping(false), 900);
+
       if (e.key === "Enter" && !e.shiftKey){
         e.preventDefault();
+        chatSendTyping(false);
         chatSendMsg();
       }
     });
+
 
     chatRefresh.addEventListener("click", chatLoadHistory);
     chatSearch.addEventListener("input", () => {
