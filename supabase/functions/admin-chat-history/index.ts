@@ -117,7 +117,7 @@ serve(async (req) => {
       };
     });
 
-    return json({ ok: true, messages });
+    return json({ ok: true, thread_id: threadId, messages });
   } catch (e) {
     return json({ error: e?.message || String(e) }, 500);
   }
