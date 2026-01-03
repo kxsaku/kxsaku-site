@@ -805,6 +805,25 @@ body{
   }catch(_){}
 }
 
+let chatMarkReadCooldown = false;
+
+async function chatMarkRead(){
+  if (!chatThreadId) return;
+  if (document.visibilityState !== "visible") return;
+
+  // simple throttle to avoid spamming updates
+  if (chatMarkReadCooldown) return;
+  chatMarkReadCooldown = true;
+  setTimeout(() => { chatMarkReadCooldown = false; }, 900);
+
+  try{
+    await callFn("client-chat-mark-read", { thread_id: chatThreadId });
+  }catch(_){
+    // silent on purpose (read receipts should never break chat UI)
+  }
+}
+
+
 function chatStartRealtime(){
   chatStopRealtime();
   if (!chatThreadId) return;
@@ -842,6 +861,12 @@ function chatStartRealtime(){
       } else {
         setUnread(true);
       }
+
+      // If an admin message arrived and the client is viewing the chat, mark read
+      if (msg.sender_role === "admin" && wasNear) {
+        chatMarkRead();
+      }
+
     })
     .on("postgres_changes", {
       event: "UPDATE",
@@ -1050,6 +1075,8 @@ function chatSendTyping(on){
         chatRender();
         chatStartRealtime();
         requestAnimationFrame(() => { chatBody.scrollTop = chatBody.scrollHeight; });
+        chatMarkRead();
+
       }catch(e){
         chatState.textContent = "Chat unavailable.";
         chatHint.textContent = e?.message || String(e);
@@ -1081,6 +1108,22 @@ function chatSendTyping(on){
         chatSend.disabled = false;
       }
     }
+
+    chatBody.addEventListener("scroll", () => {
+  if (chatNearBottom()){
+    if (chatUnreadDot.classList.contains("new")) setUnread(false);
+    chatMarkRead();
+  }
+});
+
+window.addEventListener("focus", () => {
+  if (chatNearBottom()) chatMarkRead();
+});
+
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible" && chatNearBottom()) chatMarkRead();
+});
+
 
     chatSend.addEventListener("click", chatSendMsg);
     chatInput.addEventListener("keydown", (e) => {
