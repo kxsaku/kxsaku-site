@@ -691,7 +691,31 @@
       <div class="login-err" id="loginErr"></div>
     </div>
   </div>
+    <!-- Admin: View Original Modal -->
+<div id="origModal" class="origModal" aria-hidden="true">
+  <div class="origCard">
+    <div class="origHeader">
+      <div class="origTitle">Message Details</div>
+      <button id="origClose" class="origClose">Close</button>
+    </div>
 
+    <div class="origBody">
+      <div class="origBlock">
+        <div class="origLabel" id="origMeta">—</div>
+      </div>
+
+      <div class="origBlock">
+        <div class="origLabel">Current (what the client/admin sees)</div>
+        <div id="origCurrent" class="origText"></div>
+      </div>
+
+      <div class="origBlock">
+        <div class="origLabel">Original (admin-only)</div>
+        <div id="origOriginal" class="origText"></div>
+      </div>
+    </div>
+  </div>
+</div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const SUPABASE_URL = "https://jgvxmpsjtkedzgygynbl.supabase.co";
@@ -870,6 +894,28 @@
       return j;
     }
 
+    async function adminViewOriginal(messageId){
+        const j = await callEdge("admin-chat-view-original", { message_id: messageId });
+
+        const m = j?.message;
+        if (!m) throw new Error("No message returned.");
+
+        const deleted = !!m.deleted;
+        const edited = !!m.edited;
+
+        origMeta.textContent = `ID: ${m.id} · Sender: ${m.sender_role} · ${edited ? "Edited" : "Not edited"} · ${deleted ? "Deleted" : "Not deleted"}`;
+
+        // Current (what UI shows)
+        origCurrent.textContent = m.body || "";
+
+        // Original (admin-only)
+        origOriginal.textContent = m.original_body || "";
+        origOriginal.classList.toggle("red", deleted);
+
+        openOrigModal();
+        }
+
+
     function fmt(ts){
       if (!ts) return "—";
       try{ return new Date(ts).toLocaleString(); }catch{ return "—"; }
@@ -954,18 +1000,26 @@
         if (m.delivered_at) receipts.push("Delivered");
         if (m.read_by_client_at) receipts.push("Read");
         const receiptText = receipts.length ? receipts.join(" · ") : "—";
+        const isEdited = !!m.edited_at;
+        const isDeleted = !!m.deleted;
+
         return `
-          <div class="msg ${cls}">
+        <div class="msg ${cls}">
             <div class="text">${sanitize(body)}</div>
             <div class="foot">
-              <div class="mini">
+            <div class="mini">
                 <span>${sanitize(fmt(m.created_at))}</span>
                 <span>·</span>
                 <span>${sanitize(receiptText)}</span>
-              </div>
             </div>
-          </div>
+
+            <div class="mini">
+                ${(isEdited || isDeleted) ? `<button class="mini-btn" type="button" data-act="orig" data-id="${sanitize(m.id)}">View Original</button>` : ``}
+            </div>
+            </div>
+        </div>
         `;
+
       }).join("");
 
       requestAnimationFrame(() => {
@@ -1060,6 +1114,21 @@
       if (c) setActiveClient(c);
     });
 
+    messagesEl.addEventListener("click", async (e) => {
+        const btn = e.target.closest("button[data-act='orig']");
+        if (!btn) return;
+
+        const id = btn.getAttribute("data-id");
+        if (!id) return;
+
+        try{
+            await adminViewOriginal(id);
+        }catch(err){
+            showChatErr(err?.message || String(err));
+        }
+        });
+
+
     sendBtn.addEventListener("click", sendMessage);
     composer.addEventListener("keydown", (e) => {
       if (e.key === "Enter" && !e.shiftKey){
@@ -1086,31 +1155,7 @@
     })();
   </script>
 
-  <!-- Admin: View Original Modal -->
-<div id="origModal" class="origModal" aria-hidden="true">
-  <div class="origCard">
-    <div class="origHeader">
-      <div class="origTitle">Message Details</div>
-      <button id="origClose" class="origClose">Close</button>
-    </div>
 
-    <div class="origBody">
-      <div class="origBlock">
-        <div class="origLabel" id="origMeta">—</div>
-      </div>
-
-      <div class="origBlock">
-        <div class="origLabel">Current (what the client/admin sees)</div>
-        <div id="origCurrent" class="origText"></div>
-      </div>
-
-      <div class="origBlock">
-        <div class="origLabel">Original (admin-only)</div>
-        <div id="origOriginal" class="origText"></div>
-      </div>
-    </div>
-  </div>
-</div>
 
 
 </body>
