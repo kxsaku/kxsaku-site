@@ -893,17 +893,28 @@ body{
         return;
       }
 
-      // NOTE: Edit/Delete require additional Edge Functions (we add next).
       if (act === "edit") {
         const m = chatMessages.find(x => x.id === id);
-        if (!m) return;
+        if (!m || m.deleted) return;
+
         const next = prompt("Edit your message:", m.body || "");
         if (next == null) return;
 
-        // placeholder until we add client-chat-edit
-        alert("Edit is wired in the UI. Next step is deploying the client-chat-edit Edge Function.");
+        try{
+          const j = await callFn("client-chat-edit", { message_id: id, body: next });
+          if (j?.message){
+            const idx = chatMessages.findIndex(x => x.id === id);
+            if (idx !== -1) chatMessages[idx] = { ...chatMessages[idx], ...j.message, edited: true };
+            chatRender();
+          } else {
+            await chatLoadHistory();
+          }
+        }catch(e){
+          chatHint.textContent = e?.message || String(e);
+        }
         return;
       }
+
 
       if (act === "delete") {
         // placeholder until we add client-chat-delete
