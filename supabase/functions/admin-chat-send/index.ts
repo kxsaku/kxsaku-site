@@ -2,6 +2,37 @@
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+async function resendEmail(args: {
+  to: string;
+  subject: string;
+  html: string;
+  text?: string;
+}) {
+  const RESEND_API_KEY = getEnv("RESEND_API_KEY");
+  const RESEND_FROM = getEnv("RESEND_FROM");
+
+  const r = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${RESEND_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: RESEND_FROM,
+      to: [args.to],
+      subject: args.subject,
+      html: args.html,
+      text: args.text ?? undefined,
+    }),
+  });
+
+  if (!r.ok) {
+    const t = await r.text().catch(() => "");
+    throw new Error(`Resend error: ${r.status} ${t}`);
+  }
+}
+
+
 function json(data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
@@ -88,6 +119,7 @@ serve(async (req) => {
         .insert({
           user_id,
           created_at: nowIso,
+          last_admin_msg_at: nowIso,
           last_message_at: nowIso,
           last_message_preview: text.slice(0, 140),
           last_sender_role: "admin",
@@ -113,6 +145,7 @@ serve(async (req) => {
       const updThread = await admin
         .from("chat_threads")
         .update({
+          last_admin_msg_at: nowIso,
           last_message_at: nowIso,
           last_message_preview: text.slice(0, 140),
           last_sender_role: "admin",
@@ -158,6 +191,63 @@ serve(async (req) => {
     }
 
     const m = insMsg.data as any;
+
+        // Email notify client (throttled per-thread, no message body)
+    try {
+      const APP_BASE_URL = getEnv("APP_BASE_URL");
+
+      const { data: trow } = await admin
+        .from("chat_threads")
+        .select("id,client_email_muted,last_client_email_sent_at")
+        .eq("id", threadId)
+        .maybeSingle();
+
+      const clientMuted = Boolean(trow?.client_email_muted);
+      const lastClientEmailSentAt = trow?.last_client_email_sent_at
+        ? Date.parse(trow.last_client_email_sent_at)
+        : null;
+
+      const nowMs = Date.now();
+      const TWO_HOURS = 2 * 60 * 60 * 1000;
+
+      const allow = !clientMuted && (!lastClientEmailSentAt || nowMs - lastClientEmailSentAt >= TWO_HOURS);
+
+      if (allow) {
+        const { data: profile } = await admin
+          .from("client_profiles")
+          .select("email,contact_name")
+          .eq("user_id", user_id)
+          .maybeSingle();
+
+        const to = (profile?.email || "").trim();
+        if (to) {
+          const name = profile?.contact_name || "there";
+          const link = `${APP_BASE_URL}/sns-dashboard/`;
+
+          await resendEmail({
+            to,
+            subject: "SNS: You have a new message",
+            html: `
+              <div style="font-family: Arial, sans-serif; line-height: 1.4;">
+                <h2 style="margin:0 0 10px 0;">You have a new message</h2>
+                <p style="margin:0 0 12px 0;">Hi ${name},</p>
+                <p style="margin:0 0 12px 0;">You have a new message from Saku Network Solutions.</p>
+                <p style="margin:0 0 12px 0;"><a href="${link}">Log in to your client dashboard to view it.</a></p>
+              </div>
+            `,
+            text: `Hi ${name},\n\nYou have a new message from Saku Network Solutions.\nLog in to view it: ${link}`,
+          });
+
+          await admin
+            .from("chat_threads")
+            .update({ last_client_email_sent_at: nowIso })
+            .eq("id", threadId);
+        }
+      }
+    } catch (_) {
+      // Do not fail message send if email fails
+    }
+
 
     return json({
       ok: true,

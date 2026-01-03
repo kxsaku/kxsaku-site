@@ -2,6 +2,37 @@
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+async function resendEmail(args: {
+  to: string;
+  subject: string;
+  html: string;
+  text?: string;
+}) {
+  const RESEND_API_KEY = getEnv("RESEND_API_KEY");
+  const RESEND_FROM = getEnv("RESEND_FROM");
+
+  const r = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${RESEND_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: RESEND_FROM,
+      to: [args.to],
+      subject: args.subject,
+      html: args.html,
+      text: args.text ?? undefined,
+    }),
+  });
+
+  if (!r.ok) {
+    const t = await r.text().catch(() => "");
+    throw new Error(`Resend error: ${r.status} ${t}`);
+  }
+}
+
+
 function json(data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
@@ -72,6 +103,7 @@ serve(async (req) => {
         .from("chat_threads")
         .insert({
           user_id: uid,
+          last_client_msg_at: nowIso,
           last_message_at: nowIso,
           last_message_preview: text.slice(0, 140),
           last_sender_role: "client",
@@ -88,6 +120,7 @@ serve(async (req) => {
       const upd = await sb
         .from("chat_threads")
         .update({
+          last_client_msg_at: nowIso,
           last_message_at: nowIso,
           last_message_preview: text.slice(0, 140),
           last_sender_role: "client",
@@ -113,6 +146,76 @@ serve(async (req) => {
       .single();
 
     if (insMsg.error) return json({ error: insMsg.error.message }, 500);
+
+        // Email notify admin (throttled per-thread)
+    try {
+      const ADMIN_EMAIL = getEnv("ADMIN_EMAIL").toLowerCase();
+      const APP_BASE_URL = getEnv("APP_BASE_URL");
+
+      const { data: trow } = await sb
+        .from("chat_threads")
+        .select("id,last_client_msg_at,admin_email_muted,last_admin_email_sent_at")
+        .eq("id", threadId)
+        .maybeSingle();
+
+      const adminMuted = Boolean(trow?.admin_email_muted);
+      const lastClientMsgAt = trow?.last_client_msg_at ? Date.parse(trow.last_client_msg_at) : null;
+
+      // We want: send email only if the previous client message was >= 2 hours ago (or none)
+      // Because we already set last_client_msg_at = nowIso above, we need the "previous" timestamp:
+      // If the table previously had a value, it was overwritten by nowIso only in our update statement.
+      // So: fetch previous BEFORE overwriting is ideal, but we keep it simple by using last_admin_email_sent_at gate.
+      // Rule: if last_admin_email_sent_at is null OR now - last_admin_email_sent_at >= 2h → allow.
+      const lastAdminEmailSentAt = trow?.last_admin_email_sent_at
+        ? Date.parse(trow.last_admin_email_sent_at)
+        : null;
+
+      const nowMs = Date.now();
+      const TWO_HOURS = 2 * 60 * 60 * 1000;
+
+      const allow = !adminMuted && (!lastAdminEmailSentAt || nowMs - lastAdminEmailSentAt >= TWO_HOURS);
+
+      if (allow) {
+        const { data: profile } = await sb
+          .from("client_profiles")
+          .select("contact_name,business_name,phone,email")
+          .eq("user_id", uid)
+          .maybeSingle();
+
+        const name = profile?.contact_name || "Client";
+        const biz = profile?.business_name || "—";
+        const phone = profile?.phone || "—";
+        const clientEmail = profile?.email || "—";
+
+        const ts = new Date(nowIso).toLocaleString("en-US", { hour12: true });
+        const link = `${APP_BASE_URL}/sns-client-chat/?user_id=${encodeURIComponent(uid)}`;
+
+        const subject = `SNS Chat: New message from ${name}`;
+        const html = `
+          <div style="font-family: Arial, sans-serif; line-height: 1.4;">
+            <h2 style="margin:0 0 10px 0;">New client message</h2>
+            <p style="margin:0 0 8px 0;"><b>Name:</b> ${name}</p>
+            <p style="margin:0 0 8px 0;"><b>Business:</b> ${biz}</p>
+            <p style="margin:0 0 8px 0;"><b>Phone:</b> ${phone}</p>
+            <p style="margin:0 0 8px 0;"><b>Email:</b> ${clientEmail}</p>
+            <p style="margin:0 0 8px 0;"><b>Time:</b> ${ts}</p>
+            <p style="margin:10px 0 8px 0;"><b>Message:</b></p>
+            <div style="padding:10px; border:1px solid #ddd; border-radius:8px; white-space:pre-wrap;">${text}</div>
+            <p style="margin:12px 0 0 0;"><a href="${link}">Open this chat</a></p>
+          </div>
+        `;
+
+        await resendEmail({ to: ADMIN_EMAIL, subject, html, text: `${name} (${biz}, ${phone}) @ ${ts}\n\n${text}\n\n${link}` });
+
+        await sb
+          .from("chat_threads")
+          .update({ last_admin_email_sent_at: nowIso })
+          .eq("id", threadId);
+      }
+    } catch (_) {
+      // Do not fail message send if email fails
+    }
+
 
     // Thread trigger will keep last_message_* consistent, but we already set it.
     return json({
