@@ -917,11 +917,23 @@ body{
 
 
       if (act === "delete") {
-        // placeholder until we add client-chat-delete
-        alert("Delete is wired in the UI. Next step is deploying the client-chat-delete Edge Function.");
+        if (!confirm("Delete this message? It will show as 'Deleted Message'.")) return;
+
+        try{
+          const j = await callFn("client-chat-delete", { message_id: id });
+          if (j?.message){
+            const idx = chatMessages.findIndex(x => x.id === id);
+            if (idx !== -1) chatMessages[idx] = { ...chatMessages[idx], ...j.message, deleted: true, body: "Deleted Message" };
+            chatRender();
+          } else {
+            await chatLoadHistory();
+          }
+        }catch(e){
+          chatHint.textContent = e?.message || String(e);
+        }
         return;
       }
-    });
+
 
     async function chatLoadHistory(){
       chatState.textContent = "Loading…";
