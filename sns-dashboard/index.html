@@ -322,6 +322,172 @@ body{
   animation: contentIn .35s ease both;
 }
 
+/* --------------------------
+   Client Chat (Dashboard)
+-------------------------- */
+
+.chatWrap{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  min-height: 420px;
+}
+
+.chatTop{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
+.chatMeta{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top: 8px;
+}
+
+.chatTag{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:7px 10px;
+  border-radius:999px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.06);
+  font-size: 12px;
+  color: rgba(244,240,255,.86);
+  line-height:1;
+  white-space:nowrap;
+}
+.chatDot{
+  width:9px; height:9px;
+  border-radius:999px;
+  display:inline-block;
+  box-shadow: 0 0 0 2px rgba(255,255,255,.06);
+  background: rgba(255,255,255,.18);
+}
+.chatDot.on{ background: rgba(108,255,176,.95); }
+.chatDot.new{
+  background: rgba(179,124,255,.95);
+  box-shadow: 0 0 18px rgba(179,124,255,.35);
+  animation: chatPulse 1.5s ease-in-out infinite;
+}
+@keyframes chatPulse{
+  0%{ filter: brightness(1); }
+  50%{ filter: brightness(1.35); }
+  100%{ filter: brightness(1); }
+}
+
+.chatBody{
+  position:relative;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.04);
+  border-radius: 16px;
+  padding: 12px;
+  height: 340px;
+  overflow:auto;
+  scroll-behavior:smooth;
+}
+
+.chatMsg{
+  max-width: 82%;
+  padding: 10px 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(10, 6, 32, .45);
+  box-shadow: 0 10px 24px rgba(0,0,0,.18);
+  margin: 8px 0;
+}
+.chatMsg.me{
+  margin-left:auto;
+  background: linear-gradient(180deg, rgba(140,125,255,.20), rgba(10, 6, 32, .45));
+  border-color: rgba(160,150,255,.22);
+}
+.chatMsg.them{
+  margin-right:auto;
+  background: linear-gradient(180deg, rgba(90,160,255,.12), rgba(10, 6, 32, .45));
+  border-color: rgba(90,160,255,.16);
+}
+.chatMsg.deleted{
+  border-color: rgba(255,98,98,.28);
+  background: rgba(10, 6, 32, .30);
+}
+
+.chatText{
+  white-space: pre-wrap;
+  line-height: 1.35;
+  font-size: 13.5px;
+  color: rgba(244,240,255,.92);
+}
+
+.chatFoot{
+  margin-top: 8px;
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  flex-wrap:wrap;
+  font-size: 11.5px;
+  color: rgba(244,240,255,.55);
+}
+
+.chatTools{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+
+.chatMiniBtn{
+  padding:6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.05);
+  color: rgba(244,240,255,.86);
+  cursor:pointer;
+  font-size: 11px;
+  letter-spacing:.10em;
+  text-transform:uppercase;
+}
+.chatMiniBtn:hover{ border-color: rgba(190,180,255,.35); }
+
+.chatComposer{
+  display:flex;
+  gap:10px;
+  align-items:flex-end;
+  flex-wrap:wrap;
+}
+
+.chatInput{
+  flex: 1 1 280px;
+  border-radius: 14px;
+  border: 1px solid rgba(160,150,255,.32);
+  background: rgba(255,255,255,.05);
+  padding: 10px 12px;
+  color: rgba(244,240,255,.92);
+  outline:none;
+  min-height: 44px;
+  max-height: 120px;
+  resize: none;
+}
+
+.chatJump{
+  position:absolute;
+  right: 10px;
+  bottom: 10px;
+  opacity: 0;
+  pointer-events:none;
+  transform: translateY(6px);
+  transition: opacity .12s ease, transform .12s ease;
+}
+.chatJump.on{
+  opacity: 1;
+  pointer-events:auto;
+  transform: translateY(0);
+}
+
+
 
 </style>
 
@@ -378,6 +544,47 @@ body{
         </div>
       </div>
 
+      <div class="card">
+  <div class="cardHeader">
+    <div>
+      <div class="cardTitle">Client Chat</div>
+      <div id="chatState" class="cardStatus">Loading…</div>
+
+      <div class="chatMeta">
+        <div class="chatTag"><span id="chatOnlineDot" class="chatDot"></span><span id="chatOnlineText">Offline</span></div>
+        <div class="chatTag"><span id="chatUnreadDot" class="chatDot"></span><span id="chatUnreadText">No new messages</span></div>
+      </div>
+    </div>
+
+    <div class="row" style="margin-top:0;">
+      <button id="chatRefresh" class="btn btnGhost">Refresh</button>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="chatWrap">
+    <div class="chatTop">
+      <div class="mutedSm">Search only inside this chat:</div>
+      <input id="chatSearch" class="search" style="margin-top:0;" placeholder="Search messages…" />
+    </div>
+
+    <div id="chatBody" class="chatBody">
+      <div id="chatJump" class="chatJump">
+        <button id="chatJumpBtn" class="btn btnGhost">Jump to newest</button>
+      </div>
+    </div>
+
+    <div class="chatComposer">
+      <textarea id="chatInput" class="chatInput" placeholder="Type a message… (Enter = send, Shift+Enter = newline)"></textarea>
+      <button id="chatSend" class="btn">Send</button>
+    </div>
+
+    <div class="mutedSm" id="chatHint"></div>
+  </div>
+</div>
+
+
     </div>
   </div>
 
@@ -409,6 +616,31 @@ body{
     const elPayStatus  = document.getElementById("payStatus");
     const elPeriodEnd  = document.getElementById("periodEnd");
     const elPaidAmount = document.getElementById("paidAmount");
+
+    // --------------------
+    // Client Chat elements
+    // --------------------
+    const chatState = document.getElementById("chatState");
+    const chatBody = document.getElementById("chatBody");
+    const chatInput = document.getElementById("chatInput");
+    const chatSend = document.getElementById("chatSend");
+    const chatRefresh = document.getElementById("chatRefresh");
+    const chatSearch = document.getElementById("chatSearch");
+    const chatHint = document.getElementById("chatHint");
+
+    const chatOnlineDot = document.getElementById("chatOnlineDot");
+    const chatOnlineText = document.getElementById("chatOnlineText");
+    const chatUnreadDot = document.getElementById("chatUnreadDot");
+    const chatUnreadText = document.getElementById("chatUnreadText");
+
+    const chatJump = document.getElementById("chatJump");
+    const chatJumpBtn = document.getElementById("chatJumpBtn");
+
+    let chatThreadId = null;
+    let chatMessages = [];
+    let chatRealtimeSub = null;
+    let chatSearchQ = "";
+
 
 
     async function requireUser() {
@@ -556,6 +788,198 @@ body{
       return data;
     }
 
+    // --------------------
+    // Client Chat helpers
+    // --------------------
+    function esc(s){
+      return String(s ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    function chatFmt(iso){
+      try { return new Date(iso).toLocaleString(); } catch { return iso || ""; }
+    }
+
+    function chatNearBottom(){
+      return (chatBody.scrollHeight - chatBody.scrollTop - chatBody.clientHeight) < 120;
+    }
+
+    function chatUpdateJump(){
+      chatJump.classList.toggle("on", !chatNearBottom() && chatMessages.length > 0);
+    }
+
+    chatBody.addEventListener("scroll", chatUpdateJump);
+    chatJumpBtn.addEventListener("click", () => {
+      chatBody.scrollTop = chatBody.scrollHeight;
+    });
+
+    function chatRender(){
+      const q = (chatSearchQ || "").trim().toLowerCase();
+      const view = !q ? chatMessages : chatMessages.filter(m => (m.body || "").toLowerCase().includes(q));
+
+      // keep the jump button usable
+      const wasNear = chatNearBottom();
+
+      // Remove jump container first render-safe
+      chatBody.innerHTML = `
+        <div id="chatJump" class="chatJump">
+          <button id="chatJumpBtn" class="btn btnGhost">Jump to newest</button>
+        </div>
+      `;
+
+      // Re-bind jump controls after reset
+      const _jump = chatBody.querySelector("#chatJump");
+      const _jumpBtn = chatBody.querySelector("#chatJumpBtn");
+      _jumpBtn.addEventListener("click", () => { chatBody.scrollTop = chatBody.scrollHeight; });
+      chatBody.addEventListener("scroll", () => {
+        const near = (chatBody.scrollHeight - chatBody.scrollTop - chatBody.clientHeight) < 120;
+        _jump.classList.toggle("on", !near && view.length > 0);
+      });
+
+      if (!view.length){
+        const empty = document.createElement("div");
+        empty.className = "mutedSm";
+        empty.style.padding = "8px 2px";
+        empty.textContent = q ? "No matches in this chat." : "No messages yet.";
+        chatBody.appendChild(empty);
+        return;
+      }
+
+      view.forEach(m => {
+        const div = document.createElement("div");
+        const who = m.sender_role === "client" ? "me" : "them";
+        const isDeleted = !!m.deleted;
+
+        div.className = `chatMsg ${who} ${isDeleted ? "deleted" : ""}`;
+
+        const body = isDeleted ? "Deleted Message" : (m.body || "");
+        div.innerHTML = `
+          <div class="chatText">${esc(body)}</div>
+          <div class="chatFoot">
+            <div>${esc(chatFmt(m.created_at))}${m.edited ? " · Edited" : ""}</div>
+            <div class="chatTools">
+              ${m.sender_role === "client" && !isDeleted ? `<button class="chatMiniBtn" data-act="edit" data-id="${esc(m.id)}">Edit</button>` : ``}
+              ${m.sender_role === "client" && !isDeleted ? `<button class="chatMiniBtn" data-act="delete" data-id="${esc(m.id)}">Delete</button>` : ``}
+              <button class="chatMiniBtn" data-act="reply" data-id="${esc(m.id)}">Reply</button>
+            </div>
+          </div>
+        `;
+        chatBody.appendChild(div);
+      });
+
+      // Restore scroll position behavior
+      if (wasNear) {
+        requestAnimationFrame(() => { chatBody.scrollTop = chatBody.scrollHeight; });
+      }
+    }
+
+    let replyToId = null;
+
+    chatBody.addEventListener("click", async (e) => {
+      const btn = e.target.closest("button[data-act]");
+      if (!btn) return;
+
+      const act = btn.getAttribute("data-act");
+      const id = btn.getAttribute("data-id");
+
+      if (act === "reply") {
+        replyToId = id;
+        chatHint.textContent = `Replying to message ${id.slice(0,8)}… (send to attach reply)`;
+        chatInput.focus();
+        return;
+      }
+
+      // NOTE: Edit/Delete require additional Edge Functions (we add next).
+      if (act === "edit") {
+        const m = chatMessages.find(x => x.id === id);
+        if (!m) return;
+        const next = prompt("Edit your message:", m.body || "");
+        if (next == null) return;
+
+        // placeholder until we add client-chat-edit
+        alert("Edit is wired in the UI. Next step is deploying the client-chat-edit Edge Function.");
+        return;
+      }
+
+      if (act === "delete") {
+        // placeholder until we add client-chat-delete
+        alert("Delete is wired in the UI. Next step is deploying the client-chat-delete Edge Function.");
+        return;
+      }
+    });
+
+    async function chatLoadHistory(){
+      chatState.textContent = "Loading…";
+      try{
+        const j = await callFn("client-chat-history", { limit: 200 });
+        chatThreadId = j.thread_id || null;
+        chatMessages = Array.isArray(j.messages) ? j.messages : [];
+        chatState.textContent = "Ready";
+        chatRender();
+        requestAnimationFrame(() => { chatBody.scrollTop = chatBody.scrollHeight; });
+      }catch(e){
+        chatState.textContent = "Chat unavailable.";
+        chatHint.textContent = e?.message || String(e);
+      }
+    }
+
+    async function chatSendMsg(){
+      const text = (chatInput.value || "").trim();
+      if (!text) return;
+
+      chatSend.disabled = true;
+      try{
+        const j = await callFn("client-chat-send", { body: text, reply_to_message_id: replyToId });
+        replyToId = null;
+        chatHint.textContent = "";
+        chatInput.value = "";
+
+        if (j?.message) {
+          chatMessages.push(j.message);
+          chatRender();
+          requestAnimationFrame(() => { chatBody.scrollTop = chatBody.scrollHeight; });
+        } else {
+          await chatLoadHistory();
+        }
+      }catch(e){
+        chatHint.textContent = e?.message || String(e);
+      }finally{
+        chatSend.disabled = false;
+      }
+    }
+
+    chatSend.addEventListener("click", chatSendMsg);
+    chatInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey){
+        e.preventDefault();
+        chatSendMsg();
+      }
+    });
+
+    chatRefresh.addEventListener("click", chatLoadHistory);
+    chatSearch.addEventListener("input", () => {
+      chatSearchQ = chatSearch.value || "";
+      chatRender();
+    });
+
+    // Presence indicators (client-side: shows only if YOU are online)
+    // Admin-only view of client online is on the admin chat page.
+    function setClientOnline(on){
+      chatOnlineDot.classList.toggle("on", !!on);
+      chatOnlineText.textContent = on ? "Online" : "Offline";
+    }
+
+    // Unread indicator (client-side: “new” just for UI feedback)
+    function setUnread(hasNew){
+      chatUnreadDot.classList.toggle("new", !!hasNew);
+      chatUnreadText.textContent = hasNew ? "New message" : "No new messages";
+    }
+
+
 
 
 
@@ -600,7 +1024,12 @@ body{
         elPeriodEnd.textContent = "Current Period End: —";
         manageBtn.style.display = "none";
       }
+            // Init chat
+      setClientOnline(true);
+      await chatLoadHistory();
     }
+
+    
 
   </script>
 </body>
