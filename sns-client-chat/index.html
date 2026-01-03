@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>SNS · Client Chat (Admin)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <link rel="stylesheet" href="/styles.css" />
+
+  <style>
+    :root{
+      --bg0:#020010;
+      --bg1:#050315;
+      --ink:#f4f0ff;
+      --muted:#bdb7ff;
+      --stroke: rgba(129,118,255,.20);
+      --stroke2: rgba(179,124,255,.55);
+      --glass: rgba(9, 6, 34, 0.86);
+      --glass2: rgba(15, 10, 55, 0.55);
+      --shadow: 0 25px 80px rgba(0, 0, 0, 0.65);
+      --shadow2: 0 35px 110px rgba(0, 0, 0, 0.72);
+      --accent:#b37cff;
+      --ok:#6cffb0;
+      --warn:#ffd45a;
+      --bad:#ff6262;
+      --info:#7bb8ff;
+      --r-xl:28px;
+      --r-lg:20px;
+      --r-md:16px;
+    }
+
+    html, body { height: 100%; }
+    body{
+      margin:0;
+      min-height:100vh;
+      background: radial-gradient(circle at top, #342067, #050315 55%, #020010);
+      color: var(--ink);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      overflow-x:hidden;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+
+    .wrap{
+      width: min(1600px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 3rem 0 4rem;
+    }
+
+    .toprow{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap: 1rem;
+    }
+    h1{ margin:0; letter-spacing:.18em; text-transform:uppercase; }
+    .sub{ color: var(--muted); margin-top:.6rem; }
+
+    .top-actions{
+      display:flex;
+      align-items:center;
+      justify-content:flex-end;
+      gap:.6rem;
+      flex-wrap:wrap;
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:.5rem;
+      padding:.55rem .95rem;
+      border-radius:999px;
+      border:1px solid rgba(129,118,255,.35);
+      background: rgba(9,6,34,.65);
+      color:#d9d3ff;
+      font-size:.85rem;
+      white-space:nowrap;
+    }
+    .icon-btn{
+      width: 38px;
+      height: 38px;
+      border-radius: 999px;
+      border: 1px solid rgba(129,118,255,.35);
+      background: rgba(15, 10, 55, 0.70);
+      color: #d9d3ff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      transition: transform .08s ease, box-shadow .12s ease, border-color .12s ease, filter .12s ease;
+      user-select:none;
+    }
+    .icon-btn:hover{
+      transform: translateY(-1px);
+      border-color: var(--accent);
+      box-shadow:0 0 0 1px rgba(179,124,255,.35);
+      filter:brightness(1.05);
+    }
+    .icon-btn:active{ transform: translateY(1px); }
+    .icon-btn svg{ width:18px; height:18px; opacity:.95; }
+
+    .btn{
+      border-radius:999px;
+      padding:.65rem 1.05rem;
+      border:1px solid rgba(129,118,255,.35);
+      background: rgba(15, 10, 55, 0.8);
+      color:#f4f0ff;
+      cursor:pointer;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      font-size:.78rem;
+      transition: transform .08s ease, box-shadow .12s ease, border-color .12s ease, filter .12s ease;
+      user-select:none;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:.4rem;
+      white-space:nowrap;
+    }
+    .btn:hover{ transform: translateY(-1px); border-color: var(--accent); box-shadow:0 0 0 1px rgba(179,124,255,.35); filter:brightness(1.05); }
+    .btn:active{ transform: translateY(1px); }
+    .btn-soft{ background: rgba(15, 10, 55, 0.55); border-color: rgba(129,118,255,.28); }
+    .btn-primary{ background: rgba(179,124,255,.18); border-color: rgba(179,124,255,.45); }
+    .btn-primary:hover{ border-color: var(--accent); box-shadow:0 0 0 1px rgba(179,124,255,.35); }
+    .btn-danger{ border-color: rgba(255,98,98,.45); }
+    .btn-danger:hover{ border-color:#ff6262; box-shadow:0 0 0 1px rgba(255,98,98,.25); }
+
+    .card{
+      margin-top: 1.75rem;
+      background: var(--glass);
+      border: 1px solid rgba(130, 106, 255, 0.28);
+      border-radius: var(--r-xl);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+      padding: 1.05rem;
+      position: relative;
+      overflow:hidden;
+    }
+
+    /* Ambient “breathing” glow */
+    .card::before{
+      content:"";
+      position:absolute;
+      inset:-40%;
+      background:
+        radial-gradient(circle at 18% 20%, rgba(179,124,255,.18), transparent 55%),
+        radial-gradient(circle at 85% 15%, rgba(123,184,255,.10), transparent 55%),
+        radial-gradient(circle at 60% 85%, rgba(249,115,226,.10), transparent 55%);
+      filter: blur(14px);
+      opacity:.9;
+      animation: breathe 12s ease-in-out infinite alternate;
+      pointer-events:none;
+    }
+    @keyframes breathe{
+      from{ transform: translate3d(0,0,0) scale(1); }
+      to{ transform: translate3d(-18px, 14px, 0) scale(1.03); }
+    }
+
+    .layout{
+      position: relative;
+      display:grid;
+      grid-template-columns: 380px 1fr;
+      gap: 1rem;
+      min-height: 72vh;
+      z-index:1;
+    }
+
+    .panel{
+      border: 1px solid rgba(129,118,255,.14);
+      border-radius: var(--r-xl);
+      background: rgba(9, 6, 34, 0.55);
+      backdrop-filter: blur(14px);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      min-height: 0;
+    }
+
+    .panel-header{
+      padding: .95rem .95rem .85rem;
+      border-bottom: 1px solid rgba(129,118,255,.14);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:.8rem;
+    }
+    .panel-title{
+      font-size: .78rem;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      color: rgba(244,240,255,.78);
+      margin:0;
+    }
+    .panel-sub{
+      margin-top:.45rem;
+      color: rgba(244,240,255,.62);
+      font-size:.85rem;
+      line-height:1.25;
+    }
+
+    .search{
+      width: 100%;
+      margin-top: .7rem;
+      padding: .78rem 1rem;
+      border-radius: 999px;
+      border: 1px solid rgba(129,118,255,.32);
+      background: rgba(9,6,34,.92);
+      color: var(--ink);
+      outline:none;
+    }
+    .search:focus{ border-color: rgba(179,124,255,.75); box-shadow: 0 0 0 1px rgba(179,124,255,.28); }
+
+    .client-list{
+      padding: .65rem;
+      display:flex;
+      flex-direction:column;
+      gap: .6rem;
+      overflow:auto;
+    }
+
+    .client{
+      border-radius: 18px;
+      border: 1px solid rgba(129,118,255,.14);
+      background: rgba(15,10,55,.40);
+      padding: .75rem .8rem;
+      cursor:pointer;
+      user-select:none;
+      transition: transform .10s ease, border-color .12s ease, filter .12s ease, box-shadow .12s ease;
+      position: relative;
+    }
+    .client:hover{
+      transform: translateY(-1px);
+      border-color: rgba(179,124,255,.32);
+      filter: brightness(1.05);
+    }
+    .client.active{
+      border-color: rgba(179,124,255,.75);
+      box-shadow: 0 0 0 1px rgba(179,124,255,.22);
+      background: rgba(179,124,255,.12);
+    }
+
+    .client .row{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:.7rem;
+    }
+    .client .name{ font-weight:650; letter-spacing:.02em; font-size:.95rem; line-height:1.2; }
+    .client .biz{ color: rgba(244,240,255,.68); font-size:.84rem; margin-top: .2rem; line-height:1.2; }
+    .client .meta{ color: rgba(244,240,255,.52); font-size:.78rem; margin-top: .4rem; display:flex; gap:.55rem; flex-wrap:wrap; }
+    .tag{
+      display:inline-flex; align-items:center; gap:.45rem;
+      border-radius:999px;
+      padding:.34rem .6rem;
+      border:1px solid rgba(129,118,255,.22);
+      background: rgba(9,6,34,.55);
+      font-size:.70rem;
+      letter-spacing:.10em;
+      text-transform:uppercase;
+      color: rgba(244,240,255,.92);
+      white-space:nowrap;
+    }
+    .dot{ width:10px; height:10px; border-radius:999px; box-shadow: 0 0 0 2px rgba(255,255,255,.06); display:inline-block; }
+    .dot-online{ background: var(--ok); }
+    .dot-offline{ background: rgba(255,255,255,.18); }
+    .dot-new{ background: var(--accent); }
+
+    /* “New message” glow animation */
+    .newglow{
+      position:absolute;
+      inset:-2px;
+      border-radius: 20px;
+      pointer-events:none;
+      opacity:0;
+      box-shadow: 0 0 0 1px rgba(179,124,255,.32), 0 0 24px rgba(179,124,255,.28);
+      animation: none;
+    }
+    .client.has-new .newglow{
+      opacity: 1;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    @keyframes pulse{
+      0%{ box-shadow: 0 0 0 1px rgba(179,124,255,.22), 0 0 16px rgba(179,124,255,.18); }
+      50%{ box-shadow: 0 0 0 1px rgba(179,124,255,.40), 0 0 34px rgba(179,124,255,.34); }
+      100%{ box-shadow: 0 0 0 1px rgba(179,124,255,.22), 0 0 16px rgba(179,124,255,.18); }
+    }
+
+    .chat-header{
+      padding: .95rem .95rem .85rem;
+      border-bottom: 1px solid rgba(129,118,255,.14);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: .9rem;
+    }
+    .chat-title{ margin:0; font-size:.9rem; letter-spacing:.12em; text-transform:uppercase; }
+    .chat-sub{ margin-top:.5rem; color: rgba(244,240,255,.62); font-size:.85rem; line-height:1.25; }
+    .chat-actions{ display:flex; align-items:center; gap:.55rem; flex-wrap:wrap; justify-content:flex-end; }
+
+    .messages{
+      padding: 1rem;
+      display:flex;
+      flex-direction:column;
+      gap:.7rem;
+      overflow:auto;
+      flex: 1 1 auto;
+      min-height: 0;
+      scroll-behavior:smooth;
+    }
+
+    .msg{
+      max-width: 78%;
+      border-radius: 18px;
+      padding: .75rem .85rem;
+      border: 1px solid rgba(129,118,255,.14);
+      background: rgba(15,10,55,.40);
+      position: relative;
+      box-shadow: 0 12px 30px rgba(0,0,0,.22);
+    }
+    .msg:hover{ border-color: rgba(179,124,255,.28); }
+    .msg.admin{
+      margin-left:auto;
+      background: linear-gradient(180deg, rgba(179,124,255,.20), rgba(15,10,55,.45));
+      border-color: rgba(179,124,255,.24);
+    }
+    .msg.client{
+      margin-right:auto;
+      background: linear-gradient(180deg, rgba(123,184,255,.12), rgba(15,10,55,.45));
+      border-color: rgba(123,184,255,.18);
+    }
+    .msg.deleted{
+      background: rgba(15,10,55,.28);
+      border-color: rgba(255,98,98,.28);
+    }
+
+    .msg .text{ white-space:pre-wrap; line-height:1.35; font-size:.92rem; }
+    .msg .foot{
+      margin-top:.55rem;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:.7rem;
+      color: rgba(244,240,255,.52);
+      font-size:.74rem;
+    }
+    .msg .mini{
+      display:flex;
+      align-items:center;
+      gap:.5rem;
+      flex-wrap:wrap;
+    }
+    .mini-btn{
+      border: 1px solid rgba(129,118,255,.22);
+      background: rgba(9,6,34,.40);
+      color: rgba(244,240,255,.80);
+      border-radius: 999px;
+      padding: .25rem .55rem;
+      cursor:pointer;
+      font-size:.68rem;
+      letter-spacing:.10em;
+      text-transform:uppercase;
+    }
+
+    .typing{
+      padding: .55rem 1rem .2rem;
+      color: rgba(244,240,255,.62);
+      font-size:.82rem;
+      display:none;
+    }
+    .typing.on{ display:block; }
+    .typing .shimmer{
+      display:inline-block;
+      background: linear-gradient(90deg, rgba(244,240,255,.45), rgba(179,124,255,.85), rgba(244,240,255,.45));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: shimmer 1.25s linear infinite;
+    }
+    @keyframes shimmer{ from{ background-position:0% } to{ background-position:200% } }
+
+    .composer{
+      padding: .85rem;
+      border-top: 1px solid rgba(129,118,255,.14);
+      display:flex;
+      gap:.55rem;
+      align-items:flex-end;
+      background: rgba(9,6,34,.35);
+    }
+    .composer .box{
+      flex: 1 1 auto;
+      border-radius: 18px;
+      border: 1px solid rgba(129,118,255,.22);
+      background: rgba(9,6,34,.62);
+      padding: .65rem .7rem;
+    }
+    textarea{
+      width:100%;
+      min-height: 42px;
+      max-height: 140px;
+      resize: none;
+      border:0;
+      outline:0;
+      background: transparent;
+      color: var(--ink);
+      font-family: inherit;
+      font-size: .95rem;
+      line-height: 1.35;
+      padding: 0 .2rem;
+    }
+
+    .scroll-new{
+      position:absolute;
+      right: 18px;
+      bottom: 92px;
+      z-index: 5;
+      opacity:0;
+      pointer-events:none;
+      transform: translateY(8px);
+      transition: opacity .12s ease, transform .12s ease;
+    }
+    .scroll-new.on{
+      opacity:1;
+      pointer-events:auto;
+      transform: translateY(0);
+    }
+
+    .note{
+      margin-top: 12px;
+      color: rgba(244,240,255,.50);
+      font-size: .85rem;
+    }
+
+    .overlay{
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(8px);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 16px;
+      z-index: 10000;
+    }
+    .login-card{
+      width: min(520px, 100%);
+      background: rgba(9, 6, 34, 0.95);
+      border: 1px solid rgba(130, 106, 255, 0.35);
+      border-radius: 28px;
+      box-shadow: 0 25px 90px rgba(0, 0, 0, 0.75);
+      padding: 18px 16px 16px;
+      position: relative;
+    }
+    .login-title{ margin:0; letter-spacing:.16em; text-transform:uppercase; font-size: 15px; }
+    .login-sub{ margin:.6rem 0 1rem; color: rgba(244,240,255,.72); line-height:1.45; font-size: 13px; }
+    .field label{
+      display:block; margin:.7rem 0 .35rem;
+      font-size:.74rem; color: rgba(244,240,255,.82);
+      letter-spacing:.1em; text-transform:uppercase;
+    }
+    .field input{
+      width:100%;
+      border-radius: 999px;
+      border: 1px solid rgba(129,118,255,.35);
+      background: rgba(9,6,34,.95);
+      color: var(--ink);
+      padding:.78rem 1rem;
+      outline:none;
+      padding-right: 3rem;
+      box-sizing:border-box;
+      max-width:100%;
+    }
+    .login-actions{ display:flex; gap:10px; justify-content:space-between; align-items:center; margin-top: 12px; flex-wrap:wrap; }
+    .login-err{ margin-top: 10px; color:#ff9494; font-size: 13px; display:none; line-height:1.35; }
+
+    .login-close{
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 36px;
+      height: 36px;
+      border-radius: 999px;
+      border: 1px solid rgba(129,118,255,.28);
+      background: rgba(15, 10, 55, 0.55);
+      color: #f4f0ff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .login-close svg{ width: 16px; height: 16px; opacity: .9; }
+
+    .errline{
+      margin-top:.75rem;
+      color:#ff9494;
+      font-size:.9rem;
+      line-height:1.35;
+      display:none;
+    }
+
+    @media (max-width: 980px){
+      .layout{ grid-template-columns: 1fr; }
+    }
+    @media (prefers-reduced-motion: reduce){
+      *{ animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="toprow">
+      <div>
+        <h1>SNS CLIENT CHAT</h1>
+        <div class="sub">Admin-only messaging terminal</div>
+      </div>
+
+      <div class="top-actions">
+        <span class="pill" id="whoami">Signed in: —</span>
+
+        <a class="icon-btn" href="/sns-admin/" title="Back to Admin">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M15 18l-6-6 6-6"/>
+          </svg>
+        </a>
+
+        <button class="btn btn-soft" id="logoutBtn" type="button">Logout</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="layout">
+        <!-- Left: Client list -->
+        <div class="panel">
+          <div class="panel-header">
+            <div style="min-width:0;">
+              <div class="panel-title">Clients</div>
+              <div class="panel-sub" id="clientsSub">Loading…</div>
+              <input class="search" id="clientSearch" placeholder="Search name, business, email, phone…" />
+            </div>
+            <div style="display:flex; flex-direction:column; gap:.55rem; align-items:flex-end;">
+              <button class="btn btn-primary" id="refreshBtn" type="button">Refresh</button>
+              <span class="pill" id="clientCount">0</span>
+            </div>
+          </div>
+
+          <div class="client-list" id="clientList"></div>
+        </div>
+
+        <!-- Right: Chat -->
+        <div class="panel" id="chatPanel">
+          <div class="chat-header">
+            <div style="min-width:0;">
+              <div class="chat-title" id="chatTitle">Select a client</div>
+              <div class="chat-sub" id="chatSub">Choose a client on the left to open the chat.</div>
+              <div class="errline" id="chatErr"></div>
+            </div>
+            <div class="chat-actions">
+              <button class="btn btn-soft" id="exportBtn" type="button" disabled>Export PDF</button>
+              <button class="btn btn-soft" id="broadcastBtn" type="button" disabled>Broadcast</button>
+            </div>
+          </div>
+
+          <div class="typing" id="typingLine"><span class="shimmer">Typing…</span></div>
+
+          <div class="messages" id="messages"></div>
+
+          <div class="scroll-new" id="scrollNew">
+            <button class="btn btn-primary" type="button" id="jumpBtn">Jump to newest</button>
+          </div>
+
+          <div class="composer">
+            <div class="box">
+              <textarea id="composer" placeholder="Type a message…"></textarea>
+            </div>
+
+            <button class="btn btn-primary" id="sendBtn" type="button" disabled>Send</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="note">
+        If you see an error mentioning a missing Edge Function, we add the Supabase chat functions next.
+      </div>
+    </div>
+  </div>
+
+  <!-- Login overlay -->
+  <div class="overlay" id="loginOverlay" style="display:none;">
+    <div class="login-card">
+      <button class="login-close" id="loginCloseBtn" type="button" title="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+      </button>
+
+      <h2 class="login-title">Admin Login</h2>
+      <div class="login-sub">Sign in with your admin account to access Client Chat.</div>
+
+      <div class="field">
+        <label>Email</label>
+        <input id="loginEmail" type="email" autocomplete="email" placeholder="you@example.com" />
+      </div>
+
+      <div class="field">
+        <label>Password</label>
+        <input id="loginPass" type="password" autocomplete="current-password" placeholder="••••••••" />
+      </div>
+
+      <div class="login-actions">
+        <button class="btn btn-primary" id="loginBtn" type="button">Sign in</button>
+        <span class="pill" id="loginHint">Admin-only</span>
+      </div>
+
+      <div class="login-err" id="loginErr"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = "https://jgvxmpsjtkedzgygynbl.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpndnhtcHNqdGtlZHpneWd5bmJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0NzgxMjYsImV4cCI6MjA4MTA1NDEyNn0.OCh23RWm8COtxWuumYvKUmfMOLOW01B1zrbtzcr3w6Y";
+    const ADMIN_EMAIL = "brandon.sns@pm.me";
+    const FN_BASE = `${SUPABASE_URL}/functions/v1`;
+
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const whoami = document.getElementById("whoami");
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    const loginOverlay = document.getElementById("loginOverlay");
+    const loginBtn = document.getElementById("loginBtn");
+    const loginEmail = document.getElementById("loginEmail");
+    const loginPass = document.getElementById("loginPass");
+    const loginErr = document.getElementById("loginErr");
+    const loginHint = document.getElementById("loginHint");
+    const loginCloseBtn = document.getElementById("loginCloseBtn");
+
+    const refreshBtn = document.getElementById("refreshBtn");
+    const clientCount = document.getElementById("clientCount");
+    const clientsSub = document.getElementById("clientsSub");
+    const clientSearch = document.getElementById("clientSearch");
+    const clientList = document.getElementById("clientList");
+
+    const chatTitle = document.getElementById("chatTitle");
+    const chatSub = document.getElementById("chatSub");
+    const chatErr = document.getElementById("chatErr");
+    const messagesEl = document.getElementById("messages");
+
+    const composer = document.getElementById("composer");
+    const sendBtn = document.getElementById("sendBtn");
+    const scrollNew = document.getElementById("scrollNew");
+    const jumpBtn = document.getElementById("jumpBtn");
+
+    const exportBtn = document.getElementById("exportBtn");
+    const broadcastBtn = document.getElementById("broadcastBtn");
+
+    let clients = [];
+    let activeClient = null;
+    let messages = [];
+
+    function sanitize(str){
+      return String(str ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    function showChatErr(msg){
+      chatErr.style.display = "block";
+      chatErr.textContent = msg;
+    }
+    function clearChatErr(){
+      chatErr.style.display = "none";
+      chatErr.textContent = "";
+    }
+
+    function lock(isLocked, hintMsg){
+      if (isLocked){
+        loginOverlay.style.display = "flex";
+        loginErr.style.display = "none";
+        loginErr.textContent = "";
+        loginHint.textContent = hintMsg || "Admin-only";
+        document.querySelector(".card").style.display = "none";
+      } else {
+        loginOverlay.style.display = "none";
+        document.querySelector(".card").style.display = "block";
+      }
+    }
+
+    async function ensureAdminOrShowLogin(){
+      const { data: sess } = await sb.auth.getSession();
+      const session = sess?.session;
+
+      if (!session){
+        lock(true);
+        return false;
+      }
+
+      const email = (session.user?.email || "").toLowerCase();
+      whoami.textContent = `Signed in: ${session.user?.email || "—"}`;
+
+      if (email !== ADMIN_EMAIL.toLowerCase()){
+        await sb.auth.signOut();
+        lock(true, "Not an admin account.");
+        return false;
+      }
+
+      lock(false);
+      return true;
+    }
+
+    async function login(){
+      loginErr.style.display = "none";
+      loginErr.textContent = "";
+
+      const email = (loginEmail.value || "").trim();
+      const pass = (loginPass.value || "").trim();
+      if (!email || !pass){
+        loginErr.style.display = "block";
+        loginErr.textContent = "Enter email and password.";
+        return;
+      }
+
+      loginBtn.disabled = true;
+      try{
+        const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+        if (error) throw error;
+
+        const ok = await ensureAdminOrShowLogin();
+        if (ok) await loadClientList();
+      }catch(e){
+        loginErr.style.display = "block";
+        loginErr.textContent = e?.message || String(e);
+      }finally{
+        loginBtn.disabled = false;
+      }
+    }
+
+    async function logout(){
+      await sb.auth.signOut();
+      whoami.textContent = "Signed in: —";
+      lock(true);
+    }
+
+    async function callEdge(fnName, payload = {}){
+      const { data: sess } = await sb.auth.getSession();
+      const token = sess?.session?.access_token;
+      if (!token) throw new Error("Not logged in.");
+
+      const res = await fetch(`${FN_BASE}/${fnName}`, {
+        method: "POST",
+        headers: {
+          "Content-Type":"application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const j = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(j?.error || `This page requires the Edge Function: ${fnName}.`);
+      return j;
+    }
+
+    function fmt(ts){
+      if (!ts) return "—";
+      try{ return new Date(ts).toLocaleString(); }catch{ return "—"; }
+    }
+
+    function filterClients(list){
+      const q = (clientSearch.value || "").trim().toLowerCase();
+      if (!q) return list;
+      return list.filter(c =>
+        (c.full_name || "").toLowerCase().includes(q) ||
+        (c.business_name || "").toLowerCase().includes(q) ||
+        (c.email || "").toLowerCase().includes(q) ||
+        (c.phone || "").toLowerCase().includes(q)
+      );
+    }
+
+    function renderClients(){
+      const view = filterClients(clients);
+
+      clientCount.textContent = String(view.length);
+      clientsSub.textContent = `${view.length} client${view.length === 1 ? "" : "s"} · sorted by newest message`;
+
+      if (!view.length){
+        clientList.innerHTML = `
+          <div class="client" style="cursor:default;">
+            <div class="name">No clients found</div>
+            <div class="biz">This page needs the chat Edge Functions + tables.</div>
+          </div>
+        `;
+        return;
+      }
+
+      clientList.innerHTML = view.map(c => {
+        const isActive = activeClient && activeClient.user_id === c.user_id;
+        const hasNew = !!c.has_unread;
+        const onlineDot = c.is_online ? "dot-online" : "dot-offline";
+        const onlineLabel = c.is_online ? "Online" : (c.last_seen ? `Last seen: ${fmt(c.last_seen)}` : "Offline");
+        return `
+          <div class="client ${isActive ? "active" : ""} ${hasNew ? "has-new" : ""}" data-user="${sanitize(c.user_id)}">
+            <div class="newglow"></div>
+            <div class="row">
+              <div style="min-width:0;">
+                <div class="name">${sanitize(c.full_name || c.email || "—")}</div>
+                <div class="biz">${sanitize(c.business_name || "—")}</div>
+                <div class="meta">
+                  <span class="tag"><span class="dot ${onlineDot}"></span>${sanitize(onlineLabel)}</span>
+                  <span class="tag">Last: ${sanitize(c.last_message_at ? fmt(c.last_message_at) : "No messages")}</span>
+                </div>
+              </div>
+              <div style="display:flex; flex-direction:column; gap:.5rem; align-items:flex-end;">
+                ${hasNew ? `<span class="tag"><span class="dot dot-new"></span>NEW</span>` : ``}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderMessages(){
+      if (!activeClient){
+        messagesEl.innerHTML = `
+          <div class="msg" style="max-width:100%; opacity:.85;">
+            <div class="text">Select a client to view the chat.</div>
+          </div>
+        `;
+        return;
+      }
+
+      if (!messages.length){
+        messagesEl.innerHTML = `
+          <div class="msg" style="max-width:100%; opacity:.85;">
+            <div class="text">No messages yet.</div>
+          </div>
+        `;
+        return;
+      }
+
+      messagesEl.innerHTML = messages.map(m => {
+        const cls = m.deleted ? "deleted" : (m.sender_role === "admin" ? "admin" : "client");
+        const body = m.deleted ? "Deleted Message" : (m.body || "");
+        const receipts = [];
+        if (m.delivered_at) receipts.push("Delivered");
+        if (m.read_by_client_at) receipts.push("Read");
+        const receiptText = receipts.length ? receipts.join(" · ") : "—";
+        return `
+          <div class="msg ${cls}">
+            <div class="text">${sanitize(body)}</div>
+            <div class="foot">
+              <div class="mini">
+                <span>${sanitize(fmt(m.created_at))}</span>
+                <span>·</span>
+                <span>${sanitize(receiptText)}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      requestAnimationFrame(() => {
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+      });
+    }
+
+    function setActiveClient(c){
+      activeClient = c;
+      chatTitle.textContent = `Chat · ${c.full_name || c.email || "Client"}`;
+      chatSub.textContent = c.business_name ? c.business_name : (c.phone ? `Phone: ${c.phone}` : "—");
+      clearChatErr();
+      sendBtn.disabled = false;
+      exportBtn.disabled = false;
+      broadcastBtn.disabled = false;
+      loadHistory();
+      renderClients();
+    }
+
+    async function loadClientList(){
+      refreshBtn.disabled = true;
+      refreshBtn.textContent = "Refreshing…";
+      try{
+        const data = await callEdge("admin-chat-client-list", {});
+        clients = Array.isArray(data?.clients) ? data.clients : [];
+        renderClients();
+        if (clients.length && !activeClient) setActiveClient(clients[0]);
+      }catch(e){
+        clients = [];
+        activeClient = null;
+        messages = [];
+        renderClients();
+        renderMessages();
+        showChatErr(e?.message || String(e));
+      }finally{
+        refreshBtn.disabled = false;
+        refreshBtn.textContent = "Refresh";
+      }
+    }
+
+    async function loadHistory(){
+      if (!activeClient) return;
+      messages = [];
+      renderMessages();
+      try{
+        const data = await callEdge("admin-chat-history", { user_id: activeClient.user_id, limit: 60 });
+        messages = Array.isArray(data?.messages) ? data.messages : [];
+        renderMessages();
+      }catch(e){
+        showChatErr(e?.message || String(e));
+      }
+    }
+
+    async function sendMessage(){
+      if (!activeClient) return;
+      const text = (composer.value || "").trim();
+      if (!text) return;
+
+      composer.value = "";
+      composer.focus();
+
+      try{
+        const data = await callEdge("admin-chat-send", { user_id: activeClient.user_id, body: text });
+        const msg = data?.message;
+        if (msg){
+          messages.push(msg);
+          renderMessages();
+        } else {
+          await loadHistory();
+        }
+      }catch(e){
+        showChatErr(e?.message || String(e));
+      }
+    }
+
+    function updateJump(){
+      const nearBottom = (messagesEl.scrollHeight - messagesEl.scrollTop - messagesEl.clientHeight) < 120;
+      scrollNew.classList.toggle("on", !nearBottom && !!activeClient);
+    }
+
+    messagesEl.addEventListener("scroll", updateJump);
+    jumpBtn.addEventListener("click", () => { messagesEl.scrollTop = messagesEl.scrollHeight; });
+
+    refreshBtn.addEventListener("click", loadClientList);
+    clientSearch.addEventListener("input", renderClients);
+
+    clientList.addEventListener("click", (e) => {
+      const node = e.target.closest(".client");
+      if (!node) return;
+      const userId = node.getAttribute("data-user");
+      const c = clients.find(x => x.user_id === userId);
+      if (c) setActiveClient(c);
+    });
+
+    sendBtn.addEventListener("click", sendMessage);
+    composer.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey){
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+
+    logoutBtn.addEventListener("click", logout);
+    loginBtn.addEventListener("click", login);
+    loginPass.addEventListener("keydown", (e) => { if (e.key === "Enter") login(); });
+    loginEmail.addEventListener("keydown", (e) => { if (e.key === "Enter") login(); });
+
+    loginCloseBtn.addEventListener("click", () => { window.location.href = "/sns/"; });
+
+    sendBtn.disabled = true;
+    exportBtn.disabled = true;
+    broadcastBtn.disabled = true;
+    renderMessages();
+
+    (async function init(){
+      const ok = await ensureAdminOrShowLogin();
+      if (ok) await loadClientList();
+    })();
+  </script>
+</body>
+</html>
