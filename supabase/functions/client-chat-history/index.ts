@@ -88,7 +88,7 @@ serve(async (req) => {
 
     // Load attachments for those messages
     const { data: atts, error: attErr } = await sb
-      .from("chat_attachments")
+      .from("chat-attachments")
       .select("id, message_id, storage_path, mime_type, original_name, size_bytes, uploaded_at")
       .in("message_id", msgIds);
 
@@ -98,7 +98,7 @@ serve(async (req) => {
     const byMessageId = new Map<string, AttachmentOut[]>();
 
     for (const a of atts || []) {
-      const bucket = "chat_attachments";
+      const bucket = "chat-attachments";
       const path = a.storage_path as string;
 
       let signedUrl: string | null = null;
