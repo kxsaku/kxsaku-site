@@ -51,10 +51,21 @@ function getEnv(name: string) {
   return v;
 }
 
+type AttachmentIn = {
+  attachment_id?: string;        // <- IMPORTANT
+  storage_path: string;
+  original_name: string;
+  mime_type: string;
+  size_bytes?: number | null;
+};
+
+
 type ReqBody = {
   user_id?: string;
   body?: string;
+  attachments?: AttachmentIn[];
 };
+
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return json({ ok: true }, 200);
@@ -86,9 +97,11 @@ serve(async (req) => {
     const body = (await req.json().catch(() => ({}))) as ReqBody;
     const user_id = (body.user_id || "").trim();
     const text = (body.body || "").trim();
+    const attachments = Array.isArray(body.attachments) ? body.attachments : [];
 
     if (!user_id) return json({ error: "Missing user_id" }, 400);
-    if (!text) return json({ error: "Missing body" }, 400);
+    if (!text && attachments.length === 0) return json({ error: "Missing body" }, 400);
+
 
     const nowIso = new Date().toISOString();
 
@@ -189,6 +202,41 @@ serve(async (req) => {
         500,
       );
     }
+
+// Link attachments (if provided)
+// chat-attachment-upload-url already created rows with message_id = null.
+// Here we "finalize" them by setting message_id.
+if (attachments.length > 0) {
+  for (const a of attachments) {
+    const attachmentId = (a?.attachment_id || "").trim();
+
+    if (attachmentId) {
+      const upd = await admin
+        .from("chat_attachments")
+        .update({ message_id: insMsg.data.id })
+        .eq("id", attachmentId)
+        .eq("thread_id", threadId)
+        .is("message_id", null);
+
+      if (upd.error) return json({ error: upd.error.message }, 500);
+      continue;
+    }
+
+    // Fallback: match by storage_path if no attachment_id was provided
+    if (a?.storage_path) {
+      const upd2 = await admin
+        .from("chat_attachments")
+        .update({ message_id: insMsg.data.id })
+        .eq("thread_id", threadId)
+        .eq("storage_path", a.storage_path)
+        .is("message_id", null);
+
+      if (upd2.error) return json({ error: upd2.error.message }, 500);
+    }
+  }
+}
+
+
 
     const m = insMsg.data as any;
 

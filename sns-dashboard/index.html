@@ -487,6 +487,110 @@ body{
   transform: translateY(0);
 }
 
+.chatAttachTray{
+  margin-top: 10px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+}
+
+.chatChip{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding: 10px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(160,150,255,.28);
+  background: rgba(255,255,255,.06);
+  color: rgba(244,240,255,.86);
+  max-width: 100%;
+}
+
+.chatChipName{
+  max-width: 320px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  font-size: 12px;
+}
+
+.chatChipX{
+  border: 1px solid rgba(255,255,255,.16);
+  background: rgba(255,255,255,.05);
+  color: rgba(244,240,255,.8);
+  border-radius: 999px;
+  padding: 6px 10px;
+  cursor:pointer;
+  font-size: 11px;
+  letter-spacing:.10em;
+  text-transform:uppercase;
+}
+.chatChipX:hover{ border-color: rgba(190,180,255,.35); }
+
+.chatDrop{
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+  background: rgba(0,0,0,.35);
+  backdrop-filter: blur(8px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index: 50;
+}
+
+.chatDropInner{
+  padding: 18px 22px;
+  border-radius: 16px;
+  border: 1px solid rgba(170,160,255,.35);
+  background: rgba(255,255,255,.07);
+  color: rgba(244,240,255,.9);
+  box-shadow: 0 0 18px rgba(160,120,255,.22);
+  letter-spacing:.08em;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+.chatAttRow{
+  margin-top: 10px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.chatAttItem{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(160,150,255,.22);
+  background: rgba(255,255,255,.05);
+}
+
+.chatAttLeft{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  min-width: 0;
+}
+
+.chatAttName{
+  font-size: 12.5px;
+  color: rgba(244,240,255,.92);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  max-width: 380px;
+}
+
+.chatAttMeta{
+  font-size: 11px;
+  color: rgba(244,240,255,.55);
+}
+
+
 
 
 </style>
@@ -578,11 +682,21 @@ body{
     </div>
 
     <div class="chatComposer">
+      <input id="chatFile" type="file" multiple style="display:none" />
+      <button id="chatAttachBtn" class="btn btnGhost" type="button" title="Attach files">Attach</button>
+
       <textarea id="chatInput" class="chatInput" placeholder="Type a message… (Enter = send, Shift+Enter = newline)"></textarea>
       <button id="chatSend" class="btn">Send</button>
     </div>
 
+    <div id="chatAttachTray" class="chatAttachTray" style="display:none"></div>
+
+    <div id="chatDrop" class="chatDrop" style="display:none">
+      <div class="chatDropInner">Drop files to attach</div>
+    </div>
+
     <div class="mutedSm" id="chatHint"></div>
+
   </div>
 </div>
 
@@ -630,6 +744,13 @@ body{
     const chatSearch = document.getElementById("chatSearch");
     const chatHint = document.getElementById("chatHint");
     const chatTyping = document.getElementById("chatTyping");
+    const chatFile = document.getElementById("chatFile");
+    const chatAttachBtn = document.getElementById("chatAttachBtn");
+    const chatAttachTray = document.getElementById("chatAttachTray");
+    const chatDrop = document.getElementById("chatDrop");
+
+    let chatPendingFiles = []; // { storage_path, original_name, mime_type, size_bytes }
+
 
     let chatTypingHideTimer = null;
     let chatTypingSendTimer = null;
@@ -1067,8 +1188,43 @@ function chatSendTyping(on){
         div.className = `chatMsg ${who} ${isDeleted ? "deleted" : ""}`;
 
         const body = isDeleted ? "Deleted Message" : (m.body || "");
+        const atts = Array.isArray(m.attachments) ? m.attachments : [];
+        const attHtml = atts.length ? `
+          <div class="chatAttRow">
+            ${atts.map(a => {
+              const isImg = String(a.mime_type || "").startsWith("image/");
+              const url = a.signed_url || null;
+              const name = a.original_name || "file";
+              const meta = `${fmtBytes(a.size_bytes)} · ${(a.mime_type || "").split(";")[0] || "file"}`;
+
+              if (isImg && url){
+                return `
+                  <div class="chatAttItem">
+                    <div class="chatAttLeft">
+                      <div class="chatAttName">${esc(name)}</div>
+                      <div class="chatAttMeta">${esc(meta)}</div>
+                    </div>
+                    <a class="chatMiniBtn" href="${esc(url)}" target="_blank" rel="noopener">View</a>
+                  </div>
+                `;
+              }
+
+              return `
+                <div class="chatAttItem">
+                  <div class="chatAttLeft">
+                    <div class="chatAttName">${esc(name)}</div>
+                    <div class="chatAttMeta">${esc(meta)}</div>
+                  </div>
+                  ${url ? `<a class="chatMiniBtn" href="${esc(url)}" target="_blank" rel="noopener">Download</a>` : ``}
+                </div>
+              `;
+            }).join("")}
+          </div>
+        ` : ``;
+
         div.innerHTML = `
           <div class="chatText">${esc(body)}</div>
+          ${attHtml}
           <div class="chatFoot">
             <div>${esc(chatFmt(m.created_at))}${m.edited ? " · Edited" : ""}</div>
             <div class="chatTools">
@@ -1088,6 +1244,128 @@ function chatSendTyping(on){
     }
 
     let replyToId = null;
+
+    function fmtBytes(n){
+  const v = Number(n || 0);
+  if (!v) return "0 B";
+  const u = ["B","KB","MB","GB"];
+  let i = 0, x = v;
+  while (x >= 1024 && i < u.length-1){ x/=1024; i++; }
+  return `${x.toFixed(i === 0 ? 0 : 1)} ${u[i]}`;
+}
+
+function renderAttachTray(){
+  if (!chatPendingFiles.length){
+    chatAttachTray.style.display = "none";
+    chatAttachTray.innerHTML = "";
+    return;
+  }
+  chatAttachTray.style.display = "flex";
+  chatAttachTray.innerHTML = chatPendingFiles.map((a, idx) => `
+    <div class="chatChip">
+      <div class="chatChipName">${esc(a.original_name)} · ${esc(fmtBytes(a.size_bytes))}</div>
+      <button class="chatChipX" data-att-x="${idx}">Remove</button>
+    </div>
+  `).join("");
+}
+
+chatAttachTray.addEventListener("click", (e) => {
+  const b = e.target.closest("button[data-att-x]");
+  if (!b) return;
+  const idx = Number(b.getAttribute("data-att-x"));
+  if (!Number.isFinite(idx)) return;
+  chatPendingFiles.splice(idx, 1);
+  renderAttachTray();
+});
+
+chatAttachBtn.addEventListener("click", () => chatFile.click());
+
+chatFile.addEventListener("change", async () => {
+  const files = Array.from(chatFile.files || []);
+  chatFile.value = "";
+  if (!files.length) return;
+  await chatHandleFiles(files);
+});
+
+async function chatHandleFiles(files){
+  // Ensure thread exists (client-chat-history creates it if missing)
+  if (!chatThreadId){
+    await chatLoadHistory();
+    if (!chatThreadId) throw new Error("No thread id yet.");
+  }
+
+  chatHint.textContent = "Uploading attachments…";
+  chatSend.disabled = true;
+
+  try{
+    for (const f of files){
+      await chatUploadOne(f);
+    }
+    chatHint.textContent = "";
+  }catch(e){
+    chatHint.textContent = e?.message || String(e);
+  }finally{
+    chatSend.disabled = false;
+    renderAttachTray();
+  }
+}
+
+async function chatUploadOne(file){
+  const mime = (file.type || "application/octet-stream").trim();
+
+  // 1) Ask Edge Function for a signed upload URL + token
+  const j = await callFn("chat-attachment-upload-url", {
+    thread_id: chatThreadId,
+    file_name: file.name,
+    mime_type: mime,
+    size_bytes: file.size,
+  });
+
+  if (!j?.upload?.signed_upload_url || !j?.upload?.token || !j?.upload?.path){
+    throw new Error("Upload URL generation failed.");
+  }
+
+  // 2) Upload file to the signed URL using supabase-js helper
+  const bucket = j.upload.bucket || "chat-attachments";
+  const path = j.upload.path;
+  const token = j.upload.token;
+
+  const up = await sb.storage
+    .from(bucket)
+    .uploadToSignedUrl(path, token, file, { contentType: mime });
+
+  if (up.error) throw new Error(up.error.message);
+
+  // 3) Add to pending list (will be linked to the message on send)
+  chatPendingFiles.push({
+    storage_path: path,
+    original_name: file.name,
+    mime_type: mime,
+    size_bytes: file.size,
+  });
+}
+
+// Drag & drop (drop onto the chat card)
+const chatCard = chatBody.closest(".chatWrap") || chatBody;
+window.addEventListener("dragover", (e) => {
+  if (!e.dataTransfer) return;
+  e.preventDefault();
+  chatDrop.style.display = "flex";
+});
+window.addEventListener("dragleave", (e) => {
+  // Only hide when leaving the window
+  if (e.relatedTarget == null) chatDrop.style.display = "none";
+});
+window.addEventListener("drop", async (e) => {
+  if (!e.dataTransfer) return;
+  e.preventDefault();
+  chatDrop.style.display = "none";
+
+  const files = Array.from(e.dataTransfer.files || []);
+  if (!files.length) return;
+  await chatHandleFiles(files);
+});
+
 
     chatBody.addEventListener("click", async (e) => {
       const btn = e.target.closest("button[data-act]");
@@ -1164,15 +1442,23 @@ function chatSendTyping(on){
 
     async function chatSendMsg(){
       const text = (chatInput.value || "").trim();
-      if (!text) return;
+      if (!text && chatPendingFiles.length === 0) return;
+
 
       chatSend.disabled = true;
       try{
-        const j = await callFn("client-chat-send", { body: text, reply_to_message_id: replyToId });
+        const j = await callFn("client-chat-send", {
+          body: text,
+          reply_to_message_id: replyToId,
+          attachments: chatPendingFiles,
+        });
         replyToId = null;
         chatHint.textContent = "";
         chatInput.value = "";
         chatSendTyping(false);
+        chatPendingFiles = [];
+        renderAttachTray();
+
 
         if (j?.message) {
           chatMessages.push(j.message);

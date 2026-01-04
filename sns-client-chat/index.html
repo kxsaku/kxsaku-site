@@ -658,12 +658,32 @@
           </div>
 
 
-          <div class="composer">
-            <div class="box">
-              <textarea id="composer" placeholder="Type a message…"></textarea>
-            </div>
+<div class="composer" id="composerBar">
+  <input id="chatFile" type="file" multiple style="display:none" />
 
-            <button class="btn btn-primary" id="sendBtn" type="button" disabled>Send</button>
+  <button class="btn btn-soft" id="chatAttachBtn" type="button" disabled>Attach</button>
+
+  <div class="box">
+    <textarea id="composer" placeholder="Type a message…"></textarea>
+  </div>
+
+  <button class="btn btn-primary" id="sendBtn" type="button" disabled>Send</button>
+</div>
+
+<div id="chatAttachTray" style="display:none; padding: 0 .95rem .85rem;"></div>
+
+<div id="chatDrop" style="display:none;">
+  <div style="
+    margin: 0 .95rem .95rem;
+    border: 1px dashed rgba(179,124,255,.45);
+    background: rgba(179,124,255,.08);
+    border-radius: 18px;
+    padding: 16px;
+    text-align: center;
+    color: rgba(244,240,255,.85);
+  ">Drop files to attach</div>
+</div>
+
           </div>
         </div>
       </div>
@@ -760,6 +780,16 @@
     const chatErr = document.getElementById("chatErr");
     const messagesEl = document.getElementById("messages");
     const typingLine = document.getElementById("typingLine");
+        // Attachments (admin)
+    const chatFile = document.getElementById("chatFile");
+    const chatAttachBtn = document.getElementById("chatAttachBtn");
+    const chatAttachTray = document.getElementById("chatAttachTray");
+    const chatDrop = document.getElementById("chatDrop");
+
+    // pending uploads waiting to be sent with the next message
+    let chatPendingFiles = []; 
+    // each: { attachment_id, storage_path, original_name, mime_type, size_bytes }
+
 
 
     const composer = document.getElementById("composer");
@@ -890,6 +920,108 @@ function maybePlayIncoming(threadId){
         .replaceAll('"',"&quot;")
         .replaceAll("'","&#039;");
     }
+
+    function setAttachTrayVisible(on){
+  chatAttachTray.style.display = on ? "block" : "none";
+}
+
+function renderAttachTray(){
+  if (!chatPendingFiles.length){
+    setAttachTrayVisible(false);
+    chatAttachTray.innerHTML = "";
+    return;
+  }
+  setAttachTrayVisible(true);
+
+  chatAttachTray.innerHTML = `
+    <div style="display:flex; gap:.55rem; flex-wrap:wrap;">
+      ${chatPendingFiles.map((f, idx) => `
+        <span class="tag" style="gap:.55rem;">
+          ${sanitize(f.original_name)}
+          <button class="mini-btn" type="button" data-rm-att="${idx}">X</button>
+        </span>
+      `).join("")}
+    </div>
+  `;
+}
+
+// remove attachment from tray
+chatAttachTray.addEventListener("click", (e) => {
+  const btn = e.target.closest("button[data-rm-att]");
+  if (!btn) return;
+  const idx = Number(btn.getAttribute("data-rm-att"));
+  if (!Number.isFinite(idx)) return;
+  chatPendingFiles.splice(idx, 1);
+  renderAttachTray();
+});
+
+async function putSignedUpload(url, file){
+  // signed url may be relative or absolute depending on supabase response
+  let putUrl = url;
+  if (putUrl.startsWith("/")) putUrl = `${SUPABASE_URL}${putUrl}`;
+
+  const r = await fetch(putUrl, {
+    method: "PUT",
+    headers: {
+      "Content-Type": file.type || "application/octet-stream",
+    },
+    body: file,
+  });
+
+  if (!r.ok){
+    const t = await r.text().catch(() => "");
+    throw new Error(`Upload failed: ${r.status} ${t}`);
+  }
+}
+
+async function uploadOneFileToThread(file){
+  if (!activeThreadId) throw new Error("No thread_id yet. Open a client chat first.");
+
+  // 1) get signed upload url + attachment_id
+  const up = await callEdge("chat-attachment-upload-url", {
+    thread_id: activeThreadId,
+    file_name: file.name,
+    mime_type: file.type || "application/octet-stream",
+    size_bytes: file.size,
+  });
+
+  const upload = up?.upload;
+  if (!upload?.signed_upload_url || !upload?.attachment_id || !upload?.path){
+    throw new Error("Upload URL response missing fields.");
+  }
+
+  // 2) PUT the file bytes to signed url
+  await putSignedUpload(upload.signed_upload_url, file);
+
+  // 3) store metadata to send with admin-chat-send
+  chatPendingFiles.push({
+    attachment_id: upload.attachment_id,
+    storage_path: upload.path,
+    original_name: upload.original_name || file.name,
+    mime_type: upload.mime_type || file.type || "application/octet-stream",
+    size_bytes: upload.size_bytes || file.size,
+  });
+
+  renderAttachTray();
+}
+
+async function addFiles(files){
+  const list = Array.from(files || []);
+  if (!list.length) return;
+
+  // simple sequential uploads (reliable, keeps it predictable)
+  chatAttachBtn.disabled = true;
+  chatAttachBtn.textContent = "Uploading…";
+  try{
+    for (const f of list){
+      await uploadOneFileToThread(f);
+    }
+  }finally{
+    chatAttachBtn.textContent = "Attach";
+    chatAttachBtn.disabled = false;
+  }
+}
+
 
     function showChatErr(msg){
       chatErr.style.display = "block";
@@ -1248,6 +1380,7 @@ function sendTyping(on){
       sendBtn.disabled = false;
       exportBtn.disabled = false;
       broadcastBtn.disabled = false;
+      chatAttachBtn.disabled = false;
       loadHistory();
       renderClients();
     }
@@ -1294,27 +1427,48 @@ function sendTyping(on){
     }
 
     async function sendMessage(){
-      if (!activeClient) return;
-      const text = (composer.value || "").trim();
-      if (!text) return;
+        if (!activeClient) return;
 
-      composer.value = "";
-      composer.focus();
-      sendTyping(false);
+        const text = (composer.value || "").trim();
+        const hasFiles = chatPendingFiles.length > 0;
 
-      try{
-        const data = await callEdge("admin-chat-send", { user_id: activeClient.user_id, body: text });
-        const msg = data?.message;
-        if (msg){
-          messages.push(msg);
-          renderMessages();
-        } else {
-          await loadHistory();
+        // allow sending with attachments only
+        if (!text && !hasFiles) return;
+
+        composer.value = "";
+        composer.focus();
+        sendTyping(false);
+
+        const payload = {
+            user_id: activeClient.user_id,
+            body: text,
+            attachments: chatPendingFiles.map(a => ({
+            attachment_id: a.attachment_id,
+            storage_path: a.storage_path,
+            original_name: a.original_name,
+            mime_type: a.mime_type,
+            size_bytes: a.size_bytes,
+            })),
+        };
+
+        // clear pending UI immediately (so it feels instant)
+        chatPendingFiles = [];
+        renderAttachTray();
+
+        try{
+            const data = await callEdge("admin-chat-send", payload);
+            const msg = data?.message;
+            if (msg){
+            messages.push(msg);
+            renderMessages();
+            } else {
+            await loadHistory();
+            }
+        }catch(e){
+            showChatErr(e?.message || String(e));
         }
-      }catch(e){
-        showChatErr(e?.message || String(e));
-      }
-    }
+        }
+
 
     function updateJump(){
       const nearBottom = (messagesEl.scrollHeight - messagesEl.scrollTop - messagesEl.clientHeight) < 120;
@@ -1348,6 +1502,51 @@ function sendTyping(on){
             showChatErr(err?.message || String(err));
         }
         });
+
+        chatAttachBtn.addEventListener("click", () => {
+            if (!activeClient) return;
+            chatFile.value = "";
+            chatFile.click();
+            });
+
+            chatFile.addEventListener("change", async () => {
+            try{
+                await addFiles(chatFile.files);
+            }catch(e){
+                showChatErr(e?.message || String(e));
+            }
+            });
+
+            // Drag & drop
+            window.addEventListener("dragenter", (e) => {
+            if (!activeClient) return;
+            e.preventDefault();
+            chatDrop.style.display = "block";
+            });
+            window.addEventListener("dragover", (e) => {
+            if (!activeClient) return;
+            e.preventDefault();
+            chatDrop.style.display = "block";
+            });
+            window.addEventListener("dragleave", (e) => {
+            if (!activeClient) return;
+            if (e.target === document.documentElement || e.target === document.body){
+                chatDrop.style.display = "none";
+            }
+            });
+            window.addEventListener("drop", async (e) => {
+            if (!activeClient) return;
+            e.preventDefault();
+            chatDrop.style.display = "none";
+            const dt = e.dataTransfer;
+            if (!dt?.files?.length) return;
+            try{
+                await addFiles(dt.files);
+            }catch(err){
+                showChatErr(err?.message || String(err));
+            }
+            });
+
 
 
     sendBtn.addEventListener("click", sendMessage);
