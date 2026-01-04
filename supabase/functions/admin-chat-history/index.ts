@@ -1,18 +1,6 @@
-// supabase/functions/admin-chat-history/index.ts
+// supabase/functions/client-chat-history/index.ts
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-function json(data: unknown, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: {
-      "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-      "Access-Control-Allow-Methods": "POST, OPTIONS",
-    },
-  });
-}
 
 function getEnv(name: string) {
   const v = Deno.env.get(name);
@@ -20,143 +8,139 @@ function getEnv(name: string) {
   return v;
 }
 
-type ReqBody = {
-  user_id?: string;
-  limit?: number;
+function corsHeaders(req: Request) {
+  const origin = req.headers.get("origin") ?? "*";
+  return {
+    "Access-Control-Allow-Origin": origin,
+    "Access-Control-Allow-Headers":
+      "authorization, x-client-info, apikey, content-type, x-requested-with",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Credentials": "true",
+  };
+}
+
+function json(data: unknown, status = 200, headers: Record<string, string> = {}) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { "Content-Type": "application/json", ...headers },
+  });
+}
+
+type MsgRow = {
+  id: string;
+  sender_role: "admin" | "client";
+  body: string;
+  created_at: string;
+  edited_at: string | null;
+  deleted_at: string | null;
+  delivered_at: string | null;
+  read_by_client_at: string | null;
 };
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") return json({ ok: true }, 200);
-  if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
+  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders(req) });
+  if (req.method !== "POST") return json({ error: "Method not allowed" }, 405, corsHeaders(req));
 
   try {
-    const SB_URL = getEnv("SB_URL");
-    const SB_SERVICE_ROLE_KEY = getEnv("SB_SERVICE_ROLE_KEY");
-    const ADMIN_EMAIL = (getEnv("ADMIN_EMAIL") || "").toLowerCase();
+    const SUPABASE_URL = getEnv("SUPABASE_URL");
+    const SUPABASE_ANON_KEY = getEnv("SUPABASE_ANON_KEY");
 
-    const authHeader = req.headers.get("Authorization") || "";
-    const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
-    if (!token) return json({ error: "Missing Authorization bearer token" }, 401);
-
-    const admin = createClient(SB_URL, SB_SERVICE_ROLE_KEY, {
+    const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      global: { headers: { Authorization: req.headers.get("Authorization") || "" } },
       auth: { persistSession: false },
-      global: { headers: { Authorization: `Bearer ${token}` } },
     });
 
-    // Verify caller identity (must be ADMIN_EMAIL)
-    const { data: userData, error: userErr } = await admin.auth.getUser(token);
-    if (userErr) return json({ error: `Auth error: ${userErr.message}` }, 401);
+    // Auth required (client is the logged-in user)
+    const { data: auth, error: authErr } = await sb.auth.getUser();
+    if (authErr || !auth?.user) return json({ error: "Unauthorized" }, 401, corsHeaders(req));
 
-    const callerEmail = (userData.user?.email || "").toLowerCase();
-    if (!callerEmail || callerEmail !== ADMIN_EMAIL) {
-      return json({ error: "Forbidden: admin only" }, 403);
-    }
+    const userId = auth.user.id;
 
-    const body = (await req.json().catch(() => ({}))) as ReqBody;
-    const user_id = (body.user_id || "").trim();
-    const limit = Math.max(1, Math.min(200, Number(body.limit || 60)));
+    // Ensure thread exists
+    const thRes = await sb.from("chat_threads").select("id").eq("user_id", userId).maybeSingle();
+    if (thRes.error) return json({ error: thRes.error.message }, 500, corsHeaders(req));
 
-    if (!user_id) return json({ error: "Missing user_id" }, 400);
+    let threadId = thRes.data?.id as string | undefined;
 
-    // 1) Find thread for this client (expected table: chat_threads)
-    //    If table doesn't exist yet, return empty messages gracefully.
-    const threadRes = await admin
-      .from("chat_threads")
-      .select("id")
-      .eq("user_id", user_id)
-      .maybeSingle();
-
-    if (threadRes.error) {
-      // Missing table or permissions => return empty, do not hard-fail the UI.
-      return json({
-        ok: true,
-        messages: [],
-        warning:
-          "chat_threads not found (or inaccessible). Create chat tables next.",
-      });
-    }
-
-    const threadId = threadRes.data?.id;
     if (!threadId) {
-      return json({ ok: true, messages: [] });
+      const ins = await sb
+        .from("chat_threads")
+        .insert({ user_id: userId, unread_for_admin: false, unread_for_client: false })
+        .select("id")
+        .single();
+
+      if (ins.error) return json({ error: ins.error.message }, 500, corsHeaders(req));
+      threadId = ins.data.id;
     }
 
-    // Clear admin unread flag now that the admin opened this thread
-    // Non-fatal if the column does not exist yet.
-    try {
-      await admin.from("chat_threads").update({ unread_for_admin: false }).eq("id", threadId);
-    } catch (_) {}
-
-
-    // 2) Fetch messages (expected table: chat_messages)
-    const msgRes = await admin
+    // Fetch messages
+    const msgRes = await sb
       .from("chat_messages")
-      .select(
-        "id, sender_role, body, created_at, edited_at, original_body, deleted_at, delivered_at, read_by_client_at, reply_to_message_id",
-      )
+      .select("id,sender_role,body,created_at,edited_at,deleted_at,delivered_at,read_by_client_at")
       .eq("thread_id", threadId)
-      .order("created_at", { ascending: true })
-      .limit(limit);
-    
-    if (msgRes.error) {
-      return json({
-        ok: true,
-        messages: [],
-        warning:
-          "chat_messages not found (or inaccessible). Create chat tables next.",
-      });
+      .order("created_at", { ascending: true });
+
+    if (msgRes.error) return json({ error: msgRes.error.message }, 500, corsHeaders(req));
+
+    // Fetch attachments for those messages (uses original_name, NOT filename)
+    const msgIds = (msgRes.data || []).map((m: any) => m.id).filter(Boolean);
+
+    let attByMsg: Record<string, any[]> = {};
+    if (msgIds.length > 0) {
+      const attRes = await sb
+        .from("chat_attachments")
+        .select("id,message_id,storage_bucket,storage_path,original_name,mime_type,size_bytes,created_at")
+        .eq("thread_id", threadId)
+        .in("message_id", msgIds)
+        .order("created_at", { ascending: true });
+
+      if (attRes.error) return json({ error: attRes.error.message }, 500, corsHeaders(req));
+
+      attByMsg = (attRes.data || []).reduce((acc: Record<string, any[]>, a: any) => {
+        const k = a.message_id;
+        if (!acc[k]) acc[k] = [];
+        acc[k].push({
+          id: a.id,
+          storage_bucket: a.storage_bucket,
+          storage_path: a.storage_path,
+          original_name: a.original_name,
+          mime_type: a.mime_type,
+          size_bytes: a.size_bytes ?? null,
+          created_at: a.created_at,
+        });
+        return acc;
+      }, {});
     }
 
-    const msgIds = (msgRes.data || []).map((m) => m.id).filter(Boolean);
+    // Clear client's unread when opening chat
+    const upd = await sb.from("chat_threads").update({ unread_for_client: false }).eq("id", threadId);
+    if (upd.error) console.warn("Failed to clear unread_for_client:", upd.error.message);
 
-let attByMsg: Record<string, any[]> = {};
-if (msgIds.length > 0) {
-  const attRes = await admin
-    .from("chat_attachments")
-    .select("id,message_id,original_name,mime_type,size_bytes,storage_path,created_at")
-    .eq("thread_id", threadId)
-    .in("message_id", msgIds)
-    .order("created_at", { ascending: true });
+    // Mark admin messages as read-by-client now (read receipts visible to admin only)
+    const nowIso = new Date().toISOString();
+    const markRead = await sb
+      .from("chat_messages")
+      .update({ read_by_client_at: nowIso })
+      .eq("thread_id", threadId)
+      .eq("sender_role", "admin")
+      .is("read_by_client_at", null);
 
-  if (attRes.error) return json({ error: attRes.error.message }, 500);
+    if (markRead.error) console.warn("Failed to mark read receipts:", markRead.error.message);
 
-  attByMsg = (attRes.data || []).reduce((acc: Record<string, any[]>, a: any) => {
-    const k = a.message_id;
-    if (!acc[k]) acc[k] = [];
-    acc[k].push({
-      id: a.id,
-      storage_path: a.storage_path,
-      filename: a.original_name,
-      mime_type: a.mime_type,
-      size_bytes: a.size_bytes ?? null,
-      created_at: a.created_at,
-    });
-    return acc;
-  }, {});
-}
+    const messages = (msgRes.data as MsgRow[] | null | undefined || []).map((m) => ({
+      id: m.id,
+      sender_role: m.sender_role,
+      body: m.deleted_at ? "Deleted Message" : m.body,
+      created_at: m.created_at,
+      edited: !!m.edited_at,
+      deleted: !!m.deleted_at,
+      delivered_at: m.delivered_at || null,
+      read_by_client_at: m.read_by_client_at || null,
+      attachments: attByMsg[m.id] || [],
+    }));
 
-
-    const messages = (msgRes.data || []).map((m) => {
-      const deleted = !!m.deleted_at;
-      const edited = !!m.edited_at;
-
-      return {
-        id: m.id,
-        sender_role: m.sender_role, // "admin" | "client"
-        body: m.body,
-        created_at: m.created_at,
-        edited,
-        original_body: m.original_body || null,
-        deleted,
-        delivered_at: m.delivered_at || null,
-        read_by_client_at: m.read_by_client_at || null,
-        reply_to_message_id: m.reply_to_message_id || null,
-        attachments: attByMsg[m.id] || [],
-      };
-    });
-
-    return json({ ok: true, thread_id: threadId, messages });
+    return json({ ok: true, thread_id: threadId, messages }, 200, corsHeaders(req));
   } catch (e) {
-    return json({ error: e?.message || String(e) }, 500);
+    return json({ error: (e as any)?.message || String(e) }, 500, corsHeaders(req));
   }
 });
