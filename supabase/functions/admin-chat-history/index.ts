@@ -113,7 +113,7 @@ let attByMsg: Record<string, any[]> = {};
 if (msgIds.length > 0) {
   const attRes = await admin
     .from("chat_attachments")
-    .select("id, message_id, storage_path, filename, mime_type, size_bytes, created_at")
+    .select("id,message_id,original_name,mime_type,size_bytes,storage_path,created_at")
     .eq("thread_id", threadId)
     .in("message_id", msgIds)
     .order("created_at", { ascending: true });
@@ -126,7 +126,7 @@ if (msgIds.length > 0) {
     acc[k].push({
       id: a.id,
       storage_path: a.storage_path,
-      filename: a.filename,
+      filename: a.original_name,
       mime_type: a.mime_type,
       size_bytes: a.size_bytes ?? null,
       created_at: a.created_at,
