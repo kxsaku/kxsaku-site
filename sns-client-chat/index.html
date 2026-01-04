@@ -591,6 +591,13 @@
     display: block;
     }
 
+    .atts{ margin-top:10px; display:flex; flex-direction:column; gap:10px; }
+    .att{ padding:10px; border:1px solid rgba(255,255,255,.10); border-radius:14px; background:rgba(255,255,255,.03); }
+    .attMeta{ font-size:12px; opacity:.85; margin-top:8px; }
+    .attLink{ font-size:12px; text-decoration:underline; opacity:.9; }
+    .attImg{ width:100%; max-width:420px; border-radius:14px; display:block; }
+
+
 
   </style>
 </head>
@@ -1347,7 +1354,39 @@ function sendTyping(on){
 
         return `
         <div class="msg ${cls}">
-            <div class="text">${sanitize(body)}</div>
+            ${(() => {
+  const atts = Array.isArray(m.attachments) ? m.attachments : [];
+  if (!atts.length) return `<div class="text">${sanitize(body)}</div>`;
+
+  const attHtml = atts.map(a => {
+    const name = sanitize(a.file_name || "attachment");
+    const size = (typeof a.size_bytes === "number") ? `${Math.max(1, Math.round(a.size_bytes/1024))} KB` : "";
+    const url = a.signed_url ? sanitize(a.signed_url) : "";
+    const isImg = (a.mime_type || "").startsWith("image/");
+    if (isImg && url) {
+      return `
+        <div class="att">
+          <a href="${url}" target="_blank" rel="noreferrer">
+            <img class="attImg" src="${url}" alt="${name}">
+          </a>
+          <div class="attMeta">${name}${size ? ` · ${size}` : ""}</div>
+        </div>
+      `;
+    }
+    return `
+      <div class="att">
+        <div class="attMeta">${name}${size ? ` · ${size}` : ""}</div>
+        ${url ? `<a class="attLink" href="${url}" target="_blank" rel="noreferrer">Download</a>` : `<span class="attMeta">Link unavailable</span>`}
+      </div>
+    `;
+  }).join("");
+
+  return `
+    <div class="text">${sanitize(body)}</div>
+    <div class="atts">${attHtml}</div>
+  `;
+})()}
+
             <div class="foot">
             <div class="mini">
                 <span>${sanitize(fmt(m.created_at))}</span>

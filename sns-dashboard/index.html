@@ -590,6 +590,13 @@ body{
   color: rgba(244,240,255,.55);
 }
 
+.chatAtts{ margin-top:10px; display:flex; flex-direction:column; gap:10px; }
+.chatAtt{ padding:10px; border:1px solid rgba(255,255,255,.10); border-radius:14px; background:rgba(255,255,255,.03); }
+.chatAttMeta{ font-size:12px; opacity:.85; margin-top:8px; }
+.chatAttLink{ font-size:12px; text-decoration:underline; opacity:.9; }
+.chatImg{ width:100%; max-width:360px; border-radius:14px; display:block; }
+
+
 
 
 
@@ -1189,43 +1196,39 @@ function chatSendTyping(on){
 
         const body = isDeleted ? "Deleted Message" : (m.body || "");
         const atts = Array.isArray(m.attachments) ? m.attachments : [];
-        const attHtml = atts.length ? `
-          <div class="chatAttRow">
-            ${atts.map(a => {
-              const isImg = String(a.mime_type || "").startsWith("image/");
-              const url = a.signed_url || null;
-              const name = a.original_name || "file";
-              const meta = `${fmtBytes(a.size_bytes)} · ${(a.mime_type || "").split(";")[0] || "file"}`;
 
-              if (isImg && url){
+        const attHtml = atts.length ? `
+          <div class="chatAtts">
+            ${atts.map(a => {
+              const name = esc(a.file_name || "attachment");
+              const size = (typeof a.size_bytes === "number") ? `${Math.max(1, Math.round(a.size_bytes/1024))} KB` : "";
+              const url = a.signed_url ? esc(a.signed_url) : "";
+              const isImg = (a.mime_type || "").startsWith("image/");
+              if (isImg && url) {
                 return `
-                  <div class="chatAttItem">
-                    <div class="chatAttLeft">
-                      <div class="chatAttName">${esc(name)}</div>
-                      <div class="chatAttMeta">${esc(meta)}</div>
-                    </div>
-                    <a class="chatMiniBtn" href="${esc(url)}" target="_blank" rel="noopener">View</a>
+                  <div class="chatAtt">
+                    <a href="${url}" target="_blank" rel="noreferrer">
+                      <img class="chatImg" src="${url}" alt="${name}">
+                    </a>
+                    <div class="chatAttMeta">${name}${size ? ` · ${size}` : ""}</div>
                   </div>
                 `;
               }
-
               return `
-                <div class="chatAttItem">
-                  <div class="chatAttLeft">
-                    <div class="chatAttName">${esc(name)}</div>
-                    <div class="chatAttMeta">${esc(meta)}</div>
-                  </div>
-                  ${url ? `<a class="chatMiniBtn" href="${esc(url)}" target="_blank" rel="noopener">Download</a>` : ``}
+                <div class="chatAtt">
+                  <div class="chatAttMeta">${name}${size ? ` · ${size}` : ""}</div>
+                  ${url ? `<a class="chatAttLink" href="${url}" target="_blank" rel="noreferrer">Download</a>` : `<span class="mutedSm">Link unavailable</span>`}
                 </div>
               `;
             }).join("")}
           </div>
-        ` : ``;
+        ` : "";
 
         div.innerHTML = `
           <div class="chatText">${esc(body)}</div>
           ${attHtml}
           <div class="chatFoot">
+
             <div>${esc(chatFmt(m.created_at))}${m.edited ? " · Edited" : ""}</div>
             <div class="chatTools">
               ${m.sender_role === "client" && !isDeleted ? `<button class="chatMiniBtn" data-act="edit" data-id="${esc(m.id)}">Edit</button>` : ``}

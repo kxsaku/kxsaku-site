@@ -8,137 +8,144 @@ function getEnv(name: string) {
   return v;
 }
 
-function corsHeaders(req: Request) {
-  const origin = req.headers.get("origin") ?? "*";
+function cors(headers = {}) {
   return {
-    "Access-Control-Allow-Origin": origin,
-    "Access-Control-Allow-Headers":
-      "authorization, x-client-info, apikey, content-type, x-requested-with",
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Credentials": "true",
+    ...headers,
   };
 }
 
-function json(data: unknown, status = 200, headers: Record<string, string> = {}) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { "Content-Type": "application/json", ...headers },
-  });
-}
-
-type MsgRow = {
-  id: string;
-  sender_role: "admin" | "client";
-  body: string;
-  created_at: string;
-  edited_at: string | null;
-  deleted_at: string | null;
-  delivered_at: string | null;
-  read_by_client_at: string | null;
-};
-
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders(req) });
-  }
-
-  if (req.method !== "POST") {
-    return json({ error: "Method not allowed" }, 405, corsHeaders(req));
-  }
+  if (req.method === "OPTIONS") return new Response("ok", { headers: cors() });
 
   try {
-    const SUPABASE_URL = getEnv("SUPABASE_URL");
-    const SUPABASE_ANON_KEY = getEnv("SUPABASE_ANON_KEY");
+    const SB_URL = getEnv("SB_URL");
+    const SB_SERVICE_ROLE_KEY = getEnv("SB_SERVICE_ROLE_KEY");
 
-    const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      global: { headers: { Authorization: req.headers.get("Authorization") || "" } },
+    const authHeader = req.headers.get("Authorization") || "";
+    const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
+    if (!token) return new Response(JSON.stringify({ error: "Missing bearer token" }), { status: 401, headers: cors({ "Content-Type": "application/json" }) });
+
+    const admin = createClient(SB_URL, SB_SERVICE_ROLE_KEY, {
+      global: { headers: { Authorization: `Bearer ${token}` } },
     });
 
-    // Auth required (client is the logged-in user)
-    const { data: auth, error: authErr } = await sb.auth.getUser();
-    if (authErr || !auth?.user) {
-      return json({ error: "Unauthorized" }, 401, corsHeaders(req));
+    // Verify caller is a real authed user
+    const { data: u, error: uErr } = await admin.auth.getUser(token);
+    if (uErr || !u?.user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: cors({ "Content-Type": "application/json" }) });
     }
 
-    const userId = auth.user.id;
+    const { limit = 60 } = await req.json().catch(() => ({}));
+    const me = u.user.id;
 
-    // Ensure thread exists
-    const thRes = await sb
+    // Ensure a thread exists (client <-> admin)
+    const { data: thread, error: threadErr } = await admin
       .from("chat_threads")
-      .select("id")
-      .eq("user_id", userId)
+      .select("id, user_id")
+      .eq("user_id", me)
       .maybeSingle();
 
-    if (thRes.error) {
-      return json({ error: thRes.error.message }, 500, corsHeaders(req));
+    if (threadErr) {
+      return new Response(JSON.stringify({ error: threadErr.message }), { status: 400, headers: cors({ "Content-Type": "application/json" }) });
     }
 
-    let threadId = thRes.data?.id as string | undefined;
+    let threadId = thread?.id || null;
 
     if (!threadId) {
-      const ins = await sb
+      const { data: created, error: createErr } = await admin
         .from("chat_threads")
-        .insert({ user_id: userId, unread_for_admin: false, unread_for_client: false })
+        .insert({ user_id: me })
         .select("id")
         .single();
 
-      if (ins.error) {
-        return json({ error: ins.error.message }, 500, corsHeaders(req));
+      if (createErr) {
+        return new Response(JSON.stringify({ error: createErr.message }), { status: 400, headers: cors({ "Content-Type": "application/json" }) });
       }
-      threadId = ins.data.id;
+      threadId = created.id;
     }
 
-    // Fetch messages
-    const msgRes = await sb
+    // Pull messages
+    const { data: msgs, error: mErr } = await admin
       .from("chat_messages")
-      .select(
-        "id,sender_role,body,created_at,edited_at,deleted_at,delivered_at,read_by_client_at"
-      )
+      .select("id, thread_id, sender_role, body, created_at, edited_at, edited, deleted, deleted_at, reply_to_id, delivered_at, read_by_client_at")
       .eq("thread_id", threadId)
-      .order("created_at", { ascending: true });
+      .order("created_at", { ascending: true })
+      .limit(limit);
 
-    if (msgRes.error) {
-      return json({ error: msgRes.error.message }, 500, corsHeaders(req));
+    if (mErr) {
+      return new Response(JSON.stringify({ error: mErr.message }), { status: 400, headers: cors({ "Content-Type": "application/json" }) });
     }
 
-    // Clear client's unread when opening chat
-    const upd = await sb
-      .from("chat_threads")
-      .update({ unread_for_client: false })
-      .eq("id", threadId);
+    const messages = Array.isArray(msgs) ? msgs : [];
+    const messageIds = messages.map(m => m.id);
 
-    if (upd.error) {
-      // non-fatal
-      console.warn("Failed to clear unread_for_client:", upd.error.message);
+    // Pull attachments linked to these messages
+    let attachmentsByMessage: Record<string, any[]> = {};
+    if (messageIds.length) {
+      const { data: atts, error: aErr } = await admin
+        .from("chat_attachments")
+        .select("id, message_id, file_name, mime_type, size_bytes, storage_path, created_at")
+        .in("message_id", messageIds);
+
+      if (aErr) {
+        return new Response(JSON.stringify({ error: aErr.message }), { status: 400, headers: cors({ "Content-Type": "application/json" }) });
+      }
+
+      const list = Array.isArray(atts) ? atts : [];
+      attachmentsByMessage = list.reduce((acc: any, a: any) => {
+        (acc[a.message_id] ||= []).push(a);
+        return acc;
+      }, {});
     }
 
-    // Mark admin messages as read-by-client now (read receipts visible to admin only)
-    const nowIso = new Date().toISOString();
-    const markRead = await sb
-      .from("chat_messages")
-      .update({ read_by_client_at: nowIso })
-      .eq("thread_id", threadId)
-      .eq("sender_role", "admin")
-      .is("read_by_client_at", null);
+    // Create signed URLs (so your UI can actually display/download)
+    const bucket = "chat-attachments";
+    const signedTTL = 60 * 30; // 30 min
 
-    if (markRead.error) {
-      // non-fatal
-      console.warn("Failed to mark read receipts:", markRead.error.message);
-    }
+    const messagesWithAttachments = await Promise.all(
+      messages.map(async (m: any) => {
+        const atts = attachmentsByMessage[m.id] || [];
+        const enriched = [];
 
-    const messages = (msgRes.data as MsgRow[] | null | undefined || []).map((m) => ({
-      id: m.id,
-      sender_role: m.sender_role,
-      body: m.deleted_at ? "Deleted Message" : m.body,
-      created_at: m.created_at,
-      edited: !!m.edited_at,
-      deleted: !!m.deleted_at,
-      delivered_at: m.delivered_at || null,
-      read_by_client_at: m.read_by_client_at || null,
-    }));
+        for (const a of atts) {
+          const path = a.storage_path;
+          let signed_url: string | null = null;
 
-    return json({ ok: true, thread_id: threadId, messages }, 200, corsHeaders(req));
+          if (path) {
+            const { data: s, error: sErr } = await admin.storage
+              .from(bucket)
+              .createSignedUrl(path, signedTTL);
+
+            if (!sErr) signed_url = s?.signedUrl || null;
+          }
+
+          enriched.push({
+            id: a.id,
+            message_id: a.message_id,
+            file_name: a.file_name,
+            mime_type: a.mime_type,
+            size_bytes: a.size_bytes,
+            storage_path: a.storage_path,
+            signed_url,
+            created_at: a.created_at,
+          });
+        }
+
+        return { ...m, attachments: enriched };
+      })
+    );
+
+    return new Response(
+      JSON.stringify({ thread_id: threadId, messages: messagesWithAttachments }),
+      { headers: cors({ "Content-Type": "application/json" }) }
+    );
   } catch (e) {
-    return json({ error: (e as any)?.message || String(e) }, 500, corsHeaders(req));
+    return new Response(JSON.stringify({ error: e?.message || String(e) }), {
+      status: 500,
+      headers: cors({ "Content-Type": "application/json" }),
+    });
   }
 });
