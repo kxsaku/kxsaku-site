@@ -52,8 +52,9 @@ function getEnv(name: string) {
 }
 
 type AttachmentIn = {
-  storage_path: string; // bucket path, e.g. "userId/uuid-filename.png"
-  filename: string;
+  attachment_id?: string;        // REQUIRED for linking
+  storage_path: string;
+  original_name: string;
   mime_type: string;
   size_bytes?: number | null;
 };
@@ -160,27 +161,27 @@ serve(async (req) => {
 
     if (insMsg.error) return json({ error: insMsg.error.message }, 500);
 
-    // If attachments were provided, link them to this message
+  // If attachments were provided, link existing attachment rows to this message
 if (attachments.length > 0) {
-  const rows = attachments
-    .filter(a => a?.storage_path && a?.original_name && a?.mime_type)
-    .map(a => ({
-      thread_id: threadId,
-      message_id: insMsg.data.id,
-      uploader_user_id: uid,
-      uploader_role: "client",
-      storage_bucket: "chat-attachments",
-      storage_path: a.storage_path,
-      original_name: a.original_name,
-      mime_type: a.mime_type,
-      size_bytes: Number(a.size_bytes || 0),
-    }));
+  const ids = attachments
+    .map(a => (a?.attachment_id || "").trim())
+    .filter(Boolean);
 
-  if (rows.length > 0) {
-    const insAtt = await sb.from("chat_attachments").insert(rows);
-    if (insAtt.error) return json({ error: insAtt.error.message }, 500);
+  if (ids.length > 0) {
+    const up = await sb
+      .from("chat_attachments")
+      .update({
+        message_id: insMsg.data.id,
+        uploader_user_id: uid,
+        uploader_role: "client",
+      })
+      .in("id", ids)
+      .eq("thread_id", threadId);
+
+    if (up.error) return json({ error: up.error.message }, 500);
   }
 }
+
 
 
         // Email notify admin (throttled per-thread)

@@ -1321,7 +1321,7 @@ async function chatUploadOne(file){
     size_bytes: file.size,
   });
 
-  if (!j?.upload?.signed_upload_url || !j?.upload?.token || !j?.upload?.path){
+  if (!j?.upload?.signed_upload_url || !j?.upload?.token || !j?.upload?.path || !j?.upload?.attachment_id){
     throw new Error("Upload URL generation failed.");
   }
 
@@ -1338,6 +1338,7 @@ async function chatUploadOne(file){
 
   // 3) Add to pending list (will be linked to the message on send)
   chatPendingFiles.push({
+    attachment_id: j.upload.attachment_id,
     storage_path: path,
     original_name: file.name,
     mime_type: mime,
