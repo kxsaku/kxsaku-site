@@ -51,18 +51,19 @@ function getEnv(name: string) {
   return v;
 }
 
+type AttachmentIn = {
+  storage_path: string; // bucket path, e.g. "userId/uuid-filename.png"
+  filename: string;
+  mime_type: string;
+  size_bytes?: number | null;
+};
+
 type ReqBody = {
   body?: string;
   reply_to_message_id?: string | null;
-
-  // attachments passed from UI after upload
-  attachments?: Array<{
-    storage_path: string;
-    original_name: string;
-    mime_type: string;
-    size_bytes: number;
-  }>;
+  attachments?: AttachmentIn[];
 };
+
 
 
 serve(async (req) => {
@@ -94,7 +95,8 @@ serve(async (req) => {
     const attachments = Array.isArray(body.attachments) ? body.attachments : [];
 
 
-    if (!text) return json({ error: "Missing body" }, 400);
+    if (!text && attachments.length === 0) return json({ error: "Missing body" }, 400);
+
 
     const nowIso = new Date().toISOString();
 
@@ -263,6 +265,7 @@ if (attachments.length > 0) {
         edited: !!insMsg.data.edited_at,
         deleted: !!insMsg.data.deleted_at,
         delivered_at: insMsg.data.delivered_at || null,
+        attachments: attachments || [],
       },
     });
   } catch (e) {

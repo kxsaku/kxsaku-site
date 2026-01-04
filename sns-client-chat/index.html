@@ -803,6 +803,84 @@
     let typingSendTimer = null;
     let typingOn = false;
 
+    // --------------------
+// Sound (admin)
+// --------------------
+let audioCtx = null;
+let audioUnlocked = false;
+
+function ensureAudio(){
+  if (audioCtx) return audioCtx;
+  const Ctx = window.AudioContext || window.webkitAudioContext;
+  if (!Ctx) throw new Error("WebAudio unsupported");
+  audioCtx = new Ctx();
+  return audioCtx;
+}
+
+function unlockAudioOnce(){
+  if (audioUnlocked) return;
+  audioUnlocked = true;
+  try{
+    const ctx = ensureAudio();
+    if (ctx.state === "suspended") ctx.resume();
+  }catch(_){ }
+}
+
+// Autoplay restrictions: must be unlocked by a user gesture at least once.
+window.addEventListener("pointerdown", unlockAudioOnce, { once: true });
+window.addEventListener("keydown", unlockAudioOnce, { once: true });
+
+function playToneIncoming(){
+  try{
+    const ctx = ensureAudio();
+    if (ctx.state === "suspended") return;
+    const now = ctx.currentTime;
+
+    const o1 = ctx.createOscillator();
+    const o2 = ctx.createOscillator();
+    const g = ctx.createGain();
+
+    // Soft two-note chime (client -> admin)
+    o1.type = "sine";
+    o2.type = "sine";
+    o1.frequency.value = 392.00;  // G4
+    o2.frequency.value = 587.33;  // D5
+
+    g.gain.setValueAtTime(0.0001, now);
+    g.gain.exponentialRampToValueAtTime(0.09, now + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
+
+    o1.connect(g);
+    o2.connect(g);
+    g.connect(ctx.destination);
+
+    o1.start(now);
+    o2.start(now);
+    o1.stop(now + 0.36);
+    o2.stop(now + 0.36);
+  }catch(_){ }
+}
+
+// 7-day cooldown per thread (client -> admin)
+function shouldPlayIncomingSound(threadId){
+  if (!threadId) return false;
+  const key = `sns_admin_chat_sound_incoming_${threadId}`;
+  const last = Number(localStorage.getItem(key) || "0");
+  const now = Date.now();
+  const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+  if (now - last < sevenDaysMs) return false;
+  localStorage.setItem(key, String(now));
+  return true;
+}
+
+function maybePlayIncoming(threadId){
+  // Requirement: hear it when you're on the chat window.
+  if (document.visibilityState !== "visible") return;
+  if (!shouldPlayIncomingSound(threadId)) return;
+  playToneIncoming();
+}
+
+
 
     function sanitize(str){
       return String(str ?? "")
@@ -952,6 +1030,12 @@ function startRealtime(){
       const wasNear = (messagesEl.scrollHeight - messagesEl.scrollTop - messagesEl.clientHeight) < 140;
 
       messages.push(msg);
+        // Sound: play on incoming client message
+        if (msg.sender_role === "client") {
+            // We still attempt when visible; browser will block until user interacts once.
+            maybePlayIncoming(activeThreadId);
+            }
+
       renderMessages();
 
       if (wasNear){

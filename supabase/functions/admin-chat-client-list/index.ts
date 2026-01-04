@@ -32,9 +32,10 @@ type ClientRow = {
 type ThreadRow = {
   user_id: string;
   last_message_at: string | null;
-  has_unread: boolean | null;
-  is_online: boolean | null;
-  last_seen: string | null;
+  unread_for_admin: boolean | null;
+  // optional presence fields (if you add them later)
+  is_online?: boolean | null;
+  last_seen?: string | null;
 };
 
 serve(async (req) => {
@@ -68,15 +69,29 @@ serve(async (req) => {
     const clientRows: ClientRow[] = Array.isArray(profiles) ? (profiles as ClientRow[]) : [];
 
     // Optional: merge chat thread metadata IF the table exists.
-    // If it doesn't exist yet, we silently default fields so the UI still works.
+    // IMPORTANT: keep column names aligned with your chat_threads schema.
+    // Current schema used by other functions: unread_for_admin / unread_for_client.
     let threadRows: ThreadRow[] = [];
-    const { data: threads, error: tErr } = await sb
+
+    // Try the most complete select first; if your table doesn't have is_online/last_seen yet,
+    // we fall back to the minimal, required fields.
+    let threads: any = null;
+    let tErr: any = null;
+
+    ({ data: threads, error: tErr } = await sb
       .from("chat_threads")
-      .select("user_id,last_message_at,has_unread,is_online,last_seen");
+      .select("user_id,last_message_at,unread_for_admin,is_online,last_seen"));
+
+    if (tErr) {
+      ({ data: threads, error: tErr } = await sb
+        .from("chat_threads")
+        .select("user_id,last_message_at,unread_for_admin"));
+    }
 
     if (!tErr && Array.isArray(threads)) {
       threadRows = threads as ThreadRow[];
     }
+
 
     const threadByUser = new Map<string, ThreadRow>();
     for (const t of threadRows) threadByUser.set(t.user_id, t);
@@ -90,7 +105,7 @@ serve(async (req) => {
         business_name: c.business_name,
         phone: c.phone,
         last_message_at: t?.last_message_at ?? null,
-        has_unread: Boolean(t?.has_unread ?? false),
+        has_unread: Boolean((t as any)?.unread_for_admin ?? false),
         is_online: Boolean(t?.is_online ?? false),
         last_seen: t?.last_seen ?? null,
       };

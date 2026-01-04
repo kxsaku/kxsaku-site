@@ -76,13 +76,72 @@ serve(async (req) => {
     const msgRes = await sb
       .from("chat_messages")
       .select(
-        "id, sender_role, body, created_at, edited_at, deleted_at, delivered_at",
+        "id, sender_role, body, created_at, edited_at, deleted_at, delivered_at, reply_to_message_id",
       )
       .eq("thread_id", threadId)
       .order("created_at", { ascending: true })
       .limit(limit);
 
     if (msgRes.error) return json({ error: msgRes.error.message }, 500);
+
+    // Fetch attachments for these messages (and sign URLs)
+const msgIds = (msgRes.data || []).map((m) => m.id).filter(Boolean);
+const attachmentsByMessageId = new Map<string, any[]>();
+
+let attByMsg: Record<string, any[]> = {};
+if (msgIds.length > 0) {
+  const attRes = await sb
+    .from("chat_attachments")
+    .select("id,message_id,storage_bucket,storage_path,original_name,mime_type,size_bytes,created_at")
+    .eq("thread_id", threadId)
+    .in("message_id", msgIds)
+    .order("created_at", { ascending: true });
+
+  if (attRes.error) return json({ error: attRes.error.message }, 500);
+
+    attByMsg = (attRes.data || []).reduce((acc: Record<string, any[]>, a: any) => {
+      const k = a.message_id;
+      if (!acc[k]) acc[k] = [];
+      acc[k].push({
+        id: a.id,
+        storage_path: a.storage_path,
+        filename: a.filename,
+        mime_type: a.mime_type,
+        size_bytes: a.size_bytes ?? null,
+        created_at: a.created_at,
+      });
+      return acc;
+    }, {});
+  }
+
+  // sign URLs (1 hour) so the client can render images/files immediately
+  for (const a of attRes.data || []) {
+    const bucket = a.storage_bucket || "chat-attachments";
+    const path = a.storage_path;
+
+    let signed_url: string | null = null;
+    if (path) {
+      const s = await sb.storage.from(bucket).createSignedUrl(path, 60 * 60);
+      signed_url = s.data?.signedUrl ?? null;
+    }
+
+    const row = {
+      id: a.id,
+      storage_bucket: bucket,
+      storage_path: path,
+      original_name: a.original_name,
+      mime_type: a.mime_type,
+      size_bytes: a.size_bytes,
+      created_at: a.created_at,
+      signed_url,
+    };
+
+    const mid = a.message_id as string;
+    if (!attachmentsByMessageId.has(mid)) attachmentsByMessageId.set(mid, []);
+    attachmentsByMessageId.get(mid)!.push(row);
+  }
+}
+
 
     // Mark client's unread as false (client just opened history)
     const upd = await sb
@@ -117,10 +176,9 @@ serve(async (req) => {
       edited: !!m.edited_at,
       deleted: !!m.deleted_at,
       delivered_at: m.delivered_at || null,
+      reply_to_message_id: m.reply_to_message_id || null,
+      attachments: attByMsg[m.id] || [],
     }));
 
-    return json({ ok: true, thread_id: threadId, messages });
-  } catch (e) {
-    return json({ error: e?.message || String(e) }, 500);
-  }
-});
+
+

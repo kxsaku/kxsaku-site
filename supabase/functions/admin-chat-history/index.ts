@@ -81,16 +81,23 @@ serve(async (req) => {
       return json({ ok: true, messages: [] });
     }
 
+    // Clear admin unread flag now that the admin opened this thread
+    // Non-fatal if the column does not exist yet.
+    try {
+      await admin.from("chat_threads").update({ unread_for_admin: false }).eq("id", threadId);
+    } catch (_) {}
+
+
     // 2) Fetch messages (expected table: chat_messages)
     const msgRes = await admin
       .from("chat_messages")
       .select(
-        "id, sender_role, body, created_at, edited_at, original_body, deleted_at, delivered_at, read_by_client_at",
+        "id, sender_role, body, created_at, edited_at, original_body, deleted_at, delivered_at, read_by_client_at, reply_to_message_id",
       )
       .eq("thread_id", threadId)
       .order("created_at", { ascending: true })
       .limit(limit);
-
+    
     if (msgRes.error) {
       return json({
         ok: true,
@@ -99,6 +106,35 @@ serve(async (req) => {
           "chat_messages not found (or inaccessible). Create chat tables next.",
       });
     }
+
+    const msgIds = (msgRes.data || []).map((m) => m.id).filter(Boolean);
+
+let attByMsg: Record<string, any[]> = {};
+if (msgIds.length > 0) {
+  const attRes = await admin
+    .from("chat_attachments")
+    .select("id, message_id, storage_path, filename, mime_type, size_bytes, created_at")
+    .eq("thread_id", threadId)
+    .in("message_id", msgIds)
+    .order("created_at", { ascending: true });
+
+  if (attRes.error) return json({ error: attRes.error.message }, 500);
+
+  attByMsg = (attRes.data || []).reduce((acc: Record<string, any[]>, a: any) => {
+    const k = a.message_id;
+    if (!acc[k]) acc[k] = [];
+    acc[k].push({
+      id: a.id,
+      storage_path: a.storage_path,
+      filename: a.filename,
+      mime_type: a.mime_type,
+      size_bytes: a.size_bytes ?? null,
+      created_at: a.created_at,
+    });
+    return acc;
+  }, {});
+}
+
 
     const messages = (msgRes.data || []).map((m) => {
       const deleted = !!m.deleted_at;
@@ -114,6 +150,8 @@ serve(async (req) => {
         deleted,
         delivered_at: m.delivered_at || null,
         read_by_client_at: m.read_by_client_at || null,
+        reply_to_message_id: m.reply_to_message_id || null,
+        attachments: attByMsg[m.id] || [],
       };
     });
 
