@@ -2,151 +2,130 @@
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-function json(data: unknown, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: {
-      "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Headers":
-        "authorization, x-client-info, apikey, content-type",
-      "Access-Control-Allow-Methods": "POST, OPTIONS",
-    },
-  });
-}
-
 function getEnv(name: string) {
   const v = Deno.env.get(name);
   if (!v) throw new Error(`Missing env var: ${name}`);
   return v;
 }
 
-type ReqBody = {
-  limit?: number;
-};
+function corsHeaders() {
+  return {
+    "access-control-allow-origin": "*",
+    "access-control-allow-headers":
+      "authorization, x-client-info, apikey, content-type",
+    "access-control-allow-methods": "POST, OPTIONS",
+  };
+}
+
+function json(body: unknown, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders(), "content-type": "application/json" },
+  });
+}
+
+type ReqBody = { limit?: number };
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") return json({ ok: true }, 200);
-  if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders() });
 
   try {
     const SB_URL = getEnv("SB_URL");
     const SB_SERVICE_ROLE_KEY = getEnv("SB_SERVICE_ROLE_KEY");
 
-    const authHeader = req.headers.get("Authorization") || "";
-    const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
-    if (!token) return json({ error: "Missing Authorization bearer token" }, 401);
-
-    const sb = createClient(SB_URL, SB_SERVICE_ROLE_KEY, {
+    const admin = createClient(SB_URL, SB_SERVICE_ROLE_KEY, {
       auth: { persistSession: false },
-      global: { headers: { Authorization: `Bearer ${token}` } },
     });
 
-    // Identify caller
-    const { data: userData, error: userErr } = await sb.auth.getUser(token);
-    if (userErr) return json({ error: `Auth error: ${userErr.message}` }, 401);
+    // verify caller
+    const authHeader = req.headers.get("authorization") || "";
+    const jwt = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
+    if (!jwt) return json({ error: "Missing Authorization Bearer token" }, 401);
 
-    const uid = userData.user?.id;
-    if (!uid) return json({ error: "No user found" }, 401);
+    const authed = createClient(SB_URL, getEnv("SUPABASE_ANON_KEY"), {
+      global: { headers: { Authorization: `Bearer ${jwt}` } },
+      auth: { persistSession: false },
+    });
+
+    const { data: userData, error: userErr } = await authed.auth.getUser();
+    if (userErr || !userData.user) return json({ error: "Auth error" }, 401);
+
+    const userId = userData.user.id;
 
     const body = (await req.json().catch(() => ({}))) as ReqBody;
-    const limit = Math.min(Math.max(body.limit ?? 200, 1), 500);
+    const limit = Math.min(Math.max(Number(body.limit || 60), 1), 500);
 
-    // Find (or create) the one thread for this user
-    const threadRes = await sb
+    // thread
+    const threadRes = await admin
       .from("chat_threads")
       .select("id")
-      .eq("user_id", uid)
+      .eq("user_id", userId)
       .maybeSingle();
 
     if (threadRes.error) return json({ error: threadRes.error.message }, 500);
 
-    let threadId = threadRes.data?.id as string | undefined;
+    const threadId = threadRes.data?.id;
+    if (!threadId) return json({ ok: true, thread_id: null, messages: [] }, 200);
 
-    if (!threadId) {
-      const nowIso = new Date().toISOString();
-      const ins = await sb
-        .from("chat_threads")
-        .insert({
-          user_id: uid,
-          last_message_at: nowIso,
-          last_message_preview: "",
-          last_sender_role: "client",
-          unread_for_admin: false,
-          unread_for_client: false,
-        })
-        .select("id")
-        .single();
-
-      if (ins.error) return json({ error: ins.error.message }, 500);
-      threadId = ins.data.id;
-    }
-
-    // Load messages
-    const { data: messages, error: mErr } = await sb
+    // messages
+    const msgRes = await admin
       .from("chat_messages")
-      .select(
-        "id, sender_role, body, created_at, edited_at, deleted_at, delivered_at, reply_to_message_id"
-      )
+      .select("id,sender_role,body,created_at,edited_at,deleted_at,delivered_at,read_by_client_at,reply_to_message_id")
       .eq("thread_id", threadId)
       .order("created_at", { ascending: true })
       .limit(limit);
 
-    if (mErr) return json({ error: mErr.message }, 500);
+    if (msgRes.error) return json({ error: msgRes.error.message }, 500);
 
-    const msgIds = (messages || []).map((m) => m.id);
-    if (msgIds.length === 0) {
-      return json({ ok: true, thread_id: threadId, messages: [] }, 200);
+    const msgs = (msgRes.data || []) as any[];
+    const msgIds = msgs.map((m) => m.id);
+
+    // attachments for those messages
+    let attRows: any[] = [];
+    if (msgIds.length) {
+      const at = await admin
+        .from("chat_attachments")
+        .select("id,message_id,storage_bucket,storage_path,original_name,mime_type,size_bytes,created_at")
+        .eq("thread_id", threadId)
+        .in("message_id", msgIds);
+
+      if (at.error) return json({ error: at.error.message }, 500);
+      attRows = at.data || [];
     }
 
-    // Load attachments for those messages (schema matches your upload-url/admin history)
-    const { data: atts, error: aErr } = await sb
-      .from("chat_attachments")
-      .select("id, message_id, storage_bucket, storage_path, original_name, mime_type, size_bytes")
-      .in("message_id", msgIds);
+    // signed urls
+    const byMsg = new Map<string, any[]>();
+    await Promise.all(
+      attRows.map(async (a) => {
+        const signed = await admin.storage
+          .from(a.storage_bucket)
+          .createSignedUrl(a.storage_path, 60 * 10);
 
-    if (aErr) return json({ error: aErr.message }, 500);
+        const item = {
+          id: a.id,
+          attachment_id: a.id,
+          storage_path: a.storage_path,
+          original_name: a.original_name,
+          mime_type: a.mime_type,
+          size_bytes: a.size_bytes,
+          created_at: a.created_at,
+          signed_url: signed.data?.signedUrl || null,
+        };
 
-    // Build signed URLs (short-lived)
-    const attByMsg = new Map<string, any[]>();
-    for (const a of atts || []) {
-      const bucket = a.storage_bucket || "chat-attachments";
-      const path = a.storage_path;
+        const k = a.message_id as string;
+        if (!byMsg.has(k)) byMsg.set(k, []);
+        byMsg.get(k)!.push(item);
+      }),
+    );
 
-      let signed_url: string | null = null;
-      try {
-        const { data: s, error: sErr } = await sb.storage
-          .from(bucket)
-          .createSignedUrl(path, 60 * 5); // 5 minutes
-        if (!sErr) signed_url = s?.signedUrl ?? null;
-      } catch (_) {
-        signed_url = null;
-      }
-
-      const shaped = {
-        id: a.id,
-        message_id: a.message_id,
-        file_name: a.original_name,        // IMPORTANT: frontend expects file_name
-        mime_type: a.mime_type,
-        size_bytes: a.size_bytes,
-        storage_bucket: bucket,
-        storage_path: path,
-        signed_url,
-      };
-
-      const arr = attByMsg.get(a.message_id) || [];
-      arr.push(shaped);
-      attByMsg.set(a.message_id, arr);
-    }
-
-    // Attach attachments[] onto each message (frontend expects this)
-    const out = (messages || []).map((m) => ({
+    // attach to messages
+    const out = msgs.map((m) => ({
       ...m,
-      attachments: attByMsg.get(m.id) || [],
+      attachments: byMsg.get(m.id) || [],
     }));
 
     return json({ ok: true, thread_id: threadId, messages: out }, 200);
   } catch (e) {
-    return json({ error: String(e?.message ?? e) }, 500);
+    return json({ error: String(e?.message || e) }, 500);
   }
 });
