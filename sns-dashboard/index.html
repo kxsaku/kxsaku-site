@@ -422,6 +422,34 @@ body{
   color: rgba(244,240,255,.92);
 }
 
+/* attachments */
+.chatAtts{
+  margin-top: .65rem;
+  display:flex;
+  flex-direction:column;
+  gap:.65rem;
+}
+.chatImg{
+  max-width: 100%;
+  border-radius: 16px;
+  border: 1px solid rgba(129,118,255,.18);
+  display:block;
+}
+.chatFile{
+  display:inline-flex;
+  align-items:center;
+  gap:.55rem;
+  padding: .55rem .7rem;
+  border-radius: 14px;
+  border: 1px solid rgba(129,118,255,.18);
+  background: rgba(9,6,34,.38);
+  color: rgba(244,240,255,.88);
+  text-decoration:none;
+  width: fit-content;
+}
+.chatFile:hover{ border-color: rgba(179,124,255,.40); }
+
+
 .chatFoot{
   margin-top: 8px;
   display:flex;
@@ -1138,6 +1166,25 @@ function chatSendTyping(on){
         .replaceAll("'","&#039;");
     }
 
+    function chatAttsHTML(m){
+    const atts = Array.isArray(m?.attachments) ? m.attachments : [];
+    if (!atts.length) return "";
+
+    const items = atts.map(a => {
+      const url = a?.url || a?.signed_url || "";
+      const name = a?.file_name || a?.original_name || "Attachment";
+      const mime = (a?.mime_type || "").toLowerCase();
+
+      if (mime.startsWith("image/") && url){
+        return `<img class="chatImg" src="${esc(url)}" alt="${esc(name)}" loading="lazy" />`;
+      }
+      return `<a class="chatFile" href="${esc(url)}" target="_blank" rel="noopener">${esc(name)}</a>`;
+    }).join("");
+
+    return `<div class="chatAtts">${items}</div>`;
+  }
+
+
     function chatFmt(iso){
       try { return new Date(iso).toLocaleString(); } catch { return iso || ""; }
     }
@@ -1226,7 +1273,7 @@ function chatSendTyping(on){
 
         div.innerHTML = `
           <div class="chatText">${esc(body)}</div>
-          ${attHtml}
+          ${isDeleted ? "" : chatAttsHTML(m)}
           <div class="chatFoot">
 
             <div>${esc(chatFmt(m.created_at))}${m.edited ? " · Edited" : ""}</div>

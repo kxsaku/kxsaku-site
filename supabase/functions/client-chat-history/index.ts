@@ -28,11 +28,7 @@ type AttachmentOut = {
   file_name: string;
   size_bytes: number | null;
   uploaded_at: string | null;
-
-  // preferred field for UIs
   url: string | null;
-
-  // keep for backward compatibility if any UI is using it
   signed_url: string | null;
 };
 
@@ -94,7 +90,7 @@ serve(async (req) => {
 
     // Load attachments for those messages
     const { data: atts, error: attErr } = await sb
-      .from("chat-attachments")
+      .from("chat_attachments")
       .select("id, message_id, storage_bucket, storage_path, mime_type, original_name, size_bytes, uploaded_at")
       .in("message_id", msgIds);
 
