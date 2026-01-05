@@ -28,8 +28,14 @@ type AttachmentOut = {
   file_name: string;
   size_bytes: number | null;
   uploaded_at: string | null;
+
+  // preferred field for UIs
+  url: string | null;
+
+  // keep for backward compatibility if any UI is using it
   signed_url: string | null;
 };
+
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return json({ ok: true }, 200);
@@ -92,6 +98,7 @@ serve(async (req) => {
       .select("id, message_id, storage_bucket, storage_path, mime_type, original_name, size_bytes, uploaded_at")
       .in("message_id", msgIds);
 
+
     if (attErr) return json({ error: `Failed to load attachments: ${attErr.message}` }, 500);
 
     // Sign URLs (so browser can render the image)
@@ -100,6 +107,8 @@ serve(async (req) => {
     for (const a of atts || []) {
       const bucket = (a as any).storage_bucket || "chat-attachments";
       const path = a.storage_path as string;
+      if (!path) continue;
+
 
       let signedUrl: string | null = null;
 
@@ -114,8 +123,10 @@ serve(async (req) => {
         file_name: String(a.original_name || "attachment"),
         size_bytes: (a.size_bytes ?? null) as number | null,
         uploaded_at: (a.uploaded_at ?? null) as string | null,
+        url: signedUrl,
         signed_url: signedUrl,
       };
+
 
       const mid = String(a.message_id);
       if (!byMessageId.has(mid)) byMessageId.set(mid, []);
