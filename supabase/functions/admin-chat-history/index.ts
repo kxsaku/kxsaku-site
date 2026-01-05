@@ -103,18 +103,30 @@ serve(async (req) => {
     const signedMap = new Map<string, any[]>();
     await Promise.all(
       attRows.map(async (a) => {
+        const bucket = (a.storage_bucket || "chat-attachments") as string;
+        const path = (a.storage_path || "") as string;
+
+        // If a row is malformed, don't break the entire chat history response
+        if (!path) return;
+
         const signed = await admin.storage
-          .from(a.storage_bucket)
-          .createSignedUrl(a.storage_path, 60 * 10);
+          .from(bucket)
+          .createSignedUrl(path, 60 * 10);
+
+        const signedUrl = signed.data?.signedUrl || null;
 
         const item = {
           id: a.id,
           attachment_id: a.id,
-          storage_path: a.storage_path,
+          storage_bucket: bucket,
+          storage_path: path,
           original_name: a.original_name,
           mime_type: a.mime_type,
           size_bytes: a.size_bytes,
-          signed_url: signed.data?.signedUrl || null,
+
+          // IMPORTANT: include BOTH fields for UI compatibility
+          signed_url: signedUrl,
+          url: signedUrl,
         };
 
         const key = a.message_id;
@@ -123,6 +135,7 @@ serve(async (req) => {
         signedMap.set(key, arr);
       })
     );
+
 
     const messages = msgs.map((m) => ({
       id: m.id,
@@ -135,7 +148,7 @@ serve(async (req) => {
       read_by_client_at: m.read_by_client_at || null,
       reply_to_message_id: m.reply_to_message_id || null,
       original_body: m.original_body || null, // admin-only use
-      attachments: signedMap.get(m.id) || [],
+      attachments: signedMap.get(String(m.id)) || [],
     }));
 
     // Clear admin unread when opening this chat

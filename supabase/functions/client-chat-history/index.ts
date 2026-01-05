@@ -91,7 +91,7 @@ serve(async (req) => {
     // Load attachments for those messages
     const { data: atts, error: attErr } = await sb
       .from("chat_attachments")
-      .select("id, message_id, storage_bucket, storage_path, mime_type, original_name, size_bytes, uploaded_at")
+      .select("id, message_id, storage_bucket, storage_path, mime_type, original_name, size_bytes")
       .in("message_id", msgIds);
 
 
@@ -118,7 +118,7 @@ serve(async (req) => {
         mime_type: String(a.mime_type || ""),
         file_name: String(a.original_name || "attachment"),
         size_bytes: (a.size_bytes ?? null) as number | null,
-        uploaded_at: (a.uploaded_at ?? null) as string | null,
+        uploaded_at: null,
         url: signedUrl,
         signed_url: signedUrl,
       };
