@@ -1501,7 +1501,7 @@ window.addEventListener("drop", async (e) => {
         const j = await callFn("client-chat-send", {
           body: text,
           reply_to_message_id: replyToId,
-          attachments: chatPendingFiles,
+          attachment_ids: chatPendingFiles.map(f => f.attachment_id),
         });
         replyToId = null;
         chatHint.textContent = "";
