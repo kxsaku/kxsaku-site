@@ -1497,10 +1497,6 @@ function sendTyping(on){
             body: text,
             attachments: chatPendingFiles.map(a => ({
             attachment_id: a.attachment_id,
-            storage_path: a.storage_path,
-            original_name: a.original_name,
-            mime_type: a.mime_type,
-            size_bytes: a.size_bytes,
             })),
         };
 

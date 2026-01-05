@@ -63,7 +63,11 @@ type AttachmentIn = {
 type ReqBody = {
   user_id?: string;
   body?: string;
-  attachments?: AttachmentIn[];
+
+  // uploaded beforehand via chat-attachment-upload-url
+  attachments?: Array<{
+    attachment_id: string;
+  }>;
 };
 
 
@@ -96,11 +100,18 @@ serve(async (req) => {
 
     const body = (await req.json().catch(() => ({}))) as ReqBody;
     const user_id = (body.user_id || "").trim();
-    const text = (body.body || "").trim();
+    const textRaw = (body.body || "");
+    const text = textRaw.trim();
     const attachments = Array.isArray(body.attachments) ? body.attachments : [];
 
     if (!user_id) return json({ error: "Missing user_id" }, 400);
-    if (!text && attachments.length === 0) return json({ error: "Missing body" }, 400);
+    if (!text && attachments.length === 0) {
+      return json({ error: "Missing body (or attachments)" }, 400);
+    }
+
+    // used for thread preview
+    const preview = text ? text.slice(0, 140) : "[Attachment]";
+
 
 
     const nowIso = new Date().toISOString();
@@ -134,7 +145,7 @@ serve(async (req) => {
           created_at: nowIso,
           last_admin_msg_at: nowIso,
           last_message_at: nowIso,
-          last_message_preview: text.slice(0, 140),
+          last_message_preview: preview,
           last_sender_role: "admin",
           // unread_for_client means: client has something they haven't read yet
           unread_for_client: true,
@@ -160,7 +171,7 @@ serve(async (req) => {
         .update({
           last_admin_msg_at: nowIso,
           last_message_at: nowIso,
-          last_message_preview: text.slice(0, 140),
+          last_message_preview: preview,
           last_sender_role: "admin",
           unread_for_client: true,
         })
@@ -183,7 +194,7 @@ serve(async (req) => {
       .insert({
         thread_id: threadId,
         sender_role: "admin",
-        body: text,
+        body: text, // may be "" for attachment-only messages
         created_at: nowIso,
         delivered_at: nowIso, // delivery receipt baseline
       })
@@ -203,38 +214,26 @@ serve(async (req) => {
       );
     }
 
-// Link attachments (if provided)
-// chat-attachment-upload-url already created rows with message_id = null.
-// Here we "finalize" them by setting message_id.
+// Link any pre-uploaded attachments (created by chat-attachment-upload-url) to this message
 if (attachments.length > 0) {
-  for (const a of attachments) {
-    const attachmentId = (a?.attachment_id || "").trim();
+  const ids = attachments
+    .map(a => (a?.attachment_id || "").trim())
+    .filter(Boolean);
 
-    if (attachmentId) {
-      const upd = await admin
-        .from("chat_attachments")
-        .update({ message_id: insMsg.data.id })
-        .eq("id", attachmentId)
-        .eq("thread_id", threadId)
-        .is("message_id", null);
+  if (ids.length > 0) {
+    const link = await admin
+      .from("chat_attachments")
+      .update({ message_id: insMsg.data.id })
+      .in("id", ids)
+      .eq("thread_id", threadId)
+      .is("message_id", null);
 
-      if (upd.error) return json({ error: upd.error.message }, 500);
-      continue;
-    }
-
-    // Fallback: match by storage_path if no attachment_id was provided
-    if (a?.storage_path) {
-      const upd2 = await admin
-        .from("chat_attachments")
-        .update({ message_id: insMsg.data.id })
-        .eq("thread_id", threadId)
-        .eq("storage_path", a.storage_path)
-        .is("message_id", null);
-
-      if (upd2.error) return json({ error: upd2.error.message }, 500);
+    if (link.error) {
+      return json({ error: `Failed to link attachments: ${link.error.message}` }, 500);
     }
   }
 }
+
 
 
 
