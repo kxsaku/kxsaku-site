@@ -356,4 +356,8 @@ if (attachmentIds.length > 0) {
       attachments: outAttachments,
     },
   });
+  } catch (err) {
+    console.error("Error in admin-chat-send:", err);
+    return json({ error: "Internal server error" }, 500);
+  }
 });
