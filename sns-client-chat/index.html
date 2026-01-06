@@ -1170,8 +1170,9 @@ function startRealtime(){
 
             // If it's an attachment-only message, reload history so we fetch attachments + signed URLs
       if (!msg.body) {
+        // attachment-only message: reload to get attachments
         loadHistory().catch(() => {});
-        return;
+        // don't return; allow the bubble to appear (even if empty) while history reloads
       }
 
       messages.push(msg);

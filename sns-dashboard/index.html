@@ -1082,6 +1082,13 @@ function chatStartRealtime(){
 
       if (chatMessages.some(x => x.id === msg.id)) return;
 
+      // IMPORTANT: Realtime INSERT does not include joined attachments.
+      // If this is an attachment-only message (body empty), reload history to fetch attachments + signed URLs.
+      if (!msg.body) {
+        chatLoadHistory().catch(() => {});
+        return;
+      }
+
       const wasNear = chatNearBottom();
 
       chatMessages.push(msg);
