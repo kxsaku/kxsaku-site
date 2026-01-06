@@ -76,7 +76,7 @@ serve(async (req) => {
       .select(
         "id,sender_role,body,original_body,created_at,edited_at,deleted_at,delivered_at,read_by_client_at,reply_to_message_id"
       )
-      
+      .eq("thread_id", threadId)
       .order("created_at", { ascending: true });
 
     if (msgRes.error) return json({ error: msgRes.error.message }, 500);
