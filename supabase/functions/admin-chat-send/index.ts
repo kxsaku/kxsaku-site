@@ -340,20 +340,20 @@ if (attachmentIds.length > 0) {
   }
 }
 
-return json({
-  ok: true,
-  thread_id: threadId,
-  message: {
-    id: m.id,
-    sender_role: m.sender_role,
-    body: m.body,
-    created_at: m.created_at,
-    edited: !!m.edited_at,
-    original_body: m.original_body || null,
-    deleted: !!m.deleted_at,
-    delivered_at: m.delivered_at || null,
-    read_by_client_at: m.read_by_client_at || null,
-    attachments: outAttachments,
+  return json({
+    ok: true,
+    thread_id: threadId,
+    message: {
+      id: m.id,
+      sender_role: m.sender_role,
+      body: m.body,
+      created_at: m.created_at,
+      edited: !!m.edited_at,
+      original_body: m.original_body || null,
+      deleted: !!m.deleted_at,
+      delivered_at: m.delivered_at || null,
+      read_by_client_at: m.read_by_client_at || null,
+      attachments: outAttachments,
     },
   });
 });
