@@ -228,12 +228,14 @@ const attachmentIds = attachments
   .filter((x): x is string => typeof x === "string" && x.length > 0);
 
 if (attachmentIds.length > 0) {
-  // update the existing chat_attachments rows created by chat-attachment-upload-url
+  // Force-link the uploaded attachments to this message.
+  // Do NOT filter by thread_id/message_id here — those fields may not be set yet.
   const upd = await admin
     .from("chat_attachments")
-    .update({ message_id: m.id })
-    .eq("thread_id", threadId)
-    .is("message_id", null)
+    .update({
+      thread_id: threadId,
+      message_id: m.id,
+    })
     .in("id", attachmentIds);
 
   if (upd.error) {
@@ -243,6 +245,7 @@ if (attachmentIds.length > 0) {
     );
   }
 }
+
 
 
         // Email notify client (throttled per-thread, no message body)
@@ -309,7 +312,8 @@ if (attachmentIds.length > 0) {
   const { data: atts, error: attErr } = await admin
     .from("chat_attachments")
     .select("id, storage_bucket, storage_path, mime_type, original_name, size_bytes")
-    .in("id", attachmentIds);
+    .eq("message_id", m.id);
+
 
   if (attErr) {
     return json(
