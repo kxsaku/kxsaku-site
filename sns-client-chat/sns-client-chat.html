@@ -1,0 +1,1638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>SNS · Client Chat (Admin)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <link rel="stylesheet" href="/styles.css" />
+
+  <style>
+    :root{
+      --bg0:#020010;
+      --bg1:#050315;
+      --ink:#f4f0ff;
+      --muted:#bdb7ff;
+      --stroke: rgba(129,118,255,.20);
+      --stroke2: rgba(179,124,255,.55);
+      --glass: rgba(9, 6, 34, 0.86);
+      --glass2: rgba(15, 10, 55, 0.55);
+      --shadow: 0 25px 80px rgba(0, 0, 0, 0.65);
+      --shadow2: 0 35px 110px rgba(0, 0, 0, 0.72);
+      --accent:#b37cff;
+      --ok:#6cffb0;
+      --warn:#ffd45a;
+      --bad:#ff6262;
+      --info:#7bb8ff;
+      --r-xl:28px;
+      --r-lg:20px;
+      --r-md:16px;
+    }
+
+    html, body { height: 100%; }
+    body{
+      margin:0;
+      min-height:100vh;
+      background: radial-gradient(circle at top, #342067, #050315 55%, #020010);
+      color: var(--ink);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      overflow-x:hidden;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+
+    .wrap{
+      width: min(1600px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 3rem 0 4rem;
+    }
+
+    .toprow{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap: 1rem;
+    }
+    h1{ margin:0; letter-spacing:.18em; text-transform:uppercase; }
+    .sub{ color: var(--muted); margin-top:.6rem; }
+
+    .top-actions{
+      display:flex;
+      align-items:center;
+      justify-content:flex-end;
+      gap:.6rem;
+      flex-wrap:wrap;
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:.5rem;
+      padding:.55rem .95rem;
+      border-radius:999px;
+      border:1px solid rgba(129,118,255,.35);
+      background: rgba(9,6,34,.65);
+      color:#d9d3ff;
+      font-size:.85rem;
+      white-space:nowrap;
+    }
+    .icon-btn{
+      width: 38px;
+      height: 38px;
+      border-radius: 999px;
+      border: 1px solid rgba(129,118,255,.35);
+      background: rgba(15, 10, 55, 0.70);
+      color: #d9d3ff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      transition: transform .08s ease, box-shadow .12s ease, border-color .12s ease, filter .12s ease;
+      user-select:none;
+    }
+    .icon-btn:hover{
+      transform: translateY(-1px);
+      border-color: var(--accent);
+      box-shadow:0 0 0 1px rgba(179,124,255,.35);
+      filter:brightness(1.05);
+    }
+    .icon-btn:active{ transform: translateY(1px); }
+    .icon-btn svg{ width:18px; height:18px; opacity:.95; }
+
+    .btn{
+      border-radius:999px;
+      padding:.65rem 1.05rem;
+      border:1px solid rgba(129,118,255,.35);
+      background: rgba(15, 10, 55, 0.8);
+      color:#f4f0ff;
+      cursor:pointer;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      font-size:.78rem;
+      transition: transform .08s ease, box-shadow .12s ease, border-color .12s ease, filter .12s ease;
+      user-select:none;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:.4rem;
+      white-space:nowrap;
+    }
+    .btn:hover{ transform: translateY(-1px); border-color: var(--accent); box-shadow:0 0 0 1px rgba(179,124,255,.35); filter:brightness(1.05); }
+    .btn:active{ transform: translateY(1px); }
+    .btn-soft{ background: rgba(15, 10, 55, 0.55); border-color: rgba(129,118,255,.28); }
+    .btn-primary{ background: rgba(179,124,255,.18); border-color: rgba(179,124,255,.45); }
+    .btn-primary:hover{ border-color: var(--accent); box-shadow:0 0 0 1px rgba(179,124,255,.35); }
+    .btn-danger{ border-color: rgba(255,98,98,.45); }
+    .btn-danger:hover{ border-color:#ff6262; box-shadow:0 0 0 1px rgba(255,98,98,.25); }
+
+    .card{
+      margin-top: 1.75rem;
+      background: var(--glass);
+      border: 1px solid rgba(130, 106, 255, 0.28);
+      border-radius: var(--r-xl);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+      padding: 1.05rem;
+      position: relative;
+      overflow:hidden;
+    }
+
+    /* Ambient “breathing” glow */
+    .card::before{
+      content:"";
+      position:absolute;
+      inset:-40%;
+      background:
+        radial-gradient(circle at 18% 20%, rgba(179,124,255,.18), transparent 55%),
+        radial-gradient(circle at 85% 15%, rgba(123,184,255,.10), transparent 55%),
+        radial-gradient(circle at 60% 85%, rgba(249,115,226,.10), transparent 55%);
+      filter: blur(14px);
+      opacity:.9;
+      animation: breathe 12s ease-in-out infinite alternate;
+      pointer-events:none;
+    }
+    @keyframes breathe{
+      from{ transform: translate3d(0,0,0) scale(1); }
+      to{ transform: translate3d(-18px, 14px, 0) scale(1.03); }
+    }
+
+    .layout{
+      position: relative;
+      display:grid;
+      grid-template-columns: 380px 1fr;
+      gap: 1rem;
+      min-height: 72vh;
+      z-index:1;
+    }
+
+    .panel{
+      border: 1px solid rgba(129,118,255,.14);
+      border-radius: var(--r-xl);
+      background: rgba(9, 6, 34, 0.55);
+      backdrop-filter: blur(14px);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      min-height: 0;
+    }
+
+    .panel-header{
+      padding: .95rem .95rem .85rem;
+      border-bottom: 1px solid rgba(129,118,255,.14);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:.8rem;
+    }
+    .panel-title{
+      font-size: .78rem;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      color: rgba(244,240,255,.78);
+      margin:0;
+    }
+    .panel-sub{
+      margin-top:.45rem;
+      color: rgba(244,240,255,.62);
+      font-size:.85rem;
+      line-height:1.25;
+    }
+
+    .search{
+      width: 100%;
+      margin-top: .7rem;
+      padding: .78rem 1rem;
+      border-radius: 999px;
+      border: 1px solid rgba(129,118,255,.32);
+      background: rgba(9,6,34,.92);
+      color: var(--ink);
+      outline:none;
+    }
+    .search:focus{ border-color: rgba(179,124,255,.75); box-shadow: 0 0 0 1px rgba(179,124,255,.28); }
+
+    .client-list{
+      padding: .65rem;
+      display:flex;
+      flex-direction:column;
+      gap: .6rem;
+      overflow:auto;
+    }
+
+    .client{
+      border-radius: 18px;
+      border: 1px solid rgba(129,118,255,.14);
+      background: rgba(15,10,55,.40);
+      padding: .75rem .8rem;
+      cursor:pointer;
+      user-select:none;
+      transition: transform .10s ease, border-color .12s ease, filter .12s ease, box-shadow .12s ease;
+      position: relative;
+    }
+    .client:hover{
+      transform: translateY(-1px);
+      border-color: rgba(179,124,255,.32);
+      filter: brightness(1.05);
+    }
+    .client.active{
+      border-color: rgba(179,124,255,.75);
+      box-shadow: 0 0 0 1px rgba(179,124,255,.22);
+      background: rgba(179,124,255,.12);
+    }
+
+    .client .row{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:.7rem;
+    }
+    .client .name{ font-weight:650; letter-spacing:.02em; font-size:.95rem; line-height:1.2; }
+    .client .biz{ color: rgba(244,240,255,.68); font-size:.84rem; margin-top: .2rem; line-height:1.2; }
+    .client .meta{ color: rgba(244,240,255,.52); font-size:.78rem; margin-top: .4rem; display:flex; gap:.55rem; flex-wrap:wrap; }
+    .tag{
+      display:inline-flex; align-items:center; gap:.45rem;
+      border-radius:999px;
+      padding:.34rem .6rem;
+      border:1px solid rgba(129,118,255,.22);
+      background: rgba(9,6,34,.55);
+      font-size:.70rem;
+      letter-spacing:.10em;
+      text-transform:uppercase;
+      color: rgba(244,240,255,.92);
+      white-space:nowrap;
+    }
+    .dot{ width:10px; height:10px; border-radius:999px; box-shadow: 0 0 0 2px rgba(255,255,255,.06); display:inline-block; }
+    .dot-online{ background: var(--ok); }
+    .dot-offline{ background: rgba(255,255,255,.18); }
+    .dot-new{ background: var(--accent); }
+
+    /* “New message” glow animation */
+    .newglow{
+      position:absolute;
+      inset:-2px;
+      border-radius: 20px;
+      pointer-events:none;
+      opacity:0;
+      box-shadow: 0 0 0 1px rgba(179,124,255,.32), 0 0 24px rgba(179,124,255,.28);
+      animation: none;
+    }
+    .client.has-new .newglow{
+      opacity: 1;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    @keyframes pulse{
+      0%{ box-shadow: 0 0 0 1px rgba(179,124,255,.22), 0 0 16px rgba(179,124,255,.18); }
+      50%{ box-shadow: 0 0 0 1px rgba(179,124,255,.40), 0 0 34px rgba(179,124,255,.34); }
+      100%{ box-shadow: 0 0 0 1px rgba(179,124,255,.22), 0 0 16px rgba(179,124,255,.18); }
+    }
+
+    .chat-header{
+      padding: .95rem .95rem .85rem;
+      border-bottom: 1px solid rgba(129,118,255,.14);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: .9rem;
+    }
+    .chat-title{ margin:0; font-size:.9rem; letter-spacing:.12em; text-transform:uppercase; }
+    .chat-sub{ margin-top:.5rem; color: rgba(244,240,255,.62); font-size:.85rem; line-height:1.25; }
+    .chat-actions{ display:flex; align-items:center; gap:.55rem; flex-wrap:wrap; justify-content:flex-end; }
+
+    .messages{
+      padding: 1rem;
+      display:flex;
+      flex-direction:column;
+      gap:.7rem;
+      overflow:auto;
+      flex: 1 1 auto;
+      min-height: 0;
+      scroll-behavior:smooth;
+    }
+
+    .msg{
+      max-width: 78%;
+      border-radius: 18px;
+      padding: .75rem .85rem;
+      border: 1px solid rgba(129,118,255,.14);
+      background: rgba(15,10,55,.40);
+      position: relative;
+      box-shadow: 0 12px 30px rgba(0,0,0,.22);
+    }
+    .msg:hover{ border-color: rgba(179,124,255,.28); }
+    .msg.admin{
+      margin-left:auto;
+      background: linear-gradient(180deg, rgba(179,124,255,.20), rgba(15,10,55,.45));
+      border-color: rgba(179,124,255,.24);
+    }
+    .msg.client{
+      margin-right:auto;
+      background: linear-gradient(180deg, rgba(123,184,255,.12), rgba(15,10,55,.45));
+      border-color: rgba(123,184,255,.18);
+    }
+    .msg.deleted{
+      background: rgba(15,10,55,.28);
+      border-color: rgba(255,98,98,.28);
+    }
+
+    .msg .text{ white-space:pre-wrap; line-height:1.35; font-size:.92rem; }
+    .msg .foot{
+      margin-top:.55rem;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:.7rem;
+      color: rgba(244,240,255,.52);
+      font-size:.74rem;
+    }
+    .msg .mini{
+      display:flex;
+      align-items:center;
+      gap:.5rem;
+      flex-wrap:wrap;
+    }
+    .mini-btn{
+      border: 1px solid rgba(129,118,255,.22);
+      background: rgba(9,6,34,.40);
+      color: rgba(244,240,255,.80);
+      border-radius: 999px;
+      padding: .25rem .55rem;
+      cursor:pointer;
+      font-size:.68rem;
+      letter-spacing:.10em;
+      text-transform:uppercase;
+    }
+
+    .typing{
+      padding: .55rem 1rem .2rem;
+      color: rgba(244,240,255,.62);
+      font-size:.82rem;
+      display:none;
+    }
+    .typing.on{ display:block; }
+    .typing .shimmer{
+      display:inline-block;
+      background: linear-gradient(90deg, rgba(244,240,255,.45), rgba(179,124,255,.85), rgba(244,240,255,.45));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: shimmer 1.25s linear infinite;
+    }
+    @keyframes shimmer{ from{ background-position:0% } to{ background-position:200% } }
+
+    .composer{
+      padding: .85rem;
+      border-top: 1px solid rgba(129,118,255,.14);
+      display:flex;
+      gap:.55rem;
+      align-items:flex-end;
+      background: rgba(9,6,34,.35);
+    }
+    .composer .box{
+      flex: 1 1 auto;
+      border-radius: 18px;
+      border: 1px solid rgba(129,118,255,.22);
+      background: rgba(9,6,34,.62);
+      padding: .65rem .7rem;
+    }
+    textarea{
+      width:100%;
+      min-height: 42px;
+      max-height: 140px;
+      resize: none;
+      border:0;
+      outline:0;
+      background: transparent;
+      color: var(--ink);
+      font-family: inherit;
+      font-size: .95rem;
+      line-height: 1.35;
+      padding: 0 .2rem;
+    }
+
+    .scroll-new{
+      position:absolute;
+      right: 18px;
+      bottom: 92px;
+      z-index: 5;
+      opacity:0;
+      pointer-events:none;
+      transform: translateY(8px);
+      transition: opacity .12s ease, transform .12s ease;
+    }
+    .scroll-new.on{
+      opacity:1;
+      pointer-events:auto;
+      transform: translateY(0);
+    }
+
+    .note{
+      margin-top: 12px;
+      color: rgba(244,240,255,.50);
+      font-size: .85rem;
+    }
+
+    .overlay{
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(8px);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 16px;
+      z-index: 10000;
+    }
+    .login-card{
+      width: min(520px, 100%);
+      background: rgba(9, 6, 34, 0.95);
+      border: 1px solid rgba(130, 106, 255, 0.35);
+      border-radius: 28px;
+      box-shadow: 0 25px 90px rgba(0, 0, 0, 0.75);
+      padding: 18px 16px 16px;
+      position: relative;
+    }
+    .login-title{ margin:0; letter-spacing:.16em; text-transform:uppercase; font-size: 15px; }
+    .login-sub{ margin:.6rem 0 1rem; color: rgba(244,240,255,.72); line-height:1.45; font-size: 13px; }
+    .field label{
+      display:block; margin:.7rem 0 .35rem;
+      font-size:.74rem; color: rgba(244,240,255,.82);
+      letter-spacing:.1em; text-transform:uppercase;
+    }
+    .field input{
+      width:100%;
+      border-radius: 999px;
+      border: 1px solid rgba(129,118,255,.35);
+      background: rgba(9,6,34,.95);
+      color: var(--ink);
+      padding:.78rem 1rem;
+      outline:none;
+      padding-right: 3rem;
+      box-sizing:border-box;
+      max-width:100%;
+    }
+    .login-actions{ display:flex; gap:10px; justify-content:space-between; align-items:center; margin-top: 12px; flex-wrap:wrap; }
+    .login-err{ margin-top: 10px; color:#ff9494; font-size: 13px; display:none; line-height:1.35; }
+
+    .login-close{
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 36px;
+      height: 36px;
+      border-radius: 999px;
+      border: 1px solid rgba(129,118,255,.28);
+      background: rgba(15, 10, 55, 0.55);
+      color: #f4f0ff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .login-close svg{ width: 16px; height: 16px; opacity: .9; }
+
+    .errline{
+      margin-top:.75rem;
+      color:#ff9494;
+      font-size:.9rem;
+      line-height:1.35;
+      display:none;
+    }
+
+    @media (max-width: 980px){
+      .layout{ grid-template-columns: 1fr; }
+    }
+    @media (prefers-reduced-motion: reduce){
+      *{ animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+    }
+
+    /* --------------------------
+    Admin "View Original" Modal
+    -------------------------- */
+    .origModal {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    z-index: 9999;
+    background: rgba(0,0,0,.55);
+    backdrop-filter: blur(8px);
+    }
+    .origModal.on { display: flex; }
+
+    .origCard{
+    width: min(680px, 96vw);
+    border-radius: 18px;
+    border: 1px solid rgba(255,255,255,.14);
+    background: rgba(255,255,255,.06);
+    backdrop-filter: blur(14px);
+    box-shadow: 0 18px 60px rgba(0,0,0,.45);
+    overflow: hidden;
+    }
+
+    .origHeader{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(255,255,255,.10);
+    }
+    .origTitle{
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    font-size: 12px;
+    color: rgba(244,240,255,.88);
+    }
+    .origClose{
+    cursor:pointer;
+    border-radius: 999px;
+    padding: 8px 10px;
+    border: 1px solid rgba(255,255,255,.14);
+    background: rgba(255,255,255,.06);
+    color: rgba(244,240,255,.86);
+    }
+
+    .origBody{
+    padding: 14px 16px 16px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    }
+
+    .origBlock{
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,.10);
+    background: rgba(10, 6, 32, .38);
+    padding: 10px 12px;
+    }
+    .origLabel{
+    font-size: 11px;
+    opacity: .75;
+    margin-bottom: 6px;
+    }
+    .origText{
+    white-space: pre-wrap;
+    line-height: 1.35;
+    font-size: 13.5px;
+    color: rgba(244,240,255,.92);
+    }
+    .origText.red{
+    color: rgba(255, 110, 110, .92);
+    }
+
+    .typingLine{
+    display: none;
+    margin: 6px 0 4px;
+    font-size: 12px;
+    color: rgba(180,160,255,.85);
+    opacity: .85;
+    }
+
+    .typingLine.on{
+    display: block;
+    }
+
+    .atts{ margin-top:10px; display:flex; flex-direction:column; gap:10px; }
+    .att{ padding:10px; border:1px solid rgba(255,255,255,.10); border-radius:14px; background:rgba(255,255,255,.03); }
+    .attMeta{ font-size:12px; opacity:.85; margin-top:8px; }
+    .attLink{ font-size:12px; text-decoration:underline; opacity:.9; }
+    .attImg{ width:100%; max-width:420px; border-radius:14px; display:block; }
+
+
+
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="toprow">
+      <div>
+        <h1>SNS CLIENT CHAT</h1>
+        <div class="sub">Admin-only messaging terminal</div>
+      </div>
+
+      <div class="top-actions">
+        <span class="pill" id="whoami">Signed in: —</span>
+
+        <a class="icon-btn" href="/sns-admin/" title="Back to Admin">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M15 18l-6-6 6-6"/>
+          </svg>
+        </a>
+
+        <button class="btn btn-soft" id="logoutBtn" type="button">Logout</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="layout">
+        <!-- Left: Client list -->
+        <div class="panel">
+          <div class="panel-header">
+            <div style="min-width:0;">
+              <div class="panel-title">Clients</div>
+              <div class="panel-sub" id="clientsSub">Loading…</div>
+              <input class="search" id="clientSearch" placeholder="Search name, business, email, phone…" />
+            </div>
+            <div style="display:flex; flex-direction:column; gap:.55rem; align-items:flex-end;">
+              <button class="btn btn-primary" id="refreshBtn" type="button">Refresh</button>
+              <span class="pill" id="clientCount">0</span>
+            </div>
+          </div>
+
+          <div class="client-list" id="clientList"></div>
+        </div>
+
+        <!-- Right: Chat -->
+        <div class="panel" id="chatPanel">
+          <div class="chat-header">
+            <div style="min-width:0;">
+              <div class="chat-title" id="chatTitle">Select a client</div>
+              <div class="chat-sub" id="chatSub">Choose a client on the left to open the chat.</div>
+              <div class="errline" id="chatErr"></div>
+            </div>
+            <div class="chat-actions">
+              <button class="btn btn-soft" id="exportBtn" type="button" disabled>Export PDF</button>
+              <button class="btn btn-soft" id="broadcastBtn" type="button" disabled>Broadcast</button>
+            </div>
+          </div>
+
+          <div class="typing" id="typingLine"><span class="shimmer">Typing…</span></div>
+
+          <div class="messages" id="messages"></div>
+
+          <div class="scroll-new" id="scrollNew">
+            <button class="btn btn-primary" type="button" id="jumpBtn">Jump to newest</button>
+          </div>
+
+
+<div class="composer" id="composerBar">
+  <input id="chatFile" type="file" multiple style="display:none" />
+
+  <button class="btn btn-soft" id="chatAttachBtn" type="button" disabled>Attach</button>
+
+  <div class="box">
+    <textarea id="composer" placeholder="Type a message…"></textarea>
+  </div>
+
+  <button class="btn btn-primary" id="sendBtn" type="button" disabled>Send</button>
+</div>
+
+<div id="chatAttachTray" style="display:none; padding: 0 .95rem .85rem;"></div>
+
+<div id="chatDrop" style="display:none;">
+  <div style="
+    margin: 0 .95rem .95rem;
+    border: 1px dashed rgba(179,124,255,.45);
+    background: rgba(179,124,255,.08);
+    border-radius: 18px;
+    padding: 16px;
+    text-align: center;
+    color: rgba(244,240,255,.85);
+  ">Drop files to attach</div>
+</div>
+
+          </div>
+        </div>
+      </div>
+
+      <div class="note">
+        If you see an error mentioning a missing Edge Function, we add the Supabase chat functions next.
+      </div>
+    </div>
+  </div>
+
+  <!-- Login overlay -->
+  <div class="overlay" id="loginOverlay" style="display:none;">
+    <div class="login-card">
+      <button class="login-close" id="loginCloseBtn" type="button" title="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+      </button>
+
+      <h2 class="login-title">Admin Login</h2>
+      <div class="login-sub">Sign in with your admin account to access Client Chat.</div>
+
+      <div class="field">
+        <label>Email</label>
+        <input id="loginEmail" type="email" autocomplete="email" placeholder="you@example.com" />
+      </div>
+
+      <div class="field">
+        <label>Password</label>
+        <input id="loginPass" type="password" autocomplete="current-password" placeholder="••••••••" />
+      </div>
+
+      <div class="login-actions">
+        <button class="btn btn-primary" id="loginBtn" type="button">Sign in</button>
+        <span class="pill" id="loginHint">Admin-only</span>
+      </div>
+
+      <div class="login-err" id="loginErr"></div>
+    </div>
+  </div>
+    <!-- Admin: View Original Modal -->
+<div id="origModal" class="origModal" aria-hidden="true">
+  <div class="origCard">
+    <div class="origHeader">
+      <div class="origTitle">Message Details</div>
+      <button id="origClose" class="origClose">Close</button>
+    </div>
+
+    <div class="origBody">
+      <div class="origBlock">
+        <div class="origLabel" id="origMeta">—</div>
+      </div>
+
+      <div class="origBlock">
+        <div class="origLabel">Current (what the client/admin sees)</div>
+        <div id="origCurrent" class="origText"></div>
+      </div>
+
+      <div class="origBlock">
+        <div class="origLabel">Original (admin-only)</div>
+        <div id="origOriginal" class="origText"></div>
+      </div>
+    </div>
+  </div>
+</div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = "https://jgvxmpsjtkedzgygynbl.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpndnhtcHNqdGtlZHpneWd5bmJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0NzgxMjYsImV4cCI6MjA4MTA1NDEyNn0.OCh23RWm8COtxWuumYvKUmfMOLOW01B1zrbtzcr3w6Y";
+    const ADMIN_EMAIL = "brandon.sns@pm.me";
+    const FN_BASE = `${SUPABASE_URL}/functions/v1`;
+
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const whoami = document.getElementById("whoami");
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    const loginOverlay = document.getElementById("loginOverlay");
+    const loginBtn = document.getElementById("loginBtn");
+    const loginEmail = document.getElementById("loginEmail");
+    const loginPass = document.getElementById("loginPass");
+    const loginErr = document.getElementById("loginErr");
+    const loginHint = document.getElementById("loginHint");
+    const loginCloseBtn = document.getElementById("loginCloseBtn");
+
+    const refreshBtn = document.getElementById("refreshBtn");
+    const clientCount = document.getElementById("clientCount");
+    const clientsSub = document.getElementById("clientsSub");
+    const clientSearch = document.getElementById("clientSearch");
+    const clientList = document.getElementById("clientList");
+
+    const chatTitle = document.getElementById("chatTitle");
+    const chatSub = document.getElementById("chatSub");
+    const chatErr = document.getElementById("chatErr");
+    const messagesEl = document.getElementById("messages");
+    const typingLine = document.getElementById("typingLine");
+        // Attachments (admin)
+    const chatFile = document.getElementById("chatFile");
+    const chatAttachBtn = document.getElementById("chatAttachBtn");
+    const chatAttachTray = document.getElementById("chatAttachTray");
+    const chatDrop = document.getElementById("chatDrop");
+
+    // pending uploads waiting to be sent with the next message
+    let chatPendingFiles = []; 
+    // each: { attachment_id, storage_path, original_name, mime_type, size_bytes }
+
+
+
+    const composer = document.getElementById("composer");
+    const sendBtn = document.getElementById("sendBtn");
+    const scrollNew = document.getElementById("scrollNew");
+    const jumpBtn = document.getElementById("jumpBtn");
+
+    const exportBtn = document.getElementById("exportBtn");
+    const broadcastBtn = document.getElementById("broadcastBtn");
+
+    // Admin: View Original modal refs
+    const origModal = document.getElementById("origModal");
+    const origClose = document.getElementById("origClose");
+    const origMeta = document.getElementById("origMeta");
+    const origCurrent = document.getElementById("origCurrent");
+    const origOriginal = document.getElementById("origOriginal");
+
+
+
+    function openOrigModal(){
+    origModal.classList.add("on");
+    origModal.setAttribute("aria-hidden","false");
+    }
+    function closeOrigModal(){
+    origModal.classList.remove("on");
+    origModal.setAttribute("aria-hidden","true");
+    }
+    origClose.addEventListener("click", closeOrigModal);
+    origModal.addEventListener("click", (e) => {
+    if (e.target === origModal) closeOrigModal();
+    });
+
+
+    let clients = [];
+    let activeClient = null;
+    let activeThreadId = null;
+    let messages = [];
+
+    let rtChannel = null;
+    let typingHideTimer = null;
+    let typingSendTimer = null;
+    let typingOn = false;
+
+    // --------------------
+// Sound (admin)
+// --------------------
+let audioCtx = null;
+let audioUnlocked = false;
+
+function ensureAudio(){
+  if (audioCtx) return audioCtx;
+  const Ctx = window.AudioContext || window.webkitAudioContext;
+  if (!Ctx) throw new Error("WebAudio unsupported");
+  audioCtx = new Ctx();
+  return audioCtx;
+}
+
+function unlockAudioOnce(){
+  if (audioUnlocked) return;
+  audioUnlocked = true;
+  try{
+    const ctx = ensureAudio();
+    if (ctx.state === "suspended") ctx.resume();
+  }catch(_){ }
+}
+
+// Autoplay restrictions: must be unlocked by a user gesture at least once.
+window.addEventListener("pointerdown", unlockAudioOnce, { once: true });
+window.addEventListener("keydown", unlockAudioOnce, { once: true });
+
+function playToneIncoming(){
+  try{
+    const ctx = ensureAudio();
+    if (ctx.state === "suspended") return;
+    const now = ctx.currentTime;
+
+    const o1 = ctx.createOscillator();
+    const o2 = ctx.createOscillator();
+    const g = ctx.createGain();
+
+    // Soft two-note chime (client -> admin)
+    o1.type = "sine";
+    o2.type = "sine";
+    o1.frequency.value = 392.00;  // G4
+    o2.frequency.value = 587.33;  // D5
+
+    g.gain.setValueAtTime(0.0001, now);
+    g.gain.exponentialRampToValueAtTime(0.09, now + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
+
+    o1.connect(g);
+    o2.connect(g);
+    g.connect(ctx.destination);
+
+    o1.start(now);
+    o2.start(now);
+    o1.stop(now + 0.36);
+    o2.stop(now + 0.36);
+  }catch(_){ }
+}
+
+// 7-day cooldown per thread (client -> admin)
+function shouldPlayIncomingSound(threadId){
+  if (!threadId) return false;
+  const key = `sns_admin_chat_sound_incoming_${threadId}`;
+  const last = Number(localStorage.getItem(key) || "0");
+  const now = Date.now();
+  const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+  if (now - last < sevenDaysMs) return false;
+  localStorage.setItem(key, String(now));
+  return true;
+}
+
+function maybePlayIncoming(threadId){
+  // Requirement: hear it when you're on the chat window.
+  if (document.visibilityState !== "visible") return;
+  if (!shouldPlayIncomingSound(threadId)) return;
+  playToneIncoming();
+}
+
+
+
+    function sanitize(str){
+      return String(str ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    function setAttachTrayVisible(on){
+  chatAttachTray.style.display = on ? "block" : "none";
+}
+
+function renderAttachTray(){
+  if (!chatPendingFiles.length){
+    setAttachTrayVisible(false);
+    chatAttachTray.innerHTML = "";
+    return;
+  }
+  setAttachTrayVisible(true);
+
+  chatAttachTray.innerHTML = `
+    <div style="display:flex; gap:.55rem; flex-wrap:wrap;">
+      ${chatPendingFiles.map((f, idx) => `
+        <span class="tag" style="gap:.55rem;">
+          ${sanitize(f.original_name)}
+          <button class="mini-btn" type="button" data-rm-att="${idx}">X</button>
+        </span>
+      `).join("")}
+    </div>
+  `;
+}
+
+// remove attachment from tray
+chatAttachTray.addEventListener("click", (e) => {
+  const btn = e.target.closest("button[data-rm-att]");
+  if (!btn) return;
+  const idx = Number(btn.getAttribute("data-rm-att"));
+  if (!Number.isFinite(idx)) return;
+  chatPendingFiles.splice(idx, 1);
+  renderAttachTray();
+});
+
+async function putSignedUpload(url, file){
+  // signed url may be relative or absolute depending on supabase response
+  let putUrl = url;
+  if (putUrl.startsWith("/")) putUrl = `${SUPABASE_URL}${putUrl}`;
+
+  const r = await fetch(putUrl, {
+    method: "PUT",
+    headers: {
+      "Content-Type": file.type || "application/octet-stream",
+    },
+    body: file,
+  });
+
+  if (!r.ok){
+    const t = await r.text().catch(() => "");
+    throw new Error(`Upload failed: ${r.status} ${t}`);
+  }
+}
+
+async function uploadOneFileToThread(file){
+  if (!activeThreadId) throw new Error("No thread_id yet. Open a client chat first.");
+
+  // 1) get signed upload url + attachment_id
+  const up = await callEdge("chat-attachment-upload-url", {
+    thread_id: activeThreadId,
+    file_name: file.name,
+    mime_type: file.type || "application/octet-stream",
+    size_bytes: file.size,
+  });
+
+  const upload = up?.upload;
+  if (!upload?.signed_upload_url || !upload?.attachment_id || !upload?.path){
+    throw new Error("Upload URL response missing fields.");
+  }
+
+  // 2) PUT the file bytes to signed url
+  await putSignedUpload(upload.signed_upload_url, file);
+
+  // 3) store metadata to send with admin-chat-send
+  chatPendingFiles.push({
+    attachment_id: upload.attachment_id,
+    storage_path: upload.path,
+    original_name: upload.original_name || file.name,
+    mime_type: upload.mime_type || file.type || "application/octet-stream",
+    size_bytes: upload.size_bytes || file.size,
+  });
+
+  renderAttachTray();
+}
+
+async function addFiles(files){
+  const list = Array.from(files || []);
+  if (!list.length) return;
+
+  // simple sequential uploads (reliable, keeps it predictable)
+  chatAttachBtn.disabled = true;
+  chatAttachBtn.textContent = "Uploading…";
+  try{
+    for (const f of list){
+      await uploadOneFileToThread(f);
+    }
+  }finally{
+    chatAttachBtn.textContent = "Attach";
+    chatAttachBtn.disabled = false;
+  }
+}
+
+
+    function showChatErr(msg){
+      chatErr.style.display = "block";
+      chatErr.textContent = msg;
+    }
+    function clearChatErr(){
+      chatErr.style.display = "none";
+      chatErr.textContent = "";
+    }
+
+    function lock(isLocked, hintMsg){
+      if (isLocked){
+        loginOverlay.style.display = "flex";
+        loginErr.style.display = "none";
+        loginErr.textContent = "";
+        loginHint.textContent = hintMsg || "Admin-only";
+        document.querySelector(".card").style.display = "none";
+      } else {
+        loginOverlay.style.display = "none";
+        document.querySelector(".card").style.display = "block";
+      }
+    }
+
+    async function ensureAdminOrShowLogin(){
+      const { data: sess } = await sb.auth.getSession();
+      const session = sess?.session;
+
+      if (!session){
+        lock(true);
+        return false;
+      }
+
+      const email = (session.user?.email || "").toLowerCase();
+      whoami.textContent = `Signed in: ${session.user?.email || "—"}`;
+
+      if (email !== ADMIN_EMAIL.toLowerCase()){
+        await sb.auth.signOut();
+        lock(true, "Not an admin account.");
+        return false;
+      }
+
+      lock(false);
+      return true;
+    }
+
+    async function login(){
+      loginErr.style.display = "none";
+      loginErr.textContent = "";
+
+      const email = (loginEmail.value || "").trim();
+      const pass = (loginPass.value || "").trim();
+      if (!email || !pass){
+        loginErr.style.display = "block";
+        loginErr.textContent = "Enter email and password.";
+        return;
+      }
+
+      loginBtn.disabled = true;
+      try{
+        const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+        if (error) throw error;
+
+        const ok = await ensureAdminOrShowLogin();
+        if (ok) await loadClientList();
+      }catch(e){
+        loginErr.style.display = "block";
+        loginErr.textContent = e?.message || String(e);
+      }finally{
+        loginBtn.disabled = false;
+      }
+    }
+
+    async function logout(){
+      await sb.auth.signOut();
+      whoami.textContent = "Signed in: —";
+      lock(true);
+    }
+
+    async function callEdge(fnName, payload = {}){
+      const { data: sess } = await sb.auth.getSession();
+      const token = sess?.session?.access_token;
+      if (!token) throw new Error("Not logged in.");
+
+      const res = await fetch(`${FN_BASE}/${fnName}`, {
+        method: "POST",
+        headers: {
+          "Content-Type":"application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const j = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(j?.error || `This page requires the Edge Function: ${fnName}.`);
+      return j;
+    }
+
+    function stopRealtime(){
+  try{
+    if (rtChannel){
+      sb.removeChannel(rtChannel);
+      rtChannel = null;
+    }
+  }catch(_){}
+}
+
+function startRealtime(){
+  stopRealtime();
+  if (!activeThreadId) return;
+
+  rtChannel = sb
+    .channel(`chat:${activeThreadId}`)
+    .on("postgres_changes", {
+      event: "INSERT",
+      schema: "public",
+      table: "chat_messages",
+      filter: `thread_id=eq.${activeThreadId}`,
+    }, (payload) => {
+      const m = payload.new;
+      if (!m?.id) return;
+
+      // normalize to your UI shape
+      const msg = {
+        id: m.id,
+        sender_role: m.sender_role,
+        body: m.body,
+        created_at: m.created_at,
+        edited: !!m.edited_at,
+        original_body: m.original_body ?? null,
+        deleted: !!m.deleted_at,
+        delivered_at: m.delivered_at ?? null,
+        read_by_client_at: m.read_by_client_at ?? null,
+      };
+
+      // Dedup
+      if (messages.some(x => x.id === msg.id)) return;
+
+      const wasNear = (messagesEl.scrollHeight - messagesEl.scrollTop - messagesEl.clientHeight) < 140;
+
+            // If it's an attachment-only message, reload history so we fetch attachments + signed URLs
+      if (!msg.body) {
+        loadHistory().catch(() => {});
+        return;
+      }
+
+      messages.push(msg);
+
+        // Sound: play on incoming client message
+        if (msg.sender_role === "client") {
+            // We still attempt when visible; browser will block until user interacts once.
+            maybePlayIncoming(activeThreadId);
+            }
+
+      renderMessages();
+
+      if (wasNear){
+        requestAnimationFrame(() => { messagesEl.scrollTop = messagesEl.scrollHeight; });
+      } else {
+        updateJump();
+      }
+
+      // If this is NOT the active client thread, refresh client list order/badges
+      // (simple + reliable)
+      loadClientList().catch(() => {});
+    })
+    .on("postgres_changes", {
+      event: "UPDATE",
+      schema: "public",
+      table: "chat_messages",
+      filter: `thread_id=eq.${activeThreadId}`,
+    }, (payload) => {
+      const m = payload.new;
+      if (!m?.id) return;
+
+      const idx = messages.findIndex(x => x.id === m.id);
+      if (idx === -1) return;
+
+      messages[idx] = {
+        ...messages[idx],
+        body: m.body,
+        edited: !!m.edited_at,
+        original_body: m.original_body ?? messages[idx].original_body,
+        deleted: !!m.deleted_at,
+        delivered_at: m.delivered_at ?? messages[idx].delivered_at,
+        read_by_client_at: m.read_by_client_at ?? messages[idx].read_by_client_at,
+      };
+
+      renderMessages();
+    })
+    .on("broadcast", { event: "typing" }, (payload) => {
+      // payload: { role: "client"|"admin", on: boolean }
+      const p = payload?.payload || {};
+      if (p.role !== "client") return;
+
+      typingLine.classList.toggle("on", !!p.on);
+
+      // auto-hide if they stop sending typing events
+      clearTimeout(typingHideTimer);
+      typingHideTimer = setTimeout(() => {
+        typingLine.classList.remove("on");
+      }, 1600);
+    })
+    .subscribe();
+}
+
+function sendTyping(on){
+  if (!rtChannel) return;
+
+  // avoid spamming identical state
+  if (typingOn === on) return;
+  typingOn = on;
+
+  rtChannel.send({
+    type: "broadcast",
+    event: "typing",
+    payload: { role: "admin", on: !!on },
+  });
+}
+
+
+    async function adminViewOriginal(messageId){
+        const j = await callEdge("admin-chat-view-original", { message_id: messageId });
+
+        const m = j?.message;
+        if (!m) throw new Error("No message returned.");
+
+        const deleted = !!m.deleted;
+        const edited = !!m.edited;
+
+        origMeta.textContent = `ID: ${m.id} · Sender: ${m.sender_role} · ${edited ? "Edited" : "Not edited"} · ${deleted ? "Deleted" : "Not deleted"}`;
+
+        // Current (what UI shows)
+        origCurrent.textContent = m.body || "";
+
+        // Original (admin-only)
+        origOriginal.textContent = m.original_body || "";
+        origOriginal.classList.toggle("red", deleted);
+
+        openOrigModal();
+        }
+
+
+    function fmt(ts){
+      if (!ts) return "—";
+      try{ return new Date(ts).toLocaleString(); }catch{ return "—"; }
+    }
+
+    function filterClients(list){
+      const q = (clientSearch.value || "").trim().toLowerCase();
+      if (!q) return list;
+      return list.filter(c =>
+        (c.full_name || "").toLowerCase().includes(q) ||
+        (c.business_name || "").toLowerCase().includes(q) ||
+        (c.email || "").toLowerCase().includes(q) ||
+        (c.phone || "").toLowerCase().includes(q)
+      );
+    }
+
+    function renderClients(){
+      const view = filterClients(clients);
+
+      clientCount.textContent = String(view.length);
+      clientsSub.textContent = `${view.length} client${view.length === 1 ? "" : "s"} · sorted by newest message`;
+
+      if (!view.length){
+        clientList.innerHTML = `
+          <div class="client" style="cursor:default;">
+            <div class="name">No clients found</div>
+            <div class="biz">This page needs the chat Edge Functions + tables.</div>
+          </div>
+        `;
+        return;
+      }
+
+      clientList.innerHTML = view.map(c => {
+        const isActive = activeClient && activeClient.user_id === c.user_id;
+        const hasNew = !!c.has_unread;
+        const onlineDot = c.is_online ? "dot-online" : "dot-offline";
+        const onlineLabel = c.is_online ? "Online" : (c.last_seen ? `Last seen: ${fmt(c.last_seen)}` : "Offline");
+        return `
+          <div class="client ${isActive ? "active" : ""} ${hasNew ? "has-new" : ""}" data-user="${sanitize(c.user_id)}">
+            <div class="newglow"></div>
+            <div class="row">
+              <div style="min-width:0;">
+                <div class="name">${sanitize(c.full_name || c.email || "—")}</div>
+                <div class="biz">${sanitize(c.business_name || "—")}</div>
+                <div class="meta">
+                  <span class="tag"><span class="dot ${onlineDot}"></span>${sanitize(onlineLabel)}</span>
+                  <span class="tag">Last: ${sanitize(c.last_message_at ? fmt(c.last_message_at) : "No messages")}</span>
+                </div>
+              </div>
+              <div style="display:flex; flex-direction:column; gap:.5rem; align-items:flex-end;">
+                ${hasNew ? `<span class="tag"><span class="dot dot-new"></span>NEW</span>` : ``}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderMessages(){
+      if (!activeClient){
+        messagesEl.innerHTML = `
+          <div class="msg" style="max-width:100%; opacity:.85;">
+            <div class="text">Select a client to view the chat.</div>
+          </div>
+        `;
+        return;
+      }
+
+      if (!messages.length){
+        messagesEl.innerHTML = `
+          <div class="msg" style="max-width:100%; opacity:.85;">
+            <div class="text">No messages yet.</div>
+          </div>
+        `;
+        return;
+      }
+
+      messagesEl.innerHTML = messages.map(m => {
+        const isDeleted = !!m.deleted || !!m.deleted_at;
+        const cls = isDeleted ? "deleted" : (m.sender_role === "admin" ? "admin" : "client");
+        const body = isDeleted ? "Deleted Message" : (m.body || "");       
+        const receipts = [];
+        if (m.delivered_at) receipts.push("Delivered");
+        if (m.read_by_client_at) receipts.push("Read");
+        const receiptText = receipts.length ? receipts.join(" · ") : "—";
+        const isEdited = !!m.edited || !!m.edited_at;
+
+
+        return `
+        <div class="msg ${cls}">
+            ${(() => {
+              const atts = Array.isArray(m.attachments) ? m.attachments : [];
+              const safeText = sanitize(body);
+
+              if (!atts.length) return `<div class="text">${safeText}</div>`;
+
+              const attHtml = atts.map(a => {
+                const name = sanitize(a.file_name || a.original_name || "attachment");
+                const size = (typeof a.size_bytes === "number") ? `${Math.max(1, Math.round(a.size_bytes/1024))} KB` : "";
+                const urlRaw = a.url || a.signed_url || "";
+                const url = urlRaw ? sanitize(urlRaw) : "";
+                const mime = (a.mime_type || "").toLowerCase();
+                const isImg = mime.startsWith("image/");
+
+                if (isImg && url) {
+                  return `
+                    <div class="att">
+                      <a href="${url}" target="_blank" rel="noreferrer">
+                        <img class="attImg" src="${url}" alt="${name}" loading="lazy">
+                      </a>
+                      <div class="attMeta">${name}${size ? ` · ${size}` : ""}</div>
+                    </div>
+                  `;
+                }
+
+                return `
+                  <div class="att">
+                    <div class="attMeta">${name}${size ? ` · ${size}` : ""}</div>
+                    ${url ? `<a class="attLink" href="${url}" target="_blank" rel="noreferrer">Download</a>` : `<span class="attMeta">Link unavailable</span>`}
+                  </div>
+                `;
+              }).join("");
+
+              return `
+                <div class="text">${safeText}</div>
+                <div class="atts">${attHtml}</div>
+              `;
+            })()}
+
+
+            <div class="foot">
+            <div class="mini">
+                <span>${sanitize(fmt(m.created_at))}</span>
+                <span>·</span>
+                <span>${sanitize(receiptText)}</span>
+            </div>
+
+            <div class="mini">
+                ${(isEdited || isDeleted) ? `<button class="mini-btn" type="button" data-act="orig" data-id="${sanitize(m.id)}">View Original</button>` : ``}
+            </div>
+            </div>
+        </div>
+        `;
+
+      }).join("");
+
+      requestAnimationFrame(() => {
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+      });
+    }
+
+    function setActiveClient(c){
+      stopRealtime();
+      typingLine.classList.remove("on");
+      activeThreadId = null;
+      activeClient = c;
+      chatTitle.textContent = `Chat · ${c.full_name || c.email || "Client"}`;
+      chatSub.textContent = c.business_name ? c.business_name : (c.phone ? `Phone: ${c.phone}` : "—");
+      clearChatErr();
+      sendBtn.disabled = false;
+      exportBtn.disabled = false;
+      broadcastBtn.disabled = false;
+      chatAttachBtn.disabled = false;
+      loadHistory();
+      renderClients();
+    }
+
+    async function loadClientList(){
+      refreshBtn.disabled = true;
+      refreshBtn.textContent = "Refreshing…";
+      try{
+        const data = await callEdge("admin-chat-client-list", {});
+        clients = Array.isArray(data?.clients) ? data.clients : [];
+        renderClients();
+        if (clients.length && !activeClient) setActiveClient(clients[0]);
+      }catch(e){
+        clients = [];
+        activeClient = null;
+        messages = [];
+        renderClients();
+        renderMessages();
+        showChatErr(e?.message || String(e));
+      }finally{
+        refreshBtn.disabled = false;
+        refreshBtn.textContent = "Refresh";
+      }
+    }
+
+    async function loadHistory(){
+    if (!activeClient) return;
+    messages = [];
+    renderMessages();
+    try{
+    const data = await callEdge("admin-chat-history", { user_id: activeClient.user_id, limit: 60 });
+
+    activeThreadId = data?.thread_id || null;
+
+    messages = Array.isArray(data?.messages) ? data.messages : [];
+    renderMessages();
+
+    // start realtime AFTER you have thread_id
+    startRealtime();
+    }catch(e){
+    showChatErr(e?.message || String(e));
+    }
+
+    }
+
+    async function sendMessage(){
+        if (!activeClient) return;
+
+        const text = (composer.value || "").trim();
+        const hasFiles = chatPendingFiles.length > 0;
+
+        // allow sending with attachments only
+        if (!text && !hasFiles) return;
+
+        composer.value = "";
+        composer.focus();
+        sendTyping(false);
+
+        const payload = {
+            user_id: activeClient.user_id,
+            body: text,
+            attachments: chatPendingFiles.map(a => ({
+            attachment_id: a.attachment_id,
+            })),
+        };
+
+        // clear pending UI immediately (so it feels instant)
+        chatPendingFiles = [];
+        renderAttachTray();
+
+        try{
+            const data = await callEdge("admin-chat-send", payload);
+            const msg = data?.message;
+            if (msg){
+            messages.push(msg);
+            renderMessages();
+            } else {
+            await loadHistory();
+            }
+        }catch(e){
+            showChatErr(e?.message || String(e));
+        }
+        }
+
+
+    function updateJump(){
+      const nearBottom = (messagesEl.scrollHeight - messagesEl.scrollTop - messagesEl.clientHeight) < 120;
+      scrollNew.classList.toggle("on", !nearBottom && !!activeClient);
+    }
+
+    messagesEl.addEventListener("scroll", updateJump);
+    jumpBtn.addEventListener("click", () => { messagesEl.scrollTop = messagesEl.scrollHeight; });
+
+    refreshBtn.addEventListener("click", loadClientList);
+    clientSearch.addEventListener("input", renderClients);
+
+    clientList.addEventListener("click", (e) => {
+      const node = e.target.closest(".client");
+      if (!node) return;
+      const userId = node.getAttribute("data-user");
+      const c = clients.find(x => x.user_id === userId);
+      if (c) setActiveClient(c);
+    });
+
+    messagesEl.addEventListener("click", async (e) => {
+        const btn = e.target.closest("button[data-act='orig']");
+        if (!btn) return;
+
+        const id = btn.getAttribute("data-id");
+        if (!id) return;
+
+        try{
+            await adminViewOriginal(id);
+        }catch(err){
+            showChatErr(err?.message || String(err));
+        }
+        });
+
+        chatAttachBtn.addEventListener("click", () => {
+            if (!activeClient) return;
+            chatFile.value = "";
+            chatFile.click();
+            });
+
+            chatFile.addEventListener("change", async () => {
+            try{
+                await addFiles(chatFile.files);
+            }catch(e){
+                showChatErr(e?.message || String(e));
+            }
+            });
+
+            // Drag & drop
+            window.addEventListener("dragenter", (e) => {
+            if (!activeClient) return;
+            e.preventDefault();
+            chatDrop.style.display = "block";
+            });
+            window.addEventListener("dragover", (e) => {
+            if (!activeClient) return;
+            e.preventDefault();
+            chatDrop.style.display = "block";
+            });
+            window.addEventListener("dragleave", (e) => {
+            if (!activeClient) return;
+            if (e.target === document.documentElement || e.target === document.body){
+                chatDrop.style.display = "none";
+            }
+            });
+            window.addEventListener("drop", async (e) => {
+            if (!activeClient) return;
+            e.preventDefault();
+            chatDrop.style.display = "none";
+            const dt = e.dataTransfer;
+            if (!dt?.files?.length) return;
+            try{
+                await addFiles(dt.files);
+            }catch(err){
+                showChatErr(err?.message || String(err));
+            }
+            });
+
+
+
+    sendBtn.addEventListener("click", sendMessage);
+    composer.addEventListener("keydown", (e) => {
+        // typing on (debounced off)
+        sendTyping(true);
+        clearTimeout(typingSendTimer);
+        typingSendTimer = setTimeout(() => sendTyping(false), 900);
+
+        if (e.key === "Enter" && !e.shiftKey){
+            e.preventDefault();
+            sendTyping(false);
+            sendMessage();
+        }
+        });
+
+
+    logoutBtn.addEventListener("click", logout);
+    loginBtn.addEventListener("click", login);
+    loginPass.addEventListener("keydown", (e) => { if (e.key === "Enter") login(); });
+    loginEmail.addEventListener("keydown", (e) => { if (e.key === "Enter") login(); });
+
+    loginCloseBtn.addEventListener("click", () => { window.location.href = "/sns/"; });
+
+    sendBtn.disabled = true;
+    exportBtn.disabled = true;
+    broadcastBtn.disabled = true;
+    renderMessages();
+
+    (async function init(){
+      const ok = await ensureAdminOrShowLogin();
+      if (ok) await loadClientList();
+    })();
+  </script>
+
+
+
+
+</body>
+</html>

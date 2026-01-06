@@ -63,12 +63,15 @@ type AttachmentIn = {
 type ReqBody = {
   user_id?: string;
   body?: string;
-
-  // uploaded beforehand via chat-attachment-upload-url
   attachments?: Array<{
-    attachment_id: string;
+    attachment_id?: string;
+    storage_path?: string;
+    original_name?: string;
+    mime_type?: string;
+    size_bytes?: number;
   }>;
 };
+
 
 
 serve(async (req) => {
@@ -86,7 +89,6 @@ serve(async (req) => {
 
     const admin = createClient(SB_URL, SB_SERVICE_ROLE_KEY, {
       auth: { persistSession: false },
-      global: { headers: { Authorization: `Bearer ${token}` } },
     });
 
     // Verify caller identity (must be ADMIN_EMAIL)
@@ -214,30 +216,34 @@ serve(async (req) => {
       );
     }
 
-// Link any pre-uploaded attachments (created by chat-attachment-upload-url) to this message
-if (attachments.length > 0) {
-  const ids = attachments
-    .map(a => (a?.attachment_id || "").trim())
-    .filter(Boolean);
-
-  if (ids.length > 0) {
-    const link = await admin
-      .from("chat_attachments")
-      .update({ message_id: insMsg.data.id })
-      .in("id", ids)
-      .eq("thread_id", threadId)
-      .is("message_id", null);
-
-    if (link.error) {
-      return json({ error: `Failed to link attachments: ${link.error.message}` }, 500);
-    }
-  }
-}
 
 
 
 
     const m = insMsg.data as any;
+
+// 2b) If attachments were uploaded (chat-attachment-upload-url), link them to this message
+const attachmentIds = attachments
+  .map((a) => a?.attachment_id)
+  .filter((x): x is string => typeof x === "string" && x.length > 0);
+
+if (attachmentIds.length > 0) {
+  // update the existing chat_attachments rows created by chat-attachment-upload-url
+  const upd = await admin
+    .from("chat_attachments")
+    .update({ message_id: m.id })
+    .eq("thread_id", threadId)
+    .is("message_id", null)
+    .in("id", attachmentIds);
+
+  if (upd.error) {
+    return json(
+      { error: "Failed to link attachments to message", details: upd.error.message },
+      500,
+    );
+  }
+}
+
 
         // Email notify client (throttled per-thread, no message body)
     try {
@@ -296,21 +302,57 @@ if (attachments.length > 0) {
     }
 
 
-    return json({
-      ok: true,
-      message: {
-        id: m.id,
-        sender_role: m.sender_role,
-        body: m.body,
-        created_at: m.created_at,
-        edited: !!m.edited_at,
-        original_body: m.original_body || null,
-        deleted: !!m.deleted_at,
-        delivered_at: m.delivered_at || null,
-        read_by_client_at: m.read_by_client_at || null,
-      },
-    });
-  } catch (e) {
-    return json({ error: e?.message || String(e) }, 500);
+// Build attachment payload (signed URLs) for immediate rendering in admin UI
+let outAttachments: any[] = [];
+
+if (attachmentIds.length > 0) {
+  const { data: atts, error: attErr } = await admin
+    .from("chat_attachments")
+    .select("id, storage_bucket, storage_path, mime_type, original_name, size_bytes")
+    .in("id", attachmentIds);
+
+  if (attErr) {
+    return json(
+      { error: "Failed to load linked attachments", details: attErr.message },
+      500,
+    );
   }
+
+  for (const a of atts || []) {
+    const bucket = (a as any).storage_bucket || "chat-attachments";
+    const path = (a as any).storage_path as string;
+    let signed_url: string | null = null;
+
+    if (path) {
+      const signed = await admin.storage.from(bucket).createSignedUrl(path, 60 * 60);
+      if (!signed.error) signed_url = signed.data?.signedUrl || null;
+    }
+
+    outAttachments.push({
+      id: a.id,
+      storage_path: a.storage_path,
+      mime_type: a.mime_type,
+      file_name: (a as any).original_name,
+      size_bytes: a.size_bytes ?? null,
+      url: signed_url,
+      signed_url,
+    });
+  }
+}
+
+return json({
+  ok: true,
+  thread_id: threadId,
+  message: {
+    id: m.id,
+    sender_role: m.sender_role,
+    body: m.body,
+    created_at: m.created_at,
+    edited: !!m.edited_at,
+    original_body: m.original_body || null,
+    deleted: !!m.deleted_at,
+    delivered_at: m.delivered_at || null,
+    read_by_client_at: m.read_by_client_at || null,
+    attachments: outAttachments,
+  },
 });
