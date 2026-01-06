@@ -47,8 +47,8 @@ serve(async (req) => {
 
     const sb = createClient(SB_URL, SB_SERVICE_ROLE_KEY, {
       auth: { persistSession: false },
-      global: { headers: { Authorization: `Bearer ${token}` } },
     });
+
 
     // Identify caller
     const { data: userData, error: userErr } = await sb.auth.getUser(token);
@@ -110,7 +110,8 @@ serve(async (req) => {
 
       // createSignedUrl returns `{ data: { signedUrl } }`
       const signed = await sb.storage.from(bucket).createSignedUrl(path, 60 * 60);
-      signedUrl = signed.data?.signedUrl ?? null;
+      signedUrl = signed.error ? null : (signed.data?.signedUrl ?? null);
+
 
       const out: AttachmentOut = {
         id: String(a.id),
