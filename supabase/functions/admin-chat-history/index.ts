@@ -80,6 +80,7 @@ serve(async (req) => {
       .order("created_at", { ascending: true });
 
 
+
     if (msgRes.error) return json({ error: msgRes.error.message }, 500);
 
     const msgs = (msgRes.data || []) as any[];
@@ -88,31 +89,66 @@ serve(async (req) => {
     // Pull attachments for these messages
     let attRows: any[] = [];
     if (msgIds.length) {
-      // IMPORTANT:
-      // - chat_attachments is the DATABASE table (underscore)
-      // - chat-attachments is the STORAGE bucket (hyphen)
-      // History must read from the DB table, then sign URLs from the storage bucket.
+      // Try the most complete schema first
       let at = await admin
         .from("chat_attachments")
         .select(
-          "id,message_id,storage_bucket,storage_path,original_name,mime_type,size_bytes,created_at,uploaded_at"
+          "id,message_id,storage_bucket,storage_path,mime_type,size_bytes,created_at,uploaded_at,file_name,original_name"
         )
         .in("message_id", msgIds);
 
-      // Backward-compat: some schemas don't have uploaded_at
-      if (at.error && String(at.error.message).includes("uploaded_at")) {
+      // Fallback: no uploaded_at
+      if (at.error && String(at.error.message).toLowerCase().includes("uploaded_at")) {
         at = await admin
           .from("chat_attachments")
           .select(
-            "id,message_id,storage_bucket,storage_path,original_name,mime_type,size_bytes,created_at"
+            "id,message_id,storage_bucket,storage_path,mime_type,size_bytes,created_at,file_name,original_name"
           )
           .in("message_id", msgIds);
       }
 
+      // Fallback: no file_name
+      if (at.error && String(at.error.message).toLowerCase().includes("file_name")) {
+        at = await admin
+          .from("chat_attachments")
+          .select(
+            "id,message_id,storage_bucket,storage_path,mime_type,size_bytes,created_at,uploaded_at,original_name"
+          )
+          .in("message_id", msgIds);
+
+        if (at.error && String(at.error.message).toLowerCase().includes("uploaded_at")) {
+          at = await admin
+            .from("chat_attachments")
+            .select(
+              "id,message_id,storage_bucket,storage_path,mime_type,size_bytes,created_at,original_name"
+            )
+            .in("message_id", msgIds);
+        }
+      }
+
+      // Fallback: no original_name
+      if (at.error && String(at.error.message).toLowerCase().includes("original_name")) {
+        at = await admin
+          .from("chat_attachments")
+          .select(
+            "id,message_id,storage_bucket,storage_path,mime_type,size_bytes,created_at,uploaded_at,file_name"
+          )
+          .in("message_id", msgIds);
+
+        if (at.error && String(at.error.message).toLowerCase().includes("uploaded_at")) {
+          at = await admin
+            .from("chat_attachments")
+            .select(
+              "id,message_id,storage_bucket,storage_path,mime_type,size_bytes,created_at,file_name"
+            )
+            .in("message_id", msgIds);
+        }
+      }
 
       if (at.error) return json({ error: at.error.message }, 500);
       attRows = at.data || [];
     }
+
 
 
     // Create signed URLs (10 minutes)
@@ -138,8 +174,8 @@ serve(async (req) => {
           storage_path: path,
 
           // UI compatibility: your DB uses original_name, but some UI expects file_name
-          original_name: a.original_name || null,
-          file_name: a.original_name || null,
+          original_name: a.original_name ?? a.file_name ?? null,
+          file_name: a.file_name ?? a.original_name ?? null,
 
           mime_type: a.mime_type,
           size_bytes: a.size_bytes,
