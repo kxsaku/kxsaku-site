@@ -92,7 +92,6 @@ serve(async (req) => {
         .select(
           "id,message_id,storage_bucket,storage_path,original_name,mime_type,size_bytes,created_at"
         )
-        .eq("thread_id", threadId)
         .in("message_id", msgIds);
 
       if (at.error) return json({ error: at.error.message }, 500);

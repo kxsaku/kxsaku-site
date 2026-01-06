@@ -232,10 +232,7 @@ if (attachmentIds.length > 0) {
   // Do NOT filter by thread_id/message_id here — those fields may not be set yet.
   const upd = await admin
     .from("chat_attachments")
-    .update({
-      thread_id: threadId,
-      message_id: m.id,
-    })
+    .update({ message_id: m.id, thread_id: threadId })
     .in("id", attachmentIds);
 
   if (upd.error) {
