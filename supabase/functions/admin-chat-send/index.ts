@@ -354,5 +354,6 @@ return json({
     delivered_at: m.delivered_at || null,
     read_by_client_at: m.read_by_client_at || null,
     attachments: outAttachments,
-  },
+    },
+  });
 });
