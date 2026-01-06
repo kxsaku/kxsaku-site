@@ -76,7 +76,7 @@ serve(async (req) => {
       .select(
         "id,sender_role,body,original_body,created_at,edited_at,deleted_at,delivered_at,read_by_client_at,reply_to_message_id"
       )
-      .eq("thread_id", threadId)
+      
       .order("created_at", { ascending: true });
 
     if (msgRes.error) return json({ error: msgRes.error.message }, 500);
@@ -87,16 +87,31 @@ serve(async (req) => {
     // Pull attachments for these messages
     let attRows: any[] = [];
     if (msgIds.length) {
-      const at = await admin
+      // IMPORTANT:
+      // - chat_attachments is the DATABASE table (underscore)
+      // - chat-attachments is the STORAGE bucket (hyphen)
+      // History must read from the DB table, then sign URLs from the storage bucket.
+      let at = await admin
         .from("chat_attachments")
         .select(
-          "id,message_id,storage_bucket,storage_path,original_name,mime_type,size_bytes,created_at"
+          "id,message_id,storage_bucket,storage_path,file_name,original_name,mime_type,size_bytes,created_at,uploaded_at"
         )
         .in("message_id", msgIds);
+
+      // Backward-compat: some schemas don't have uploaded_at
+      if (at.error && String(at.error.message).includes('uploaded_at')) {
+        at = await admin
+          .from("chat_attachments")
+          .select(
+            "id,message_id,storage_bucket,storage_path,file_name,original_name,mime_type,size_bytes,created_at"
+          )
+          .in("message_id", msgIds);
+      }
 
       if (at.error) return json({ error: at.error.message }, 500);
       attRows = at.data || [];
     }
+
 
     // Create signed URLs (10 minutes)
     const signedMap = new Map<string, any[]>();
