@@ -94,19 +94,20 @@ serve(async (req) => {
       let at = await admin
         .from("chat_attachments")
         .select(
-          "id,message_id,storage_bucket,storage_path,file_name,original_name,mime_type,size_bytes,created_at,uploaded_at"
+          "id,message_id,storage_bucket,storage_path,original_name,mime_type,size_bytes,created_at,uploaded_at"
         )
         .in("message_id", msgIds);
 
       // Backward-compat: some schemas don't have uploaded_at
-      if (at.error && String(at.error.message).includes('uploaded_at')) {
+      if (at.error && String(at.error.message).includes("uploaded_at")) {
         at = await admin
           .from("chat_attachments")
           .select(
-            "id,message_id,storage_bucket,storage_path,file_name,original_name,mime_type,size_bytes,created_at"
+            "id,message_id,storage_bucket,storage_path,original_name,mime_type,size_bytes,created_at"
           )
           .in("message_id", msgIds);
       }
+
 
       if (at.error) return json({ error: at.error.message }, 500);
       attRows = at.data || [];
@@ -134,14 +135,18 @@ serve(async (req) => {
           attachment_id: a.id,
           storage_bucket: bucket,
           storage_path: path,
-          original_name: a.original_name,
+
+          // UI compatibility: your DB uses original_name, but some UI expects file_name
+          original_name: a.original_name || null,
+          file_name: a.original_name || null,
+
           mime_type: a.mime_type,
           size_bytes: a.size_bytes,
 
-          // IMPORTANT: include BOTH fields for UI compatibility
           signed_url: signedUrl,
           url: signedUrl,
         };
+
 
         const key = a.message_id;
         const arr = signedMap.get(key) || [];
