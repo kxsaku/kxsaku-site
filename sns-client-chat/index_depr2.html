@@ -703,97 +703,6 @@
     .attMeta{ font-size:12px; opacity:.85; margin-top:8px; }
     .attLink{ font-size:12px; text-decoration:underline; opacity:.9; }
     .attImg{ width:100%; max-width:420px; border-radius:14px; display:block; }
-  
-    /* --------------------------
-      Mode toggles (home/chat/broadcast)
-    -------------------------- */
-    body[data-mode="home"] #composerBar,
-    body[data-mode="home"] #chatAttachTray,
-    body[data-mode="home"] #chatDrop{ display:none !important; }
-
-    body[data-mode="home"] #clientSearch{ display:none !important; } /* top-left search hidden on splash */
-
-    body[data-mode="broadcast"] #clientSearch{ display:none !important; } /* broadcast has its own targeting later */
-
-    /* Burger menu */
-    .menu-wrap{ position:relative; }
-    .menu{
-      position:absolute;
-      right:0;
-      top: calc(100% + 10px);
-      width: 220px;
-      border-radius: 18px;
-      border: 1px solid rgba(129,118,255,.22);
-      background: rgba(9,6,34,.92);
-      box-shadow: 0 24px 80px rgba(0,0,0,.55);
-      padding: 8px;
-      display:none;
-      z-index: 50;
-      backdrop-filter: blur(14px);
-    }
-    .menu.on{ display:block; animation: pop .12s ease-out; }
-    @keyframes pop{ from{ transform: translateY(-6px); opacity:0 } to{ transform: translateY(0); opacity:1 } }
-    .menu button{
-      width:100%;
-      text-align:left;
-      border-radius: 14px;
-      padding: .65rem .75rem;
-      border: 1px solid transparent;
-      background: transparent;
-      color: rgba(244,240,255,.92);
-      cursor:pointer;
-      font-size: .82rem;
-      letter-spacing:.06em;
-    }
-    .menu button:hover{
-      background: rgba(179,124,255,.12);
-      border-color: rgba(179,124,255,.25);
-    }
-    .menu .sep{ height:1px; margin:6px 4px; background: rgba(129,118,255,.16); }
-
-    /* Chat keyword search results panel */
-    .search-panel{
-      position:absolute;
-      right: 16px;
-      top: 64px;
-      width: min(540px, calc(100% - 32px));
-      max-height: 60vh;
-      overflow:auto;
-      border-radius: 18px;
-      border: 1px solid rgba(129,118,255,.22);
-      background: rgba(9,6,34,.94);
-      box-shadow: 0 30px 90px rgba(0,0,0,.62);
-      padding: 10px;
-      display:none;
-      z-index: 60;
-      backdrop-filter: blur(16px);
-    }
-    .search-panel.on{ display:block; }
-    .sr-row{
-      border-radius: 16px;
-      border: 1px solid rgba(129,118,255,.14);
-      background: rgba(15,10,55,.35);
-      padding: 10px 10px 10px;
-      cursor:pointer;
-      transition: transform .08s ease, border-color .12s ease, filter .12s ease;
-      margin-bottom: 10px;
-    }
-    .sr-row:hover{ transform: translateY(-1px); border-color: rgba(179,124,255,.28); filter: brightness(1.06); }
-    .sr-ts{ font-size: 11px; color: rgba(244,240,255,.62); letter-spacing:.10em; text-transform:uppercase; margin-bottom: 6px; }
-    .sr-hit{ font-size: 13.5px; line-height:1.35; color: rgba(244,240,255,.95); }
-    .sr-ghost{ font-size: 12.5px; line-height:1.35; color: rgba(244,240,255,.55); opacity:.55; margin-top: 6px; }
-    .sr-mark{ color: rgba(179,124,255,.95); font-weight:700; }
-    .msg.focus{
-      outline: 2px solid rgba(179,124,255,.45);
-      box-shadow: 0 0 0 1px rgba(179,124,255,.20), 0 18px 60px rgba(179,124,255,.10);
-      animation: focusPulse 1.2s ease-out 1;
-    }
-    @keyframes focusPulse{
-      0%{ outline-color: rgba(179,124,255,.0); }
-      30%{ outline-color: rgba(179,124,255,.55); }
-      100%{ outline-color: rgba(179,124,255,.25); }
-    }
-
   </style>
 </head>
 
@@ -845,32 +754,13 @@
               <div class="chat-sub" id="chatSub">Search/select a client on the left to open a chat.</div>
               <div class="errline" id="chatErr"></div>
             </div>
-            <div class="chat-actions" style="position:relative;">
-              <a class="icon-btn" id="homeBtn" href="javascript:void(0)" title="Home">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M3 10.5L12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1v-10.5z"/>
-                </svg>
-              </a>
-
-              <div class="menu-wrap">
-                <button class="icon-btn" id="menuBtn" type="button" title="Menu">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M4 6h16M4 12h16M4 18h16"/>
-                  </svg>
-                </button>
-                <div class="menu" id="menu">
-                  <button id="exportBtn" type="button" disabled>Export PDF</button>
-                  <button id="broadcastBtn" type="button">Broadcast</button>
-                  <div class="sep"></div>
-                  <button id="closeSearchBtn" type="button">Close Search</button>
-                </div>
-              </div>
+            <div class="chat-actions">
+              <button class="btn btn-soft" id="exportBtn" type="button" disabled>Export PDF</button>
+              <button class="btn btn-soft" id="broadcastBtn" type="button">Broadcast</button>
             </div>
           </div>
 
           <div class="typing" id="typingLine"><span class="shimmer">Typing…</span></div>
-
-          <div class="search-panel" id="chatSearchPanel"></div>
 
           <div class="messages" id="messages"></div>
 
@@ -998,13 +888,7 @@
     const chatSub = document.getElementById("chatSub");
     const chatErr = document.getElementById("chatErr");
     const messagesEl = document.getElementById("messages");
-    
-    const homeBtn = document.getElementById("homeBtn");
-    const menuBtn = document.getElementById("menuBtn");
-    const menu = document.getElementById("menu");
-    const closeSearchBtn = document.getElementById("closeSearchBtn");
-    const chatSearchPanel = document.getElementById("chatSearchPanel");
-const typingLine = document.getElementById("typingLine");
+    const typingLine = document.getElementById("typingLine");
 
     // Attachments (admin)
     const chatFile = document.getElementById("chatFile");
@@ -1048,10 +932,6 @@ const typingLine = document.getElementById("typingLine");
     let activeClient = null;
     let activeThreadId = null;
     let messages = [];
-
-    let uiMode = 'home';
-    let homeQuery = '';
-
 
     let rtChannel = null;
     let typingHideTimer = null;
@@ -1150,141 +1030,6 @@ const typingLine = document.getElementById("typingLine");
       if (msg.delivered_at) return "Delivered";
       return "";
     }
-
-
-    // --------------------
-    // UI Mode (home/chat/broadcast)
-    // --------------------
-    function setMode(mode){
-      uiMode = mode;
-      document.body.dataset.mode = mode;
-
-      // close menus/panels
-      menu.classList.remove("on");
-      chatSearchPanel.classList.remove("on");
-      chatSearchPanel.innerHTML = "";
-
-      // Toggle header title/sub
-      if (mode === "home"){
-        chatTitle.textContent = "Client Chat";
-        chatSub.textContent = "Search/select a client on the left to open a chat.";
-      } else if (mode === "broadcast"){
-        chatTitle.textContent = "Broadcast";
-        chatSub.textContent = "Compose a broadcast message (implementation next).";
-      }
-      // chat mode title/sub are set in setActiveClient()
-
-      // Composer
-      const showComposer = (mode === "chat" || mode === "broadcast");
-      composerBar.style.display = showComposer ? "flex" : "none";
-
-      // Attachments UI safety
-      if (!showComposer){
-        chatPendingFiles = [];
-        renderAttachTray();
-      }
-
-      // Top-left search (chat keyword search only)
-      clientSearch.style.display = (mode === "chat") ? "block" : "none";
-      if (mode !== "chat"){ clientSearch.value = ""; }
-    }
-
-    function goHome(){
-      stopRealtime();
-      typingLine.classList.remove("on");
-      activeClient = null;
-      activeThreadId = null;
-      messages = [];
-      clearChatErr();
-
-      sendBtn.disabled = true;
-      exportBtn.disabled = true;
-      chatAttachBtn.disabled = true;
-
-      setMode("home");
-      renderMessages({ preserveScroll: true });
-      renderClients();
-    }
-
-    // Home search input is rendered inside the HOME card (dynamic). Use event delegation.
-    document.addEventListener("input", (e) => {
-      if (e.target && e.target.id === "homeSearch"){
-        homeQuery = e.target.value || "";
-        renderClients();
-      }
-    });
-
-    document.addEventListener("keydown", (e) => {
-      if (e.target && e.target.id === "homeSearch" && e.key === "Enter"){
-        e.preventDefault();
-        const view = filterClients(clients);
-        if (view.length) setActiveClient(view[0]);
-      }
-    });
-
-    // --------------------
-    // Chat keyword search (Discord-like)
-    // --------------------
-    function escapeRegExp(s){ return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
-
-    function highlightHit(text, term){
-      if (!term) return sanitize(text);
-      const re = new RegExp(escapeRegExp(term), "ig");
-      return sanitize(text).replace(re, (m) => `<span class="sr-mark">${m}</span>`);
-    }
-
-    function closeSearch(){
-      chatSearchPanel.classList.remove("on");
-      chatSearchPanel.innerHTML = "";
-      clientSearch.value = "";
-    }
-
-    function buildSearchResults(term){
-      const q = (term || "").trim();
-      if (!q){ closeSearch(); return; }
-
-      const hits = [];
-      for (let i = 0; i < messages.length; i++){
-        const mm = messages[i];
-        if (!mm || !mm.id) continue;
-        if (!!mm.deleted || !!mm.deleted_at) continue;
-        const body = String(mm.body || "");
-        if (!body) continue;
-        if (body.toLowerCase().includes(q.toLowerCase())){
-          const prev = messages[i-1] && !(messages[i-1].deleted || messages[i-1].deleted_at) ? messages[i-1] : null;
-          const next = messages[i+1] && !(messages[i+1].deleted || messages[i+1].deleted_at) ? messages[i+1] : null;
-          hits.push({ m: mm, prev, next });
-        }
-      }
-
-      if (!hits.length){
-        chatSearchPanel.innerHTML = `
-          <div class="sr-row" style="cursor:default;">
-            <div class="sr-ts">No results</div>
-            <div class="sr-hit">No messages matched “${sanitize(q)}”.</div>
-          </div>
-        `;
-        chatSearchPanel.classList.add("on");
-        return;
-      }
-
-      chatSearchPanel.innerHTML = hits.slice(-80).reverse().map(h => {
-        const ts = fmt(h.m.created_at);
-        const prevText = h.prev ? (h.prev.body || "") : "";
-        const nextText = h.next ? (h.next.body || "") : "";
-        return `
-          <div class="sr-row" data-mid="${sanitize(h.m.id)}">
-            <div class="sr-ts">${sanitize(ts)}</div>
-            <div class="sr-ghost">${highlightHit(prevText, q)}</div>
-            <div class="sr-hit">${highlightHit(h.m.body || "", q)}</div>
-            <div class="sr-ghost">${highlightHit(nextText, q)}</div>
-          </div>
-        `;
-      }).join("");
-
-      chatSearchPanel.classList.add("on");
-    }
-
 
     function setAttachTrayVisible(on){
       chatAttachTray.style.display = on ? "block" : "none";
@@ -1568,8 +1313,7 @@ const typingLine = document.getElementById("typingLine");
             maybePlayIncoming(activeThreadId);
           }
 
-          setMode('home');
-    renderMessages({ preserveScroll: true });
+          renderMessages();
 
           if (wasNear){
             requestAnimationFrame(() => { messagesEl.scrollTop = messagesEl.scrollHeight; });
@@ -1675,7 +1419,7 @@ const typingLine = document.getElementById("typingLine");
     }
 
     function filterClients(list){
-      const q = (homeQuery || "").trim().toLowerCase();
+      const q = (clientSearch.value || "").trim().toLowerCase();
       if (!q) return list;
       return list.filter(c =>
         (c.full_name || "").toLowerCase().includes(q) ||
@@ -1746,8 +1490,17 @@ const typingLine = document.getElementById("typingLine");
       const hs = document.getElementById("homeSearch");
       const hb = document.getElementById("homeBroadcast");
       if (hs){
-        hs.value = homeQuery || "";
+        hs.value = clientSearch.value || "";
         hs.focus();
+        hs.addEventListener("input", () => {
+          clientSearch.value = hs.value;
+          renderClients();
+        });
+        hs.addEventListener("keydown", (e) => {
+          if (e.key !== "Enter") return;
+          const view = filterClients(clients);
+          if (view.length) setActiveClient(view[0]);
+        });
       }
       if (hb){
         hb.addEventListener("click", () => {
@@ -1757,7 +1510,7 @@ const typingLine = document.getElementById("typingLine");
       }
     }
 
-    function renderMessages(opts = {}){
+    function renderMessages(){
       if (!activeClient){
         renderHome();
         return;
@@ -1782,7 +1535,7 @@ const typingLine = document.getElementById("typingLine");
         const isEdited = !!m.edited || !!m.edited_at;
 
         return `
-        <div class="msg ${cls}" data-mid="${sanitize(m.id)}">
+        <div class="msg ${cls}">
           ${(() => {
             const atts = Array.isArray(m.attachments) ? m.attachments : [];
             const safeText = sanitize(body);
@@ -1842,9 +1595,6 @@ const typingLine = document.getElementById("typingLine");
     }
 
     function setActiveClient(c){
-      setMode('chat');
-      clientSearch.placeholder = 'Search in chat…';
-
       stopRealtime();
       typingLine.classList.remove("on");
       activeThreadId = null;
@@ -1964,56 +1714,7 @@ const typingLine = document.getElementById("typingLine");
     messagesEl.addEventListener("scroll", updateJump);
     jumpBtn.addEventListener("click", () => { messagesEl.scrollTop = messagesEl.scrollHeight; });
 
-    
     refreshBtn.addEventListener("click", loadClientList);
-
-    homeBtn.addEventListener("click", goHome);
-
-    // Burger menu
-    menuBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      menu.classList.toggle("on");
-    });
-
-    closeSearchBtn.addEventListener("click", () => {
-      closeSearch();
-      menu.classList.remove("on");
-    });
-
-    document.addEventListener("click", (e) => {
-      if (!menu.contains(e.target) && e.target !== menuBtn) menu.classList.remove("on");
-      if (!chatSearchPanel.contains(e.target) && e.target !== clientSearch) chatSearchPanel.classList.remove("on");
-    });
-
-    // Chat keyword search input (chat mode only)
-    clientSearch.addEventListener("input", () => {
-      if (uiMode !== "chat") return;
-      buildSearchResults(clientSearch.value);
-    });
-
-    clientSearch.addEventListener("keydown", (e) => {
-      if (uiMode !== "chat") return;
-      if (e.key === "Escape"){ closeSearch(); }
-    });
-
-    chatSearchPanel.addEventListener("click", (e) => {
-      const row = e.target.closest(".sr-row[data-mid]");
-      if (!row) return;
-      const mid = row.getAttribute("data-mid");
-      if (!mid) return;
-
-      chatSearchPanel.classList.remove("on");
-      document.querySelectorAll(".msg.focus").forEach(n => n.classList.remove("focus"));
-
-      const el = messagesEl.querySelector(`.msg[data-mid="${CSS.escape(mid)}"]`);
-      if (!el) return;
-
-      el.classList.add("focus");
-      el.scrollIntoView({ block: "center", behavior: "smooth" });
-      setTimeout(() => { el.classList.remove("focus"); }, 1800);
-    });
-
-
     clientSearch.addEventListener("input", () => {
       renderClients();
       if (!activeClient) renderMessages(); // keep home search in sync
@@ -2086,29 +1787,7 @@ const typingLine = document.getElementById("typingLine");
     });
 
     sendBtn.addEventListener("click", sendMessage);
-    
-    // Broadcast (UI only for now)
-    broadcastBtn.addEventListener("click", () => {
-      setMode("broadcast");
-      stopRealtime();
-      activeClient = null;
-      activeThreadId = null;
-      messages = [];
-      clearChatErr();
-
-      messagesEl.innerHTML = `
-        <div class="msg" style="max-width:100%; opacity:.85;">
-          <div class="text">Broadcast composer ready. (We’ll wire delivery logic next.)</div>
-        </div>
-      `;
-
-      composer.value = "";
-      composer.focus();
-      sendBtn.disabled = false;
-      chatAttachBtn.disabled = false;
-    });
-
-composer.addEventListener("keydown", (e) => {
+    composer.addEventListener("keydown", (e) => {
       // typing on (debounced off)
       sendTyping(true);
       clearTimeout(typingSendTimer);
