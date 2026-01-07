@@ -2,6 +2,12 @@
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+function getEnv(name: string) {
+  const v = Deno.env.get(name);
+  if (!v) throw new Error(`Missing env var: ${name}`);
+  return v;
+}
+
 function json(data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
@@ -15,13 +21,7 @@ function json(data: unknown, status = 200) {
   });
 }
 
-function getEnv(name: string) {
-  const v = Deno.env.get(name);
-  if (!v) throw new Error(`Missing env var: ${name}`);
-  return v;
-}
-
-type ReqBody = {
+type Body = {
   thread_id?: string;
 };
 
@@ -33,47 +33,57 @@ serve(async (req) => {
     const SB_URL = getEnv("SB_URL");
     const SB_SERVICE_ROLE_KEY = getEnv("SB_SERVICE_ROLE_KEY");
 
+    // token comes from your client chat page calling this function
     const authHeader = req.headers.get("Authorization") || "";
     const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
     if (!token) return json({ error: "Missing Authorization bearer token" }, 401);
 
-    const sb = createClient(SB_URL, SB_SERVICE_ROLE_KEY, {
-      global: { headers: { Authorization: `Bearer ${token}` } },
+    const body = (await req.json().catch(() => ({}))) as Body;
+    const thread_id = (body.thread_id || "").trim();
+    if (!thread_id) return json({ error: "Missing thread_id" }, 400);
+
+    // IMPORTANT:
+    // Use service role client WITHOUT forcing Authorization header globally.
+    // We only pass the user token to auth.getUser(token) for identity validation.
+    const admin = createClient(SB_URL, SB_SERVICE_ROLE_KEY, {
       auth: { persistSession: false },
     });
 
-    const { data: userRes, error: userErr } = await sb.auth.getUser(token);
-    if (userErr || !userRes?.user) return json({ error: "Unauthorized" }, 401);
-    const userId = userRes.user.id;
+    // Validate user identity from the JWT
+    const { data: userData, error: userErr } = await admin.auth.getUser(token);
+    if (userErr) return json({ error: `Auth error: ${userErr.message}` }, 401);
 
-    const body = (await req.json().catch(() => ({}))) as ReqBody;
-    const threadId = (body.thread_id || "").trim();
-    if (!threadId) return json({ error: "Missing thread_id" }, 400);
+    const uid = userData.user?.id;
+    if (!uid) return json({ error: "Unauthorized" }, 401);
 
-    // Validate: this thread belongs to the calling client
-    const t = await sb
+    // Validate the thread belongs to this user BEFORE updating
+    const { data: threadRow, error: threadErr } = await admin
       .from("chat_threads")
-      .select("id,user_id")
-      .eq("id", threadId)
-      .single();
+      .select("user_id")
+      .eq("id", thread_id)
+      .maybeSingle();
 
-    if (t.error || !t.data) return json({ error: "Thread not found" }, 404);
-    if (t.data.user_id !== userId) return json({ error: "Forbidden" }, 403);
+    if (threadErr) return json({ error: threadErr.message }, 400);
+    if (!threadRow) return json({ error: "Thread not found" }, 404);
+    if (threadRow.user_id !== uid) return json({ error: "Forbidden" }, 403);
 
-    const readAt = new Date().toISOString();
+    // Mark all unread ADMIN messages as read by the client
+    const nowIso = new Date().toISOString();
 
-    // Mark ALL admin->client messages as read (only the ones not yet read)
-    const upd = await sb
+    const { error: updErr, count } = await admin
       .from("chat_messages")
-      .update({ read_by_client_at: readAt })
-      .eq("thread_id", threadId)
+      .update({ read_by_client_at: nowIso }, { count: "exact" })
+      .eq("thread_id", thread_id)
       .eq("sender_role", "admin")
       .is("read_by_client_at", null);
 
-    if (upd.error) return json({ error: upd.error.message }, 400);
+    if (updErr) return json({ error: updErr.message }, 400);
 
-    return json({ ok: true, thread_id: threadId, read_at: readAt }, 200);
+    return json({ ok: true, updated: count ?? 0 }, 200);
   } catch (e) {
-    return json({ error: e?.message || String(e) }, 500);
+    return json(
+      { error: e instanceof Error ? e.message : String(e) },
+      500,
+    );
   }
 });
