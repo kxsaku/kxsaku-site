@@ -32,22 +32,18 @@
     html, body { height: 100%; }
     body{
       margin:0;
-      height:100vh;
+      min-height:100vh;
       background: radial-gradient(circle at top, #342067, #050315 55%, #020010);
       color: var(--ink);
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
-      overflow:hidden; /* contain the chat like ChatGPT (internal scrolls only) */
+      overflow-x:hidden;
     }
     *, *::before, *::after { box-sizing: border-box; }
 
     .wrap{
       width: min(1600px, calc(100% - 32px));
       margin: 0 auto;
-      padding: 2rem 0 2rem;
-      height: 100vh;
-      display:flex;
-      flex-direction:column;
-      gap: 1.15rem;
+      padding: 3rem 0 4rem;
     }
 
     .toprow{
@@ -55,7 +51,6 @@
       justify-content:space-between;
       align-items:flex-start;
       gap: 1rem;
-      flex: 0 0 auto;
     }
     h1{ margin:0; letter-spacing:.18em; text-transform:uppercase; }
     .sub{ color: var(--muted); margin-top:.6rem; }
@@ -130,7 +125,7 @@
     .btn-danger:hover{ border-color:#ff6262; box-shadow:0 0 0 1px rgba(255,98,98,.25); }
 
     .card{
-      margin-top: 0;
+      margin-top: 1.75rem;
       background: var(--glass);
       border: 1px solid rgba(130, 106, 255, 0.28);
       border-radius: var(--r-xl);
@@ -139,8 +134,6 @@
       padding: 1.05rem;
       position: relative;
       overflow:hidden;
-      flex: 1 1 auto;
-      min-height: 0;  /* critical for internal scrolling */
     }
 
     /* Ambient “breathing” glow */
@@ -167,8 +160,7 @@
       display:grid;
       grid-template-columns: 380px 1fr;
       gap: 1rem;
-      height: 100%;
-      min-height: 0;
+      min-height: 72vh;
       z-index:1;
     }
 
@@ -214,9 +206,8 @@
       background: rgba(9,6,34,.92);
       color: var(--ink);
       outline:none;
-      transition: border-color .12s ease, box-shadow .12s ease, filter .12s ease;
     }
-    .search:focus{ border-color: rgba(179,124,255,.75); box-shadow: 0 0 0 1px rgba(179,124,255,.28); filter:brightness(1.02); }
+    .search:focus{ border-color: rgba(179,124,255,.75); box-shadow: 0 0 0 1px rgba(179,124,255,.28); }
 
     .client-list{
       padding: .65rem;
@@ -300,7 +291,6 @@
       align-items:flex-start;
       justify-content:space-between;
       gap: .9rem;
-      flex: 0 0 auto;
     }
     .chat-title{ margin:0; font-size:.9rem; letter-spacing:.12em; text-transform:uppercase; }
     .chat-sub{ margin-top:.5rem; color: rgba(244,240,255,.62); font-size:.85rem; line-height:1.25; }
@@ -325,9 +315,8 @@
       background: rgba(15,10,55,.40);
       position: relative;
       box-shadow: 0 12px 30px rgba(0,0,0,.22);
-      transition: border-color .12s ease, transform .10s ease, filter .12s ease;
     }
-    .msg:hover{ border-color: rgba(179,124,255,.28); filter: brightness(1.02); }
+    .msg:hover{ border-color: rgba(179,124,255,.28); }
     .msg.admin{
       margin-left:auto;
       background: linear-gradient(180deg, rgba(179,124,255,.20), rgba(15,10,55,.45));
@@ -369,17 +358,13 @@
       font-size:.68rem;
       letter-spacing:.10em;
       text-transform:uppercase;
-      transition: transform .08s ease, border-color .12s ease, filter .12s ease;
     }
-    .mini-btn:hover{ transform: translateY(-1px); border-color: rgba(179,124,255,.45); filter:brightness(1.05); }
-    .mini-btn:active{ transform: translateY(1px); }
 
     .typing{
       padding: .55rem 1rem .2rem;
       color: rgba(244,240,255,.62);
       font-size:.82rem;
       display:none;
-      flex: 0 0 auto;
     }
     .typing.on{ display:block; }
     .typing .shimmer{
@@ -399,7 +384,6 @@
       gap:.55rem;
       align-items:flex-end;
       background: rgba(9,6,34,.35);
-      flex: 0 0 auto;
     }
     .composer .box{
       flex: 1 1 auto;
@@ -407,11 +391,6 @@
       border: 1px solid rgba(129,118,255,.22);
       background: rgba(9,6,34,.62);
       padding: .65rem .7rem;
-      transition: border-color .12s ease, box-shadow .12s ease;
-    }
-    .composer .box:focus-within{
-      border-color: rgba(179,124,255,.55);
-      box-shadow: 0 0 0 1px rgba(179,124,255,.18);
     }
     textarea{
       width:100%;
@@ -445,93 +424,10 @@
     }
 
     .note{
-      margin-top: 0;
+      margin-top: 12px;
       color: rgba(244,240,255,.50);
       font-size: .85rem;
-      flex: 0 0 auto;
     }
-
-    /* --------------------------
-       Home (no client selected)
-    -------------------------- */
-    .home{
-      margin: 0 auto;
-      width: min(820px, 100%);
-      padding: 1.25rem 0 .25rem;
-      display:flex;
-      flex-direction:column;
-      gap: .9rem;
-    }
-    .home h2{
-      margin:0;
-      letter-spacing:.14em;
-      text-transform:uppercase;
-      font-size: 0.95rem;
-      color: rgba(244,240,255,.92);
-    }
-    .home p{
-      margin:0;
-      color: rgba(244,240,255,.62);
-      line-height:1.45;
-      font-size: .92rem;
-    }
-    .home-card{
-      border-radius: 22px;
-      border: 1px solid rgba(129,118,255,.18);
-      background: rgba(15, 10, 55, 0.38);
-      padding: 14px;
-      box-shadow: 0 16px 50px rgba(0,0,0,.25);
-    }
-    .home-row{
-      display:flex;
-      gap:.6rem;
-      align-items:center;
-      flex-wrap:wrap;
-    }
-    .home-search{
-      width: 100%;
-      padding: .9rem 1.05rem;
-      border-radius: 999px;
-      border: 1px solid rgba(129,118,255,.30);
-      background: rgba(9,6,34,.92);
-      color: var(--ink);
-      outline:none;
-      font-size: .95rem;
-      transition: border-color .12s ease, box-shadow .12s ease, filter .12s ease;
-    }
-    .home-search:focus{ border-color: rgba(179,124,255,.75); box-shadow: 0 0 0 1px rgba(179,124,255,.28); filter:brightness(1.02); }
-    .home-hint{
-      margin-top:.5rem;
-      font-size:.82rem;
-      color: rgba(244,240,255,.52);
-    }
-
-    /* --------------------------
-       Skeleton loaders
-    -------------------------- */
-    .skel{
-      position: relative;
-      overflow:hidden;
-      background: rgba(255,255,255,.06);
-      border: 1px solid rgba(129,118,255,.12);
-    }
-    .skel::after{
-      content:"";
-      position:absolute;
-      inset:0;
-      transform: translateX(-120%);
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,.10), transparent);
-      animation: skel 1.15s linear infinite;
-    }
-    @keyframes skel{
-      from{ transform: translateX(-120%); }
-      to{ transform: translateX(120%); }
-    }
-    .skel-line{ height: 12px; border-radius: 999px; }
-    .skel-line.sm{ height: 10px; opacity:.85; }
-    .skel-box{ border-radius: 18px; padding: .75rem .8rem; }
-    .skel-stack{ display:flex; flex-direction:column; gap:.55rem; }
-    .skel-row{ display:flex; gap:.55rem; align-items:center; }
 
     .overlay{
       position: fixed; inset: 0;
@@ -600,10 +496,7 @@
     }
 
     @media (max-width: 980px){
-      body{ overflow:auto; } /* allow normal scroll on small screens */
-      .wrap{ height:auto; }
-      .layout{ grid-template-columns: 1fr; height:auto; }
-      .card{ min-height: 72vh; }
+      .layout{ grid-template-columns: 1fr; }
     }
     @media (prefers-reduced-motion: reduce){
       *{ animation: none !important; transition: none !important; scroll-behavior: auto !important; }
@@ -613,89 +506,89 @@
     Admin "View Original" Modal
     -------------------------- */
     .origModal {
-      position: fixed;
-      inset: 0;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 18px;
-      z-index: 9999;
-      background: rgba(0,0,0,.55);
-      backdrop-filter: blur(8px);
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    z-index: 9999;
+    background: rgba(0,0,0,.55);
+    backdrop-filter: blur(8px);
     }
     .origModal.on { display: flex; }
 
     .origCard{
-      width: min(680px, 96vw);
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.06);
-      backdrop-filter: blur(14px);
-      box-shadow: 0 18px 60px rgba(0,0,0,.45);
-      overflow: hidden;
+    width: min(680px, 96vw);
+    border-radius: 18px;
+    border: 1px solid rgba(255,255,255,.14);
+    background: rgba(255,255,255,.06);
+    backdrop-filter: blur(14px);
+    box-shadow: 0 18px 60px rgba(0,0,0,.45);
+    overflow: hidden;
     }
 
     .origHeader{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      padding: 14px 16px;
-      border-bottom: 1px solid rgba(255,255,255,.10);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(255,255,255,.10);
     }
     .origTitle{
-      font-weight: 700;
-      letter-spacing: .06em;
-      text-transform: uppercase;
-      font-size: 12px;
-      color: rgba(244,240,255,.88);
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    font-size: 12px;
+    color: rgba(244,240,255,.88);
     }
     .origClose{
-      cursor:pointer;
-      border-radius: 999px;
-      padding: 8px 10px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.06);
-      color: rgba(244,240,255,.86);
+    cursor:pointer;
+    border-radius: 999px;
+    padding: 8px 10px;
+    border: 1px solid rgba(255,255,255,.14);
+    background: rgba(255,255,255,.06);
+    color: rgba(244,240,255,.86);
     }
 
     .origBody{
-      padding: 14px 16px 16px;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
+    padding: 14px 16px 16px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
     }
 
     .origBlock{
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(10, 6, 32, .38);
-      padding: 10px 12px;
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,.10);
+    background: rgba(10, 6, 32, .38);
+    padding: 10px 12px;
     }
     .origLabel{
-      font-size: 11px;
-      opacity: .75;
-      margin-bottom: 6px;
+    font-size: 11px;
+    opacity: .75;
+    margin-bottom: 6px;
     }
     .origText{
-      white-space: pre-wrap;
-      line-height: 1.35;
-      font-size: 13.5px;
-      color: rgba(244,240,255,.92);
+    white-space: pre-wrap;
+    line-height: 1.35;
+    font-size: 13.5px;
+    color: rgba(244,240,255,.92);
     }
     .origText.red{
-      color: rgba(255, 110, 110, .92);
+    color: rgba(255, 110, 110, .92);
     }
 
     .typingLine{
-      display: none;
-      margin: 6px 0 4px;
-      font-size: 12px;
-      color: rgba(180,160,255,.85);
-      opacity: .85;
+    display: none;
+    margin: 6px 0 4px;
+    font-size: 12px;
+    color: rgba(180,160,255,.85);
+    opacity: .85;
     }
 
     .typingLine.on{
-      display: block;
+    display: block;
     }
 
     .atts{ margin-top:10px; display:flex; flex-direction:column; gap:10px; }
@@ -703,6 +596,9 @@
     .attMeta{ font-size:12px; opacity:.85; margin-top:8px; }
     .attLink{ font-size:12px; text-decoration:underline; opacity:.9; }
     .attImg{ width:100%; max-width:420px; border-radius:14px; display:block; }
+
+
+
   </style>
 </head>
 
@@ -750,13 +646,13 @@
         <div class="panel" id="chatPanel">
           <div class="chat-header">
             <div style="min-width:0;">
-              <div class="chat-title" id="chatTitle">Client Chat</div>
-              <div class="chat-sub" id="chatSub">Search/select a client on the left to open a chat.</div>
+              <div class="chat-title" id="chatTitle">Select a client</div>
+              <div class="chat-sub" id="chatSub">Choose a client on the left to open the chat.</div>
               <div class="errline" id="chatErr"></div>
             </div>
             <div class="chat-actions">
               <button class="btn btn-soft" id="exportBtn" type="button" disabled>Export PDF</button>
-              <button class="btn btn-soft" id="broadcastBtn" type="button">Broadcast</button>
+              <button class="btn btn-soft" id="broadcastBtn" type="button" disabled>Broadcast</button>
             </div>
           </div>
 
@@ -768,29 +664,33 @@
             <button class="btn btn-primary" type="button" id="jumpBtn">Jump to newest</button>
           </div>
 
-          <div class="composer" id="composerBar">
-            <input id="chatFile" type="file" multiple style="display:none" />
-            <button class="btn btn-soft" id="chatAttachBtn" type="button" disabled>Attach</button>
 
-            <div class="box">
-              <textarea id="composer" placeholder="Type a message…"></textarea>
-            </div>
+<div class="composer" id="composerBar">
+  <input id="chatFile" type="file" multiple style="display:none" />
 
-            <button class="btn btn-primary" id="sendBtn" type="button" disabled>Send</button>
-          </div>
+  <button class="btn btn-soft" id="chatAttachBtn" type="button" disabled>Attach</button>
 
-          <div id="chatAttachTray" style="display:none; padding: 0 .95rem .85rem;"></div>
+  <div class="box">
+    <textarea id="composer" placeholder="Type a message…"></textarea>
+  </div>
 
-          <div id="chatDrop" style="display:none;">
-            <div style="
-              margin: 0 .95rem .95rem;
-              border: 1px dashed rgba(179,124,255,.45);
-              background: rgba(179,124,255,.08);
-              border-radius: 18px;
-              padding: 16px;
-              text-align: center;
-              color: rgba(244,240,255,.85);
-            ">Drop files to attach</div>
+  <button class="btn btn-primary" id="sendBtn" type="button" disabled>Send</button>
+</div>
+
+<div id="chatAttachTray" style="display:none; padding: 0 .95rem .85rem;"></div>
+
+<div id="chatDrop" style="display:none;">
+  <div style="
+    margin: 0 .95rem .95rem;
+    border: 1px dashed rgba(179,124,255,.45);
+    background: rgba(179,124,255,.08);
+    border-radius: 18px;
+    padding: 16px;
+    text-align: center;
+    color: rgba(244,240,255,.85);
+  ">Drop files to attach</div>
+</div>
+
           </div>
         </div>
       </div>
@@ -831,33 +731,31 @@
       <div class="login-err" id="loginErr"></div>
     </div>
   </div>
+    <!-- Admin: View Original Modal -->
+<div id="origModal" class="origModal" aria-hidden="true">
+  <div class="origCard">
+    <div class="origHeader">
+      <div class="origTitle">Message Details</div>
+      <button id="origClose" class="origClose">Close</button>
+    </div>
 
-  <!-- Admin: View Original Modal -->
-  <div id="origModal" class="origModal" aria-hidden="true">
-    <div class="origCard">
-      <div class="origHeader">
-        <div class="origTitle">Message Details</div>
-        <button id="origClose" class="origClose">Close</button>
+    <div class="origBody">
+      <div class="origBlock">
+        <div class="origLabel" id="origMeta">—</div>
       </div>
 
-      <div class="origBody">
-        <div class="origBlock">
-          <div class="origLabel" id="origMeta">—</div>
-        </div>
+      <div class="origBlock">
+        <div class="origLabel">Current (what the client/admin sees)</div>
+        <div id="origCurrent" class="origText"></div>
+      </div>
 
-        <div class="origBlock">
-          <div class="origLabel">Current (what the client/admin sees)</div>
-          <div id="origCurrent" class="origText"></div>
-        </div>
-
-        <div class="origBlock">
-          <div class="origLabel">Original (admin-only)</div>
-          <div id="origOriginal" class="origText"></div>
-        </div>
+      <div class="origBlock">
+        <div class="origLabel">Original (admin-only)</div>
+        <div id="origOriginal" class="origText"></div>
       </div>
     </div>
   </div>
-
+</div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const SUPABASE_URL = "https://jgvxmpsjtkedzgygynbl.supabase.co";
@@ -889,16 +787,17 @@
     const chatErr = document.getElementById("chatErr");
     const messagesEl = document.getElementById("messages");
     const typingLine = document.getElementById("typingLine");
-
-    // Attachments (admin)
+        // Attachments (admin)
     const chatFile = document.getElementById("chatFile");
     const chatAttachBtn = document.getElementById("chatAttachBtn");
     const chatAttachTray = document.getElementById("chatAttachTray");
     const chatDrop = document.getElementById("chatDrop");
 
     // pending uploads waiting to be sent with the next message
-    let chatPendingFiles = [];
+    let chatPendingFiles = []; 
     // each: { attachment_id, storage_path, original_name, mime_type, size_bytes }
+
+
 
     const composer = document.getElementById("composer");
     const sendBtn = document.getElementById("sendBtn");
@@ -915,23 +814,30 @@
     const origCurrent = document.getElementById("origCurrent");
     const origOriginal = document.getElementById("origOriginal");
 
+
+
     function openOrigModal(){
-      origModal.classList.add("on");
-      origModal.setAttribute("aria-hidden","false");
+    origModal.classList.add("on");
+    origModal.setAttribute("aria-hidden","false");
     }
     function closeOrigModal(){
-      origModal.classList.remove("on");
-      origModal.setAttribute("aria-hidden","true");
+    origModal.classList.remove("on");
+    origModal.setAttribute("aria-hidden","true");
     }
     origClose.addEventListener("click", closeOrigModal);
     origModal.addEventListener("click", (e) => {
-      if (e.target === origModal) closeOrigModal();
+    if (e.target === origModal) closeOrigModal();
     });
+
 
     let clients = [];
     let activeClient = null;
     let activeThreadId = null;
-    let messages = [];
+    let messages = [];        // visible window
+    let allMessages = [];     // full loaded history (current chunk)
+    let visibleCount = 25;
+    let loadingOlder = false;
+
 
     let rtChannel = null;
     let typingHideTimer = null;
@@ -939,81 +845,83 @@
     let typingOn = false;
 
     // --------------------
-    // Sound (admin)
-    // --------------------
-    let audioCtx = null;
-    let audioUnlocked = false;
+// Sound (admin)
+// --------------------
+let audioCtx = null;
+let audioUnlocked = false;
 
-    function ensureAudio(){
-      if (audioCtx) return audioCtx;
-      const Ctx = window.AudioContext || window.webkitAudioContext;
-      if (!Ctx) throw new Error("WebAudio unsupported");
-      audioCtx = new Ctx();
-      return audioCtx;
-    }
+function ensureAudio(){
+  if (audioCtx) return audioCtx;
+  const Ctx = window.AudioContext || window.webkitAudioContext;
+  if (!Ctx) throw new Error("WebAudio unsupported");
+  audioCtx = new Ctx();
+  return audioCtx;
+}
 
-    function unlockAudioOnce(){
-      if (audioUnlocked) return;
-      audioUnlocked = true;
-      try{
-        const ctx = ensureAudio();
-        if (ctx.state === "suspended") ctx.resume();
-      }catch(_){ }
-    }
+function unlockAudioOnce(){
+  if (audioUnlocked) return;
+  audioUnlocked = true;
+  try{
+    const ctx = ensureAudio();
+    if (ctx.state === "suspended") ctx.resume();
+  }catch(_){ }
+}
 
-    // Autoplay restrictions: must be unlocked by a user gesture at least once.
-    window.addEventListener("pointerdown", unlockAudioOnce, { once: true });
-    window.addEventListener("keydown", unlockAudioOnce, { once: true });
+// Autoplay restrictions: must be unlocked by a user gesture at least once.
+window.addEventListener("pointerdown", unlockAudioOnce, { once: true });
+window.addEventListener("keydown", unlockAudioOnce, { once: true });
 
-    function playToneIncoming(){
-      try{
-        const ctx = ensureAudio();
-        if (ctx.state === "suspended") return;
-        const now = ctx.currentTime;
+function playToneIncoming(){
+  try{
+    const ctx = ensureAudio();
+    if (ctx.state === "suspended") return;
+    const now = ctx.currentTime;
 
-        const o1 = ctx.createOscillator();
-        const o2 = ctx.createOscillator();
-        const g = ctx.createGain();
+    const o1 = ctx.createOscillator();
+    const o2 = ctx.createOscillator();
+    const g = ctx.createGain();
 
-        // Soft two-note chime (client -> admin)
-        o1.type = "sine";
-        o2.type = "sine";
-        o1.frequency.value = 392.00;  // G4
-        o2.frequency.value = 587.33;  // D5
+    // Soft two-note chime (client -> admin)
+    o1.type = "sine";
+    o2.type = "sine";
+    o1.frequency.value = 392.00;  // G4
+    o2.frequency.value = 587.33;  // D5
 
-        g.gain.setValueAtTime(0.0001, now);
-        g.gain.exponentialRampToValueAtTime(0.09, now + 0.01);
-        g.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
+    g.gain.setValueAtTime(0.0001, now);
+    g.gain.exponentialRampToValueAtTime(0.09, now + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
 
-        o1.connect(g);
-        o2.connect(g);
-        g.connect(ctx.destination);
+    o1.connect(g);
+    o2.connect(g);
+    g.connect(ctx.destination);
 
-        o1.start(now);
-        o2.start(now);
-        o1.stop(now + 0.36);
-        o2.stop(now + 0.36);
-      }catch(_){ }
-    }
+    o1.start(now);
+    o2.start(now);
+    o1.stop(now + 0.36);
+    o2.stop(now + 0.36);
+  }catch(_){ }
+}
 
-    // 7-day cooldown per thread (client -> admin)
-    function shouldPlayIncomingSound(threadId){
-      if (!threadId) return false;
-      const key = `sns_admin_chat_sound_incoming_${threadId}`;
-      const last = Number(localStorage.getItem(key) || "0");
-      const now = Date.now();
-      const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
-      if (now - last < sevenDaysMs) return false;
-      localStorage.setItem(key, String(now));
-      return true;
-    }
+// 7-day cooldown per thread (client -> admin)
+function shouldPlayIncomingSound(threadId){
+  if (!threadId) return false;
+  const key = `sns_admin_chat_sound_incoming_${threadId}`;
+  const last = Number(localStorage.getItem(key) || "0");
+  const now = Date.now();
+  const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+  if (now - last < sevenDaysMs) return false;
+  localStorage.setItem(key, String(now));
+  return true;
+}
 
-    function maybePlayIncoming(threadId){
-      // Requirement: hear it when you're on the chat window.
-      if (document.visibilityState !== "visible") return;
-      if (!shouldPlayIncomingSound(threadId)) return;
-      playToneIncoming();
-    }
+function maybePlayIncoming(threadId){
+  // Requirement: hear it when you're on the chat window.
+  if (document.visibilityState !== "visible") return;
+  if (!shouldPlayIncomingSound(threadId)) return;
+  playToneIncoming();
+}
+
+
 
     function sanitize(str){
       return String(str ?? "")
@@ -1031,106 +939,108 @@
       return "";
     }
 
+
     function setAttachTrayVisible(on){
-      chatAttachTray.style.display = on ? "block" : "none";
+  chatAttachTray.style.display = on ? "block" : "none";
+}
+
+function renderAttachTray(){
+  if (!chatPendingFiles.length){
+    setAttachTrayVisible(false);
+    chatAttachTray.innerHTML = "";
+    return;
+  }
+  setAttachTrayVisible(true);
+
+  chatAttachTray.innerHTML = `
+    <div style="display:flex; gap:.55rem; flex-wrap:wrap;">
+      ${chatPendingFiles.map((f, idx) => `
+        <span class="tag" style="gap:.55rem;">
+          ${sanitize(f.original_name)}
+          <button class="mini-btn" type="button" data-rm-att="${idx}">X</button>
+        </span>
+      `).join("")}
+    </div>
+  `;
+}
+
+// remove attachment from tray
+chatAttachTray.addEventListener("click", (e) => {
+  const btn = e.target.closest("button[data-rm-att]");
+  if (!btn) return;
+  const idx = Number(btn.getAttribute("data-rm-att"));
+  if (!Number.isFinite(idx)) return;
+  chatPendingFiles.splice(idx, 1);
+  renderAttachTray();
+});
+
+async function putSignedUpload(url, file){
+  // signed url may be relative or absolute depending on supabase response
+  let putUrl = url;
+  if (putUrl.startsWith("/")) putUrl = `${SUPABASE_URL}${putUrl}`;
+
+  const r = await fetch(putUrl, {
+    method: "PUT",
+    headers: {
+      "Content-Type": file.type || "application/octet-stream",
+    },
+    body: file,
+  });
+
+  if (!r.ok){
+    const t = await r.text().catch(() => "");
+    throw new Error(`Upload failed: ${r.status} ${t}`);
+  }
+}
+
+async function uploadOneFileToThread(file){
+  if (!activeThreadId) throw new Error("No thread_id yet. Open a client chat first.");
+
+  // 1) get signed upload url + attachment_id
+  const up = await callEdge("chat-attachment-upload-url", {
+    thread_id: activeThreadId,
+    file_name: file.name,
+    mime_type: file.type || "application/octet-stream",
+    size_bytes: file.size,
+  });
+
+  const upload = up?.upload;
+  if (!upload?.signed_upload_url || !upload?.attachment_id || !upload?.path){
+    throw new Error("Upload URL response missing fields.");
+  }
+
+  // 2) PUT the file bytes to signed url
+  await putSignedUpload(upload.signed_upload_url, file);
+
+  // 3) store metadata to send with admin-chat-send
+  chatPendingFiles.push({
+    attachment_id: upload.attachment_id,
+    storage_path: upload.path,
+    original_name: upload.original_name || file.name,
+    mime_type: upload.mime_type || file.type || "application/octet-stream",
+    size_bytes: upload.size_bytes || file.size,
+  });
+
+  renderAttachTray();
+}
+
+async function addFiles(files){
+  const list = Array.from(files || []);
+  if (!list.length) return;
+
+  // simple sequential uploads (reliable, keeps it predictable)
+  chatAttachBtn.disabled = true;
+  chatAttachBtn.textContent = "Uploading…";
+  try{
+    for (const f of list){
+      await uploadOneFileToThread(f);
     }
+  }finally{
+    chatAttachBtn.textContent = "Attach";
+    chatAttachBtn.disabled = false;
+  }
+}
 
-    function renderAttachTray(){
-      if (!chatPendingFiles.length){
-        setAttachTrayVisible(false);
-        chatAttachTray.innerHTML = "";
-        return;
-      }
-      setAttachTrayVisible(true);
-
-      chatAttachTray.innerHTML = `
-        <div style="display:flex; gap:.55rem; flex-wrap:wrap;">
-          ${chatPendingFiles.map((f, idx) => `
-            <span class="tag" style="gap:.55rem;">
-              ${sanitize(f.original_name)}
-              <button class="mini-btn" type="button" data-rm-att="${idx}">X</button>
-            </span>
-          `).join("")}
-        </div>
-      `;
-    }
-
-    // remove attachment from tray
-    chatAttachTray.addEventListener("click", (e) => {
-      const btn = e.target.closest("button[data-rm-att]");
-      if (!btn) return;
-      const idx = Number(btn.getAttribute("data-rm-att"));
-      if (!Number.isFinite(idx)) return;
-      chatPendingFiles.splice(idx, 1);
-      renderAttachTray();
-    });
-
-    async function putSignedUpload(url, file){
-      // signed url may be relative or absolute depending on supabase response
-      let putUrl = url;
-      if (putUrl.startsWith("/")) putUrl = `${SUPABASE_URL}${putUrl}`;
-
-      const r = await fetch(putUrl, {
-        method: "PUT",
-        headers: {
-          "Content-Type": file.type || "application/octet-stream",
-        },
-        body: file,
-      });
-
-      if (!r.ok){
-        const t = await r.text().catch(() => "");
-        throw new Error(`Upload failed: ${r.status} ${t}`);
-      }
-    }
-
-    async function uploadOneFileToThread(file){
-      if (!activeThreadId) throw new Error("No thread_id yet. Open a client chat first.");
-
-      // 1) get signed upload url + attachment_id
-      const up = await callEdge("chat-attachment-upload-url", {
-        thread_id: activeThreadId,
-        file_name: file.name,
-        mime_type: file.type || "application/octet-stream",
-        size_bytes: file.size,
-      });
-
-      const upload = up?.upload;
-      if (!upload?.signed_upload_url || !upload?.attachment_id || !upload?.path){
-        throw new Error("Upload URL response missing fields.");
-      }
-
-      // 2) PUT the file bytes to signed url
-      await putSignedUpload(upload.signed_upload_url, file);
-
-      // 3) store metadata to send with admin-chat-send
-      chatPendingFiles.push({
-        attachment_id: upload.attachment_id,
-        storage_path: upload.path,
-        original_name: upload.original_name || file.name,
-        mime_type: upload.mime_type || file.type || "application/octet-stream",
-        size_bytes: upload.size_bytes || file.size,
-      });
-
-      renderAttachTray();
-    }
-
-    async function addFiles(files){
-      const list = Array.from(files || []);
-      if (!list.length) return;
-
-      // simple sequential uploads (reliable, keeps it predictable)
-      chatAttachBtn.disabled = true;
-      chatAttachBtn.textContent = "Uploading…";
-      try{
-        for (const f of list){
-          await uploadOneFileToThread(f);
-        }
-      }finally{
-        chatAttachBtn.textContent = "Attach";
-        chatAttachBtn.disabled = false;
-      }
-    }
 
     function showChatErr(msg){
       chatErr.style.display = "block";
@@ -1229,189 +1139,172 @@
     }
 
     function stopRealtime(){
-      try{
-        if (rtChannel){
-          sb.removeChannel(rtChannel);
-          rtChannel = null;
-        }
-      }catch(_){}
+  try{
+    if (rtChannel){
+      sb.removeChannel(rtChannel);
+      rtChannel = null;
     }
+  }catch(_){}
+}
 
-    function renderClientsSkeleton(){
-      clientList.innerHTML = `
-        ${Array.from({length: 8}).map(() => `
-          <div class="client skel skel-box" style="cursor:default;">
-            <div class="skel-stack">
-              <div class="skel skel-line" style="width: 70%;"></div>
-              <div class="skel skel-line sm" style="width: 55%;"></div>
-              <div class="skel-row">
-                <div class="skel skel-line sm" style="width: 38%;"></div>
-                <div class="skel skel-line sm" style="width: 42%;"></div>
-              </div>
-            </div>
-          </div>
-        `).join("")}
-      `;
-    }
+function startRealtime(){
+  stopRealtime();
+  if (!activeThreadId) return;
 
-    function renderMessagesSkeleton(){
-      messagesEl.innerHTML = `
-        <div class="home" style="width:min(900px,100%);">
-          <div class="home-card">
-            <div class="skel skel-line" style="width: 45%; height: 14px;"></div>
-            <div style="height:10px;"></div>
-            <div class="skel skel-line sm" style="width: 78%;"></div>
-            <div style="height:12px;"></div>
-            <div class="skel skel-line" style="width: 100%; height: 44px; border-radius: 999px;"></div>
-          </div>
-        </div>
-      `;
-    }
+  rtChannel = sb
+    .channel(`chat:${activeThreadId}`)
+    .on("postgres_changes", {
+      event: "INSERT",
+      schema: "public",
+      table: "chat_messages",
+      filter: `thread_id=eq.${activeThreadId}`,
+    }, (payload) => {
+      const m = payload.new;
+      if (!m?.id) return;
 
-    function startRealtime(){
-      stopRealtime();
-      if (!activeThreadId) return;
+      // normalize to your UI shape
+      const msg = {
+        id: m.id,
+        sender_role: m.sender_role,
+        body: m.body,
+        created_at: m.created_at,
+        edited: !!m.edited_at,
+        original_body: m.original_body ?? null,
+        deleted: !!m.deleted_at,
+        delivered_at: m.delivered_at ?? null,
+        read_by_client_at: m.read_by_client_at ?? null,
+      };
 
-      rtChannel = sb
-        .channel(`chat:${activeThreadId}`)
-        .on("postgres_changes", {
-          event: "INSERT",
-          schema: "public",
-          table: "chat_messages",
-          filter: `thread_id=eq.${activeThreadId}`,
-        }, (payload) => {
-          const m = payload.new;
-          if (!m?.id) return;
+      // Dedup
+      if (messages.some(x => x.id === msg.id)) return;
 
-          // normalize to your UI shape
-          const msg = {
-            id: m.id,
-            sender_role: m.sender_role,
-            body: m.body,
-            created_at: m.created_at,
-            edited: !!m.edited_at,
-            original_body: m.original_body ?? null,
-            deleted: !!m.deleted_at,
-            delivered_at: m.delivered_at ?? null,
-            read_by_client_at: m.read_by_client_at ?? null,
-          };
+      const wasNear = (messagesEl.scrollHeight - messagesEl.scrollTop - messagesEl.clientHeight) < 140;
 
-          // Dedup
-          if (messages.some(x => x.id === msg.id)) return;
+            // If it's an attachment-only message, reload history so we fetch attachments + signed URLs
+      if (!msg.body) {
+        // attachment-only message: reload to get attachments
+        loadHistory().catch(() => {});
+        // don't return; allow the bubble to appear (even if empty) while history reloads
+      }
 
-          const wasNear = (messagesEl.scrollHeight - messagesEl.scrollTop - messagesEl.clientHeight) < 140;
+      messages.push(msg);
 
-          // If it's an attachment-only message, reload history so we fetch attachments + signed URLs
-          if (!msg.body) {
-            loadHistory(false).catch(() => {});
-          }
-
-          messages.push(msg);
-
-          // Sound: play on incoming client message
-          if (msg.sender_role === "client") {
+        // Sound: play on incoming client message
+        if (msg.sender_role === "client") {
+            // We still attempt when visible; browser will block until user interacts once.
             maybePlayIncoming(activeThreadId);
-          }
-
-          renderMessages();
-
-          if (wasNear){
-            requestAnimationFrame(() => { messagesEl.scrollTop = messagesEl.scrollHeight; });
-          } else {
-            updateJump();
-          }
-
-          // If this is NOT the active client thread, refresh client list order/badges
-          loadClientList().catch(() => {});
-        })
-        .on("postgres_changes", {
-          event: "UPDATE",
-          schema: "public",
-          table: "chat_messages",
-          filter: `thread_id=eq.${activeThreadId}`,
-        }, (payload) => {
-          const m = payload.new;
-          if (!m?.id) return;
-
-          const idx = messages.findIndex(x => x.id === m.id);
-          if (idx === -1) return;
-
-          messages[idx] = {
-            ...messages[idx],
-            body: m.body,
-            edited: !!m.edited_at,
-            original_body: m.original_body ?? messages[idx].original_body,
-            deleted: !!m.deleted_at,
-            delivered_at: m.delivered_at ?? messages[idx].delivered_at,
-            read_by_client_at: m.read_by_client_at ?? messages[idx].read_by_client_at,
-          };
-
-          renderMessages();
-        })
-        .on("broadcast", { event: "typing" }, (payload) => {
-          // payload: { role: "client"|"admin", on: boolean }
-          const p = payload?.payload || {};
-          if (p.role !== "client") return;
-
-          typingLine.classList.toggle("on", !!p.on);
-
-          // auto-hide if they stop sending typing events
-          clearTimeout(typingHideTimer);
-          typingHideTimer = setTimeout(() => {
-            typingLine.classList.remove("on");
-          }, 1600);
-        })
-        // NOTE: read broadcasts now only update UI (no history reload / no scroll reset)
-        .on("broadcast", { event: "read" }, (payload) => {
-          const p = payload?.payload || {};
-          if (!p.at || p.thread_id !== activeThreadId || p.role !== "client") return;
-
-          let changed = false;
-          for (const m of messages){
-            if (m.sender_role === "admin" && m.delivered_at && !m.read_by_client_at){
-              m.read_by_client_at = p.at;
-              changed = true;
             }
-          }
-          if (changed) renderMessages();
-        })
-        .subscribe();
-    }
 
-    function sendTyping(on){
-      if (!rtChannel) return;
+      renderMessages();
 
-      // avoid spamming identical state
-      if (typingOn === on) return;
-      typingOn = on;
+      if (wasNear){
+        requestAnimationFrame(() => { messagesEl.scrollTop = messagesEl.scrollHeight; });
+      } else {
+        updateJump();
+      }
 
-      rtChannel.send({
-        type: "broadcast",
-        event: "typing",
-        payload: { role: "admin", on: !!on },
+      // If this is NOT the active client thread, refresh client list order/badges
+      // (simple + reliable)
+      loadClientList().catch(() => {});
+    })
+    .on("postgres_changes", {
+      event: "UPDATE",
+      schema: "public",
+      table: "chat_messages",
+      filter: `thread_id=eq.${activeThreadId}`,
+    }, (payload) => {
+      const m = payload.new;
+      if (!m?.id) return;
+
+      const idx = messages.findIndex(x => x.id === m.id);
+      if (idx === -1) return;
+
+      messages[idx] = {
+        ...messages[idx],
+        body: m.body,
+        edited: !!m.edited_at,
+        original_body: m.original_body ?? messages[idx].original_body,
+        deleted: !!m.deleted_at,
+        delivered_at: m.delivered_at ?? messages[idx].delivered_at,
+        read_by_client_at: m.read_by_client_at ?? messages[idx].read_by_client_at,
+      };
+
+      renderMessages();
+    })
+    .on("broadcast", { event: "typing" }, (payload) => {
+      // payload: { role: "client"|"admin", on: boolean }
+      const p = payload?.payload || {};
+      if (p.role !== "client") return;
+
+      typingLine.classList.toggle("on", !!p.on);
+
+      // auto-hide if they stop sending typing events
+      clearTimeout(typingHideTimer);
+      typingHideTimer = setTimeout(() => {
+        typingLine.classList.remove("on");
+      }, 1600);
+    })
+    .on("broadcast", { event: "read" }, (payload) => {
+      const p = payload?.payload || {};
+      if (!p.thread_id || p.thread_id !== activeThreadId) return;
+
+      const at = p.at || new Date().toISOString();
+
+      // Update in-memory messages (no reload)
+      for (const m of messages){
+        if (m.sender_role === "admin" && !m.read_by_client_at){
+          m.read_by_client_at = at;
+        }
+      }
+
+      // Update only the receipt spans in DOM
+      const nodes = messagesEl.querySelectorAll(".receipt");
+      nodes.forEach(node => {
+        node.textContent = "Read";
       });
-    }
+    })
+
+
+
+    .subscribe();
+}
+
+function sendTyping(on){
+  if (!rtChannel) return;
+
+  // avoid spamming identical state
+  if (typingOn === on) return;
+  typingOn = on;
+
+  rtChannel.send({
+    type: "broadcast",
+    event: "typing",
+    payload: { role: "admin", on: !!on },
+  });
+}
+
 
     async function adminViewOriginal(messageId){
-      const j = await callEdge("admin-chat-view-original", { message_id: messageId });
+        const j = await callEdge("admin-chat-view-original", { message_id: messageId });
 
-      const m = j?.message;
-      if (!m) throw new Error("No message returned.");
+        const m = j?.message;
+        if (!m) throw new Error("No message returned.");
 
-      const deleted = !!m.deleted;
-      const edited = !!m.edited;
+        const deleted = !!m.deleted;
+        const edited = !!m.edited;
 
-      origMeta.textContent = `ID: ${m.id} · Sender: ${m.sender_role} · ${edited ? "Edited" : "Not edited"} · ${deleted ? "Deleted" : "Not deleted"}`;
+        origMeta.textContent = `ID: ${m.id} · Sender: ${m.sender_role} · ${edited ? "Edited" : "Not edited"} · ${deleted ? "Deleted" : "Not deleted"}`;
 
-      // Current (what UI shows)
-      origCurrent.textContent = m.body || "";
+        // Current (what UI shows)
+        origCurrent.textContent = m.body || "";
 
-      // Original (admin-only)
-      origOriginal.textContent = m.original_body || "";
-      origOriginal.classList.toggle("red", deleted);
+        // Original (admin-only)
+        origOriginal.textContent = m.original_body || "";
+        origOriginal.classList.toggle("red", deleted);
 
-      openOrigModal();
-    }
+        openOrigModal();
+        }
+
 
     function fmt(ts){
       if (!ts) return "—";
@@ -1439,7 +1332,7 @@
         clientList.innerHTML = `
           <div class="client" style="cursor:default;">
             <div class="name">No clients found</div>
-            <div class="biz">Try a different search.</div>
+            <div class="biz">This page needs the chat Edge Functions + tables.</div>
           </div>
         `;
         return;
@@ -1471,48 +1364,13 @@
       }).join("");
     }
 
-    function renderHome(){
-      messagesEl.innerHTML = `
-        <div class="home">
-          <h2>Home</h2>
-          <p>Search a client (name, business, email, or phone) and select a chat from the left.</p>
-
-          <div class="home-card">
-            <div class="home-row">
-              <input id="homeSearch" class="home-search" placeholder="Search clients by name, business, email, or phone…" />
-              <button id="homeBroadcast" class="btn btn-primary" type="button">Broadcast</button>
-            </div>
-            <div class="home-hint">Tip: press Enter to open the first matching client.</div>
-          </div>
-        </div>
-      `;
-
-      const hs = document.getElementById("homeSearch");
-      const hb = document.getElementById("homeBroadcast");
-      if (hs){
-        hs.value = clientSearch.value || "";
-        hs.focus();
-        hs.addEventListener("input", () => {
-          clientSearch.value = hs.value;
-          renderClients();
-        });
-        hs.addEventListener("keydown", (e) => {
-          if (e.key !== "Enter") return;
-          const view = filterClients(clients);
-          if (view.length) setActiveClient(view[0]);
-        });
-      }
-      if (hb){
-        hb.addEventListener("click", () => {
-          // Placeholder only (you said we can implement later)
-          alert("Broadcast: coming next. For now, select a client to chat.");
-        });
-      }
-    }
-
     function renderMessages(){
       if (!activeClient){
-        renderHome();
+        messagesEl.innerHTML = `
+          <div class="msg" style="max-width:100%; opacity:.85;">
+            <div class="text">Select a client to view the chat.</div>
+          </div>
+        `;
         return;
       }
 
@@ -1529,69 +1387,83 @@
         const isDeleted = !!m.deleted || !!m.deleted_at;
         const cls = isDeleted ? "deleted" : (m.sender_role === "admin" ? "admin" : "client");
         const body = isDeleted ? "Deleted Message" : (m.body || "");
-        const r = receiptLabel(m);
-        // Replace delivered with read (show one label only)
-        const receiptText = r ? (" · " + r) : "";
+        const r = receiptLabel(m);           // FIX: use m, not msg
         const isEdited = !!m.edited || !!m.edited_at;
+
+
 
         return `
         <div class="msg ${cls}">
-          ${(() => {
-            const atts = Array.isArray(m.attachments) ? m.attachments : [];
-            const safeText = sanitize(body);
+            ${(() => {
+              const atts = Array.isArray(m.attachments) ? m.attachments : [];
+              const safeText = sanitize(body);
 
-            if (!atts.length) return `<div class="text">${safeText}</div>`;
+              if (!atts.length) return `<div class="text">${safeText}</div>`;
 
-            const attHtml = atts.map(a => {
-              const name = sanitize(a.file_name || a.original_name || "attachment");
-              const size = (typeof a.size_bytes === "number") ? `${Math.max(1, Math.round(a.size_bytes/1024))} KB` : "";
-              const urlRaw = a.url || a.signed_url || "";
-              const url = urlRaw ? sanitize(urlRaw) : "";
-              const mime = (a.mime_type || "").toLowerCase();
-              const looksLikeImage =
-                /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(name) ||
-                /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(urlRaw);
+              const attHtml = atts.map(a => {
+                const name = sanitize(a.file_name || a.original_name || "attachment");
+                const size = (typeof a.size_bytes === "number") ? `${Math.max(1, Math.round(a.size_bytes/1024))} KB` : "";
+                const urlRaw = a.url || a.signed_url || "";
+                const url = urlRaw ? sanitize(urlRaw) : "";
+                const mime = (a.mime_type || "").toLowerCase();
+                const looksLikeImage =
+                  /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(name) ||
+                  /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(urlRaw);
 
-              const isImg = mime.startsWith("image/") || looksLikeImage;
+                const isImg = mime.startsWith("image/") || looksLikeImage;
 
-              if (isImg && url) {
+
+                if (isImg && url) {
+                  return `
+                    <div class="att">
+                      <a href="${url}" target="_blank" rel="noreferrer">
+                        <img class="attImg" src="${url}" alt="${name}" loading="lazy">
+                      </a>
+                      <div class="attMeta">${name}${size ? ` · ${size}` : ""}</div>
+                    </div>
+                  `;
+                }
+
                 return `
                   <div class="att">
-                    <a href="${url}" target="_blank" rel="noreferrer">
-                      <img class="attImg" src="${url}" alt="${name}" loading="lazy">
-                    </a>
                     <div class="attMeta">${name}${size ? ` · ${size}` : ""}</div>
+                    ${url ? `<a class="attLink" href="${url}" target="_blank" rel="noreferrer">Download</a>` : `<span class="attMeta">Link unavailable</span>`}
                   </div>
                 `;
-              }
+              }).join("");
 
               return `
-                <div class="att">
-                  <div class="attMeta">${name}${size ? ` · ${size}` : ""}</div>
-                  ${url ? `<a class="attLink" href="${url}" target="_blank" rel="noreferrer">Download</a>` : `<span class="attMeta">Link unavailable</span>`}
-                </div>
+                <div class="text">${safeText}</div>
+                <div class="atts">${attHtml}</div>
               `;
-            }).join("");
+            })()}
 
-            return `
-              <div class="text">${safeText}</div>
-              <div class="atts">${attHtml}</div>
-            `;
-          })()}
 
-          <div class="foot">
+            <div class="foot">
             <div class="mini">
               <span>${sanitize(fmt(m.created_at))}</span>
-              ${receiptText ? `<span>${sanitize(receiptText)}</span>` : ``}
+              ${r ? `<span>·</span><span class="receipt" data-mid="${sanitize(m.id)}">${sanitize(r)}</span>` : ``}
             </div>
 
+
             <div class="mini">
-              ${(isEdited || isDeleted) ? `<button class="mini-btn" type="button" data-act="orig" data-id="${sanitize(m.id)}">View Original</button>` : ``}
+                ${(isEdited || isDeleted) ? `<button class="mini-btn" type="button" data-act="orig" data-id="${sanitize(m.id)}">View Original</button>` : ``}
             </div>
-          </div>
+            </div>
         </div>
         `;
+
       }).join("");
+
+      const wasNearBottom =
+        (messagesEl.scrollHeight - messagesEl.scrollTop - messagesEl.clientHeight) < 140;
+
+      requestAnimationFrame(() => {
+        if (wasNearBottom) {
+          messagesEl.scrollTop = messagesEl.scrollHeight;
+        }
+      });
+
     }
 
     function setActiveClient(c){
@@ -1599,35 +1471,25 @@
       typingLine.classList.remove("on");
       activeThreadId = null;
       activeClient = c;
-
       chatTitle.textContent = `Chat · ${c.full_name || c.email || "Client"}`;
       chatSub.textContent = c.business_name ? c.business_name : (c.phone ? `Phone: ${c.phone}` : "—");
-
       clearChatErr();
       sendBtn.disabled = false;
       exportBtn.disabled = false;
+      broadcastBtn.disabled = false;
       chatAttachBtn.disabled = false;
-
-      loadHistory(true);
+      loadHistory();
       renderClients();
     }
 
     async function loadClientList(){
       refreshBtn.disabled = true;
       refreshBtn.textContent = "Refreshing…";
-      clientsSub.textContent = "Loading…";
-      renderClientsSkeleton();
-
       try{
         const data = await callEdge("admin-chat-client-list", {});
         clients = Array.isArray(data?.clients) ? data.clients : [];
         renderClients();
-
-        // IMPORTANT: do NOT auto-open the first client.
-        // If the user has no active chat selected, keep the Home view.
-        if (!activeClient){
-          renderMessages();
-        }
+        if (clients.length && !activeClient) setActiveClient(clients[0]);
       }catch(e){
         clients = [];
         activeClient = null;
@@ -1641,70 +1503,77 @@
       }
     }
 
-    async function loadHistory(forceBottom){
+    async function loadHistory(){
       if (!activeClient) return;
 
       messages = [];
-      renderMessagesSkeleton();
+      allMessages = [];
+      visibleCount = 25;
+
+      renderMessages();
 
       try{
-        const data = await callEdge("admin-chat-history", { user_id: activeClient.user_id, limit: 60 });
+        // Load a larger chunk so "scroll up" has something to reveal
+        const data = await callEdge("admin-chat-history", { user_id: activeClient.user_id, limit: 200 });
 
         activeThreadId = data?.thread_id || null;
-        messages = Array.isArray(data?.messages) ? data.messages : [];
+
+        allMessages = Array.isArray(data?.messages) ? data.messages : [];
+        visibleCount = Math.min(25, allMessages.length);
+        messages = allMessages.slice(-visibleCount);
 
         renderMessages();
-
-        // Start realtime AFTER you have thread_id
         startRealtime();
-
-        if (forceBottom){
-          requestAnimationFrame(() => { messagesEl.scrollTop = messagesEl.scrollHeight; });
-        }
       }catch(e){
         showChatErr(e?.message || String(e));
       }
     }
+
 
     async function sendMessage(){
-      if (!activeClient) return;
+        if (!activeClient) return;
 
-      const text = (composer.value || "").trim();
-      const hasFiles = chatPendingFiles.length > 0;
+        const text = (composer.value || "").trim();
+        const hasFiles = chatPendingFiles.length > 0;
 
-      // allow sending with attachments only
-      if (!text && !hasFiles) return;
+        // allow sending with attachments only
+        if (!text && !hasFiles) return;
 
-      composer.value = "";
-      composer.focus();
-      sendTyping(false);
+        composer.value = "";
+        composer.focus();
+        sendTyping(false);
 
-      const payload = {
-        user_id: activeClient.user_id,
-        body: text,
-        attachments: chatPendingFiles.map(a => ({
-          attachment_id: a.attachment_id,
-        })),
-      };
+        const payload = {
+            user_id: activeClient.user_id,
+            body: text,
+            attachments: chatPendingFiles.map(a => ({
+            attachment_id: a.attachment_id,
+            })),
+        };
 
-      // clear pending UI immediately (so it feels instant)
-      chatPendingFiles = [];
-      renderAttachTray();
+        // clear pending UI immediately (so it feels instant)
+        chatPendingFiles = [];
+        renderAttachTray();
 
-      try{
-        const data = await callEdge("admin-chat-send", payload);
-        const msg = data?.message;
-        if (msg){
-          messages.push(msg);
-          renderMessages();
-          requestAnimationFrame(() => { messagesEl.scrollTop = messagesEl.scrollHeight; });
-        } else {
-          await loadHistory(true);
+        try{
+            const data = await callEdge("admin-chat-send", payload);
+            const msg = data?.message;
+            if (msg){
+            allMessages.push(msg);
+
+            if (visibleCount < 25) visibleCount = Math.min(25, allMessages.length);
+            messages = allMessages.slice(-visibleCount);
+
+            renderMessages();
+
+            } else {
+            await loadHistory();
+            }
+        }catch(e){
+            showChatErr(e?.message || String(e));
         }
-      }catch(e){
-        showChatErr(e?.message || String(e));
-      }
-    }
+        }
+
 
     function updateJump(){
       const nearBottom = (messagesEl.scrollHeight - messagesEl.scrollTop - messagesEl.clientHeight) < 120;
@@ -1712,13 +1581,32 @@
     }
 
     messagesEl.addEventListener("scroll", updateJump);
+    messagesEl.addEventListener("scroll", () => {
+      if (loadingOlder) return;
+      if (!activeClient) return;
+      if (messagesEl.scrollTop > 80) return;
+      if (visibleCount >= allMessages.length) return;
+
+      loadingOlder = true;
+
+      const prevHeight = messagesEl.scrollHeight;
+
+      visibleCount = Math.min(allMessages.length, visibleCount + 25);
+      messages = allMessages.slice(-visibleCount);
+
+      renderMessages();
+
+      requestAnimationFrame(() => {
+        const newHeight = messagesEl.scrollHeight;
+        messagesEl.scrollTop = newHeight - prevHeight; // preserve viewport
+        loadingOlder = false;
+      });
+    });
+
     jumpBtn.addEventListener("click", () => { messagesEl.scrollTop = messagesEl.scrollHeight; });
 
     refreshBtn.addEventListener("click", loadClientList);
-    clientSearch.addEventListener("input", () => {
-      renderClients();
-      if (!activeClient) renderMessages(); // keep home search in sync
-    });
+    clientSearch.addEventListener("input", renderClients);
 
     clientList.addEventListener("click", (e) => {
       const node = e.target.closest(".client");
@@ -1729,76 +1617,79 @@
     });
 
     messagesEl.addEventListener("click", async (e) => {
-      const btn = e.target.closest("button[data-act='orig']");
-      if (!btn) return;
+        const btn = e.target.closest("button[data-act='orig']");
+        if (!btn) return;
 
-      const id = btn.getAttribute("data-id");
-      if (!id) return;
+        const id = btn.getAttribute("data-id");
+        if (!id) return;
 
-      try{
-        await adminViewOriginal(id);
-      }catch(err){
-        showChatErr(err?.message || String(err));
-      }
-    });
+        try{
+            await adminViewOriginal(id);
+        }catch(err){
+            showChatErr(err?.message || String(err));
+        }
+        });
 
-    chatAttachBtn.addEventListener("click", () => {
-      if (!activeClient) return;
-      chatFile.value = "";
-      chatFile.click();
-    });
+        chatAttachBtn.addEventListener("click", () => {
+            if (!activeClient) return;
+            chatFile.value = "";
+            chatFile.click();
+            });
 
-    chatFile.addEventListener("change", async () => {
-      try{
-        await addFiles(chatFile.files);
-      }catch(e){
-        showChatErr(e?.message || String(e));
-      }
-    });
+            chatFile.addEventListener("change", async () => {
+            try{
+                await addFiles(chatFile.files);
+            }catch(e){
+                showChatErr(e?.message || String(e));
+            }
+            });
 
-    // Drag & drop
-    window.addEventListener("dragenter", (e) => {
-      if (!activeClient) return;
-      e.preventDefault();
-      chatDrop.style.display = "block";
-    });
-    window.addEventListener("dragover", (e) => {
-      if (!activeClient) return;
-      e.preventDefault();
-      chatDrop.style.display = "block";
-    });
-    window.addEventListener("dragleave", (e) => {
-      if (!activeClient) return;
-      if (e.target === document.documentElement || e.target === document.body){
-        chatDrop.style.display = "none";
-      }
-    });
-    window.addEventListener("drop", async (e) => {
-      if (!activeClient) return;
-      e.preventDefault();
-      chatDrop.style.display = "none";
-      const dt = e.dataTransfer;
-      if (!dt?.files?.length) return;
-      try{
-        await addFiles(dt.files);
-      }catch(err){
-        showChatErr(err?.message || String(err));
-      }
-    });
+            // Drag & drop
+            window.addEventListener("dragenter", (e) => {
+            if (!activeClient) return;
+            e.preventDefault();
+            chatDrop.style.display = "block";
+            });
+            window.addEventListener("dragover", (e) => {
+            if (!activeClient) return;
+            e.preventDefault();
+            chatDrop.style.display = "block";
+            });
+            window.addEventListener("dragleave", (e) => {
+            if (!activeClient) return;
+            if (e.target === document.documentElement || e.target === document.body){
+                chatDrop.style.display = "none";
+            }
+            });
+            window.addEventListener("drop", async (e) => {
+            if (!activeClient) return;
+            e.preventDefault();
+            chatDrop.style.display = "none";
+            const dt = e.dataTransfer;
+            if (!dt?.files?.length) return;
+            try{
+                await addFiles(dt.files);
+            }catch(err){
+                showChatErr(err?.message || String(err));
+            }
+            });
+
+
 
     sendBtn.addEventListener("click", sendMessage);
     composer.addEventListener("keydown", (e) => {
-      // typing on (debounced off)
-      sendTyping(true);
-      clearTimeout(typingSendTimer);
-      typingSendTimer = setTimeout(() => sendTyping(false), 900);
+        // typing on (debounced off)
+        sendTyping(true);
+        clearTimeout(typingSendTimer);
+        typingSendTimer = setTimeout(() => sendTyping(false), 900);
 
-      if (e.key === "Enter" && !e.shiftKey){
-        e.preventDefault();
-        sendTyping(false);
-        sendMessage();
-      }
-    });
+        if (e.key === "Enter" && !e.shiftKey){
+            e.preventDefault();
+            sendTyping(false);
+            sendMessage();
+        }
+        });
+
 
     logoutBtn.addEventListener("click", logout);
     loginBtn.addEventListener("click", login);
@@ -1807,11 +1698,9 @@
 
     loginCloseBtn.addEventListener("click", () => { window.location.href = "/sns/"; });
 
-    // Default state: Home (no auto-open)
     sendBtn.disabled = true;
     exportBtn.disabled = true;
-    chatAttachBtn.disabled = true;
-
+    broadcastBtn.disabled = true;
     renderMessages();
 
     (async function init(){
@@ -1819,5 +1708,9 @@
       if (ok) await loadClientList();
     })();
   </script>
+
+
+
+
 </body>
 </html>
