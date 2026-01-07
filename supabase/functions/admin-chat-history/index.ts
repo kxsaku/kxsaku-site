@@ -1,4 +1,4 @@
-// supabase/functions/admin-chat-history/index.ts
+// supabase/functions/admin-chat-send/index.ts
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -22,7 +22,17 @@ function getEnv(name: string) {
 }
 
 type ReqBody = {
-  user_id?: string;
+  user_id?: string; // target client user_id
+  body?: string;
+  reply_to_message_id?: string | null;
+
+  // attachments passed from UI after upload
+  attachments?: Array<{
+    storage_path: string;
+    original_name: string;
+    mime_type: string;
+    size_bytes: number;
+  }>;
 };
 
 serve(async (req) => {
@@ -38,26 +48,39 @@ serve(async (req) => {
     const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
     if (!token) return json({ error: "Missing Authorization bearer token" }, 401);
 
-    const admin = createClient(SB_URL, SB_SERVICE_ROLE_KEY, {
+    const sb = createClient(SB_URL, SB_SERVICE_ROLE_KEY, {
       auth: { persistSession: false },
       global: { headers: { Authorization: `Bearer ${token}` } },
     });
 
     // Verify caller is admin
-    const { data: userData, error: userErr } = await admin.auth.getUser(token);
+    const { data: userData, error: userErr } = await sb.auth.getUser(token);
     if (userErr) return json({ error: `Auth error: ${userErr.message}` }, 401);
 
+    const adminUid = userData.user?.id;
     const callerEmail = (userData.user?.email || "").toLowerCase();
-    if (!callerEmail || callerEmail !== ADMIN_EMAIL) {
+    if (!adminUid || !callerEmail || callerEmail !== ADMIN_EMAIL) {
       return json({ error: "Forbidden: admin only" }, 403);
     }
 
     const body = (await req.json().catch(() => ({}))) as ReqBody;
     const targetUserId = (body.user_id || "").trim();
+    const text = (body.body || "").trim();
+    const replyTo = (body.reply_to_message_id || null) as string | null;
+    const attachments = Array.isArray(body.attachments) ? body.attachments : [];
+
     if (!targetUserId) return json({ error: "Missing user_id" }, 400);
 
-    // Find the client's thread
-    const th = await admin
+    // IMPORTANT:
+    // Admin is allowed to send an "attachment-only" message.
+    if (!text && attachments.length === 0) {
+      return json({ error: "Missing body (or attachments)" }, 400);
+    }
+
+    const nowIso = new Date().toISOString();
+
+    // Find thread for this client
+    const th = await sb
       .from("chat_threads")
       .select("id")
       .eq("user_id", targetUserId)
@@ -65,130 +88,130 @@ serve(async (req) => {
 
     if (th.error) return json({ error: th.error.message }, 500);
 
-    const threadId = th.data?.id;
+    let threadId = th.data?.id as string | undefined;
+
+    // If thread doesn't exist yet, create it
     if (!threadId) {
-      return json({ ok: true, thread_id: null, messages: [] }, 200);
+      const preview =
+        text.slice(0, 140) ||
+        (attachments.length ? `[Attachment] ${attachments[0]?.original_name || ""}`.trim() : "");
+
+      const insThread = await sb
+        .from("chat_threads")
+        .insert({
+          user_id: targetUserId,
+          last_admin_msg_at: nowIso,
+          last_message_at: nowIso,
+          last_message_preview: preview,
+          last_sender_role: "admin",
+          unread_for_client: true,
+          unread_for_admin: false,
+        })
+        .select("id")
+        .single();
+
+      if (insThread.error) return json({ error: insThread.error.message }, 500);
+      threadId = insThread.data.id;
+    } else {
+      const preview =
+        text.slice(0, 140) ||
+        (attachments.length ? `[Attachment] ${attachments[0]?.original_name || ""}`.trim() : "");
+
+      const updThread = await sb
+        .from("chat_threads")
+        .update({
+          last_admin_msg_at: nowIso,
+          last_message_at: nowIso,
+          last_message_preview: preview,
+          last_sender_role: "admin",
+          unread_for_client: true,
+        })
+        .eq("id", threadId);
+
+      if (updThread.error) return json({ error: updThread.error.message }, 500);
     }
 
-    // Pull messages
-    const msgRes = await admin
+    // Insert message (body can be empty if attachments exist)
+    const insMsg = await sb
       .from("chat_messages")
-      .select(
-        "id,sender_role,body,original_body,created_at,edited_at,deleted_at,delivered_at,read_by_client_at,reply_to_message_id"
-      )
-      .eq("thread_id", threadId)
-      .order("created_at", { ascending: true });
+      .insert({
+        thread_id: threadId,
+        sender_role: "admin",
+        body: text,
+        reply_to_message_id: replyTo,
+        created_at: nowIso,
+        delivered_at: nowIso,
+      })
+      .select("id, sender_role, body, created_at, edited_at, deleted_at, delivered_at")
+      .single();
 
+    if (insMsg.error) return json({ error: insMsg.error.message }, 500);
 
+    // Link attachments to this message (THIS is what makes history work)
+    if (attachments.length > 0) {
+      const rows = attachments
+        .filter((a) => a?.storage_path && a?.original_name && a?.mime_type)
+        .map((a) => ({
+          thread_id: threadId,
+          message_id: insMsg.data.id,
+          uploader_user_id: adminUid,
+          uploader_role: "admin",
+          storage_bucket: "chat-attachments",
+          storage_path: a.storage_path,
+          original_name: a.original_name,
+          mime_type: a.mime_type,
+          size_bytes: Number(a.size_bytes || 0),
+        }));
 
-    if (msgRes.error) return json({ error: msgRes.error.message }, 500);
-
-    const msgs = (msgRes.data || []) as any[];
-    const msgIds = msgs.map((m) => m.id);
-
-// Pull attachments for these messages
-let attRows: any[] = [];
-if (msgIds.length) {
-  // Try progressively smaller selects until schema matches.
-  // This prevents "column does not exist" from breaking attachments.
-  const selects = [
-    "id,message_id,storage_bucket,storage_path,file_name,original_name,mime_type,size_bytes,created_at,uploaded_at",
-    "id,message_id,storage_bucket,storage_path,original_name,mime_type,size_bytes,created_at,uploaded_at",
-    "id,message_id,storage_bucket,storage_path,original_name,mime_type,size_bytes,created_at",
-    "id,message_id,storage_bucket,storage_path,original_name,mime_type,created_at",
-    "id,message_id,storage_bucket,storage_path,original_name,created_at",
-    "id,message_id,storage_path,original_name,created_at",
-    "id,message_id,storage_path,created_at",
-  ];
-
-  let at: any = null;
-  let lastErr: any = null;
-
-  for (const sel of selects) {
-    const res = await admin
-      .from("chat_attachments")
-      .select(sel)
-      .in("message_id", msgIds);
-
-    if (!res.error) {
-      at = res;
-      lastErr = null;
-      break;
+      if (rows.length > 0) {
+        const insAtt = await sb.from("chat_attachments").insert(rows);
+        if (insAtt.error) return json({ error: insAtt.error.message }, 500);
+      }
     }
 
-    lastErr = res.error;
-  }
+    // Return message + signed URLs so UI can render immediately
+    const signedAttachments: any[] = [];
+    if (attachments.length > 0) {
+      for (const a of attachments) {
+        const path = (a?.storage_path || "").trim();
+        if (!path) continue;
 
-  if (lastErr) return json({ error: lastErr.message }, 500);
-  attRows = at?.data || [];
-}
-
-
-
-
-    // Create signed URLs (10 minutes)
-    const signedMap = new Map<string, any[]>();
-    await Promise.all(
-      attRows.map(async (a) => {
-        const bucket = (a.storage_bucket || "chat-attachments") as string;
-        const path = (a.storage_path || "") as string;
-
-        // If a row is malformed, don't break the entire chat history response
-        if (!path) return;
-
-        const signed = await admin.storage
-          .from(bucket)
+        const signed = await sb.storage
+          .from("chat-attachments")
           .createSignedUrl(path, 60 * 10);
 
         const signedUrl = signed.data?.signedUrl || null;
 
-        const item = {
-          id: a.id,
-          attachment_id: a.id,
-          storage_bucket: bucket,
+        signedAttachments.push({
+          original_name: a.original_name || null,
+          file_name: a.original_name || null,
+          mime_type: a.mime_type || null,
+          size_bytes: Number(a.size_bytes || 0),
+          storage_bucket: "chat-attachments",
           storage_path: path,
-
-          // UI compatibility: your DB uses original_name, but some UI expects file_name
-          original_name: a.original_name ?? a.file_name ?? null,
-          file_name: a.file_name ?? a.original_name ?? null,
-
-          mime_type: a.mime_type,
-          size_bytes: a.size_bytes,
-
           signed_url: signedUrl,
           url: signedUrl,
-        };
+        });
+      }
+    }
 
-
-        const key = a.message_id;
-        const arr = signedMap.get(key) || [];
-        arr.push(item);
-        signedMap.set(key, arr);
-      })
+    return json(
+      {
+        ok: true,
+        thread_id: threadId,
+        message: {
+          id: insMsg.data.id,
+          sender_role: "admin",
+          body: text,
+          created_at: insMsg.data.created_at,
+          edited: !!insMsg.data.edited_at,
+          deleted: !!insMsg.data.deleted_at,
+          delivered_at: insMsg.data.delivered_at || null,
+          attachments: signedAttachments,
+        },
+      },
+      200
     );
-
-
-    const messages = msgs.map((m) => ({
-      id: m.id,
-      sender_role: m.sender_role,
-      body: m.deleted_at ? "Deleted Message" : m.body,
-      created_at: m.created_at,
-      edited: !!m.edited_at,
-      deleted: !!m.deleted_at,
-      delivered_at: m.delivered_at || null,
-      read_by_client_at: m.read_by_client_at || null,
-      reply_to_message_id: m.reply_to_message_id || null,
-      original_body: m.original_body || null, // admin-only use
-      attachments: signedMap.get(String(m.id)) || [],
-    }));
-
-    // Clear admin unread when opening this chat
-    await admin
-      .from("chat_threads")
-      .update({ unread_for_admin: false })
-      .eq("id", threadId);
-
-    return json({ ok: true, thread_id: threadId, messages }, 200);
   } catch (e) {
     return json({ error: e?.message || String(e) }, 500);
   }
