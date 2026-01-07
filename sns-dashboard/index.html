@@ -978,7 +978,7 @@ async function chatMarkRead(){
     // Tell admin chat to refresh receipts immediately
     try{
       if (chatThreadId && chatRealtimeSub) {
-        chatRealtimeSub.send({
+        await chatRealtimeSub.send({
           type: "broadcast",
           event: "read",
           payload: { role: "client", thread_id: chatThreadId, at: new Date().toISOString() }
@@ -1530,12 +1530,16 @@ window.addEventListener("drop", async (e) => {
 
 
         if (j?.message) {
-          chatMessages.push(j.message);
+          // De-dupe in case realtime INSERT arrived first
+          if (!chatMessages.some(x => x.id === j.message.id)) {
+            chatMessages.push(j.message);
+          }
           chatRender();
           requestAnimationFrame(() => { chatBody.scrollTop = chatBody.scrollHeight; });
         } else {
           await chatLoadHistory();
         }
+
       }catch(e){
         chatHint.textContent = e?.message || String(e);
       }finally{
