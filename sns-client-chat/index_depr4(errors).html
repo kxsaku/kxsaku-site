@@ -2044,6 +2044,17 @@ const typingLine = document.getElementById("typingLine");
             const replyHtml = replyToId ? `
               <div class="replyQuote" data-jump="${sanitize(replyToId)}" title="Jump to replied message">
                 <div class="rqMeta">
+                  <span>Reply</span><span>·</span>
+                  <span>${sanitize(replyMsg?.sender_role === 'admin' ? 'You' : (activeClient?.name || 'Client'))}</span>
+                </div>
+                <div class="rqText">${sanitize(shortSnippetFromMessage(replyMsg))}</div>
+              </div>
+            ` : ``;
+            const replyToId = m.reply_to_message_id;
+            const replyMsg = replyToId ? getMessageById(replyToId) : null;
+            const replyHtml = replyToId ? `
+              <div class="replyQuote" data-jump="${sanitize(replyToId)}" title="Jump to replied message">
+                <div class="rqMeta">
                   <span>Reply</span>
                   <span>·</span>
                   <span>${sanitize(replyMsg?.sender_role === 'admin' ? 'You' : (activeClient?.name || 'Client'))}</span>
