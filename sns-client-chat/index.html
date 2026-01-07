@@ -1374,7 +1374,12 @@ function sendTyping(on){
                 const urlRaw = a.url || a.signed_url || "";
                 const url = urlRaw ? sanitize(urlRaw) : "";
                 const mime = (a.mime_type || "").toLowerCase();
-                const isImg = mime.startsWith("image/");
+                const looksLikeImage =
+                  /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(name) ||
+                  /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(urlRaw);
+
+                const isImg = mime.startsWith("image/") || looksLikeImage;
+
 
                 if (isImg && url) {
                   return `

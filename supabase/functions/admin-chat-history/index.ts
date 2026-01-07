@@ -86,68 +86,43 @@ serve(async (req) => {
     const msgs = (msgRes.data || []) as any[];
     const msgIds = msgs.map((m) => m.id);
 
-    // Pull attachments for these messages
-    let attRows: any[] = [];
-    if (msgIds.length) {
-      // Try the most complete schema first
-      let at = await admin
-        .from("chat_attachments")
-        .select(
-          "id,message_id,storage_bucket,storage_path,mime_type,size_bytes,created_at,uploaded_at,file_name,original_name"
-        )
-        .in("message_id", msgIds);
+// Pull attachments for these messages
+let attRows: any[] = [];
+if (msgIds.length) {
+  // Try progressively smaller selects until schema matches.
+  // This prevents "column does not exist" from breaking attachments.
+  const selects = [
+    "id,message_id,storage_bucket,storage_path,file_name,original_name,mime_type,size_bytes,created_at,uploaded_at",
+    "id,message_id,storage_bucket,storage_path,original_name,mime_type,size_bytes,created_at,uploaded_at",
+    "id,message_id,storage_bucket,storage_path,original_name,mime_type,size_bytes,created_at",
+    "id,message_id,storage_bucket,storage_path,original_name,mime_type,created_at",
+    "id,message_id,storage_bucket,storage_path,original_name,created_at",
+    "id,message_id,storage_path,original_name,created_at",
+    "id,message_id,storage_path,created_at",
+  ];
 
-      // Fallback: no uploaded_at
-      if (at.error && String(at.error.message).toLowerCase().includes("uploaded_at")) {
-        at = await admin
-          .from("chat_attachments")
-          .select(
-            "id,message_id,storage_bucket,storage_path,mime_type,size_bytes,created_at,file_name,original_name"
-          )
-          .in("message_id", msgIds);
-      }
+  let at: any = null;
+  let lastErr: any = null;
 
-      // Fallback: no file_name
-      if (at.error && String(at.error.message).toLowerCase().includes("file_name")) {
-        at = await admin
-          .from("chat_attachments")
-          .select(
-            "id,message_id,storage_bucket,storage_path,mime_type,size_bytes,created_at,uploaded_at,original_name"
-          )
-          .in("message_id", msgIds);
+  for (const sel of selects) {
+    const res = await admin
+      .from("chat_attachments")
+      .select(sel)
+      .in("message_id", msgIds);
 
-        if (at.error && String(at.error.message).toLowerCase().includes("uploaded_at")) {
-          at = await admin
-            .from("chat_attachments")
-            .select(
-              "id,message_id,storage_bucket,storage_path,mime_type,size_bytes,created_at,original_name"
-            )
-            .in("message_id", msgIds);
-        }
-      }
-
-      // Fallback: no original_name
-      if (at.error && String(at.error.message).toLowerCase().includes("original_name")) {
-        at = await admin
-          .from("chat_attachments")
-          .select(
-            "id,message_id,storage_bucket,storage_path,mime_type,size_bytes,created_at,uploaded_at,file_name"
-          )
-          .in("message_id", msgIds);
-
-        if (at.error && String(at.error.message).toLowerCase().includes("uploaded_at")) {
-          at = await admin
-            .from("chat_attachments")
-            .select(
-              "id,message_id,storage_bucket,storage_path,mime_type,size_bytes,created_at,file_name"
-            )
-            .in("message_id", msgIds);
-        }
-      }
-
-      if (at.error) return json({ error: at.error.message }, 500);
-      attRows = at.data || [];
+    if (!res.error) {
+      at = res;
+      lastErr = null;
+      break;
     }
+
+    lastErr = res.error;
+  }
+
+  if (lastErr) return json({ error: lastErr.message }, 500);
+  attRows = at?.data || [];
+}
+
 
 
 
