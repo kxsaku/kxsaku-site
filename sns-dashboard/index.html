@@ -977,7 +977,7 @@ async function chatMarkRead(){
 
     // Tell admin chat to refresh receipts immediately
     try{
-      if (chatThreadId && chatRT){
+      if (chatThreadId && chatRealtimeSub) {
         chatRealtimeSub.send({
           type: "broadcast",
           event: "read",
