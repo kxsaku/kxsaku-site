@@ -1232,6 +1232,11 @@ function startRealtime(){
         typingLine.classList.remove("on");
       }, 1600);
     })
+    .on("broadcast", { event: "read" }, async (_payload) => {
+      // Client marked messages as read; reload so read_by_client_at shows immediately
+      try { await loadHistory(); } catch(_) {}
+    })
+
     .subscribe();
 }
 

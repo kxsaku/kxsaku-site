@@ -974,6 +974,17 @@ async function chatMarkRead(){
 
   try{
     await callFn("client-chat-mark-read", { thread_id: chatThreadId });
+
+    // Tell admin chat to refresh receipts immediately
+    try{
+      if (chatThreadId && chatRT){
+        chatRealtimeSub.send({
+          type: "broadcast",
+          event: "read",
+          payload: { role: "client", thread_id: chatThreadId, at: new Date().toISOString() }
+        });
+      }
+    }catch(_){}
   }catch(_){
     // silent on purpose (read receipts should never break chat UI)
   }
