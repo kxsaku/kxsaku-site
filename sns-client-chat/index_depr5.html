@@ -183,14 +183,6 @@
       min-height: 0;
     }
 
-    /* View transitions */
-    #chatPanel{ transition: opacity .18s ease, transform .18s ease; }
-    #chatPanel.vfade{ opacity:0; transform: translateY(10px); }
-
-    .client:active{ transform: translateY(0px) scale(.99); }
-    .client.tapped{ animation: tap .18s ease; }
-    @keyframes tap{ 0%{ transform: scale(1); } 50%{ transform: scale(.985); } 100%{ transform: scale(1); } }
-
     .panel-header{
       padding: .95rem .95rem .85rem;
       border-bottom: 1px solid rgba(129,118,255,.14);
@@ -707,29 +699,9 @@
     }
 
     .atts{ margin-top:10px; display:flex; flex-direction:column; gap:10px; }
-    .att{ position:relative; padding:10px; border:1px solid rgba(255,255,255,.10); border-radius:14px; background:rgba(255,255,255,.03); }
+    .att{ padding:10px; border:1px solid rgba(255,255,255,.10); border-radius:14px; background:rgba(255,255,255,.03); }
     .attMeta{ font-size:12px; opacity:.85; margin-top:8px; }
     .attLink{ font-size:12px; text-decoration:underline; opacity:.9; }
-.attDl{
-      position:absolute;
-      top: 10px;
-      right: 10px;
-      width: 34px;
-      height: 34px;
-      border-radius: 12px;
-      border: 1px solid rgba(129,118,255,.22);
-      background: rgba(9,6,34,.55);
-      color: rgba(244,240,255,.90);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      text-decoration:none;
-      transition: transform .10s ease, filter .12s ease, border-color .12s ease, box-shadow .12s ease, opacity .12s ease;
-      opacity: .92;
-    }
-    .attDl:hover{ transform: translateY(-1px); border-color: rgba(179,124,255,.55); box-shadow: 0 0 0 1px rgba(179,124,255,.22); filter: brightness(1.05); opacity: 1; }
-    .attDl:active{ transform: translateY(1px) scale(.98); }
-    .attDl svg{ width:18px; height:18px; opacity:.95; }
     .attImg{ width:100%; max-width:420px; border-radius:14px; display:block; }
   
     /* --------------------------
@@ -1141,8 +1113,6 @@
     const clientSearch = document.getElementById("clientSearch");
     const clientList = document.getElementById("clientList");
 
-    const chatPanel = document.getElementById("chatPanel");
-
     const chatTitle = document.getElementById("chatTitle");
     const chatSub = document.getElementById("chatSub");
     const chatErr = document.getElementById("chatErr");
@@ -1293,19 +1263,6 @@ const typingLine = document.getElementById("typingLine");
         .replaceAll("'","&#039;");
     }
 
-
-function isImageAtt(a){
-  if (!a) return false;
-  const name = String(a.file_name || a.original_name || "").toLowerCase();
-  const urlRaw = String(a.url || a.signed_url || "");
-  const url = urlRaw.toLowerCase();
-  const mime = String(a.mime_type || "").toLowerCase();
-
-  const extOk = /\.(png|jpe?g|gif|webp|bmp|svg)$/.test(name) || /\.(png|jpe?g|gif|webp|bmp|svg)$/.test(url);
-  return mime.startsWith("image/") || extOk;
-}
-
-
     function receiptLabel(msg){
       if (msg.sender_role !== "admin") return "";
       if (msg.read_by_client_at) return "Read";
@@ -1384,7 +1341,7 @@ function isImageAtt(a){
     }
 
     async function downloadAllForMessage(m){
-      const atts = (Array.isArray(m.attachments) ? m.attachments : []).filter(isImageAtt);
+      const atts = Array.isArray(m.attachments) ? m.attachments : [];
       if (!atts.length){
         // text-only: download as .txt
         const content = (m.body || "");
@@ -1410,9 +1367,12 @@ function isImageAtt(a){
     }
 
     async function downloadOneForMessage(m){
-      const atts = (Array.isArray(m.attachments) ? m.attachments : []).filter(isImageAtt);
-  if (!atts.length) return;
-  const a = atts[0];
+      const atts = Array.isArray(m.attachments) ? m.attachments : [];
+      if (!atts.length){
+        await downloadAllForMessage(m);
+        return;
+      }
+      const a = atts[0];
       const url = a.url || a.signed_url;
       if (!url) throw new Error("Link unavailable");
       const name = a.file_name || a.original_name || "attachment";
@@ -1481,19 +1441,7 @@ function isImageAtt(a){
       if (mode !== "chat"){ clientSearch.value = ""; }
     }
 
-    
-function withChatTransition(fn){
-  if (!chatPanel){ fn(); return; }
-  chatPanel.classList.add("vfade");
-  window.setTimeout(() => {
-    try{ fn(); } finally {
-      requestAnimationFrame(() => chatPanel.classList.remove("vfade"));
-    }
-  }, 120);
-}
-
-function goHome(){
-  withChatTransition(() => {
+    function goHome(){
       stopRealtime();
       typingLine.classList.remove("on");
       activeClient = null;
@@ -1508,9 +1456,7 @@ function goHome(){
       setMode("home");
       renderMessages({ preserveScroll: true });
       renderClients();
-    
-  });
-}
+    }
 
     // Home search input is rendered inside the HOME card (dynamic). Use event delegation.
     document.addEventListener("input", (e) => {
@@ -2083,10 +2029,6 @@ function goHome(){
         const isDeleted = !!m.deleted || !!m.deleted_at;
         const cls = isDeleted ? "deleted" : (m.sender_role === "admin" ? "admin" : "client");
         const body = isDeleted ? "Deleted Message" : (m.body || "");
-        const attsAll = Array.isArray(m.attachments) ? m.attachments : [];
-        const imgAtts = attsAll.filter(isImageAtt);
-        const imgCount = imgAtts.length;
-
         const r = receiptLabel(m);
         // Replace delivered with read (show one label only)
         const receiptText = r ? (" · " + r) : "";
@@ -2128,29 +2070,22 @@ function goHome(){
 
               if (isImg && url) {
                 return `
-                    <div class="att">
-                      <a href="${url}" target="_blank" rel="noreferrer">
-                        <img class="attImg" src="${url}" alt="${name}" loading="lazy">
-                      </a>
-
-                      <a class="attDl" href="${url}" download title="Download image" aria-label="Download image">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <path d="M12 3v10"/>
-                          <path d="M7 11l5 5 5-5"/>
-                          <path d="M5 21h14"/>
-                        </svg>
-                      </a>
-
-                      <div class="attMeta">${name}${size ? ` · ${size}` : ""}</div>
-                    </div>
-                  `;}
+                  <div class="att">
+                    <a href="${url}" target="_blank" rel="noreferrer">
+                      <img class="attImg" src="${url}" alt="${name}" loading="lazy">
+                    </a>
+                    <div class="attMeta">${name}${size ? ` · ${size}` : ""}</div>
+                  </div>
+                `;
+              }
 
               return `
-                  <div class="att">
-                    <div class="attMeta">${name}${size ? ` · ${size}` : ""}</div>
-                    <span class="attMeta" style="opacity:.8;">Non-image attachment</span>
-                  </div>
-                `;}).join("");
+                <div class="att">
+                  <div class="attMeta">${name}${size ? ` · ${size}` : ""}</div>
+                  ${url ? `<a class="attLink" href="${url}" target="_blank" rel="noreferrer">Download</a>` : `<span class="attMeta">Link unavailable</span>`}
+                </div>
+              `;
+            }).join("");
 
             return `
               <div class="text">${safeText}</div>
@@ -2172,8 +2107,17 @@ function goHome(){
                   </svg>
                 </button>
               ` : ``}
-${(Array.isArray(m.attachments) && m.attachments.length > 1) ? `
-                ${imgCount > 1 ? `<button class="mini-icon" type="button" data-act="dlall" data-id="${sanitize(m.id)}" title="Download all">
+
+              <button class="mini-icon" type="button" data-act="dl1" data-id="${sanitize(m.id)}" title="Download">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 3v10"/>
+                  <path d="M7 11l5 5 5-5"/>
+                  <path d="M5 21h14"/>
+                </svg>
+              </button>
+
+              ${(Array.isArray(m.attachments) && m.attachments.length > 1) ? `
+                <button class="mini-icon" type="button" data-act="dlall" data-id="${sanitize(m.id)}" title="Download all">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M12 3v8"/>
                     <path d="M7 8l5 5 5-5"/>
@@ -2181,7 +2125,7 @@ ${(Array.isArray(m.attachments) && m.attachments.length > 1) ? `
                     <path d="M4 14h4"/>
                     <path d="M16 14h4"/>
                   </svg>
-                </button>` : ``}
+                </button>
               ` : ``}
 
               ${(isEdited || isDeleted) ? `
@@ -2194,7 +2138,6 @@ ${(Array.isArray(m.attachments) && m.attachments.length > 1) ? `
     }
 
     function setActiveClient(c){
-  withChatTransition(() => {
       setMode('chat');
       // Clear local unread badge for this client immediately
       try{
@@ -2220,9 +2163,7 @@ ${(Array.isArray(m.attachments) && m.attachments.length > 1) ? `
 
       loadHistory(true);
       renderClients();
-    
-  });
-}
+    }
 
     async function loadClientList(){
       refreshBtn.disabled = true;
@@ -2390,10 +2331,6 @@ ${(Array.isArray(m.attachments) && m.attachments.length > 1) ? `
     clientList.addEventListener("click", (e) => {
       const node = e.target.closest(".client");
       if (!node) return;
-
-      node.classList.add("tapped");
-      window.setTimeout(() => node.classList.remove("tapped"), 220);
-
       const userId = node.getAttribute("data-user");
       const c = clients.find(x => x.user_id === userId);
       if (c) setActiveClient(c);
