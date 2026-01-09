@@ -1,11 +1,10 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<title>Saku Network Solutions | Reliable Networks, Done Clean</title>
-<meta content="width=device-width, initial-scale=1" name="viewport"/>
-<script>
+  <meta charset="UTF-8" />
+  <title>Saku Network Solutions | Reliable Networks, Done Clean</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script>
   (function () {
     // If user explicitly chose desktop, do not redirect
     if (localStorage.getItem("sns_force_desktop") === "1") return;
@@ -22,8 +21,10 @@
     }
   })();
 </script>
-<meta content="Saku Network Solutions (SNS) provides network assessments, Wi-Fi stability upgrades, secure office networks, and ongoing administration." name="description"/>
-<style>
+
+  <meta name="description" content="Saku Network Solutions (SNS) provides network assessments, Wi-Fi stability upgrades, secure office networks, and ongoing administration." />
+
+  <style>
     :root{
       --bg0:#03010b;
       --bg1:#060214;
@@ -649,141 +650,155 @@
     }
 
   </style>
-<link href="./rotating-headline.css" rel="stylesheet"/></head>
+</head>
+
 <body class="is-loading">
-<div class="bg">
-<!-- True Beams background app (Vite build) -->
-<iframe aria-hidden="true" class="beams-iframe" src="/darkveil-bg/index.html" tabindex="-1"></iframe>
-<!-- Optional overlays (kept minimal so Beams remains visible) -->
-<div class="vignette"></div>
-</div>
-<!-- Boot skeleton shown until background + DOM are ready -->
-<div aria-hidden="true" id="boot-skeleton">
-<div class="sk-wrap">
-<div class="sk-nav shimmer"></div>
-</div>
-<div class="sk-hero">
-<div class="sk-pill shimmer"></div>
-<div class="sk-title shimmer"></div>
-<div class="sk-text shimmer"></div>
-<div class="sk-text sm shimmer"></div>
-<div class="sk-cta">
-<div class="sk-btn shimmer"></div>
-<div class="sk-btn shimmer"></div>
-</div>
-</div>
-<div class="sk-grid">
-<div class="sk-card shimmer"></div>
-<div class="sk-card shimmer"></div>
-<div class="sk-card shimmer"></div>
-</div>
-<div class="sk-panels">
-<div class="sk-panel shimmer"></div>
-<div class="sk-panel shimmer"></div>
-</div>
-</div>
-<div id="app">
-<!-- Top Nav -->
-<header class="topnav">
-<div class="wrap">
-<div class="navrow">
-<div class="brand">
-<div class="mark">
-<img alt="Saku Network Solutions logo" src="/assets/sns-logo-purple.png"/>
-</div>
-<div>
-<strong>SAKU NETWORK SOLUTIONS</strong>
-<span>Network infrastructure, done clean.</span>
-</div>
-</div>
-<nav aria-label="Primary" class="navlinks">
-<a class="active" href="/home/">Home</a>
-<a href="/sns/">Services</a>
-<a href="/credibility/">Credibility</a>
-<a href="/resources/">Resources</a>
-<a href="/contact/">Contact</a>
-</nav>
-<div class="actions">
-<a class="btn" href="/sns-login/">Client Login</a>
-</div>
-</div>
-</div>
-</header>
-<!-- Hero -->
-<main>
-<section class="hero">
-<canvas id="particles"></canvas>
-<div class="wrap">
-<div class="hero-mark reveal">
-<img alt="Saku Network Solutions logo" src="/assets/sns-logo-purple.png"/>
-</div>
-<div class="eyebrow reveal">Veteran-led • Los Angeles • Small Business IT</div>
-<h1 class="reveal">Reliable Wi-Fi and secure networks for offices that can’t afford downtime.</h1>
-<p class="lede reveal">
+  <div class="bg">
+    <!-- True Beams background app (Vite build) -->
+    <iframe class="beams-iframe" src="/darkveil-bg/index.html" aria-hidden="true" tabindex="-1"></iframe>
+    <!-- Optional overlays (kept minimal so Beams remains visible) -->
+    <div class="vignette"></div>
+  </div>
+
+  <!-- Boot skeleton shown until background + DOM are ready -->
+  <div id="boot-skeleton" aria-hidden="true">
+    <div class="sk-wrap">
+      <div class="sk-nav shimmer"></div>
+    </div>
+    <div class="sk-hero">
+      <div class="sk-pill shimmer"></div>
+      <div class="sk-title shimmer"></div>
+      <div class="sk-text shimmer"></div>
+      <div class="sk-text sm shimmer"></div>
+      <div class="sk-cta">
+        <div class="sk-btn shimmer"></div>
+        <div class="sk-btn shimmer"></div>
+      </div>
+    </div>
+    <div class="sk-grid">
+      <div class="sk-card shimmer"></div>
+      <div class="sk-card shimmer"></div>
+      <div class="sk-card shimmer"></div>
+    </div>
+    <div class="sk-panels">
+      <div class="sk-panel shimmer"></div>
+      <div class="sk-panel shimmer"></div>
+    </div>
+  </div>
+
+  <div id="app">
+
+
+  <!-- Top Nav -->
+  <header class="topnav">
+    <div class="wrap">
+      <div class="navrow">
+        <div class="brand">
+          <div class="mark">
+            <img src="/assets/sns-logo-purple.png" alt="Saku Network Solutions logo">
+          </div>
+          <div>
+            <strong>SAKU NETWORK SOLUTIONS</strong>
+            <span>Network infrastructure, done clean.</span>
+          </div>
+        </div>
+
+        <nav class="navlinks" aria-label="Primary">
+          <a class="active" href="/home/">Home</a>
+          <a href="/sns/">Services</a>
+          <a href="/credibility/">Credibility</a>
+          <a href="/resources/">Resources</a>
+          <a href="/contact/">Contact</a>
+        </nav>
+
+        <div class="actions">
+          <a class="btn" href="/sns-login/">Client Login</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <main>
+    <section class="hero">
+      <canvas id="particles"></canvas>
+      <div class="wrap">
+<h1 class="reveal hero-title-rt">Network <span id="rt-headline"></span></h1>
+
+        <p class="lede reveal">
+          
           SNS designs, installs, and supports business networks with a focus on stability, clean implementation,
-          and security-minded configuration. If your connection drops under load, coverage is inconsistent, or
-          your equipment is unmanaged — we fix the root cause and leave you with a system you can trust.
+          and security-minded configuration.
+        
         </p>
-<div class="cta reveal">
-<a class="btn primary" href="/sns-inquiry/">Start an Inquiry</a>
-<a class="btn" href="/sns/">View Services</a>
-</div>
-<!-- Minimal, spaced features (like Nexros) -->
-<div class="featureRow">
-<div class="card reveal">
-<h3>Network Assessment</h3>
-<p>On-site survey + actionable plan. Know what’s wrong, what changes, and what it costs.</p>
-</div>
-<div class="card reveal">
-<h3>Wi-Fi Under Load</h3>
-<p>Fix drops, interference, and bandwidth abuse with clean config and right-sized hardware.</p>
-</div>
-<div class="card reveal">
-<h3>Ongoing Support</h3>
-<p>Optional membership for continuous admin, monitoring, and rapid changes as you grow.</p>
-</div>
-</div>
-</div>
-</section>
-<!-- One more spaced block (still minimal) -->
-<section class="section">
-<div class="wrap">
-<div class="split">
-<div class="panel reveal">
-<h2>Best Starting Point</h2>
-<p>
+
+        <div class="cta reveal">
+          <a class="btn primary" href="/sns-inquiry/">Start an Inquiry</a>
+          <a class="btn" href="/sns/">View Services</a>
+        </div>
+
+        <!-- Minimal, spaced features (like Nexros) -->
+        <div class="featureRow">
+          <div class="card reveal">
+            <h3>Network Assessment</h3>
+            <p>On-site survey + actionable plan. Know what’s wrong, what changes, and what it costs.</p>
+          </div>
+          <div class="card reveal">
+            <h3>Wi-Fi Under Load</h3>
+            <p>Fix drops, interference, and bandwidth abuse with clean config and right-sized hardware.</p>
+          </div>
+          <div class="card reveal">
+            <h3>Ongoing Support</h3>
+            <p>Optional membership for continuous admin, monitoring, and rapid changes as you grow.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- One more spaced block (still minimal) -->
+    <section class="section">
+      <div class="wrap">
+        <div class="split">
+          <div class="panel reveal">
+            <h2>Best Starting Point</h2>
+            <p>
               An on-site environment survey + network assessment. You get a clear scope, recommended fixes,
               and a deployment plan — before any work begins.
             </p>
-</div>
-<div class="panel reveal">
-<h2>Professional, quiet credibility</h2>
-<p>
+          </div>
+
+          <div class="panel reveal">
+            <h2>Professional, quiet credibility</h2>
+            <p>
               Enterprise-style execution: clean installs, documentation-first thinking, and security-minded network design.
               Proof lives on the Credibility page — not in loud marketing.
             </p>
-</div>
-</div>
-<div class="cta reveal" style="margin-top:2.0rem;">
-<a class="btn" href="/credibility/">Proof &amp; History</a>
-<a class="btn" href="/contact/">Contact</a>
-</div>
-</div>
-</section>
-<footer>
-<div class="wrap">
-<div>© 2026 Saku Network Solutions</div>
-<div style="margin-top:.9rem;">
-<a href="/sns-inquiry/">Inquiry</a>  • 
-          <a href="/sns/">Services</a>  • 
-          <a href="/sns-login/">Client Login</a>  • 
-          <a class="footer-link admin-link" href="/sns-admin/">Admin Login</a>
-</div>
-</div>
-</footer>
-</main>
-</div>
-<script>
+          </div>
+        </div>
+
+        <div class="cta reveal" style="margin-top:2.0rem;">
+          <a class="btn" href="/credibility/">Proof & History</a>
+          <a class="btn" href="/contact/">Contact</a>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="wrap">
+        <div>© 2026 Saku Network Solutions</div>
+        <div style="margin-top:.9rem;">
+          <a href="/sns-inquiry/">Inquiry</a> &nbsp;•&nbsp;
+          <a href="/sns/">Services</a> &nbsp;•&nbsp;
+          <a href="/sns-login/">Client Login</a> &nbsp;•&nbsp;
+          <a href="/sns-admin/" class="footer-link admin-link" >Admin Login</a>
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  </div>
+
+  <script>
     // Reveal-on-scroll (initialized after boot so you never see the "unstyled" state)
     function initReveal(){
       const els = Array.from(document.querySelectorAll('.reveal'));
@@ -802,6 +817,7 @@
       els.forEach(el => io.observe(el));
     }
   </script>
+
 <script>
 function initParticles(){
   const c = document.getElementById("particles");
@@ -901,6 +917,13 @@ function initParticles(){
   }, { passive: true });
 }
 </script>
+
+
+
+
+  
+
+
 <script>
 (function(){
   const iframe = document.querySelector(".beams-iframe");
@@ -958,5 +981,7 @@ function initParticles(){
   setTimeout(() => finishBoot(), 2500);
 })();
 </script>
-<script src="./rotating-headline.js" type="module"></script></body>
+
+  <script type="module" src="./rotating-headline.js"></script>
+</body>
 </html>
