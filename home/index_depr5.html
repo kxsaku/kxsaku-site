@@ -58,7 +58,10 @@
       margin:0;
       color: var(--ink);
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
-      background: linear-gradient(180deg, var(--bg1), var(--bg0));
+      background: radial-gradient(1200px 800px at 25% 20%, rgba(179,124,255,.18), transparent 60%),
+                  radial-gradient(900px 650px at 85% 10%, rgba(94,234,212,.10), transparent 55%),
+                  radial-gradient(1100px 900px at 70% 80%, rgba(249,115,226,.12), transparent 55%),
+                  linear-gradient(180deg, var(--bg1), var(--bg0));
       overflow-x:hidden;
     }
 
@@ -520,139 +523,10 @@
     /* Keep your vignette on top of the beams */
     .bg .vignette{ z-index: 1; }
 
-  
-
-    /* --- Boot loading + prevent background flash --- */
-    body.is-loading{ overflow-y: hidden; }
-    .beams-iframe{ opacity: 0; transition: opacity .35s ease; }
-    body.bg-ready .beams-iframe{ opacity: 1; }
-
-    #app{ opacity: 0; transform: translateY(6px); transition: opacity .28s ease, transform .28s ease; }
-    body.is-ready #app{ opacity: 1; transform: none; }
-
-    /* Full-page skeleton overlay */
-    #boot-skeleton{
-      position: fixed;
-      inset: 0;
-      z-index: 999;
-      pointer-events: none;
-      background: linear-gradient(180deg, var(--bg1), var(--bg0));
-    }
-    body.is-ready #boot-skeleton{ display:none; }
-
-    .sk-wrap{
-      width: min(var(--max), calc(100% - 2rem));
-      margin: 0 auto;
-      padding: 1.15rem 0 2.0rem;
-    }
-    .sk-nav{
-      height: 64px;
-      border-radius: 18px;
-      border: 1px solid rgba(196,181,253,.10);
-      background: rgba(10,6,28,.34);
-      backdrop-filter: blur(14px);
-    }
-    .sk-hero{
-      margin-top: 2.2rem;
-      padding: 3.2rem 0 2.8rem;
-      text-align:center;
-    }
-    .sk-pill{
-      display:inline-block;
-      height: 26px;
-      width: 280px;
-      border-radius: 999px;
-      background: rgba(196,181,253,.10);
-      border: 1px solid rgba(196,181,253,.12);
-    }
-    .sk-title{
-      height: 52px;
-      width: min(760px, 88%);
-      margin: 1.2rem auto 0;
-      border-radius: 14px;
-      background: rgba(196,181,253,.10);
-      border: 1px solid rgba(196,181,253,.12);
-    }
-    .sk-text{
-      height: 18px;
-      width: min(860px, 92%);
-      margin: .85rem auto 0;
-      border-radius: 10px;
-      background: rgba(196,181,253,.08);
-      border: 1px solid rgba(196,181,253,.10);
-    }
-    .sk-text.sm{ width: min(720px, 86%); }
-    .sk-cta{
-      display:flex;
-      justify-content:center;
-      gap:.8rem;
-      margin-top: 1.4rem;
-      flex-wrap: wrap;
-    }
-    .sk-btn{
-      height: 40px;
-      width: 170px;
-      border-radius: 999px;
-      background: rgba(196,181,253,.10);
-      border: 1px solid rgba(196,181,253,.12);
-    }
-    .sk-grid{
-      width: min(var(--max), calc(100% - 2rem));
-      margin: 2.6rem auto 0;
-      display:grid;
-      grid-template-columns: repeat(3, minmax(0,1fr));
-      gap: 1rem;
-    }
-    .sk-card{
-      height: 96px;
-      border-radius: var(--r-xl);
-      background: rgba(10,6,28,.34);
-      border: 1px solid rgba(196,181,253,.12);
-    }
-    .sk-panels{
-      width: min(var(--max), calc(100% - 2rem));
-      margin: 2.6rem auto 0;
-      display:grid;
-      grid-template-columns: 1.1fr .9fr;
-      gap: 1rem;
-    }
-    .sk-panel{
-      height: 120px;
-      border-radius: var(--r-xl);
-      background: rgba(10,6,28,.34);
-      border: 1px solid rgba(196,181,253,.12);
-    }
-
-    /* shimmer */
-    #boot-skeleton .shimmer{
-      position: relative;
-      overflow:hidden;
-    }
-    #boot-skeleton .shimmer::after{
-      content:"";
-      position:absolute;
-      inset:-40% -60%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,.10), transparent);
-      transform: translateX(-60%) rotate(10deg);
-      animation: skShimmer 1.05s linear infinite;
-      opacity:.9;
-    }
-    @keyframes skShimmer{
-      from{ transform: translateX(-60%) rotate(10deg); }
-      to{ transform: translateX(60%) rotate(10deg); }
-    }
-    @media (max-width: 980px){
-      .sk-grid{ grid-template-columns: 1fr; }
-      .sk-panels{ grid-template-columns: 1fr; }
-    }
-    @media (prefers-reduced-motion: reduce){
-      #boot-skeleton .shimmer::after{ display:none; }
-    }
-
   </style>
 </head>
 
-<body class="is-loading">
+<body>
   <div class="bg">
     <!-- True Beams background app (Vite build) -->
     <iframe class="beams-iframe" src="/darkveil-bg/index.html" aria-hidden="true" tabindex="-1"></iframe>
@@ -660,33 +534,6 @@
     <div class="vignette"></div>
   </div>
 
-  <!-- Boot skeleton shown until background + DOM are ready -->
-  <div id="boot-skeleton" aria-hidden="true">
-    <div class="sk-wrap">
-      <div class="sk-nav shimmer"></div>
-    </div>
-    <div class="sk-hero">
-      <div class="sk-pill shimmer"></div>
-      <div class="sk-title shimmer"></div>
-      <div class="sk-text shimmer"></div>
-      <div class="sk-text sm shimmer"></div>
-      <div class="sk-cta">
-        <div class="sk-btn shimmer"></div>
-        <div class="sk-btn shimmer"></div>
-      </div>
-    </div>
-    <div class="sk-grid">
-      <div class="sk-card shimmer"></div>
-      <div class="sk-card shimmer"></div>
-      <div class="sk-card shimmer"></div>
-    </div>
-    <div class="sk-panels">
-      <div class="sk-panel shimmer"></div>
-      <div class="sk-panel shimmer"></div>
-    </div>
-  </div>
-
-  <div id="app">
 
 
   <!-- Top Nav -->
@@ -801,11 +648,9 @@
     </footer>
   </main>
 
-  </div>
-
   <script>
-    // Reveal-on-scroll (initialized after boot so you never see the "unstyled" state)
-    function initReveal(){
+    // Lightweight reveal-on-scroll
+    (function(){
       const els = Array.from(document.querySelectorAll('.reveal'));
       if (!('IntersectionObserver' in window) || els.length === 0) {
         els.forEach(el => el.classList.add('in'));
@@ -820,11 +665,11 @@
         }
       }, { threshold: 0.14 });
       els.forEach(el => io.observe(el));
-    }
+    })();
   </script>
 
 <script>
-function initParticles(){
+(function(){
   const c = document.getElementById("particles");
   if (!c) return;
 
@@ -841,6 +686,7 @@ function initParticles(){
   function rand(min, max){ return Math.random() * (max - min) + min; }
 
   function resize(){
+    // Size canvas to HERO only (not the full page)
     const r = hero.getBoundingClientRect();
     w = Math.floor(r.width);
     h = Math.floor(r.height);
@@ -852,29 +698,36 @@ function initParticles(){
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
 
+  // Fewer particles + slower motion (more Nexros-like)
   let N = 0;
   const p = [];
 
   function resetParticle(s){
+    // Spawn from a TOP-RIGHT window (not the corner)
     s.x = rand(w * 0.62, w * 0.92);
     s.y = rand(-70, -10);
 
     s.r = rand(0.7, 2.0);
     s.a = rand(0.16, 0.48);
 
-    s.vx = rand(0.06, 0.22);
-    s.vy = rand(0.05, 0.18);
+    // Direction: top-right -> bottom-left
+    // Slower speeds than before
+    s.vx = rand(0.06, 0.22);  // leftward magnitude
+    s.vy = rand(0.05, 0.18);  // downward magnitude
 
+    // small drift for natural wobble
     s.phase = rand(0, Math.PI * 2);
     s.drift = rand(0.18, 0.55);
   }
 
   function seed(){
     p.length = 0;
+    // Density based on hero area only
     N = Math.floor(Math.min(110, Math.max(45, (w * h) / 26000)));
     for (let i = 0; i < N; i++){
       const s = {};
       resetParticle(s);
+      // distribute initial state across the hero so it doesn't "start empty"
       s.x = rand(0, w);
       s.y = rand(0, h);
       p.push(s);
@@ -892,16 +745,21 @@ function initParticles(){
     for (let i = 0; i < p.length; i++){
       const s = p[i];
 
+      // wobble
       s.phase += 0.0016 * dt * s.drift;
 
+      // move: left + down (SLOW)
       s.x -= s.vx * dt;
       s.y += s.vy * dt;
 
+      // slight sideways oscillation to keep it organic
       s.x += Math.sin(s.phase) * 0.04 * dt;
 
+      // Reset before reaching the extreme bottom-left corner
       if (s.y > h * 0.86 || s.x < w * 0.06){
         resetParticle(s);
       }
+
 
       ctx.fillStyle = `rgba(230,220,255,${s.a})`;
       ctx.beginPath();
@@ -920,72 +778,13 @@ function initParticles(){
     resize();
     seed();
   }, { passive: true });
-}
+})();
 </script>
 
 
 
 
   
-
-
-<script>
-(function(){
-  const iframe = document.querySelector(".beams-iframe");
-  let domReady = false;
-  let bgReady = false;
-  let bootDone = false;
-
-  function finishBoot(){
-    if (bootDone) return;
-    bootDone = true;
-
-    // Fade iframe in, then reveal the page
-    document.body.classList.add("bg-ready");
-
-    // Next tick so CSS transitions apply reliably
-    setTimeout(() => {
-      document.body.classList.remove("is-loading");
-      document.body.classList.add("is-ready");
-
-      // init UI behaviors after first paint
-      if (typeof initReveal === "function") initReveal();
-      if (typeof initParticles === "function") initParticles();
-    }, 50);
-  }
-
-  function tryBoot(){
-    if (domReady && bgReady) finishBoot();
-  }
-
-  document.addEventListener("DOMContentLoaded", () => {
-    domReady = true;
-    tryBoot();
-  });
-
-  if (iframe){
-    // If it is already loaded (bfcache), load event may not fire
-    try {
-      if (iframe.contentDocument && iframe.contentDocument.readyState === "complete") {
-        bgReady = true;
-        tryBoot();
-      }
-    } catch(e){ /* ignore */ }
-
-    iframe.addEventListener("load", () => {
-      bgReady = true;
-      tryBoot();
-    }, { once: true });
-  } else {
-    // No iframe found; don't block page forever
-    bgReady = true;
-    tryBoot();
-  }
-
-  // Hard fallback so you never get stuck on skeleton
-  setTimeout(() => finishBoot(), 2500);
-})();
-</script>
 
 </body>
 </html>
