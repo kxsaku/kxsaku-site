@@ -1,41 +1,21 @@
-/* /home/rotating-headline.css */
-/* Minimal styling so it blends into your existing hero typography. */
-
-#rt-headline {
+.rt-inline {
   display: inline-flex;
   align-items: baseline;
-  justify-content: center;
   white-space: nowrap;
 }
 
-.rt-layout {
-  display: inline-flex;
-  align-items: baseline;
-  justify-content: center;
-  position: relative;
-  will-change: transform;
-}
-
-.rt-word {
-  display: inline-flex;
-  align-items: baseline;
-  justify-content: center;
-}
-
-.rt-char {
+.rt-static {
   display: inline-block;
 }
 
-.rt-space {
+.rt-dynamic {
   display: inline-block;
-  white-space: pre;
 }
 
-/* Respect reduced motion */
-@media (prefers-reduced-motion: reduce) {
-  .rt-char, .rt-space {
-    transition: none !important;
-    animation: none !important;
-    transform: none !important;
-  }
+.text-rotate {
+  display: inline-flex;
+}
+
+.text-rotate-element {
+  display: inline-block;
 }

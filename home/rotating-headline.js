@@ -1,74 +1,120 @@
-// /home/rotating-headline.js
-// Production-safe: NO JSX (runs directly in browser as an ES module)
+import React, {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useState
+} from "react";
+import { createRoot } from "react-dom/client";
+import { motion, AnimatePresence } from "motion/react";
 
-import React from "https://esm.sh/react@18.2.0";
-import { createRoot } from "https://esm.sh/react-dom@18.2.0/client";
-import { motion, AnimatePresence } from "https://esm.sh/framer-motion@11.0.0?deps=react@18.2.0,react-dom@18.2.0";
+import "./rotating-headline.css";
 
-const WORDS = ["Assessment", "Affordability", "Reliability", "Security", "Support"];
-
-function splitChars(text) {
-  return Array.from(text);
+function cn(...classes) {
+  return classes.filter(Boolean).join(" ");
 }
 
-function RotatingHeadline() {
-  const [index, setIndex] = React.useState(0);
+const RotatingText = forwardRef((props, ref) => {
+  const {
+    texts,
+    transition = { type: "spring", damping: 30, stiffness: 400 },
+    initial = { y: "100%", opacity: 0 },
+    animate = { y: 0, opacity: 1 },
+    exit = { y: "-120%", opacity: 0 },
+    rotationInterval = 2000,
+    staggerDuration = 0.025,
+    staggerFrom = "last",
+    loop = true,
+    auto = true
+  } = props;
 
-  React.useEffect(() => {
-    const id = setInterval(() => {
-      setIndex((i) => (i + 1) % WORDS.length);
-    }, 2200);
+  const [currentTextIndex, setCurrentTextIndex] = useState(0);
+
+  const splitIntoCharacters = text => {
+    if (typeof Intl !== "undefined" && Intl.Segmenter) {
+      const segmenter = new Intl.Segmenter("en", { granularity: "grapheme" });
+      return Array.from(segmenter.segment(text), s => s.segment);
+    }
+    return Array.from(text);
+  };
+
+  const characters = useMemo(() => {
+    return splitIntoCharacters(texts[currentTextIndex]);
+  }, [texts, currentTextIndex]);
+
+  const getDelay = index => {
+    if (staggerFrom === "last") {
+      return (characters.length - index) * staggerDuration;
+    }
+    return index * staggerDuration;
+  };
+
+  const next = useCallback(() => {
+    setCurrentTextIndex(i =>
+      i === texts.length - 1 ? (loop ? 0 : i) : i + 1
+    );
+  }, [texts.length, loop]);
+
+  useEffect(() => {
+    if (!auto) return;
+    const id = setInterval(next, rotationInterval);
     return () => clearInterval(id);
-  }, []);
+  }, [next, rotationInterval, auto]);
 
-  const word = WORDS[index];
+  return (
+    <motion.span
+      className="rt-inline"
+      layout
+      transition={transition}
+    >
+      <span className="rt-static">Network&nbsp;</span>
 
-  return React.createElement(
-    motion.span,
-    {
-      layout: true,
-      className: "rt-layout",
-      transition: { type: "spring", damping: 30, stiffness: 400 },
-    },
-    React.createElement(
-      AnimatePresence,
-      { mode: "wait" },
-      React.createElement(
-        motion.span,
-        {
-          key: word,
-          className: "rt-word",
-          layout: true,
-          initial: { opacity: 0 },
-          animate: { opacity: 1 },
-          exit: { opacity: 0 },
-        },
-        splitChars(word).map((char, i) =>
-          React.createElement(
-            motion.span,
-            {
-              key: i,
-              className: "rt-char",
-              initial: { y: "100%", opacity: 0 },
-              animate: { y: "0%", opacity: 1 },
-              exit: { y: "-100%", opacity: 0 },
-              transition: {
-                duration: 0.35,
-                delay: i * 0.02,
-                ease: [0.2, 0.9, 0.2, 1],
-              },
-            },
-            char == " " ? "\u00A0" : char
-          )
-        )
-      )
-    )
+      <span className="rt-dynamic">
+        <AnimatePresence mode="wait">
+          <motion.span
+            key={currentTextIndex}
+            className="text-rotate"
+            layout
+            aria-hidden
+          >
+            {characters.map((char, i) => (
+              <motion.span
+                key={i}
+                className="text-rotate-element"
+                initial={initial}
+                animate={animate}
+                exit={exit}
+                transition={{
+                  ...transition,
+                  delay: getDelay(i)
+                }}
+              >
+                {char}
+              </motion.span>
+            ))}
+          </motion.span>
+        </AnimatePresence>
+      </span>
+    </motion.span>
   );
-}
+});
 
-const mountNode = document.getElementById("rt-headline");
-if (mountNode) {
-  createRoot(mountNode).render(React.createElement(RotatingHeadline));
-} else {
-  console.warn('[rotating-headline] Mount node "#rt-headline" not found.');
+RotatingText.displayName = "RotatingText";
+
+/* ---------- MOUNT ---------- */
+
+const mount = document.getElementById("rt-root");
+
+if (mount) {
+  createRoot(mount).render(
+    <RotatingText
+      texts={[
+        "Assessment",
+        "Reliability",
+        "Security",
+        "Support"
+      ]}
+    />
+  );
 }
