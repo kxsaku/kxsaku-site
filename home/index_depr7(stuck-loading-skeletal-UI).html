@@ -1116,77 +1116,61 @@ function initParticles(){
 
 <script>
 (function(){
-  // --- Boot gate: keep skeleton until BOTH DOM is ready and background iframe has had a chance to paint ---
+  const iframe = document.querySelector(".beams-iframe");
   let domReady = false;
   let bgReady = false;
-  let done = false;
+  let bootDone = false;
 
-  function finish(){
-    if (done) return;
-    done = true;
+  function finishBoot(){
+    if (bootDone) return;
+    bootDone = true;
 
-    document.documentElement.classList.add("is-ready");
-    document.documentElement.classList.remove("is-loading");
+    // Fade iframe in, then reveal the page
+    document.body.classList.add("bg-ready");
 
-    if (typeof initReveal === "function") initReveal();
-    if (typeof initParticles === "function") initParticles();
+    // Next tick so CSS transitions apply reliably
+    setTimeout(() => {
+      document.body.classList.remove("is-loading");
+      document.body.classList.add("is-ready");
 
-    // Remove skeleton from DOM after fade to avoid it intercepting clicks
-    window.setTimeout(() => {
-      const sk = document.getElementById("boot-skeleton");
-      if (sk) sk.remove();
-    }, 420);
+      // init UI behaviors after first paint
+      if (typeof initReveal === "function") initReveal();
+      if (typeof initParticles === "function") initParticles();
+    }, 50);
   }
 
-  function maybeFinish(){
-    if (domReady && bgReady) finish();
-  }
-
-  function attachBgListener(){
-    const iframe = document.querySelector(".beams-iframe");
-    if (!iframe) {
-      // No background iframe found; don't block rendering.
-      bgReady = true;
-      maybeFinish();
-      return;
-    }
-
-    // If it loads, we are good. If it errors, we still unblock.
-    iframe.addEventListener("load", () => {
-      bgReady = true;
-      maybeFinish();
-    }, { once: true });
-
-    iframe.addEventListener("error", () => {
-      bgReady = true;
-      maybeFinish();
-    }, { once: true });
-
-    // Safety: if the iframe is cached and load already happened before this listener attached,
-    // don't keep the skeleton forever.
-    window.setTimeout(() => {
-      if (!bgReady) {
-        bgReady = true;
-        maybeFinish();
-      }
-    }, 700);
+  function tryBoot(){
+    if (domReady && bgReady) finishBoot();
   }
 
   document.addEventListener("DOMContentLoaded", () => {
     domReady = true;
-    attachBgListener();
-    maybeFinish();
-  }, { once: true });
+    tryBoot();
+  });
 
-  // Hard fallback (never get stuck). Keeps the "no-flash" goal while preventing indefinite loading.
-  window.setTimeout(() => {
-    if (!done) {
-      domReady = true;
+  if (iframe){
+    // If it is already loaded (bfcache), load event may not fire
+    try {
+      if (iframe.contentDocument && iframe.contentDocument.readyState === "complete") {
+        bgReady = true;
+        tryBoot();
+      }
+    } catch(e){ /* ignore */ }
+
+    iframe.addEventListener("load", () => {
       bgReady = true;
-      finish();
-    }
-  }, 2500);
+      tryBoot();
+    }, { once: true });
+  } else {
+    // No iframe found; don't block page forever
+    bgReady = true;
+    tryBoot();
+  }
+
+  // Hard fallback so you never get stuck on skeleton
+  setTimeout(() => finishBoot(), 2500);
 })();
 </script>
+
 </body>
 </html>
