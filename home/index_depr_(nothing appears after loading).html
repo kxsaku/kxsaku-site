@@ -1125,8 +1125,8 @@ function initParticles(){
     if (done) return;
     done = true;
 
-    document.body.classList.add("is-ready");
-    document.body.classList.remove("is-loading");
+    document.documentElement.classList.add("is-ready");
+    document.documentElement.classList.remove("is-loading");
 
     if (typeof initReveal === "function") initReveal();
     if (typeof initParticles === "function") initParticles();
@@ -1188,7 +1188,5 @@ function initParticles(){
   }, 2500);
 })();
 </script>
-  </div>
-
 </body>
 </html>
