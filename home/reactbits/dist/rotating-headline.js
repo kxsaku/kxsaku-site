@@ -1,17 +1,16 @@
 // /home/rotating-headline.js
-// ReactBits-style rotating headline (character-by-character) for a plain HTML page.
-// Requirements: modern browser with ES modules.
+// ESM module — React + Framer Motion (runtime) like ReactBits-style character animation.
 
-import * as React from "https://esm.sh/react@18.3.1?dev=false";
-import { createRoot } from "https://esm.sh/react-dom@18.3.1/client?dev=false";
-// IMPORTANT: externalize React so Framer Motion uses the SAME React instance.
-import { motion, AnimatePresence } from "https://esm.sh/framer-motion@11.2.12?external=react&dev=false";
+import React from "https://esm.sh/react@18.2.0";
+import { createRoot } from "https://esm.sh/react-dom@18.2.0/client";
 
-const FIXED = "Network";
+// Force framer-motion to resolve against the SAME React instance via deps pinning.
+import { motion, AnimatePresence } from "https://esm.sh/framer-motion@11.0.0?deps=react@18.2.0,react-dom@18.2.0";
+
 const WORDS = ["Assessment", "Affordability", "Reliability", "Security", "Support"];
 
 function splitChars(text) {
-  // Grapheme-safe split (emojis, accents, etc.)
+  // Grapheme-safe split (emoji, accents) where supported.
   if (typeof Intl !== "undefined" && Intl.Segmenter) {
     const seg = new Intl.Segmenter("en", { granularity: "grapheme" });
     return Array.from(seg.segment(text), (s) => s.segment);
@@ -30,75 +29,59 @@ function RotatingHeadline() {
   }, []);
 
   const word = WORDS[index];
-  const chars = React.useMemo(() => splitChars(word), [word]);
+  const chars = splitChars(word);
 
-  const spring = { type: "spring", damping: 30, stiffness: 400 };
+  // Stagger-from-last like ReactBits example.
+  const staggerDuration = 0.025;
 
-  // Build DOM without JSX (browser cannot parse JSX without a build step)
-  return React.createElement(
-    motion.span,
-    { className: "rt-layout", layout: true, transition: spring },
-    // Fixed word (moves via layout as the rotating word changes width)
-    React.createElement(
-      motion.span,
-      { className: "rt-fixed", layout: true, transition: spring },
-      FIXED
-    ),
-    React.createElement("span", { className: "rt-space", "aria-hidden": "true" }, " "),
-    React.createElement(
-      "span",
-      { className: "rt-inline" },
-      React.createElement(
-        AnimatePresence,
-        { mode: "wait", initial: false },
-        React.createElement(
-          motion.span,
-          {
-            key: word,
-            className: "rt-word",
-            layout: true,
-            initial: { opacity: 0 },
-            animate: { opacity: 1 },
-            exit: { opacity: 0 },
-            transition: spring,
-            "aria-hidden": "true",
-          },
-          chars.map((ch, i) =>
-            React.createElement(
-              motion.span,
-              {
-                key: i,
-                className: "rt-char",
-                initial: { y: "100%", opacity: 0 },
-                animate: { y: 0, opacity: 1 },
-                exit: { y: "-120%", opacity: 0 },
-                transition: { ...spring, delay: i * 0.025 },
-              },
-              ch
-            )
-          )
-        )
-      ),
-      // Screen reader text (full phrase)
-      React.createElement("span", { className: "rt-sr-only" }, `${FIXED} ${word}`)
-    )
+  return (
+    <motion.span
+      layout
+      className="rt-layout"
+      transition={{ type: "spring", damping: 30, stiffness: 400 }}
+      aria-label={word}
+    >
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.span
+          key={word}
+          className="rt-word"
+          layout
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          {chars.map((ch, i) => {
+            const delay = (chars.length - 1 - i) * staggerDuration;
+            const isSpace = ch === " ";
+            return (
+              <motion.span
+                key={i}
+                className={isSpace ? "rt-space" : "rt-char"}
+                initial={{ y: "100%", opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: "-120%", opacity: 0 }}
+                transition={{
+                  type: "spring",
+                  damping: 30,
+                  stiffness: 400,
+                  delay,
+                }}
+                aria-hidden="true"
+              >
+                {ch}
+              </motion.span>
+            );
+          })}
+        </motion.span>
+      </AnimatePresence>
+    </motion.span>
   );
 }
 
-function mount() {
-  const mountNode = document.getElementById("rt-headline");
-  if (!mountNode) return;
-
-  // Prevent double-mount if hot-reloaded or injected twice
-  if (mountNode.__rtMounted) return;
-  mountNode.__rtMounted = true;
-
-  const root = createRoot(mountNode);
-  root.render(React.createElement(RotatingHeadline));
-}
-
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", mount);
+const mountNode = document.getElementById("rt-headline");
+if (!mountNode) {
+  console.warn('[rotating-headline] Mount node "#rt-headline" not found.');
 } else {
-  mount();
+  const root = createRoot(mountNode);
+  root.render(<RotatingHeadline />);
 }
