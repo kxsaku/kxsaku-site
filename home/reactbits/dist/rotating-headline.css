@@ -1,15 +1,18 @@
-
+/* layout wrapper — allows smooth word width changes */
 .rt-layout {
   display: inline-flex;
   align-items: baseline;
-}
-
-.rt-word {
-  display: inline-flex;
   white-space: nowrap;
 }
 
+/* word container */
+.rt-word {
+  display: inline-flex;
+  overflow: hidden;
+}
+
+/* individual characters */
 .rt-char {
   display: inline-block;
-  will-change: transform, opacity;
+  will-change: transform;
 }
