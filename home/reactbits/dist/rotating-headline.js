@@ -1337,7 +1337,7 @@ var require_react_dom_development = __commonJS({
         return dispatcher;
       }
       "undefined" !== typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ && "function" === typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart && __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart(Error());
-      var React5 = require_react(), Internals = {
+      var React4 = require_react(), Internals = {
         d: {
           f: noop2,
           r: function() {
@@ -1355,7 +1355,7 @@ var require_react_dom_development = __commonJS({
         },
         p: 0,
         findDOMNode: null
-      }, REACT_PORTAL_TYPE = /* @__PURE__ */ Symbol.for("react.portal"), ReactSharedInternals = React5.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE;
+      }, REACT_PORTAL_TYPE = /* @__PURE__ */ Symbol.for("react.portal"), ReactSharedInternals = React4.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE;
       "function" === typeof Map && null != Map.prototype && "function" === typeof Map.prototype.forEach && "function" === typeof Set && null != Set.prototype && "function" === typeof Set.prototype.clear && "function" === typeof Set.prototype.forEach || console.error(
         "React depends on Map and Set built-in types. Make sure that you load a polyfill in older browsers. https://reactjs.org/link/react-polyfills"
       );
@@ -2890,7 +2890,7 @@ var require_react_dom_client_development = __commonJS({
         "number" === type && getActiveElement(node.ownerDocument) === node || node.defaultValue === "" + value || (node.defaultValue = "" + value);
       }
       function validateOptionProps(element, props) {
-        null == props.value && ("object" === typeof props.children && null !== props.children ? React5.Children.forEach(props.children, function(child) {
+        null == props.value && ("object" === typeof props.children && null !== props.children ? React4.Children.forEach(props.children, function(child) {
           null == child || "string" === typeof child || "number" === typeof child || "bigint" === typeof child || didWarnInvalidChild || (didWarnInvalidChild = true, console.error(
             "Cannot infer the option value of complex children. Pass a `value` prop or use a plain string as children to <option>."
           ));
@@ -18522,14 +18522,14 @@ var require_react_dom_client_development = __commonJS({
         ));
       }
       "undefined" !== typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ && "function" === typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart && __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart(Error());
-      var Scheduler = require_scheduler(), React5 = require_react(), ReactDOM = require_react_dom(), assign = Object.assign, REACT_LEGACY_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.element"), REACT_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.transitional.element"), REACT_PORTAL_TYPE = /* @__PURE__ */ Symbol.for("react.portal"), REACT_FRAGMENT_TYPE = /* @__PURE__ */ Symbol.for("react.fragment"), REACT_STRICT_MODE_TYPE = /* @__PURE__ */ Symbol.for("react.strict_mode"), REACT_PROFILER_TYPE = /* @__PURE__ */ Symbol.for("react.profiler"), REACT_CONSUMER_TYPE = /* @__PURE__ */ Symbol.for("react.consumer"), REACT_CONTEXT_TYPE = /* @__PURE__ */ Symbol.for("react.context"), REACT_FORWARD_REF_TYPE = /* @__PURE__ */ Symbol.for("react.forward_ref"), REACT_SUSPENSE_TYPE = /* @__PURE__ */ Symbol.for("react.suspense"), REACT_SUSPENSE_LIST_TYPE = /* @__PURE__ */ Symbol.for("react.suspense_list"), REACT_MEMO_TYPE = /* @__PURE__ */ Symbol.for("react.memo"), REACT_LAZY_TYPE = /* @__PURE__ */ Symbol.for("react.lazy");
+      var Scheduler = require_scheduler(), React4 = require_react(), ReactDOM = require_react_dom(), assign = Object.assign, REACT_LEGACY_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.element"), REACT_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.transitional.element"), REACT_PORTAL_TYPE = /* @__PURE__ */ Symbol.for("react.portal"), REACT_FRAGMENT_TYPE = /* @__PURE__ */ Symbol.for("react.fragment"), REACT_STRICT_MODE_TYPE = /* @__PURE__ */ Symbol.for("react.strict_mode"), REACT_PROFILER_TYPE = /* @__PURE__ */ Symbol.for("react.profiler"), REACT_CONSUMER_TYPE = /* @__PURE__ */ Symbol.for("react.consumer"), REACT_CONTEXT_TYPE = /* @__PURE__ */ Symbol.for("react.context"), REACT_FORWARD_REF_TYPE = /* @__PURE__ */ Symbol.for("react.forward_ref"), REACT_SUSPENSE_TYPE = /* @__PURE__ */ Symbol.for("react.suspense"), REACT_SUSPENSE_LIST_TYPE = /* @__PURE__ */ Symbol.for("react.suspense_list"), REACT_MEMO_TYPE = /* @__PURE__ */ Symbol.for("react.memo"), REACT_LAZY_TYPE = /* @__PURE__ */ Symbol.for("react.lazy");
       /* @__PURE__ */ Symbol.for("react.scope");
       var REACT_ACTIVITY_TYPE = /* @__PURE__ */ Symbol.for("react.activity");
       /* @__PURE__ */ Symbol.for("react.legacy_hidden");
       /* @__PURE__ */ Symbol.for("react.tracing_marker");
       var REACT_MEMO_CACHE_SENTINEL = /* @__PURE__ */ Symbol.for("react.memo_cache_sentinel");
       /* @__PURE__ */ Symbol.for("react.view_transition");
-      var MAYBE_ITERATOR_SYMBOL = Symbol.iterator, REACT_CLIENT_REFERENCE = /* @__PURE__ */ Symbol.for("react.client.reference"), isArrayImpl = Array.isArray, ReactSharedInternals = React5.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE, ReactDOMSharedInternals = ReactDOM.__DOM_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE, NotPending = Object.freeze({
+      var MAYBE_ITERATOR_SYMBOL = Symbol.iterator, REACT_CLIENT_REFERENCE = /* @__PURE__ */ Symbol.for("react.client.reference"), isArrayImpl = Array.isArray, ReactSharedInternals = React4.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE, ReactDOMSharedInternals = ReactDOM.__DOM_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE, NotPending = Object.freeze({
         pending: false,
         data: null,
         method: null,
@@ -21317,7 +21317,7 @@ var require_react_dom_client_development = __commonJS({
         }
       };
       (function() {
-        var isomorphicReactPackageVersion = React5.version;
+        var isomorphicReactPackageVersion = React4.version;
         if ("19.2.3" !== isomorphicReactPackageVersion)
           throw Error(
             'Incompatible React versions: The "react" and "react-dom" packages must have the exact same version. Instead got:\n  - react:      ' + (isomorphicReactPackageVersion + "\n  - react-dom:  19.2.3\nLearn more: https://react.dev/warnings/version-mismatch")
@@ -21671,18 +21671,18 @@ var require_react_jsx_runtime_development = __commonJS({
       function isValidElement2(object) {
         return "object" === typeof object && null !== object && object.$$typeof === REACT_ELEMENT_TYPE;
       }
-      var React5 = require_react(), REACT_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.transitional.element"), REACT_PORTAL_TYPE = /* @__PURE__ */ Symbol.for("react.portal"), REACT_FRAGMENT_TYPE = /* @__PURE__ */ Symbol.for("react.fragment"), REACT_STRICT_MODE_TYPE = /* @__PURE__ */ Symbol.for("react.strict_mode"), REACT_PROFILER_TYPE = /* @__PURE__ */ Symbol.for("react.profiler"), REACT_CONSUMER_TYPE = /* @__PURE__ */ Symbol.for("react.consumer"), REACT_CONTEXT_TYPE = /* @__PURE__ */ Symbol.for("react.context"), REACT_FORWARD_REF_TYPE = /* @__PURE__ */ Symbol.for("react.forward_ref"), REACT_SUSPENSE_TYPE = /* @__PURE__ */ Symbol.for("react.suspense"), REACT_SUSPENSE_LIST_TYPE = /* @__PURE__ */ Symbol.for("react.suspense_list"), REACT_MEMO_TYPE = /* @__PURE__ */ Symbol.for("react.memo"), REACT_LAZY_TYPE = /* @__PURE__ */ Symbol.for("react.lazy"), REACT_ACTIVITY_TYPE = /* @__PURE__ */ Symbol.for("react.activity"), REACT_CLIENT_REFERENCE = /* @__PURE__ */ Symbol.for("react.client.reference"), ReactSharedInternals = React5.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE, hasOwnProperty = Object.prototype.hasOwnProperty, isArrayImpl = Array.isArray, createTask = console.createTask ? console.createTask : function() {
+      var React4 = require_react(), REACT_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.transitional.element"), REACT_PORTAL_TYPE = /* @__PURE__ */ Symbol.for("react.portal"), REACT_FRAGMENT_TYPE = /* @__PURE__ */ Symbol.for("react.fragment"), REACT_STRICT_MODE_TYPE = /* @__PURE__ */ Symbol.for("react.strict_mode"), REACT_PROFILER_TYPE = /* @__PURE__ */ Symbol.for("react.profiler"), REACT_CONSUMER_TYPE = /* @__PURE__ */ Symbol.for("react.consumer"), REACT_CONTEXT_TYPE = /* @__PURE__ */ Symbol.for("react.context"), REACT_FORWARD_REF_TYPE = /* @__PURE__ */ Symbol.for("react.forward_ref"), REACT_SUSPENSE_TYPE = /* @__PURE__ */ Symbol.for("react.suspense"), REACT_SUSPENSE_LIST_TYPE = /* @__PURE__ */ Symbol.for("react.suspense_list"), REACT_MEMO_TYPE = /* @__PURE__ */ Symbol.for("react.memo"), REACT_LAZY_TYPE = /* @__PURE__ */ Symbol.for("react.lazy"), REACT_ACTIVITY_TYPE = /* @__PURE__ */ Symbol.for("react.activity"), REACT_CLIENT_REFERENCE = /* @__PURE__ */ Symbol.for("react.client.reference"), ReactSharedInternals = React4.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE, hasOwnProperty = Object.prototype.hasOwnProperty, isArrayImpl = Array.isArray, createTask = console.createTask ? console.createTask : function() {
         return null;
       };
-      React5 = {
+      React4 = {
         react_stack_bottom_frame: function(callStackForError) {
           return callStackForError();
         }
       };
       var specialPropKeyWarningShown;
       var didWarnAboutElementRef = {};
-      var unknownOwnerDebugStack = React5.react_stack_bottom_frame.bind(
-        React5,
+      var unknownOwnerDebugStack = React4.react_stack_bottom_frame.bind(
+        React4,
         UnknownOwner
       )();
       var unknownOwnerDebugTask = createTask(getTaskName(UnknownOwner));
@@ -25870,12 +25870,12 @@ function composeRefs(...refs) {
   };
 }
 function useComposedRefs(...refs) {
-  return React2.useCallback(composeRefs(...refs), refs);
+  return React.useCallback(composeRefs(...refs), refs);
 }
-var React2;
+var React;
 var init_use_composed_ref = __esm({
   "node_modules/framer-motion/dist/es/utils/use-composed-ref.mjs"() {
-    React2 = __toESM(require_react(), 1);
+    React = __toESM(require_react(), 1);
   }
 });
 
@@ -25921,19 +25921,19 @@ function PopChild({ children, isPresent, anchorX, root }) {
       }
     };
   }, [isPresent]);
-  return (0, import_jsx_runtime.jsx)(PopChildMeasure, { isPresent, childRef: ref, sizeRef: size, children: React3.cloneElement(children, { ref: composedRef }) });
+  return (0, import_jsx_runtime.jsx)(PopChildMeasure, { isPresent, childRef: ref, sizeRef: size, children: React2.cloneElement(children, { ref: composedRef }) });
 }
-var import_jsx_runtime, React3, import_react6, PopChildMeasure;
+var import_jsx_runtime, React2, import_react6, PopChildMeasure;
 var init_PopChild = __esm({
   "node_modules/framer-motion/dist/es/components/AnimatePresence/PopChild.mjs"() {
     "use client";
     import_jsx_runtime = __toESM(require_jsx_runtime(), 1);
     init_es2();
-    React3 = __toESM(require_react(), 1);
+    React2 = __toESM(require_react(), 1);
     import_react6 = __toESM(require_react(), 1);
     init_MotionConfigContext();
     init_use_composed_ref();
-    PopChildMeasure = class extends React3.Component {
+    PopChildMeasure = class extends React2.Component {
       getSnapshotBeforeUpdate(prevProps) {
         const element = this.props.childRef.current;
         if (element && prevProps.isPresent && !this.props.isPresent) {
@@ -25964,12 +25964,12 @@ var init_PopChild = __esm({
 function newChildrenMap() {
   return /* @__PURE__ */ new Map();
 }
-var import_jsx_runtime2, React4, import_react7, PresenceChild;
+var import_jsx_runtime2, React3, import_react7, PresenceChild;
 var init_PresenceChild = __esm({
   "node_modules/framer-motion/dist/es/components/AnimatePresence/PresenceChild.mjs"() {
     "use client";
     import_jsx_runtime2 = __toESM(require_jsx_runtime(), 1);
-    React4 = __toESM(require_react(), 1);
+    React3 = __toESM(require_react(), 1);
     import_react7 = __toESM(require_react(), 1);
     init_PresenceContext();
     init_use_constant();
@@ -26005,7 +26005,7 @@ var init_PresenceChild = __esm({
       (0, import_react7.useMemo)(() => {
         presenceChildren.forEach((_, key) => presenceChildren.set(key, false));
       }, [isPresent]);
-      React4.useEffect(() => {
+      React3.useEffect(() => {
         !isPresent && !presenceChildren.size && onExitComplete && onExitComplete();
       }, [isPresent]);
       if (mode === "popLayout") {
@@ -31741,13 +31741,14 @@ var init_RotatingText = __esm({
 function cn(...classes) {
   return classes.filter(Boolean).join(" ");
 }
-var import_react24, RotatingText, RotatingText_default;
+var import_react24, import_jsx_runtime6, RotatingText, RotatingText_default;
 var init_RotatingText2 = __esm({
   "home/reactbits/RotatingText.js"() {
     "use client";
     import_react24 = __toESM(require_react());
     init_react();
     init_RotatingText();
+    import_jsx_runtime6 = __toESM(require_jsx_runtime());
     RotatingText = (0, import_react24.forwardRef)((props, ref) => {
       const {
         texts,
@@ -31868,36 +31869,42 @@ var init_RotatingText2 = __esm({
         const intervalId = setInterval(next, rotationInterval);
         return () => clearInterval(intervalId);
       }, [next, rotationInterval, auto2]);
-      return /* @__PURE__ */ React.createElement(motion.span, { className: cn("text-rotate", mainClassName), ...rest, layout: true, transition }, /* @__PURE__ */ React.createElement("span", { className: "text-rotate-sr-only" }, texts[currentTextIndex]), /* @__PURE__ */ React.createElement(AnimatePresence, { mode: animatePresenceMode, initial: animatePresenceInitial }, /* @__PURE__ */ React.createElement(
-        motion.span,
-        {
-          key: currentTextIndex,
-          className: cn(splitBy === "lines" ? "text-rotate-lines" : "text-rotate"),
-          layout: true,
-          "aria-hidden": "true"
-        },
-        elements.map((wordObj, wordIndex, array) => {
-          const previousCharsCount = array.slice(0, wordIndex).reduce((sum, word) => sum + word.characters.length, 0);
-          return /* @__PURE__ */ React.createElement("span", { key: wordIndex, className: cn("text-rotate-word", splitLevelClassName) }, wordObj.characters.map((char, charIndex) => /* @__PURE__ */ React.createElement(
-            motion.span,
-            {
-              key: charIndex,
-              initial,
-              animate,
-              exit,
-              transition: {
-                ...transition,
-                delay: getStaggerDelay(
-                  previousCharsCount + charIndex,
-                  array.reduce((sum, word) => sum + word.characters.length, 0)
-                )
-              },
-              className: cn("text-rotate-element", elementLevelClassName)
-            },
-            char
-          )), wordObj.needsSpace && /* @__PURE__ */ React.createElement("span", { className: "text-rotate-space" }, " "));
-        })
-      )));
+      return /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(motion.span, { className: cn("text-rotate", mainClassName), ...rest, layout: true, transition, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("span", { className: "text-rotate-sr-only", children: texts[currentTextIndex] }),
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(AnimatePresence, { mode: animatePresenceMode, initial: animatePresenceInitial, children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
+          motion.span,
+          {
+            className: cn(splitBy === "lines" ? "text-rotate-lines" : "text-rotate"),
+            layout: true,
+            "aria-hidden": "true",
+            children: elements.map((wordObj, wordIndex, array) => {
+              const previousCharsCount = array.slice(0, wordIndex).reduce((sum, word) => sum + word.characters.length, 0);
+              return /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("span", { className: cn("text-rotate-word", splitLevelClassName), children: [
+                wordObj.characters.map((char, charIndex) => /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
+                  motion.span,
+                  {
+                    initial,
+                    animate,
+                    exit,
+                    transition: {
+                      ...transition,
+                      delay: getStaggerDelay(
+                        previousCharsCount + charIndex,
+                        array.reduce((sum, word) => sum + word.characters.length, 0)
+                      )
+                    },
+                    className: cn("text-rotate-element", elementLevelClassName),
+                    children: char
+                  },
+                  charIndex
+                )),
+                wordObj.needsSpace && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("span", { className: "text-rotate-space", children: " " })
+              ] }, wordIndex);
+            })
+          },
+          currentTextIndex
+        ) })
+      ] });
     });
     RotatingText.displayName = "RotatingText";
     RotatingText_default = RotatingText;
@@ -31910,12 +31917,13 @@ var require_main = __commonJS({
     var import_react26 = __toESM(require_react());
     var import_client = __toESM(require_client());
     init_RotatingText2();
+    var import_jsx_runtime7 = __toESM(require_jsx_runtime());
     function renderIntoMount(mount) {
       if (!mount) return false;
       if (mount.dataset.rtMounted === "1") return true;
       mount.dataset.rtMounted = "1";
       (0, import_client.createRoot)(mount).render(
-        /* @__PURE__ */ import_react26.default.createElement(
+        /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(
           RotatingText_default,
           {
             texts: ["Reliability", "Security", "Availability", "Affordability"],
