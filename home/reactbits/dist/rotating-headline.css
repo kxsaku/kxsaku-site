@@ -1,18 +1,20 @@
-/* layout wrapper — allows smooth word width changes */
-.rt-layout {
+.text-rotate {
   display: inline-flex;
   align-items: baseline;
   white-space: nowrap;
 }
 
-/* word container */
-.rt-word {
-  display: inline-flex;
-  overflow: hidden;
+.rt-inline {
+  display: inline-block;
+  min-width: 14ch;
+  text-align: left;
 }
 
-/* individual characters */
-.rt-char {
+.rt-word {
+  display: inline-flex;
+}
+
+.rt-el {
   display: inline-block;
-  will-change: transform;
+  will-change: transform, opacity;
 }
