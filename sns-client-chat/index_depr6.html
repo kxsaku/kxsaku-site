@@ -398,90 +398,7 @@
       color: transparent;
       animation: shimmer 1.25s linear infinite;
     }
-    @keyframes shimmer{ from{ background-position:0% } 
-    .home.home-center{
-      width:100%;
-      min-height: calc(100vh - 88px);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding: 2.2rem 1.2rem;
-      text-align:center;
-      position:relative;
-      overflow:hidden;
-    }
-    .home-hero{
-      width:min(760px, 100%);
-      position:relative;
-      z-index:1;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      gap:.9rem;
-    }
-    .home-title{
-      font-size: clamp(1.35rem, 2.2vw, 2.2rem);
-      font-weight: 800;
-      letter-spacing: .2px;
-      background: linear-gradient(90deg, rgba(200,180,255,.95), rgba(179,124,255,.95), rgba(129,118,255,.95));
-      background-size: 200% 100%;
-      -webkit-background-clip: text;
-      background-clip:text;
-      color: transparent;
-      animation: shimmer 1.6s linear infinite;
-    }
-    .home-sub{
-      max-width: 52ch;
-      color: rgba(244,240,255,.78);
-      line-height: 1.5;
-      font-size: 1.02rem;
-    }
-    .home-glass{
-      width: min(560px, 100%);
-      padding: 1rem;
-      border-radius: 22px;
-      background: linear-gradient(180deg, rgba(9,6,34,.60), rgba(15,10,55,.36));
-      border: 1px solid rgba(179,124,255,.28);
-      box-shadow: 0 18px 70px rgba(0,0,0,.35);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      display:flex;
-      flex-direction:column;
-      gap:.75rem;
-    }
-    .home-broadcast{
-      width:100%;
-      border-radius: 18px;
-      padding: .82rem 1rem;
-    }
-    .home.home-center::before{
-      content:"";
-      position:absolute;
-      inset:-40%;
-      background:
-        radial-gradient(600px 400px at 20% 30%, rgba(179,124,255,.18), transparent 60%),
-        radial-gradient(520px 380px at 85% 20%, rgba(129,118,255,.18), transparent 62%),
-        radial-gradient(700px 520px at 55% 85%, rgba(255,110,199,.12), transparent 60%);
-      animation: homeGlow 9s ease-in-out infinite alternate;
-      filter: blur(6px);
-      opacity:.95;
-    }
-    .home.home-center::after{
-      content:"";
-      position:absolute;
-      inset:0;
-      background:
-        radial-gradient(900px 320px at 50% 0%, rgba(129,118,255,.10), transparent 70%),
-        radial-gradient(700px 340px at 50% 100%, rgba(179,124,255,.10), transparent 70%);
-      pointer-events:none;
-      opacity:.8;
-    }
-    @keyframes homeGlow{
-      from{ transform: translate3d(-2%, -1%, 0) scale(1.02); }
-      to{ transform: translate3d(2%, 1%, 0) scale(1.06); }
-    }
-    
-to{ background-position:200% } }
+    @keyframes shimmer{ from{ background-position:0% } to{ background-position:200% } }
 
     .composer{
       padding: .85rem;
@@ -521,12 +438,12 @@ to{ background-position:200% } }
 
     .scroll-new{
       position:absolute;
-      left: 50%;
-      bottom: 112px;
+      right: 18px;
+      bottom: 92px;
       z-index: 5;
       opacity:0;
       pointer-events:none;
-      transform: translate(-50%, 8px);
+      transform: translateY(8px);
       transition: opacity .12s ease, transform .12s ease;
     }
     .scroll-new.on{
@@ -1011,167 +928,7 @@ to{ background-position:200% } }
       100%{ box-shadow: 0 0 0 rgba(179,124,255,0); }
     }
 
-  
-    /* --------------------------
-       Internal Notes (ChatGPT-like)
-    -------------------------- */
-    .notesView{
-      position: fixed;
-      inset: 0;
-      z-index: 9990;
-      padding: 0;
-      background: radial-gradient(1200px 560px at 30% 20%, rgba(179,124,255,.14), transparent 60%),
-                  radial-gradient(1000px 520px at 80% 20%, rgba(129,118,255,.14), transparent 60%),
-                  linear-gradient(180deg, rgba(2,0,16,1), rgba(5,3,21,1));
-      animation: notesBg 10s ease-in-out infinite alternate;
-    }
-    @keyframes notesBg{
-      from{ filter: saturate(1.02); }
-      to{ filter: saturate(1.12); }
-    }
-    .notesShell{
-      height: 100%;
-      display:grid;
-      grid-template-columns: 320px 1fr;
-      gap: 0;
-      border-top: 1px solid rgba(129,118,255,.16);
-    }
-    .notesSidebar{
-      border-right: 1px solid rgba(129,118,255,.16);
-      background: rgba(9,6,34,.36);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      padding: 14px;
-      display:flex;
-      flex-direction:column;
-      gap: 10px;
-      overflow:hidden;
-    }
-    .notesTop{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 10px;
-    }
-    .notesTitle{
-      font-weight: 800;
-      letter-spacing: .2px;
-    }
-    .notesSearchRow{
-      display:flex;
-      gap: 10px;
-    }
-    .notesSearch, .notesSelect{
-      border-radius: 14px;
-      border: 1px solid rgba(179,124,255,.22);
-      background: rgba(255,255,255,.06);
-      color: var(--ink);
-      padding: .7rem .8rem;
-      outline:none;
-      width:100%;
-    }
-    .notesSelect{ width: 190px; }
-    .notesList{
-      overflow:auto;
-      padding-right: 4px;
-      display:flex;
-      flex-direction:column;
-      gap: 8px;
-    }
-    .noteItem{
-      border-radius: 16px;
-      border: 1px solid rgba(129,118,255,.18);
-      background: rgba(255,255,255,.05);
-      padding: 10px 12px;
-      cursor:pointer;
-      transition: transform .12s ease, border-color .12s ease, background .12s ease;
-    }
-    .noteItem:hover{ transform: translateY(-1px); border-color: rgba(179,124,255,.32); background: rgba(255,255,255,.065); }
-    .noteItem.on{ border-color: rgba(179,124,255,.55); background: rgba(255,255,255,.075); }
-    .noteItemTitle{ font-weight: 700; font-size: .98rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .noteItemMeta{ opacity: .76; font-size: .86rem; margin-top: 2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-
-    .notesMain{
-      padding: 18px;
-      display:flex;
-      flex-direction:column;
-      gap: 10px;
-      overflow:hidden;
-    }
-    .notesMeta{
-      display:flex;
-      align-items:center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    .notesTitleInput{
-      flex: 1 1 320px;
-      border-radius: 16px;
-      border: 1px solid rgba(179,124,255,.22);
-      background: rgba(255,255,255,.06);
-      color: var(--ink);
-      padding: .85rem .95rem;
-      font-size: 1.05rem;
-      font-weight: 750;
-      outline:none;
-    }
-    .notesClientChip{
-      display:inline-flex;
-      align-items:center;
-      gap: 8px;
-      padding: .55rem .7rem;
-      border-radius: 999px;
-      border: 1px solid rgba(179,124,255,.28);
-      background: rgba(255,255,255,.06);
-      width: fit-content;
-      opacity: .92;
-    }
-    .notesBody{
-      flex: 1 1 auto;
-      width: 100%;
-      resize: none;
-      border-radius: 18px;
-      border: 1px solid rgba(129,118,255,.16);
-      background: rgba(9,6,34,.30);
-      color: var(--ink);
-      padding: 14px 14px;
-      outline:none;
-      line-height: 1.5;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
-    }
-    .notesSaved{
-      position: fixed;
-      right: 18px;
-      bottom: 18px;
-      padding: .55rem .8rem;
-      border-radius: 999px;
-      border: 1px solid rgba(179,124,255,.28);
-      background: rgba(0,0,0,.30);
-      backdrop-filter: blur(10px);
-      transition: opacity .18s ease, transform .18s ease;
-      transform: translateY(8px);
-      pointer-events:none;
-    }
-    .notesSaved.on{ opacity:1 !important; transform: translateY(0); }
-
-    .notesPickList{
-      display:flex;
-      flex-direction:column;
-      gap: 8px;
-      max-height: 52vh;
-      overflow:auto;
-      padding-right: 4px;
-    }
-    .pickItem{
-      border-radius: 16px;
-      border: 1px solid rgba(129,118,255,.18);
-      background: rgba(255,255,255,.05);
-      padding: 10px 12px;
-      cursor:pointer;
-    }
-    .pickItem:hover{ border-color: rgba(179,124,255,.34); }
-
-</style>
+  </style>
 </head>
 
 <body>
@@ -1236,11 +993,10 @@ to{ background-position:200% } }
                   </svg>
                 </button>
                 <div class="menu" id="menu">
-                  <button id="exportBtn" type="button">Export PDF</button>
-                  <button id="statusBtn" type="button">Client Status Manager</button>
-                  <button id="notesBtn" type="button">Internal Notes</button>
-                  <div class="sep"></div>
+                  <button id="exportBtn" type="button" disabled>Export PDF</button>
                   <button id="broadcastBtn" type="button">Broadcast</button>
+                  <div class="sep"></div>
+                  <button id="closeSearchBtn" type="button">Close Search</button>
                 </div>
               </div>
             </div>
@@ -1295,7 +1051,11 @@ to{ background-position:200% } }
           </div>
         </div>
       </div>
-</div>
+
+      <div class="note">
+        If you see an error mentioning a missing Edge Function, we add the Supabase chat functions next.
+      </div>
+    </div>
   </div>
 
   <!-- Login overlay -->
@@ -1329,96 +1089,6 @@ to{ background-position:200% } }
     </div>
   </div>
 
-
-  <!-- Client Status Manager Modal -->
-  <div id="statusModal" class="origModal" aria-hidden="true" style="display:none;">
-    <div class="origCard" style="max-width: 720px;">
-      <div class="origHeader">
-        <div class="origTitle">Client Status Manager</div>
-        <button id="statusClose" class="origClose">Close</button>
-      </div>
-
-      <div class="origBody">
-        <div class="origBlock">
-          <div class="origLabel">Current Status</div>
-          <div id="statusCurrent" class="origMono">—</div>
-        </div>
-
-        <div class="origBlock">
-          <div class="origLabel">Client-facing banner message (optional)</div>
-          <input id="statusMessage" class="search" style="width:100%;" placeholder="e.g., Maintenance in progress. Chat sending is temporarily disabled." />
-        </div>
-
-        <div class="origBlock" style="display:flex; gap:.65rem; flex-wrap:wrap;">
-          <button id="statusNormal" class="btn">Set All to Normal</button>
-          <button id="statusMaintenance" class="btn btn-primary">Set All to Maintenance</button>
-          <button id="statusEmergency" class="btn" style="background: rgba(255,80,120,.16); border:1px solid rgba(255,80,120,.35);">Emergency Mode</button>
-        </div>
-
-        <div class="origBlock" style="opacity:.85;">
-          <div class="origLabel">Behavior</div>
-          <div class="origMono" style="white-space:normal;">
-            Normal: clients can view + send messages.<br/>
-            Maintenance: clients can view history, but sending is locked + a red banner is shown.<br/>
-            Emergency: client chat page is blocked from loading (notice screen).
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Internal Notes View -->
-  <div id="notesView" class="notesView" style="display:none;">
-    <div class="notesShell">
-      <div class="notesSidebar">
-        <div class="notesTop">
-          <div class="notesTitle">Internal Notes</div>
-          <button id="notesBackBtn" class="btn">Back</button>
-        </div>
-
-        <div class="notesSearchRow">
-          <input id="notesSearch" class="notesSearch" placeholder="Search…" />
-          <select id="notesSearchMode" class="notesSelect">
-            <option value="keywords">Keywords (body)</option>
-            <option value="title">Title</option>
-            <option value="client">Client (name/email/phone/business)</option>
-          </select>
-        </div>
-
-        <button id="noteNewBtn" class="btn btn-primary" type="button">New Note</button>
-        <div id="notesList" class="notesList"></div>
-      </div>
-
-      <div class="notesMain">
-        <div class="notesMeta">
-          <input id="noteTitle" class="notesTitleInput" placeholder="Untitled note" />
-          <button id="noteClientBtn" class="btn" type="button">Link Client</button>
-          <button id="noteDeleteBtn" class="btn" type="button" style="background: rgba(255,80,120,.16); border:1px solid rgba(255,80,120,.35);">Delete</button>
-        </div>
-        <div id="noteClientChip" class="notesClientChip" style="display:none;"></div>
-        <textarea id="noteBody" class="notesBody" placeholder="Start typing… (auto-saves)"></textarea>
-        <div id="noteSaved" class="notesSaved" style="opacity:0;">Saved</div>
-      </div>
-    </div>
-
-    <!-- Client picker -->
-    <div id="notesClientPick" class="origModal" aria-hidden="true" style="display:none;">
-      <div class="origCard" style="max-width: 760px;">
-        <div class="origHeader">
-          <div class="origTitle">Link a Client</div>
-          <button id="notesClientClose" class="origClose">Close</button>
-        </div>
-        <div class="origBody">
-          <div class="origBlock">
-            <input id="notesClientSearch" class="search" style="width:100%;" placeholder="Search clients…" />
-          </div>
-          <div id="notesClientList" class="notesPickList"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-
   <!-- Admin: View Original Modal -->
   <div id="origModal" class="origModal" aria-hidden="true">
     <div class="origCard">
@@ -1446,7 +1116,6 @@ to{ background-position:200% } }
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
   <script>
     const SUPABASE_URL = "https://jgvxmpsjtkedzgygynbl.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpndnhtcHNqdGtlZHpneWd5bmJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0NzgxMjYsImV4cCI6MjA4MTA1NDEyNn0.OCh23RWm8COtxWuumYvKUmfMOLOW01B1zrbtzcr3w6Y";
@@ -1482,6 +1151,7 @@ to{ background-position:200% } }
     const homeBtn = document.getElementById("homeBtn");
     const menuBtn = document.getElementById("menuBtn");
     const menu = document.getElementById("menu");
+    const closeSearchBtn = document.getElementById("closeSearchBtn");
     const chatSearchPanel = document.getElementById("chatSearchPanel");
 const typingLine = document.getElementById("typingLine");
 
@@ -1501,8 +1171,6 @@ const typingLine = document.getElementById("typingLine");
     const jumpBtn = document.getElementById("jumpBtn");
 
     const exportBtn = document.getElementById("exportBtn");
-    const statusBtn = document.getElementById("statusBtn");
-    const notesBtn = document.getElementById("notesBtn");
     const broadcastBtn = document.getElementById("broadcastBtn");
 
     // Admin: View Original modal refs
@@ -1698,30 +1366,6 @@ function isImageAtt(a){
       });
     }
 
-    let pinnedToBottom = true;
-
-    function updatePinned(){
-      pinnedToBottom = (messagesEl.scrollHeight - messagesEl.scrollTop - messagesEl.clientHeight) < 140;
-    }
-
-    function hookMediaAutoScroll(){
-      // If images/videos load after initial render, keep pinned to bottom when appropriate.
-      const els = messagesEl.querySelectorAll("img, video");
-      els.forEach(el => {
-        if (el.tagName === "IMG"){
-          const img = el;
-          if (img.complete) return;
-          img.addEventListener("load", () => { if (pinnedToBottom) scrollToBottom(true); }, { once:true });
-          img.addEventListener("error", () => {}, { once:true });
-        } else {
-          const v = el;
-          if (v.readyState >= 1) return; // HAVE_METADATA
-          v.addEventListener("loadedmetadata", () => { if (pinnedToBottom) scrollToBottom(true); }, { once:true });
-        }
-      });
-    }
-
-
     // --------------------
     // Downloads
     // --------------------
@@ -1739,14 +1383,12 @@ function isImageAtt(a){
       setTimeout(() => URL.revokeObjectURL(obj), 1500);
     }
 
-    
     async function downloadAllForMessage(m){
-      const atts = (Array.isArray(m.attachments) ? m.attachments : []).filter(a => !!(a && (a.url || a.signed_url)));
-      const bodyText = String(m.body || "").trim();
-
-      // No attachments: download message text
+      const atts = (Array.isArray(m.attachments) ? m.attachments : []).filter(isImageAtt);
       if (!atts.length){
-        const b = new Blob([bodyText], { type: "text/plain;charset=utf-8" });
+        // text-only: download as .txt
+        const content = (m.body || "");
+        const b = new Blob([content], { type: "text/plain;charset=utf-8" });
         const obj = URL.createObjectURL(b);
         const a = document.createElement("a");
         a.href = obj;
@@ -1758,68 +1400,16 @@ function isImageAtt(a){
         return;
       }
 
-      // Single attachment: download directly
-      if (atts.length === 1){
-        const a0 = atts[0];
-        const url = a0.url || a0.signed_url;
-        const name = a0.file_name || a0.original_name || `attachment_${a0.id || ""}`;
-        await downloadBlob(url, name);
-        return;
-      }
-
-      // Multiple attachments: zip
-      if (!window.JSZip){
-        throw new Error("JSZip failed to load (cannot create .zip).");
-      }
-
-      const zip = new JSZip();
-      const folder = zip.folder(`message_${m.id}`) || zip;
-
-      // Optionally include message text as a note
-      if (bodyText){
-        folder.file("message.txt", bodyText);
-      }
-
-      // Download each file and add to zip
-      let i = 1;
+      // Multiple attachment downloads (sequential, predictable)
       for (const a of atts){
         const url = a.url || a.signed_url;
         if (!url) continue;
-
-        let name = String(a.file_name || a.original_name || "").trim();
-        if (!name){
-          const extFromMime = (String(a.mime_type || "").toLowerCase().split("/")[1] || "bin").replace(/[^a-z0-9]+/g,"");
-          name = `attachment_${i}.${extFromMime || "bin"}`;
-        }
-
-        // Avoid duplicate names inside the zip
-        if (folder.file(name)){
-          const dot = name.lastIndexOf(".");
-          const base = dot > 0 ? name.slice(0, dot) : name;
-          const ext = dot > 0 ? name.slice(dot) : "";
-          name = `${base} (${i})${ext}`;
-        }
-
-        const r = await fetch(url);
-        if (!r.ok) throw new Error(`Download failed (${r.status}) for ${name}`);
-        const b = await r.blob();
-        folder.file(name, b);
-        i++;
+        const name = a.file_name || a.original_name || `attachment_${a.id || ""}`;
+        await downloadBlob(url, name);
       }
-
-      const blob = await zip.generateAsync({ type: "blob" });
-      const obj = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = obj;
-      a.download = `message_${m.id}_attachments.zip`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(obj), 2500);
     }
 
-
-async function downloadOneForMessage(m){
+    async function downloadOneForMessage(m){
       const atts = (Array.isArray(m.attachments) ? m.attachments : []).filter(isImageAtt);
   if (!atts.length) return;
   const a = atts[0];
@@ -2446,15 +2036,16 @@ function goHome(){
       setMode('home');
 
       messagesEl.innerHTML = `
-        <div class="home home-center">
-          <div class="home-hero">
-            <div class="home-title">SNS Client Chat</div>
-            <div class="home-sub">Search a client, then jump straight into their conversation.</div>
+        <div class="home">
+          <h2>Home</h2>
+          <p>Search a client (name, business, email, or phone) and select a chat from the left.</p>
 
-            <div class="home-glass">
-              <button id="homeBroadcast" class="btn btn-primary home-broadcast" type="button">Broadcast</button>
+          <div class="home-card">
+            <div class="home-row">
               <input id="homeSearch" class="home-search" placeholder="Search clients by name, business, email, or phone…" />
+              <button id="homeBroadcast" class="btn btn-primary" type="button">Broadcast</button>
             </div>
+            <div class="home-hint">Tip: press Enter to open the first matching client.</div>
           </div>
         </div>
       `;
@@ -2600,9 +2191,6 @@ ${(Array.isArray(m.attachments) && m.attachments.length > 1) ? `
           </div>        </div>
         `;
       }).join("");
-      hookMediaAutoScroll();
-      if (opts && opts.forceBottom) { pinnedToBottom = true; scrollToBottom(true); }
-    
     }
 
     function setActiveClient(c){
@@ -2630,7 +2218,6 @@ ${(Array.isArray(m.attachments) && m.attachments.length > 1) ? `
       exportBtn.disabled = false;
       chatAttachBtn.disabled = false;
 
-      pinnedToBottom = true;
       loadHistory(true);
       renderClients();
     
@@ -2678,11 +2265,14 @@ ${(Array.isArray(m.attachments) && m.attachments.length > 1) ? `
         activeThreadId = data?.thread_id || null;
         messages = Array.isArray(data?.messages) ? data.messages : [];
 
-        renderMessages({ forceBottom: !!forceBottom });
+        renderMessages();
 
         // Start realtime AFTER you have thread_id
         startRealtime();
-        if (forceBottom){ pinnedToBottom = true; scrollToBottom(true); }
+
+        if (forceBottom){
+          requestAnimationFrame(() => { messagesEl.scrollTop = messagesEl.scrollHeight; });
+        }
       }catch(e){
         showChatErr(e?.message || String(e));
       }
@@ -2735,12 +2325,12 @@ ${(Array.isArray(m.attachments) && m.attachments.length > 1) ? `
     }
 
     function updateJump(){
-      updatePinned();
-      scrollNew.classList.toggle("on", !pinnedToBottom && !!activeClient);
+      const nearBottom = (messagesEl.scrollHeight - messagesEl.scrollTop - messagesEl.clientHeight) < 120;
+      scrollNew.classList.toggle("on", !nearBottom && !!activeClient);
     }
 
-    messagesEl.addEventListener("scroll", updateJump, { passive:true });
-    jumpBtn.addEventListener("click", () => { pinnedToBottom = true; scrollToBottom(false); });
+    messagesEl.addEventListener("scroll", updateJump);
+    jumpBtn.addEventListener("click", () => { messagesEl.scrollTop = messagesEl.scrollHeight; });
 
     
     refreshBtn.addEventListener("click", loadClientList);
@@ -2751,6 +2341,11 @@ ${(Array.isArray(m.attachments) && m.attachments.length > 1) ? `
     menuBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       menu.classList.toggle("on");
+    });
+
+    closeSearchBtn.addEventListener("click", () => {
+      closeSearch();
+      menu.classList.remove("on");
     });
 
     document.addEventListener("click", (e) => {
@@ -2936,303 +2531,6 @@ composer.addEventListener("keydown", (e) => {
         sendMessage();
       }
     });
-
-
-    // --------------------
-    // Client Status Manager (global)
-    // --------------------
-    const statusModal = document.getElementById("statusModal");
-    const statusClose = document.getElementById("statusClose");
-    const statusCurrent = document.getElementById("statusCurrent");
-    const statusMessage = document.getElementById("statusMessage");
-    const statusNormal = document.getElementById("statusNormal");
-    const statusMaintenance = document.getElementById("statusMaintenance");
-    const statusEmergency = document.getElementById("statusEmergency");
-
-    async function getSystemStatus(){
-      try{
-        return await callEdge("system-status-get", {});
-      }catch(e){
-        return { mode: "unknown", message: "" };
-      }
-    }
-
-    async function setSystemStatus(mode){
-      const msg = (statusMessage?.value || "").trim();
-      const res = await callEdge("system-status-set", { mode, message: msg });
-      return res;
-    }
-
-    function openStatusModal(){
-      if (!statusModal) return;
-      statusModal.classList.add("on");
-      statusModal.style.display = "flex";
-      getSystemStatus().then(s => {
-        if (statusCurrent) statusCurrent.textContent = `${String(s?.mode || "unknown").toUpperCase()}${s?.updated_at ? ` · ${new Date(s.updated_at).toLocaleString()}` : ""}`;
-        if (statusMessage && typeof s?.message === "string") statusMessage.value = s.message;
-      });
-    }
-    function closeStatusModal(){
-      if (!statusModal) return;
-      statusModal.classList.remove("on");
-      statusModal.style.display = "none";
-    }
-
-    if (statusBtn){
-      statusBtn.addEventListener("click", () => { openStatusModal(); menu.classList.remove("on"); });
-    }
-    if (statusClose) statusClose.addEventListener("click", closeStatusModal);
-    if (statusModal) statusModal.addEventListener("click", (e) => { if (e.target === statusModal) closeStatusModal(); });
-
-    if (statusNormal) statusNormal.addEventListener("click", async () => {
-      await setSystemStatus("normal");
-      const s = await getSystemStatus();
-      if (statusCurrent) statusCurrent.textContent = `${String(s?.mode || "unknown").toUpperCase()}${s?.updated_at ? ` · ${new Date(s.updated_at).toLocaleString()}` : ""}`;
-    });
-    if (statusMaintenance) statusMaintenance.addEventListener("click", async () => {
-      await setSystemStatus("maintenance");
-      const s = await getSystemStatus();
-      if (statusCurrent) statusCurrent.textContent = `${String(s?.mode || "unknown").toUpperCase()}${s?.updated_at ? ` · ${new Date(s.updated_at).toLocaleString()}` : ""}`;
-    });
-    if (statusEmergency) statusEmergency.addEventListener("click", async () => {
-      if (!confirm("Emergency Mode will BLOCK the client chat page from loading. Continue?")) return;
-      await setSystemStatus("emergency");
-      const s = await getSystemStatus();
-      if (statusCurrent) statusCurrent.textContent = `${String(s?.mode || "unknown").toUpperCase()}${s?.updated_at ? ` · ${new Date(s.updated_at).toLocaleString()}` : ""}`;
-    });
-
-    // --------------------
-    // Internal Notes
-    // --------------------
-    const notesView = document.getElementById("notesView");
-    const notesBackBtn = document.getElementById("notesBackBtn");
-    const notesSearch = document.getElementById("notesSearch");
-    const notesSearchMode = document.getElementById("notesSearchMode");
-    const noteNewBtn = document.getElementById("noteNewBtn");
-    const notesListEl = document.getElementById("notesList");
-
-    const noteTitleEl = document.getElementById("noteTitle");
-    const noteBodyEl = document.getElementById("noteBody");
-    const noteSavedEl = document.getElementById("noteSaved");
-    const noteClientBtn = document.getElementById("noteClientBtn");
-    const noteClientChip = document.getElementById("noteClientChip");
-    const noteDeleteBtn = document.getElementById("noteDeleteBtn");
-
-    const notesClientPick = document.getElementById("notesClientPick");
-    const notesClientClose = document.getElementById("notesClientClose");
-    const notesClientSearch = document.getElementById("notesClientSearch");
-    const notesClientList = document.getElementById("notesClientList");
-
-    let notes = [];
-    let activeNoteId = null;
-    let saveTimer = null;
-    let savedFlashTimer = null;
-
-    function showSaved(){
-      if (!noteSavedEl) return;
-      noteSavedEl.classList.add("on");
-      noteSavedEl.style.opacity = "1";
-      if (savedFlashTimer) clearTimeout(savedFlashTimer);
-      savedFlashTimer = setTimeout(() => {
-        noteSavedEl.classList.remove("on");
-        noteSavedEl.style.opacity = "0";
-      }, 900);
-    }
-
-    function openNotes(){
-      if (!notesView) return;
-      const card = document.querySelector(".card");
-      if (card) card.style.display = "none";
-      notesView.style.display = "block";
-      setMode("notes");
-      menu.classList.remove("on");
-      loadNotes().catch(() => {});
-    }
-    function closeNotes(){
-      if (!notesView) return;
-      const card = document.querySelector(".card");
-      if (card) card.style.display = "";
-      notesView.style.display = "none";
-      setMode(activeClient ? "chat" : "home");
-    }
-
-    if (notesBtn){
-      notesBtn.addEventListener("click", () => { openNotes(); });
-    }
-    if (notesBackBtn){
-      notesBackBtn.addEventListener("click", closeNotes);
-    }
-
-    async function callNotes(action, payload={}){
-      return await callEdge("admin-notes", { action, ...payload });
-    }
-
-    function renderNotesList(){
-      if (!notesListEl) return;
-      notesListEl.innerHTML = notes.map(n => {
-        const title = sanitize(n.title || "Untitled");
-        const meta = sanitize(n.client_label || (n.client_email || "") || "");
-        const cls = (n.id === activeNoteId) ? "noteItem on" : "noteItem";
-        return `<div class="${cls}" data-note="${sanitize(n.id)}">
-          <div class="noteItemTitle">${title}</div>
-          <div class="noteItemMeta">${meta || "&nbsp;"}</div>
-        </div>`;
-      }).join("");
-    }
-
-    function setActiveNote(id){
-      activeNoteId = id;
-      const n = notes.find(x => x.id === id) || null;
-
-      if (noteTitleEl) noteTitleEl.value = n?.title || "";
-      if (noteBodyEl) noteBodyEl.value = n?.body || "";
-
-      if (noteClientChip){
-        if (n?.client_label){
-          noteClientChip.style.display = "inline-flex";
-          noteClientChip.textContent = `Client: ${n.client_label}`;
-        }else{
-          noteClientChip.style.display = "none";
-          noteClientChip.textContent = "";
-        }
-      }
-
-      renderNotesList();
-    }
-
-    async function loadNotes(){
-      const q = (notesSearch?.value || "").trim();
-      const mode = (notesSearchMode?.value || "keywords");
-      const res = await callNotes("list", { q, mode, limit: 100 });
-      notes = Array.isArray(res?.notes) ? res.notes : [];
-      renderNotesList();
-
-      // Auto-select first note
-      if (!activeNoteId && notes.length){
-        setActiveNote(notes[0].id);
-      }else if (activeNoteId){
-        // refresh active note content if it still exists
-        const still = notes.find(x => x.id === activeNoteId);
-        if (!still && notes.length) setActiveNote(notes[0].id);
-      }
-    }
-
-    if (notesListEl){
-      notesListEl.addEventListener("click", (e) => {
-        const it = e.target.closest("[data-note]");
-        if (!it) return;
-        const id = it.getAttribute("data-note");
-        if (id) setActiveNote(id);
-      });
-    }
-
-    async function createNewNote(){
-      const res = await callNotes("upsert", { note: { title: "New Note", body: "" } });
-      await loadNotes();
-      if (res?.note?.id) setActiveNote(res.note.id);
-      if (noteTitleEl) noteTitleEl.focus();
-    }
-
-    if (noteNewBtn) noteNewBtn.addEventListener("click", createNewNote);
-
-    function scheduleSave(){
-      if (saveTimer) clearTimeout(saveTimer);
-      saveTimer = setTimeout(async () => {
-        const n = notes.find(x => x.id === activeNoteId);
-        if (!n) return;
-        const title = (noteTitleEl?.value || "").trim();
-        const body = String(noteBodyEl?.value || "");
-        const res = await callNotes("upsert", { note: { id: activeNoteId, title, body, client_user_id: n.client_user_id || null, client_label: n.client_label || null } });
-        if (res?.note){
-          // merge updated fields
-          const idx = notes.findIndex(x => x.id === activeNoteId);
-          if (idx >= 0) notes[idx] = { ...notes[idx], ...res.note };
-          renderNotesList();
-          showSaved();
-        }
-      }, 450);
-    }
-
-    if (noteTitleEl) noteTitleEl.addEventListener("input", scheduleSave);
-    if (noteBodyEl) noteBodyEl.addEventListener("input", scheduleSave);
-
-    if (notesSearch) notesSearch.addEventListener("input", () => { loadNotes().catch(() => {}); });
-    if (notesSearchMode) notesSearchMode.addEventListener("change", () => { loadNotes().catch(() => {}); });
-
-    // Client picker for note linking
-    function openClientPicker(){
-      if (!notesClientPick) return;
-      notesClientPick.classList.add("on");
-      notesClientPick.style.display = "flex";
-      if (notesClientSearch) { notesClientSearch.value = ""; notesClientSearch.focus(); }
-      renderClientPicker("");
-    }
-    function closeClientPicker(){
-      if (!notesClientPick) return;
-      notesClientPick.classList.remove("on");
-      notesClientPick.style.display = "none";
-    }
-
-    function clientLabel(c){
-      const parts = [c.full_name || "", c.business_name ? `(${c.business_name})` : "", c.email ? `· ${c.email}` : "", c.phone ? `· ${c.phone}` : ""].filter(Boolean);
-      return parts.join(" ");
-    }
-
-    function renderClientPicker(q){
-      if (!notesClientList) return;
-      const query = String(q || "").toLowerCase();
-      const list = (Array.isArray(clients) ? clients : []).filter(c => {
-        const blob = `${c.full_name||""} ${c.business_name||""} ${c.email||""} ${c.phone||""}`.toLowerCase();
-        return !query || blob.includes(query);
-      }).slice(0, 120);
-
-      notesClientList.innerHTML = list.map(c => {
-        const label = sanitize(clientLabel(c));
-        return `<div class="pickItem" data-pick="${sanitize(c.user_id)}">${label}</div>`;
-      }).join("") || `<div style="opacity:.75; padding: 10px;">No clients found.</div>`;
-    }
-
-    if (noteClientBtn) noteClientBtn.addEventListener("click", openClientPicker);
-    if (notesClientClose) notesClientClose.addEventListener("click", closeClientPicker);
-    if (notesClientPick) notesClientPick.addEventListener("click", (e) => { if (e.target === notesClientPick) closeClientPicker(); });
-    if (notesClientSearch) notesClientSearch.addEventListener("input", () => renderClientPicker(notesClientSearch.value));
-
-    if (notesClientList){
-      notesClientList.addEventListener("click", (e) => {
-        const it = e.target.closest("[data-pick]");
-        if (!it) return;
-        const user_id = it.getAttribute("data-pick");
-        const c = clients.find(x => x.user_id === user_id);
-        if (!c) return;
-        const label = clientLabel(c);
-
-        const n = notes.find(x => x.id === activeNoteId);
-        if (!n) return;
-
-        n.client_user_id = c.user_id;
-        n.client_label = label;
-        if (noteClientChip){
-          noteClientChip.style.display = "inline-flex";
-          noteClientChip.textContent = `Client: ${label}`;
-        }
-        closeClientPicker();
-        scheduleSave();
-      });
-    }
-
-    if (noteDeleteBtn){
-      noteDeleteBtn.addEventListener("click", async () => {
-        const n = notes.find(x => x.id === activeNoteId);
-        if (!n) return;
-        if (!confirm("Delete this note?")) return;
-        await callNotes("delete", { id: activeNoteId });
-        activeNoteId = null;
-        if (noteTitleEl) noteTitleEl.value = "";
-        if (noteBodyEl) noteBodyEl.value = "";
-        if (noteClientChip){ noteClientChip.style.display = "none"; noteClientChip.textContent = ""; }
-        await loadNotes();
-      });
-    }
 
     logoutBtn.addEventListener("click", logout);
     loginBtn.addEventListener("click", login);
