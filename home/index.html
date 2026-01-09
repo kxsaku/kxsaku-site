@@ -167,7 +167,12 @@
       align-items: baseline;
     }
 
-    .hero-title-rt .rt-inline{min-width:auto;}
+    .hero-title-rt .rt-inline{
+      display: inline-block;
+      min-width: 12.5ch;        /* locks width to longest word */
+      text-align: left;
+      transition: width 0.35s ease, transform 0.35s ease;
+    }
 
     .hero-title-rt .rt-split{
       display: inline-flex;
@@ -407,7 +412,7 @@
 
     /* Rotating word: slightly brighter + controlled glow */
     .hero-title-rt .rt-inline{min-width:auto;}
-.lede{
+    .lede{
       margin: 0 auto;
       max-width: 78ch;
       color: var(--muted);
