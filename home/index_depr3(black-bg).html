@@ -508,29 +508,54 @@
       .reveal{ opacity:1; transform:none; transition:none; }
     }
   
-    /* --- ReactBits-style Beams (vanilla canvas) background --- */
-    #beamsCanvas{
+    .beams-bg{
       position: fixed;
       inset: 0;
       width: 100vw;
       height: 100vh;
+      border: 0;
       z-index: 0;
       pointer-events: none;
-      mix-blend-mode: screen;
-      opacity: 0.95;
-      filter: blur(0.2px) saturate(1.05);
+      background: transparent;
     }
-    /* Keep existing bg layers above the canvas */
-    .bg .dots{ z-index: 1 !important; }
-    .bg .vignette{ z-index: 2 !important; }
-    .bg .particles{ z-index: 3 !important; }
+
+    /* Make sure your page content sits above it */
+    body > *:not(.beams-bg){
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Optional: ensure your body background doesn't wash it out */
+    html, body{
+      background: #000;
+    }
+
+    @keyframes beam-drift{
+      0%   { transform: translate3d(0,0,0) rotate(var(--rot)); }
+      100% { transform: translate3d(var(--tx), var(--ty), 0) rotate(var(--rot)); }
+    }
+
+    /* make sure the existing bg sits behind beams */
+    .bg{ z-index: -3; }
 
   </style>
 </head>
 
 <body>
+
+  <iframe
+  class="beams-bg"
+  src="/beams-bg/"
+  title=""
+  aria-hidden="true"
+  tabindex="-1"
+></iframe>
+
+
+  <!-- Beams background (behind everything) -->
+  <div class="beams-bg" id="beamsBg" aria-hidden="true"></div>
+
   <div class="bg">
-    <canvas id="beamsCanvas" aria-hidden="true"></canvas>
     <div class="glow"></div>
     <div class="lines"></div>
     <div class="dots"></div>
@@ -787,160 +812,81 @@
 
 
 
-  <script>
-  // --- Beams background (vanilla canvas; no React build needed) ---
-  (function(){
-    const canvas = document.getElementById('beamsCanvas');
-    if(!canvas) return;
+<script>
+/**
+ * "Beams" background generator (pure HTML/CSS/JS)
+ * Mirrors the ReactBits Beams-JS-CSS feel without requiring shadcn/registry access.
+ *
+ * Tuned to your exported settings:
+ *  beamWidth=2, beamHeight=15, beamNumber=12, lightColor=#8565e2, speed=2
+ */
+(function(){
+  const root = document.getElementById("beamsBg");
+  if (!root) return;
 
-    const ctx = canvas.getContext('2d', { alpha: true });
+  // Respect reduced-motion
+  const prefersReduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (prefersReduced) return;
 
-    // Match the "Export code" knobs
-    const CFG = {
-      beamWidth: 2,        // higher = thicker beams (mapped to pixels below)
-      beamHeight: 15,      // higher = taller gradients (mapped to pixels below)
-      beamNumber: 12,
-      lightColor: '#8565e2',
-      speed: 2,
-      noiseIntensity: 1.75,
-      scale: 0.2,
-      rotation: 0          // degrees
-    };
+  const beamNumber = 12;
+  const beamWidthPx = 2;
+  const beamHeightVh = 15;
+  const light = "133,101,226"; // #8565e2
+  const speed = 2;
 
-    // Simple deterministic PRNG
-    function mulberry32(a){ return function(){ let t=a+=0x6D2B79F5; t=Math.imul(t^t>>>15,t|1); t^=t+Math.imul(t^t>>>7,t|61); return ((t^t>>>14)>>>0)/4294967296; }; }
+  // Clear any existing beams (hot reload safety)
+  root.innerHTML = "";
 
-    // 2D value noise (fast, not Perlin) — good enough for the "film grain" vibe
-    function valueNoise2D(x,y){
-      const xi = Math.floor(x), yi = Math.floor(y);
-      const xf = x - xi, yf = y - yi;
+  function rand(min, max){ return Math.random() * (max - min) + min; }
 
-      const r = mulberry32((xi*374761393 + yi*668265263) | 0);
-      const v00 = r();
-      const r1 = mulberry32(((xi+1)*374761393 + yi*668265263) | 0);
-      const v10 = r1();
-      const r2 = mulberry32((xi*374761393 + (yi+1)*668265263) | 0);
-      const v01 = r2();
-      const r3 = mulberry32(((xi+1)*374761393 + (yi+1)*668265263) | 0);
-      const v11 = r3();
+  // Duration scales inversely with "speed"
+  const baseDur = 18 / Math.max(0.6, speed); // seconds
 
-      // smoothstep
-      const u = xf*xf*(3-2*xf);
-      const v = yf*yf*(3-2*yf);
+  for (let i = 0; i < beamNumber; i++){
+    const el = document.createElement("div");
+    el.className = "beam";
 
-      const x1 = v00*(1-u) + v10*u;
-      const x2 = v01*(1-u) + v11*u;
-      return x1*(1-v) + x2*v;
-    }
+    // Positions
+    const x = rand(-10, 110); // vw
+    const y = rand(-25, 105); // vh
 
-    function hexToRgb(hex){
-      const h = hex.replace('#','').trim();
-      const full = h.length === 3 ? h.split('').map(c=>c+c).join('') : h;
-      const n = parseInt(full,16);
-      return { r:(n>>16)&255, g:(n>>8)&255, b:n&255 };
-    }
+    // Drift: diagonally down-right or up-right depending on rotation
+    const tx = rand(22, 55) + "vw";
+    const ty = rand(18, 50) + "vh";
 
-    const rgb = hexToRgb(CFG.lightColor);
+    // Angle and opacity
+    const rot = rand(-22, 22).toFixed(2) + "deg";
+    const a = rand(0.18, 0.42).toFixed(2);
 
-    let W=0,H=0, DPR=1;
-    function resize(){
-      DPR = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
-      W = Math.floor(window.innerWidth * DPR);
-      H = Math.floor(window.innerHeight * DPR);
-      canvas.width = W;
-      canvas.height = H;
-    }
-    window.addEventListener('resize', resize, { passive: true });
-    resize();
+    // Vary beam length/width slightly for depth
+    const bw = (beamWidthPx * rand(0.85, 1.35)).toFixed(2) + "px";
+    const bh = (beamHeightVh * rand(0.85, 1.25)).toFixed(2) + "vh";
 
-    // Build beams
-    const rand = mulberry32(1337);
-    const beams = Array.from({length: CFG.beamNumber}).map((_,i)=>({
-      x: rand(),                 // 0..1
-      y: rand(),                 // 0..1
-      w: 0.08 + rand()*0.18,     // relative width
-      phase: rand()*Math.PI*2,
-      drift: (rand()*2-1)*0.08,
-      speed: 0.4 + rand()*0.8
-    }));
+    // Duration + delay
+    const dur = (baseDur * rand(0.75, 1.35)).toFixed(2) + "s";
+    const delay = (-rand(0, baseDur)).toFixed(2) + "s";
 
-    function draw(tMs){
-      const t = tMs / 1000;
+    el.style.setProperty("--x", x + "vw");
+    el.style.setProperty("--y", y + "vh");
+    el.style.setProperty("--tx", tx);
+    el.style.setProperty("--ty", ty);
+    el.style.setProperty("--rot", rot);
+    el.style.setProperty("--a", a);
+    el.style.setProperty("--bw", bw);
+    el.style.setProperty("--bh", bh);
+    el.style.setProperty("--dur", dur);
+    el.style.setProperty("--delay", delay);
 
-      // Clear (keep transparency so your existing gradients still show through)
-      ctx.clearRect(0,0,W,H);
+    // Use your light color (converted to rgba) for consistent tint
+    el.style.background =
+      `radial-gradient(90% 120% at 30% 50%, rgba(${light},.95), rgba(${light},0) 65%),` +
+      `linear-gradient(90deg, rgba(${light},.55), rgba(${light},0))`;
 
-      // Optional rotation (around center)
-      ctx.save();
-      if(CFG.rotation){
-        ctx.translate(W/2, H/2);
-        ctx.rotate((CFG.rotation*Math.PI)/180);
-        ctx.translate(-W/2, -H/2);
-      }
+    root.appendChild(el);
+  }
+})();
+</script>
 
-      // Beam sizing maps
-      const baseBeamW = Math.max(40*DPR, (Math.min(W,H) * 0.06) * (CFG.beamWidth/2));
-      const beamH = Math.max(300*DPR, (Math.min(W,H) * 0.22) * (CFG.beamHeight/10));
-
-      // Background subtle darkness so the beams read like the ReactBits demo
-      ctx.fillStyle = 'rgba(0,0,0,0.35)';
-      ctx.fillRect(0,0,W,H);
-
-      // Draw beams
-      for(const b of beams){
-        const x = (b.x + Math.sin(t*b.drift + b.phase)*0.02) * W;
-        const w = baseBeamW * b.w;
-
-        // vertical movement
-        const yCenter = ((b.y + (t * (CFG.speed*0.08) * b.speed)) % 1) * H;
-
-        // gradient along Y so it looks like a "light sweep"
-        const g = ctx.createLinearGradient(0, yCenter - beamH, 0, yCenter + beamH);
-        g.addColorStop(0.00, `rgba(${rgb.r},${rgb.g},${rgb.b},0.00)`);
-        g.addColorStop(0.35, `rgba(${rgb.r},${rgb.g},${rgb.b},0.18)`);
-        g.addColorStop(0.50, `rgba(${rgb.r},${rgb.g},${rgb.b},0.40)`);
-        g.addColorStop(0.65, `rgba(${rgb.r},${rgb.g},${rgb.b},0.18)`);
-        g.addColorStop(1.00, `rgba(${rgb.r},${rgb.g},${rgb.b},0.00)`);
-
-        ctx.fillStyle = g;
-        ctx.fillRect(x - w/2, yCenter - beamH, w, beamH*2);
-
-        // A soft edge blur via an overdraw with globalAlpha
-        ctx.globalAlpha = 0.20;
-        ctx.fillRect(x - w/2 - 10*DPR, yCenter - beamH, w + 20*DPR, beamH*2);
-        ctx.globalAlpha = 1;
-      }
-
-      // Grain/noise overlay to mimic the demo texture
-      const step = Math.max(3, Math.floor(6 / CFG.scale)); // lower scale => finer grain
-      const intensity = 0.06 * CFG.noiseIntensity;
-      const img = ctx.getImageData(0,0,W,H);
-      const d = img.data;
-      for(let y=0; y<H; y+=step){
-        for(let x=0; x<W; x+=step){
-          const n = valueNoise2D((x/W)*80, (y/H)*80 + t*1.5);
-          const v = (n-0.5) * 255 * intensity;
-          const idx = (y*W + x) * 4;
-          // apply to a small block (step x step)
-          for(let yy=0; yy<step && y+yy<H; yy++){
-            for(let xx=0; xx<step && x+xx<W; xx++){
-              const ii = ((y+yy)*W + (x+xx)) * 4;
-              d[ii]   = Math.min(255, Math.max(0, d[ii]   + v));
-              d[ii+1] = Math.min(255, Math.max(0, d[ii+1] + v));
-              d[ii+2] = Math.min(255, Math.max(0, d[ii+2] + v));
-              // alpha unchanged
-            }
-          }
-        }
-      }
-      ctx.putImageData(img,0,0);
-
-      ctx.restore();
-      requestAnimationFrame(draw);
-    }
-    requestAnimationFrame(draw);
-  })();
-  </script>
 
 </body>
 </html>
