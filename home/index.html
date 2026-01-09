@@ -54,7 +54,13 @@
 
     *{ box-sizing:border-box; }
     html, body{ height:100%; }
-    
+    body{
+      margin:0;
+      color: var(--ink);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      background: linear-gradient(180deg, var(--bg1), var(--bg0));
+      overflow-x:hidden;
+    }
 
     /* Full-bleed animated background (Nexros-style) */
     .bg{
@@ -925,117 +931,59 @@ function initParticles(){
 
 <script>
 (function(){
-  // Robust "no-flash" boot:
-  // - Keep the real page hidden (opacity:0) while the background iframe spins up
-  // - Show an on-brand skeleton overlay
-  // - Reveal as soon as BOTH:
-  //    1) DOM is ready (layout exists)
-  //    2) Background iframe has fired load (or we time out safely)
-  //
-  // Important: This must NEVER get stuck. We always reveal after a hard timeout.
-
-  const body = document.body;
   const iframe = document.querySelector(".beams-iframe");
-  const sk = document.getElementById("boot-skeleton");
-
-  let domReady = (document.readyState !== "loading");
+  let domReady = false;
   let bgReady = false;
-  let done = false;
+  let bootDone = false;
 
-  function finishBoot(reason){
-    if (done) return;
-    done = true;
+  function finishBoot(){
+    if (bootDone) return;
+    bootDone = true;
 
-    body.classList.remove("is-loading");
-    body.classList.add("is-ready");
+    // Fade iframe in, then reveal the page
+    document.body.classList.add("bg-ready");
 
-    if (bgReady) body.classList.add("bg-ready");
+    // Next tick so CSS transitions apply reliably
+    setTimeout(() => {
+      document.body.classList.remove("is-loading");
+      document.body.classList.add("is-ready");
 
-    // Let the transition run, then remove skeleton from the DOM so it can never block clicks.
-    if (sk){
-      sk.setAttribute("aria-hidden","true");
-      sk.style.opacity = "0";
-      setTimeout(() => { try{ sk.remove(); }catch(e){} }, 240);
-    }
-
-    // Safety: ensure the iframe is visible even if classes were missed.
-    if (iframe) iframe.style.opacity = "";
+      // init UI behaviors after first paint
+      if (typeof initReveal === "function") initReveal();
+      if (typeof initParticles === "function") initParticles();
+    }, 50);
   }
 
-  // DOM ready
-  if (!domReady){
-    document.addEventListener("DOMContentLoaded", () => {
-      domReady = true;
-      maybeFinish();
-    }, { once:true });
+  function tryBoot(){
+    if (domReady && bgReady) finishBoot();
   }
 
-  // Background iframe ready
-  function markBgReady(){
-    bgReady = true;
-    body.classList.add("bg-ready");
-    maybeFinish();
-  }
+  document.addEventListener("DOMContentLoaded", () => {
+    domReady = true;
+    tryBoot();
+  });
 
   if (iframe){
-    // If the iframe is cached and already complete, mark it ready.
-    try{
-      if (iframe.contentDocument && iframe.contentDocument.readyState === "complete"){
+    // If it is already loaded (bfcache), load event may not fire
+    try {
+      if (iframe.contentDocument && iframe.contentDocument.readyState === "complete") {
         bgReady = true;
+        tryBoot();
       }
-    }catch(e){ /* ignore */ }
+    } catch(e){ /* ignore */ }
 
-    if (bgReady){
-      body.classList.add("bg-ready");
-    } else {
-      iframe.addEventListener("load", markBgReady, { once:true });
-      iframe.addEventListener("error", () => {
-        // If the background fails, still reveal the page.
-        markBgReady();
-      }, { once:true });
-    }
+    iframe.addEventListener("load", () => {
+      bgReady = true;
+      tryBoot();
+    }, { once: true });
   } else {
-    // No iframe found; don't block.
+    // No iframe found; don't block page forever
     bgReady = true;
-    body.classList.add("bg-ready");
+    tryBoot();
   }
 
-  // A small rAF loop avoids edge cases where listeners miss because of cached fast loads.
-  const start = performance.now();
-  function poll(){
-    if (done) return;
-
-    // Refresh domReady if we started late.
-    if (!domReady && document.readyState !== "loading") domReady = true;
-
-    // Refresh bgReady if iframe became complete without firing our handler.
-    if (!bgReady && iframe){
-      try{
-        if (iframe.contentDocument && iframe.contentDocument.readyState === "complete"){
-          markBgReady();
-        }
-      }catch(e){ /* ignore */ }
-    }
-
-    maybeFinish();
-
-    if (!done && (performance.now() - start) < 1800){
-      requestAnimationFrame(poll);
-    }
-  }
-
-  function maybeFinish(){
-    // Primary: both ready
-    if (domReady && bgReady){
-      // One more frame so styles apply cleanly before we fade in.
-      requestAnimationFrame(() => finishBoot("ready"));
-    }
-  }
-
-  // Always reveal after a hard cap (never get stuck).
-  setTimeout(() => finishBoot("timeout"), 2200);
-
-  poll();
+  // Hard fallback so you never get stuck on skeleton
+  setTimeout(() => finishBoot(), 2500);
 })();
 </script>
 
