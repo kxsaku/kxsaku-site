@@ -1,0 +1,31 @@
+{
+  "name": "kxsaku-site",
+  "version": "1.0.0",
+  "description": "Saku Network Solutions Official Webpage!\r I'm still working on it, but im doing my best being its my first time developing a website and learning html, css, and JS!\r this webpage is essentially designed to be a landing page for my business.",
+  "main": "index.js",
+  "dependencies": {
+    "motion": "^12.25.0",
+    "ogl": "^1.0.11",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kxsaku/kxsaku-site.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/kxsaku/kxsaku-site/issues"
+  },
+  "homepage": "https://github.com/kxsaku/kxsaku-site#readme",
+  "devDependencies": {
+    "@vitejs/plugin-react": "^5.1.2",
+    "vite": "^7.3.1"
+  }
+}
