@@ -65,7 +65,32 @@
       overflow-x:hidden;
     }
 
-        /* diagonal shimmer lines */
+    /* Full-bleed animated background (Nexros-style) */
+    .bg{
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      pointer-events:none;
+      overflow:hidden;
+    }
+    /* soft drifting glow */
+    .bg .glow{
+      position:absolute;
+      inset:-20%;
+      background:
+        radial-gradient(circle at 20% 25%, rgba(179,124,255,.22), transparent 55%),
+        radial-gradient(circle at 85% 15%, rgba(94,234,212,.12), transparent 55%),
+        radial-gradient(circle at 60% 80%, rgba(249,115,226,.14), transparent 55%);
+      filter: blur(10px);
+      animation: glowFloat 16s ease-in-out infinite alternate;
+      opacity:.9;
+    }
+    @keyframes glowFloat{
+      from{ transform: translate3d(0,0,0) scale(1); }
+      to{ transform: translate3d(-18px, 12px, 0) scale(1.03); }
+    }
+
+    /* diagonal shimmer lines */
     .bg .lines{
       position:absolute;
       inset:0;
@@ -482,26 +507,16 @@
       .btn, .card, .navlinks a{ transition:none; }
       .reveal{ opacity:1; transform:none; transition:none; }
     }
-  
-    /* ReactBits Beams Background */
-    #reactbits-bg {
-      position: fixed;
-      inset: 0;
-      z-index: -2;
-      pointer-events: none;
-      background: #020010;
-    }
-    canvas.reactbits-beams {
-      width: 100%;
-      height: 100%;
-      display: block;
-    }
-
   </style>
 </head>
 
 <body>
-  <div id="reactbits-bg"></div>
+  <div class="bg">
+    <div class="glow"></div>
+    <div class="lines"></div>
+    <div class="dots"></div>
+    <div class="vignette"></div>
+  </div>
 
 
 
@@ -751,56 +766,6 @@
 </script>
 
 
-
-
-<script src="https://unpkg.com/gsap@3/dist/gsap.min.js"></script>
-<script>
-(function () {
-  const container = document.getElementById("reactbits-bg");
-  if (!container) return;
-
-  const canvas = document.createElement("canvas");
-  canvas.className = "reactbits-beams";
-  container.appendChild(canvas);
-
-  const ctx = canvas.getContext("2d");
-  let w, h, beams = [];
-
-  function resize() {
-    w = canvas.width = window.innerWidth;
-    h = canvas.height = window.innerHeight;
-  }
-
-  function makeBeams() {
-    beams = Array.from({ length: 12 }).map(() => ({
-      x: Math.random() * w,
-      width: 2,
-      speed: 2,
-      opacity: 0.25
-    }));
-  }
-
-  function draw() {
-    ctx.clearRect(0, 0, w, h);
-    beams.forEach(b => {
-      ctx.fillStyle = `rgba(133,101,226,${b.opacity})`;
-      ctx.fillRect(b.x, 0, b.width, h);
-      b.x += b.speed;
-      if (b.x > w) b.x = -b.width;
-    });
-    requestAnimationFrame(draw);
-  }
-
-  resize();
-  makeBeams();
-  draw();
-
-  window.addEventListener("resize", () => {
-    resize();
-    makeBeams();
-  });
-})();
-</script>
 
 </body>
 </html>
