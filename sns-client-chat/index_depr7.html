@@ -325,16 +325,6 @@
       scroll-behavior:smooth;
     }
 
-    .messages.homeMode{
-      padding: 0;
-      gap: 0;
-    }
-    .messages.homeMode .home-center{
-      min-height: 100%;
-      padding: 0;
-    }
-
-
     .msg{
       max-width: 78%;
       border-radius: 18px;
@@ -411,7 +401,7 @@
     @keyframes shimmer{ from{ background-position:0% } 
     .home.home-center{
       width:100%;
-      min-height: 100%;
+      min-height: calc(100vh - 88px);
       display:flex;
       align-items:center;
       justify-content:center;
@@ -1672,9 +1662,7 @@ function isImageAtt(a){
       const inChat = (mode === "chat");
       const onHome = (mode === "home");
 
-      
-      if (messagesEl){ messagesEl.classList.toggle("homeMode", onHome); }
-// Left search: keep as client filter (home + chat)
+      // Left search: keep as client filter (home + chat)
       clientSearch.style.display = "";
       clientSearch.placeholder = "Search name, business, email, phone…";
 
@@ -1702,32 +1690,13 @@ function isImageAtt(a){
     replyCancel.addEventListener("click", clearReply);
 
     function scrollToBottom(instant=true){
-      const doHard = () => { 
-        // hard set first (most reliable)
-        messagesEl.scrollTop = messagesEl.scrollHeight;
-      };
-
-      if (!messagesEl) return;
-
-      if (!instant){
-        // smooth once, then hard-set on settle frames
-        messagesEl.scrollTo({ top: messagesEl.scrollHeight, behavior: "smooth" });
-      }
-
+      // Robust: wait for DOM paint
       requestAnimationFrame(() => {
-        doHard();
         requestAnimationFrame(() => {
-          doHard();
-          requestAnimationFrame(doHard);
+          messagesEl.scrollTo({ top: messagesEl.scrollHeight, behavior: instant ? "auto" : "smooth" });
         });
       });
-
-      // settle passes (media/layout)
-      setTimeout(doHard, 60);
-      setTimeout(doHard, 220);
-      setTimeout(doHard, 900);
     }
-
 
     let pinnedToBottom = true;
 
@@ -2632,13 +2601,8 @@ ${(Array.isArray(m.attachments) && m.attachments.length > 1) ? `
         `;
       }).join("");
       hookMediaAutoScroll();
-      if (opts && opts.forceBottom) {
-        pinnedToBottom = true;
-        scrollToBottom(true);
-        // extra settle (lazy media + layout changes)
-        setTimeout(() => { if (pinnedToBottom) scrollToBottom(true); }, 120);
-        setTimeout(() => { if (pinnedToBottom) scrollToBottom(true); }, 520);
-      }
+      if (opts && opts.forceBottom) { pinnedToBottom = true; scrollToBottom(true); }
+    
     }
 
     function setActiveClient(c){
@@ -2667,7 +2631,7 @@ ${(Array.isArray(m.attachments) && m.attachments.length > 1) ? `
       chatAttachBtn.disabled = false;
 
       pinnedToBottom = true;
-      await loadHistory(true);
+      loadHistory(true);
       renderClients();
     
   });
@@ -3163,47 +3127,11 @@ composer.addEventListener("keydown", (e) => {
     }
 
     async function createNewNote(){
-  // Instant, blank note (optimistic)
-  const tempId = `temp_${Date.now()}`;
-  const nowIso = new Date().toISOString();
-  const temp = {
-    id: tempId,
-    title: "",
-    body: "",
-    client_user_id: null,
-    client_label: null,
-    created_at: nowIso,
-    updated_at: nowIso,
-  };
-  notes = [temp, ...(Array.isArray(notes) ? notes : [])];
-  activeNoteId = tempId;
-  renderNotesList();
-  setActiveNote(tempId);
-
-  if (noteTitleEl) noteTitleEl.value = "";
-  if (noteBodyEl) noteBodyEl.value = "";
-  if (noteClientChip){
-    noteClientChip.style.display = "none";
-    noteClientChip.textContent = "";
-  }
-  if (noteTitleEl) noteTitleEl.focus();
-
-  // Create on backend (no id) and replace temp id
-  try{
-    const res = await callNotes("upsert", { note: { title: "", body: "" } });
-    if (res?.note?.id){
-      const real = res.note;
-      const idx = notes.findIndex(x => x.id === tempId);
-      if (idx >= 0) notes[idx] = { ...notes[idx], ...real };
-      activeNoteId = real.id;
-      renderNotesList();
-      setActiveNote(real.id);
-      showSaved();
+      const res = await callNotes("upsert", { note: { title: "New Note", body: "" } });
+      await loadNotes();
+      if (res?.note?.id) setActiveNote(res.note.id);
+      if (noteTitleEl) noteTitleEl.focus();
     }
-  }catch(_){
-    // keep temp locally; save will retry on next input
-  }
-}
 
     if (noteNewBtn) noteNewBtn.addEventListener("click", createNewNote);
 
@@ -3225,19 +3153,10 @@ composer.addEventListener("keydown", (e) => {
       }, 450);
     }
 
-    function onNoteInput(){
-      const n = notes.find(x => x.id === activeNoteId);
-      if (!n) return;
-      n.title = String(noteTitleEl?.value || "");
-      n.body = String(noteBodyEl?.value || "");
-      n.updated_at = new Date().toISOString();
-      renderNotesList();
-      scheduleSave();
-    }
+    if (noteTitleEl) noteTitleEl.addEventListener("input", scheduleSave);
+    if (noteBodyEl) noteBodyEl.addEventListener("input", scheduleSave);
 
-    if (noteTitleEl) noteTitleEl.addEventListener("input", onNoteInput);
-    if (noteBodyEl) noteBodyEl.addEventListener("input", onNoteInput);
-if (notesSearch) notesSearch.addEventListener("input", () => { loadNotes().catch(() => {}); });
+    if (notesSearch) notesSearch.addEventListener("input", () => { loadNotes().catch(() => {}); });
     if (notesSearchMode) notesSearchMode.addEventListener("change", () => { loadNotes().catch(() => {}); });
 
     // Client picker for note linking
@@ -3292,9 +3211,7 @@ if (notesSearch) notesSearch.addEventListener("input", () => { loadNotes().catch
 
         n.client_user_id = c.user_id;
         n.client_label = label;
-        n.updated_at = new Date().toISOString();
-        renderNotesList();
-if (noteClientChip){
+        if (noteClientChip){
           noteClientChip.style.display = "inline-flex";
           noteClientChip.textContent = `Client: ${label}`;
         }
