@@ -507,51 +507,13 @@
       .btn, .card, .navlinks a{ transition:none; }
       .reveal{ opacity:1; transform:none; transition:none; }
     }
-  
-    /* ReactBits-style "Beams" background layer (pure HTML/CSS/JS) */
-    .beams-bg{
-      position: fixed;
-      inset: 0;
-      z-index: -2; /* above .bg (-3), below everything else */
-      pointer-events: none;
-      overflow: hidden;
-      opacity: .62;
-      mix-blend-mode: screen;
-      filter: saturate(1.05);
-    }
-    .beams-bg .beam{
-      position:absolute;
-      width: var(--bw);
-      height: var(--bh);
-      left: var(--x);
-      top: var(--y);
-      transform: rotate(var(--rot));
-      border-radius: 10px;
-      background:
-        radial-gradient(90% 120% at 30% 50%, rgba(133,101,226,.95), rgba(133,101,226,0) 65%),
-        linear-gradient(90deg, rgba(133,101,226,.55), rgba(133,101,226,0));
-      opacity: var(--a);
-      filter: blur(0.2px);
-      animation: beam-drift var(--dur) linear infinite;
-      animation-delay: var(--delay);
-    }
-    @keyframes beam-drift{
-      0%   { transform: translate3d(0,0,0) rotate(var(--rot)); }
-      100% { transform: translate3d(var(--tx), var(--ty), 0) rotate(var(--rot)); }
-    }
-
-    /* make sure the existing bg sits behind beams */
-    .bg{ z-index: -3; }
-
   </style>
 </head>
 
 <body>
-
-  <!-- Beams background (behind everything) -->
-  <div class="beams-bg" id="beamsBg" aria-hidden="true"></div>
-
   <div class="bg">
+    <!-- ReactBits “Beams” background (vanilla) -->
+    <div class="beams" id="beams" aria-hidden="true"></div>
     <div class="glow"></div>
     <div class="lines"></div>
     <div class="dots"></div>
@@ -805,83 +767,6 @@
 })();
 </script>
 
-
-
-
-<script>
-/**
- * "Beams" background generator (pure HTML/CSS/JS)
- * Mirrors the ReactBits Beams-JS-CSS feel without requiring shadcn/registry access.
- *
- * Tuned to your exported settings:
- *  beamWidth=2, beamHeight=15, beamNumber=12, lightColor=#8565e2, speed=2
- */
-(function(){
-  const root = document.getElementById("beamsBg");
-  if (!root) return;
-
-  // Respect reduced-motion
-  const prefersReduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if (prefersReduced) return;
-
-  const beamNumber = 12;
-  const beamWidthPx = 2;
-  const beamHeightVh = 15;
-  const light = "133,101,226"; // #8565e2
-  const speed = 2;
-
-  // Clear any existing beams (hot reload safety)
-  root.innerHTML = "";
-
-  function rand(min, max){ return Math.random() * (max - min) + min; }
-
-  // Duration scales inversely with "speed"
-  const baseDur = 18 / Math.max(0.6, speed); // seconds
-
-  for (let i = 0; i < beamNumber; i++){
-    const el = document.createElement("div");
-    el.className = "beam";
-
-    // Positions
-    const x = rand(-10, 110); // vw
-    const y = rand(-25, 105); // vh
-
-    // Drift: diagonally down-right or up-right depending on rotation
-    const tx = rand(22, 55) + "vw";
-    const ty = rand(18, 50) + "vh";
-
-    // Angle and opacity
-    const rot = rand(-22, 22).toFixed(2) + "deg";
-    const a = rand(0.18, 0.42).toFixed(2);
-
-    // Vary beam length/width slightly for depth
-    const bw = (beamWidthPx * rand(0.85, 1.35)).toFixed(2) + "px";
-    const bh = (beamHeightVh * rand(0.85, 1.25)).toFixed(2) + "vh";
-
-    // Duration + delay
-    const dur = (baseDur * rand(0.75, 1.35)).toFixed(2) + "s";
-    const delay = (-rand(0, baseDur)).toFixed(2) + "s";
-
-    el.style.setProperty("--x", x + "vw");
-    el.style.setProperty("--y", y + "vh");
-    el.style.setProperty("--tx", tx);
-    el.style.setProperty("--ty", ty);
-    el.style.setProperty("--rot", rot);
-    el.style.setProperty("--a", a);
-    el.style.setProperty("--bw", bw);
-    el.style.setProperty("--bh", bh);
-    el.style.setProperty("--dur", dur);
-    el.style.setProperty("--delay", delay);
-
-    // Use your light color (converted to rgba) for consistent tint
-    el.style.background =
-      `radial-gradient(90% 120% at 30% 50%, rgba(${light},.95), rgba(${light},0) 65%),` +
-      `linear-gradient(90deg, rgba(${light},.55), rgba(${light},0))`;
-
-    root.appendChild(el);
-  }
-})();
-</script>
 
 
 </body>
