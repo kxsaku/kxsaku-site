@@ -73,19 +73,6 @@
       pointer-events:none;
       overflow:hidden;
     }
-
-    /* Beams background app (built output in /beams-bg). Using an iframe prevents its bundled CSS from
-       leaking into this page, while still rendering the real animation. */
-    .beams-iframe{
-      position:absolute;
-      inset:0;
-      width:100%;
-      height:100%;
-      border:0;
-      display:block;
-      pointer-events:none;
-      z-index:0;
-    }
     /* soft drifting glow */
     .bg .glow{
       position:absolute;
@@ -521,28 +508,32 @@
       .reveal{ opacity:1; transform:none; transition:none; }
     }
   
-    /* --- True Beams background (isolated in an iframe so its bundled CSS can't affect this page) --- */
-    .beams-iframe{
+    /* --- ReactBits-style Beams (vanilla canvas) background --- */
+    #beamsCanvas{
       position: fixed;
       inset: 0;
       width: 100vw;
       height: 100vh;
-      border: 0;
       z-index: 0;
       pointer-events: none;
-      background: transparent;
+      mix-blend-mode: screen;
+      opacity: 0.95;
+      filter: blur(0.2px) saturate(1.05);
     }
-    /* Keep your vignette on top of the beams */
-    .bg .vignette{ z-index: 1; }
+    /* Keep existing bg layers above the canvas */
+    .bg .dots{ z-index: 1 !important; }
+    .bg .vignette{ z-index: 2 !important; }
+    .bg .particles{ z-index: 3 !important; }
 
   </style>
 </head>
 
 <body>
   <div class="bg">
-    <!-- True Beams background app (Vite build) -->
-    <iframe class="beams-iframe" src="/beams-bg/index.html" aria-hidden="true" tabindex="-1"></iframe>
-    <!-- Optional overlays (kept minimal so Beams remains visible) -->
+    <canvas id="beamsCanvas" aria-hidden="true"></canvas>
+    <div class="glow"></div>
+    <div class="lines"></div>
+    <div class="dots"></div>
     <div class="vignette"></div>
   </div>
 
@@ -796,7 +787,160 @@
 
 
 
-  
+  <script>
+  // --- Beams background (vanilla canvas; no React build needed) ---
+  (function(){
+    const canvas = document.getElementById('beamsCanvas');
+    if(!canvas) return;
+
+    const ctx = canvas.getContext('2d', { alpha: true });
+
+    // Match the "Export code" knobs
+    const CFG = {
+      beamWidth: 2,        // higher = thicker beams (mapped to pixels below)
+      beamHeight: 15,      // higher = taller gradients (mapped to pixels below)
+      beamNumber: 12,
+      lightColor: '#8565e2',
+      speed: 2,
+      noiseIntensity: 1.75,
+      scale: 0.2,
+      rotation: 0          // degrees
+    };
+
+    // Simple deterministic PRNG
+    function mulberry32(a){ return function(){ let t=a+=0x6D2B79F5; t=Math.imul(t^t>>>15,t|1); t^=t+Math.imul(t^t>>>7,t|61); return ((t^t>>>14)>>>0)/4294967296; }; }
+
+    // 2D value noise (fast, not Perlin) — good enough for the "film grain" vibe
+    function valueNoise2D(x,y){
+      const xi = Math.floor(x), yi = Math.floor(y);
+      const xf = x - xi, yf = y - yi;
+
+      const r = mulberry32((xi*374761393 + yi*668265263) | 0);
+      const v00 = r();
+      const r1 = mulberry32(((xi+1)*374761393 + yi*668265263) | 0);
+      const v10 = r1();
+      const r2 = mulberry32((xi*374761393 + (yi+1)*668265263) | 0);
+      const v01 = r2();
+      const r3 = mulberry32(((xi+1)*374761393 + (yi+1)*668265263) | 0);
+      const v11 = r3();
+
+      // smoothstep
+      const u = xf*xf*(3-2*xf);
+      const v = yf*yf*(3-2*yf);
+
+      const x1 = v00*(1-u) + v10*u;
+      const x2 = v01*(1-u) + v11*u;
+      return x1*(1-v) + x2*v;
+    }
+
+    function hexToRgb(hex){
+      const h = hex.replace('#','').trim();
+      const full = h.length === 3 ? h.split('').map(c=>c+c).join('') : h;
+      const n = parseInt(full,16);
+      return { r:(n>>16)&255, g:(n>>8)&255, b:n&255 };
+    }
+
+    const rgb = hexToRgb(CFG.lightColor);
+
+    let W=0,H=0, DPR=1;
+    function resize(){
+      DPR = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+      W = Math.floor(window.innerWidth * DPR);
+      H = Math.floor(window.innerHeight * DPR);
+      canvas.width = W;
+      canvas.height = H;
+    }
+    window.addEventListener('resize', resize, { passive: true });
+    resize();
+
+    // Build beams
+    const rand = mulberry32(1337);
+    const beams = Array.from({length: CFG.beamNumber}).map((_,i)=>({
+      x: rand(),                 // 0..1
+      y: rand(),                 // 0..1
+      w: 0.08 + rand()*0.18,     // relative width
+      phase: rand()*Math.PI*2,
+      drift: (rand()*2-1)*0.08,
+      speed: 0.4 + rand()*0.8
+    }));
+
+    function draw(tMs){
+      const t = tMs / 1000;
+
+      // Clear (keep transparency so your existing gradients still show through)
+      ctx.clearRect(0,0,W,H);
+
+      // Optional rotation (around center)
+      ctx.save();
+      if(CFG.rotation){
+        ctx.translate(W/2, H/2);
+        ctx.rotate((CFG.rotation*Math.PI)/180);
+        ctx.translate(-W/2, -H/2);
+      }
+
+      // Beam sizing maps
+      const baseBeamW = Math.max(40*DPR, (Math.min(W,H) * 0.06) * (CFG.beamWidth/2));
+      const beamH = Math.max(300*DPR, (Math.min(W,H) * 0.22) * (CFG.beamHeight/10));
+
+      // Background subtle darkness so the beams read like the ReactBits demo
+      ctx.fillStyle = 'rgba(0,0,0,0.35)';
+      ctx.fillRect(0,0,W,H);
+
+      // Draw beams
+      for(const b of beams){
+        const x = (b.x + Math.sin(t*b.drift + b.phase)*0.02) * W;
+        const w = baseBeamW * b.w;
+
+        // vertical movement
+        const yCenter = ((b.y + (t * (CFG.speed*0.08) * b.speed)) % 1) * H;
+
+        // gradient along Y so it looks like a "light sweep"
+        const g = ctx.createLinearGradient(0, yCenter - beamH, 0, yCenter + beamH);
+        g.addColorStop(0.00, `rgba(${rgb.r},${rgb.g},${rgb.b},0.00)`);
+        g.addColorStop(0.35, `rgba(${rgb.r},${rgb.g},${rgb.b},0.18)`);
+        g.addColorStop(0.50, `rgba(${rgb.r},${rgb.g},${rgb.b},0.40)`);
+        g.addColorStop(0.65, `rgba(${rgb.r},${rgb.g},${rgb.b},0.18)`);
+        g.addColorStop(1.00, `rgba(${rgb.r},${rgb.g},${rgb.b},0.00)`);
+
+        ctx.fillStyle = g;
+        ctx.fillRect(x - w/2, yCenter - beamH, w, beamH*2);
+
+        // A soft edge blur via an overdraw with globalAlpha
+        ctx.globalAlpha = 0.20;
+        ctx.fillRect(x - w/2 - 10*DPR, yCenter - beamH, w + 20*DPR, beamH*2);
+        ctx.globalAlpha = 1;
+      }
+
+      // Grain/noise overlay to mimic the demo texture
+      const step = Math.max(3, Math.floor(6 / CFG.scale)); // lower scale => finer grain
+      const intensity = 0.06 * CFG.noiseIntensity;
+      const img = ctx.getImageData(0,0,W,H);
+      const d = img.data;
+      for(let y=0; y<H; y+=step){
+        for(let x=0; x<W; x+=step){
+          const n = valueNoise2D((x/W)*80, (y/H)*80 + t*1.5);
+          const v = (n-0.5) * 255 * intensity;
+          const idx = (y*W + x) * 4;
+          // apply to a small block (step x step)
+          for(let yy=0; yy<step && y+yy<H; yy++){
+            for(let xx=0; xx<step && x+xx<W; xx++){
+              const ii = ((y+yy)*W + (x+xx)) * 4;
+              d[ii]   = Math.min(255, Math.max(0, d[ii]   + v));
+              d[ii+1] = Math.min(255, Math.max(0, d[ii+1] + v));
+              d[ii+2] = Math.min(255, Math.max(0, d[ii+2] + v));
+              // alpha unchanged
+            }
+          }
+        }
+      }
+      ctx.putImageData(img,0,0);
+
+      ctx.restore();
+      requestAnimationFrame(draw);
+    }
+    requestAnimationFrame(draw);
+  })();
+  </script>
 
 </body>
 </html>
