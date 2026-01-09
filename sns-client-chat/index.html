@@ -1922,35 +1922,46 @@ async function downloadOneForMessage(m){
     }
 
     
-function withChatTransition(fn){
-  if (!chatPanel){ fn(); return; }
+async function withChatTransition(fn){
+  if (!chatPanel){
+    await fn();
+    return;
+  }
+
   chatPanel.classList.add("vfade");
-  window.setTimeout(() => {
-    try{ fn(); } finally {
-      requestAnimationFrame(() => chatPanel.classList.remove("vfade"));
-    }
-  }, 120);
-}
 
-function goHome(){
-  withChatTransition(() => {
-      stopRealtime();
-      typingLine.classList.remove("on");
-      activeClient = null;
-      activeThreadId = null;
-      messages = [];
-      clearChatErr();
-
-      sendBtn.disabled = true;
-      exportBtn.disabled = true;
-      chatAttachBtn.disabled = true;
-
-      setMode("home");
-      renderMessages({ preserveScroll: true });
-      renderClients();
-    
+  await new Promise((resolve) => {
+    window.setTimeout(async () => {
+      try{
+        await fn();
+      } finally {
+        requestAnimationFrame(() => chatPanel.classList.remove("vfade"));
+        resolve();
+      }
+    }, 120);
   });
 }
+
+
+async function goHome(){
+  await withChatTransition(async () => {
+    stopRealtime();
+    typingLine.classList.remove("on");
+    activeClient = null;
+    activeThreadId = null;
+    messages = [];
+    clearChatErr();
+
+    sendBtn.disabled = true;
+    exportBtn.disabled = true;
+    chatAttachBtn.disabled = true;
+
+    setMode("home");
+    renderMessages({ preserveScroll: true });
+    renderClients();
+  });
+}
+
 
     // Home search input is rendered inside the HOME card (dynamic). Use event delegation.
     document.addEventListener("input", (e) => {
@@ -2640,37 +2651,39 @@ ${(Array.isArray(m.attachments) && m.attachments.length > 1) ? `
       }
     }
 
-    function setActiveClient(c){
-  withChatTransition(() => {
-      setMode('chat');
-      // Clear local unread badge for this client immediately
-      try{
-        const idx = clients.findIndex(x => x.user_id === c.user_id);
-        if (idx !== -1) clients[idx].has_unread = false;
-      }catch(_){ }
+    async function setActiveClient(c){
+      await withChatTransition(async () => {
+        setMode('chat');
 
-      setMode('chat');
-      clientSearch.placeholder = 'Search in chat…';
+        // Clear local unread badge for this client immediately
+        try{
+          const idx = clients.findIndex(x => x.user_id === c.user_id);
+          if (idx !== -1) clients[idx].has_unread = false;
+        }catch(_){ }
 
-      stopRealtime();
-      typingLine.classList.remove("on");
-      activeThreadId = null;
-      activeClient = c;
+        clientSearch.placeholder = 'Search in chat…';
 
-      chatTitle.textContent = `Chat · ${c.full_name || c.email || "Client"}`;
-      chatSub.textContent = c.business_name ? c.business_name : (c.phone ? `Phone: ${c.phone}` : "—");
+        stopRealtime();
+        typingLine.classList.remove("on");
+        activeThreadId = null;
+        activeClient = c;
 
-      clearChatErr();
-      sendBtn.disabled = false;
-      exportBtn.disabled = false;
-      chatAttachBtn.disabled = false;
+        chatTitle.textContent = `Chat · ${c.full_name || c.email || "Client"}`;
+        chatSub.textContent = c.business_name ? c.business_name : (c.phone ? `Phone: ${c.phone}` : "—");
 
-      pinnedToBottom = true;
-      await loadHistory(true);
-      renderClients();
-    
-  });
-}
+        clearChatErr();
+        sendBtn.disabled = false;
+        exportBtn.disabled = false;
+        chatAttachBtn.disabled = false;
+
+        pinnedToBottom = true;
+
+        await loadHistory(true);
+
+        renderClients();
+      });
+    }
+
 
     async function loadClientList(){
       refreshBtn.disabled = true;
