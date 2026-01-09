@@ -508,33 +508,28 @@
       .reveal{ opacity:1; transform:none; transition:none; }
     }
   
-    /* ReactBits-style "Beams" background layer (pure HTML/CSS/JS) */
     .beams-bg{
       position: fixed;
       inset: 0;
-      z-index: -2; /* above .bg (-3), below everything else */
+      width: 100vw;
+      height: 100vh;
+      border: 0;
+      z-index: 0;
       pointer-events: none;
-      overflow: hidden;
-      opacity: .62;
-      mix-blend-mode: screen;
-      filter: saturate(1.05);
+      background: transparent;
     }
-    .beams-bg .beam{
-      position:absolute;
-      width: var(--bw);
-      height: var(--bh);
-      left: var(--x);
-      top: var(--y);
-      transform: rotate(var(--rot));
-      border-radius: 10px;
-      background:
-        radial-gradient(90% 120% at 30% 50%, rgba(133,101,226,.95), rgba(133,101,226,0) 65%),
-        linear-gradient(90deg, rgba(133,101,226,.55), rgba(133,101,226,0));
-      opacity: var(--a);
-      filter: blur(0.2px);
-      animation: beam-drift var(--dur) linear infinite;
-      animation-delay: var(--delay);
+
+    /* Make sure your page content sits above it */
+    body > *:not(.beams-bg){
+      position: relative;
+      z-index: 1;
     }
+
+    /* Optional: ensure your body background doesn't wash it out */
+    html, body{
+      background: #000;
+    }
+
     @keyframes beam-drift{
       0%   { transform: translate3d(0,0,0) rotate(var(--rot)); }
       100% { transform: translate3d(var(--tx), var(--ty), 0) rotate(var(--rot)); }
@@ -547,6 +542,15 @@
 </head>
 
 <body>
+
+  <iframe
+  class="beams-bg"
+  src="/beams-bg/"
+  title=""
+  aria-hidden="true"
+  tabindex="-1"
+></iframe>
+
 
   <!-- Beams background (behind everything) -->
   <div class="beams-bg" id="beamsBg" aria-hidden="true"></div>
