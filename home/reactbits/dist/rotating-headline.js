@@ -31991,3 +31991,27 @@ react/cjs/react-jsx-runtime.development.js:
    * LICENSE file in the root directory of this source tree.
    *)
 */
+import React from "react";
+import { createRoot } from "react-dom/client";
+import RotatingText from "./RotatingText.js";
+
+const target = document.getElementById("rt-headline");
+
+if (target) {
+  const root = createRoot(target);
+  root.render(
+    React.createElement(RotatingText, {
+      texts: ["Reliability", "Security", "Availability", "Affordability"],
+      mainClassName: "rt-inline",
+      splitLevelClassName: "rt-split",
+      elementLevelClassName: "rt-el",
+      staggerFrom: "last",
+      staggerDuration: 0.025,
+      rotationInterval: 2400,
+      initial: { y: "100%", opacity: 0 },
+      animate: { y: 0, opacity: 1 },
+      exit: { y: "-120%", opacity: 0 },
+      transition: { type: "spring", damping: 32, stiffness: 380 }
+    })
+  );
+}
