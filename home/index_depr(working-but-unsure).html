@@ -158,39 +158,6 @@
       #particles{ display:none; }
     }
 
-    .hero-title-rt{
-      display: inline-flex;
-      align-items: baseline;
-      justify-content: center;
-      gap: .22em;
-    }
-
-    .hero-title-rt .text-rotate{
-      display: inline-flex;
-      flex-wrap: nowrap;
-      white-space: nowrap;
-      align-items: baseline;
-    }
-
-    .hero-title-rt .rt-inline{
-      display: inline-flex;
-      align-items: baseline;
-      min-width: 13ch;
-      
-    }
-
-    .hero-title-rt .rt-split{
-      display: inline-flex;
-      overflow: hidden;
-      padding-bottom: .08em;
-    }
-
-    .hero-title-rt .rt-el{
-      display: inline-block;
-      will-change: transform, opacity;
-    }
-
-
 
 
     /* Layout */
@@ -408,24 +375,20 @@
       letter-spacing: .01em;
     }
 
-        /* Headline styling (no gradient pill; premium contrast + soft bloom) */
+        /* Theme-matched headline gradient (like Nexros) */
     .hero h1{
-      color: rgba(244,240,255,.72);
-      text-shadow:
-        0 18px 70px rgba(0,0,0,.60),
-        0 0 26px rgba(179,124,255,.18);
+      background: linear-gradient(180deg,
+        rgba(179,124,255,.60),
+        rgba(244,240,255,.42) 60%,
+        rgba(249,115,226,.32)
+      );
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
     }
 
-    /* Rotating word: slightly brighter + controlled glow (no tacky gradients) */
-    .hero-title-rt .rt-inline{
-      color: rgba(244,240,255,.88);
-      text-shadow:
-        0 18px 70px rgba(0,0,0,.60),
-        0 0 18px rgba(179,124,255,.22),
-        0 0 30px rgba(249,115,226,.10);
-      filter: none; /* avoid double glow stacking */
-    }
-.lede{
+
+    .lede{
       margin: 0 auto;
       max-width: 78ch;
       color: var(--muted);
@@ -1046,7 +1009,7 @@
 
         <div class="eyebrow reveal">Veteran-led • Los Angeles • Small Business IT</div>
 
-        <h1 class="reveal hero-title-rt">Network <span id="rt-headline"></span></h1>
+        <h1 class="reveal">Network reliability is our business.</h1>
 
         <p class="lede reveal">
           SNS designs, installs, and supports business networks with a focus on stability, clean implementation,
@@ -1302,6 +1265,6 @@ function initParticles(){
   setTimeout(() => finishBoot(), 2500);
 })();
 </script>
-<script type="module" src="/home/reactbits/dist/rotating-headline.js"></script>
+
 </body>
 </html>
