@@ -633,6 +633,48 @@
     .skel-stack{ display:flex; flex-direction:column; gap:.55rem; }
     .skel-row{ display:flex; gap:.55rem; align-items:center; }
 
+        /* Notes skeleton + busy overlay */
+    .notesBusy{
+      position: absolute;
+      inset: 0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index: 40;
+      background: rgba(0,0,0,.28);
+      backdrop-filter: blur(6px);
+    }
+    .notesBusy.on{ display:flex; }
+
+    .notesBusyCard{
+      border-radius: 18px;
+      border: 1px solid rgba(179,124,255,.20);
+      background: rgba(9,6,34,.72);
+      padding: 12px 14px;
+      box-shadow: 0 18px 60px rgba(0,0,0,.45);
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+    .notesBusyDot{
+      width: 10px; height: 10px; border-radius: 999px;
+      background: rgba(179,124,255,.95);
+      box-shadow: 0 0 0 3px rgba(179,124,255,.15);
+      animation: busyPulse 1.1s ease-in-out infinite;
+    }
+    @keyframes busyPulse{
+      0%{ transform: scale(.95); opacity:.75; }
+      50%{ transform: scale(1.10); opacity:1; }
+      100%{ transform: scale(.95); opacity:.75; }
+    }
+    .notesBusyText{
+      font-size: 13px;
+      letter-spacing:.06em;
+      text-transform: uppercase;
+      color: rgba(244,240,255,.90);
+    }
+
+
     .overlay{
       position: fixed; inset: 0;
       background: rgba(0,0,0,.55);
@@ -1069,8 +1111,11 @@
     .notesSearchRow{
       display:flex;
       gap: 10px;
+      align-items: center;
     }
-    .notesSearch, .notesSelect{
+
+    /* Search input stays consistent */
+    .notesSearch{
       border-radius: 14px;
       border: 1px solid rgba(179,124,255,.22);
       background: rgba(255,255,255,.06);
@@ -1078,8 +1123,82 @@
       padding: .7rem .8rem;
       outline:none;
       width:100%;
+      transition: border-color .12s ease, box-shadow .12s ease, filter .12s ease, transform .12s ease;
     }
-    .notesSelect{ width: 190px; }
+    .notesSearch:focus{
+      border-color: rgba(179,124,255,.55);
+      box-shadow: 0 0 0 1px rgba(179,124,255,.18);
+      filter: brightness(1.04);
+    }
+
+    /* Select wrapper (gives us a clean arrow + hover glow) */
+    .selectWrap{
+      position: relative;
+      width: 190px;
+      flex: 0 0 190px;
+    }
+    .selectWrap::after{
+      content:"";
+      position:absolute;
+      right: 12px;
+      top: 50%;
+      width: 10px;
+      height: 10px;
+      transform: translateY(-50%) rotate(45deg);
+      border-right: 2px solid rgba(244,240,255,.78);
+      border-bottom: 2px solid rgba(244,240,255,.78);
+      pointer-events:none;
+      opacity:.85;
+      transition: transform .12s ease, opacity .12s ease, filter .12s ease;
+    }
+    .selectWrap:hover::after{
+      opacity: 1;
+      filter: brightness(1.08);
+      transform: translateY(-50%) rotate(45deg) translateY(-1px);
+    }
+
+    /* The actual select */
+    .notesSelect{
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+
+      width: 100%;
+      border-radius: 14px;
+      border: 1px solid rgba(179,124,255,.22);
+      background: rgba(9,6,34,.58);
+      color: rgba(244,240,255,.92);
+      padding: .7rem 2.25rem .7rem .8rem; /* right padding for arrow */
+      outline: none;
+
+      cursor: pointer;
+      transition: border-color .12s ease, box-shadow .12s ease, filter .12s ease, transform .12s ease;
+    }
+    .notesSelect:hover{
+      border-color: rgba(179,124,255,.40);
+      filter: brightness(1.05);
+    }
+    .notesSelect:focus{
+      border-color: rgba(179,124,255,.65);
+      box-shadow: 0 0 0 1px rgba(179,124,255,.20);
+      transform: translateY(-1px);
+    }
+
+    /* IMPORTANT: fixes your “white on white” issue in many browsers */
+    .notesSelect option{
+      background: rgba(9,6,34,.98);
+      color: rgba(244,240,255,.92);
+    }
+
+    /* Disabled look when we skeleton-load */
+    .notesSelect:disabled,
+    .notesSearch:disabled{
+      opacity: .55;
+      cursor: default;
+      filter: none;
+      transform: none;
+    }
+
     .notesList{
       overflow:auto;
       padding-right: 4px;
@@ -1379,6 +1498,12 @@
   <!-- Internal Notes View -->
   <div id="notesView" class="notesView" style="display:none;">
     <div class="notesShell">
+        <div id="notesBusy" class="notesBusy">
+          <div class="notesBusyCard">
+            <span class="notesBusyDot"></span>
+            <span id="notesBusyText" class="notesBusyText">Loading…</span>
+          </div>
+        </div>
       <div class="notesSidebar">
         <div class="notesTop">
           <div class="notesTitle">Internal Notes</div>
@@ -1387,11 +1512,13 @@
 
         <div class="notesSearchRow">
           <input id="notesSearch" class="notesSearch" placeholder="Search…" />
-          <select id="notesSearchMode" class="notesSelect">
-            <option value="keywords">Keywords (body)</option>
-            <option value="title">Title</option>
-            <option value="client">Client (name/email/phone/business)</option>
-          </select>
+          <div class="selectWrap">
+            <select id="notesSearchMode" class="notesSelect">
+              <option value="keywords">Keywords (body)</option>
+              <option value="title">Title</option>
+              <option value="client">Client (name/email/phone/business)</option>
+            </select>
+          </div>
         </div>
 
         <button id="noteNewBtn" class="btn btn-primary" type="button">New Note</button>
@@ -3065,6 +3192,36 @@ composer.addEventListener("keydown", (e) => {
     const noteClientBtn = document.getElementById("noteClientBtn");
     const noteClientChip = document.getElementById("noteClientChip");
     const noteDeleteBtn = document.getElementById("noteDeleteBtn");
+        // Notes delete modal
+    const noteDeleteModal = document.getElementById("noteDeleteModal");
+    const noteDeleteClose = document.getElementById("noteDeleteClose");
+    const noteDeleteCancel = document.getElementById("noteDeleteCancel");
+    const noteDeleteConfirm = document.getElementById("noteDeleteConfirm");
+    const noteDeletePreview = document.getElementById("noteDeletePreview");
+
+    function openNoteDeleteModal(){
+      if (!noteDeleteModal) return;
+      const n = notes.find(x => x.id === activeNoteId);
+      const title = (n?.title || "").trim() || "Untitled note";
+      const meta = (n?.client_label || n?.client_email || "").trim();
+      if (noteDeletePreview){
+        noteDeletePreview.textContent = meta ? `${title} — ${meta}` : title;
+      }
+      noteDeleteModal.classList.add("on");
+      noteDeleteModal.style.display = "flex";
+      noteDeleteModal.setAttribute("aria-hidden","false");
+    }
+    function closeNoteDeleteModal(){
+      if (!noteDeleteModal) return;
+      noteDeleteModal.classList.remove("on");
+      noteDeleteModal.style.display = "none";
+      noteDeleteModal.setAttribute("aria-hidden","true");
+    }
+
+    if (noteDeleteClose) noteDeleteClose.addEventListener("click", closeNoteDeleteModal);
+    if (noteDeleteCancel) noteDeleteCancel.addEventListener("click", closeNoteDeleteModal);
+    if (noteDeleteModal) noteDeleteModal.addEventListener("click", (e) => { if (e.target === noteDeleteModal) closeNoteDeleteModal(); });
+
 
     const notesClientPick = document.getElementById("notesClientPick");
     const notesClientClose = document.getElementById("notesClientClose");
@@ -3075,6 +3232,42 @@ composer.addEventListener("keydown", (e) => {
     let activeNoteId = null;
     let saveTimer = null;
     let savedFlashTimer = null;
+
+    const notesBusy = document.getElementById("notesBusy");
+    const notesBusyText = document.getElementById("notesBusyText");
+
+    function setNotesBusy(on, text){
+      if (notesBusyText) notesBusyText.textContent = text || "Loading…";
+      if (notesBusy) notesBusy.classList.toggle("on", !!on);
+
+      // Disable note editor controls while busy
+      if (noteTitleEl) noteTitleEl.disabled = !!on;
+      if (noteBodyEl) noteBodyEl.disabled = !!on;
+      if (noteNewBtn) noteNewBtn.disabled = !!on;
+      if (noteClientBtn) noteClientBtn.disabled = !!on;
+      if (noteDeleteBtn) noteDeleteBtn.disabled = !!on;
+      if (notesSearch) notesSearch.disabled = !!on;
+      if (notesSearchMode) notesSearchMode.disabled = !!on;
+    }
+
+    function renderNotesSkeleton(){
+      // left list skeleton
+      if (notesListEl){
+        notesListEl.innerHTML = Array.from({length: 10}).map(() => `
+          <div class="noteItem skel" style="padding: 10px 12px;">
+            <div class="skel skel-line" style="width: 70%;"></div>
+            <div style="height:8px;"></div>
+            <div class="skel skel-line sm" style="width: 52%;"></div>
+          </div>
+        `).join("");
+      }
+
+      // editor skeleton
+      if (noteTitleEl) noteTitleEl.value = "";
+      if (noteBodyEl) noteBodyEl.value = "";
+      if (noteClientChip){ noteClientChip.style.display = "none"; noteClientChip.textContent = ""; }
+    }
+
 
     function showSaved(){
       if (!noteSavedEl) return;
@@ -3151,30 +3344,47 @@ composer.addEventListener("keydown", (e) => {
     async function loadNotes(){
       const q = (notesSearch?.value || "").trim();
       const mode = (notesSearchMode?.value || "keywords");
-      const res = await callNotes("list", { q, mode, limit: 100 });
-      notes = Array.isArray(res?.notes) ? res.notes : [];
-      renderNotesList();
 
-      // Auto-select first note
-      if (!activeNoteId && notes.length){
-        setActiveNote(notes[0].id);
-      }else if (activeNoteId){
-        // refresh active note content if it still exists
-        const still = notes.find(x => x.id === activeNoteId);
-        if (!still && notes.length) setActiveNote(notes[0].id);
+      setNotesBusy(true, "Loading…");
+      renderNotesSkeleton();
+
+      try{
+        const res = await callNotes("list", { q, mode, limit: 100 });
+        notes = Array.isArray(res?.notes) ? res.notes : [];
+        renderNotesList();
+
+        // Auto-select first note
+        if (!activeNoteId){
+          if (notes.length) setActiveNote(notes[0].id);
+        } else {
+          const still = notes.find(x => x.id === activeNoteId);
+          if (!still && notes.length) setActiveNote(notes[0].id);
+        }
+      }finally{
+        setNotesBusy(false);
       }
     }
+
 
     if (notesListEl){
       notesListEl.addEventListener("click", (e) => {
         const it = e.target.closest("[data-note]");
         if (!it) return;
         const id = it.getAttribute("data-note");
-        if (id) setActiveNote(id);
+        if (!id) return;
+
+        // quick skeleton/transition (keeps it feeling “loaded”)
+        setNotesBusy(true, "Loading…");
+        window.setTimeout(() => {
+          try{ setActiveNote(id); }
+          finally{ setNotesBusy(false); }
+        }, 140);
       });
     }
 
+
     async function createNewNote(){
+      setNotesBusy(true, "Creating…");
   // Instant, blank note (optimistic)
   const tempId = `temp_${Date.now()}`;
   const nowIso = new Date().toISOString();
@@ -3214,8 +3424,11 @@ composer.addEventListener("keydown", (e) => {
     }
   }catch(_){
     // keep temp locally; save will retry on next input
+  }finally{
+    setNotesBusy(false);
   }
 }
+
 
     if (noteNewBtn) noteNewBtn.addEventListener("click", createNewNote);
 
@@ -3316,18 +3529,51 @@ if (noteClientChip){
     }
 
     if (noteDeleteBtn){
-      noteDeleteBtn.addEventListener("click", async () => {
+      noteDeleteBtn.addEventListener("click", () => {
         const n = notes.find(x => x.id === activeNoteId);
         if (!n) return;
-        if (!confirm("Delete this note?")) return;
-        await callNotes("delete", { id: activeNoteId });
-        activeNoteId = null;
-        if (noteTitleEl) noteTitleEl.value = "";
-        if (noteBodyEl) noteBodyEl.value = "";
-        if (noteClientChip){ noteClientChip.style.display = "none"; noteClientChip.textContent = ""; }
-        await loadNotes();
+        openNoteDeleteModal();
       });
     }
+
+    if (noteDeleteConfirm){
+      noteDeleteConfirm.addEventListener("click", async () => {
+        const n = notes.find(x => x.id === activeNoteId);
+        if (!n) return;
+
+        // If it's a temp note that never got created server-side, just remove locally.
+        if (String(activeNoteId || "").startsWith("temp_")){
+          notes = notes.filter(x => x.id !== activeNoteId);
+          activeNoteId = null;
+          if (noteTitleEl) noteTitleEl.value = "";
+          if (noteBodyEl) noteBodyEl.value = "";
+          if (noteClientChip){ noteClientChip.style.display = "none"; noteClientChip.textContent = ""; }
+          closeNoteDeleteModal();
+          renderNotesList();
+          if (notes.length) setActiveNote(notes[0].id);
+          return;
+        }
+
+        try{
+          setNotesBusy(true, "Deleting…");
+          closeNoteDeleteModal();
+
+          await callNotes("delete", { id: activeNoteId });
+
+          activeNoteId = null;
+          if (noteTitleEl) noteTitleEl.value = "";
+          if (noteBodyEl) noteBodyEl.value = "";
+          if (noteClientChip){ noteClientChip.style.display = "none"; noteClientChip.textContent = ""; }
+
+          await loadNotes();
+        }catch(e){
+          showChatErr(e?.message || String(e));
+        }finally{
+          setNotesBusy(false);
+        }
+      });
+    }
+
 
     logoutBtn.addEventListener("click", logout);
     loginBtn.addEventListener("click", login);
@@ -3348,5 +3594,29 @@ if (noteClientChip){
       if (ok) await loadClientList();
     })();
   </script>
+
+<!-- Notes: Delete Confirm Modal -->
+<div id="noteDeleteModal" class="origModal" aria-hidden="true" style="display:none;">
+  <div class="origCard" style="max-width: 560px;">
+    <div class="origHeader">
+      <div class="origTitle">Delete Note</div>
+      <button id="noteDeleteClose" class="origClose">Close</button>
+    </div>
+
+    <div class="origBody">
+      <div class="origBlock">
+        <div class="origLabel">This action cannot be undone.</div>
+        <div id="noteDeletePreview" class="origText" style="opacity:.92;"></div>
+      </div>
+
+      <div class="origBlock" style="display:flex; gap:.65rem; justify-content:flex-end; flex-wrap:wrap;">
+        <button id="noteDeleteCancel" class="btn btn-soft" type="button">Cancel</button>
+        <button id="noteDeleteConfirm" class="btn" type="button" style="background: rgba(255,80,120,.16); border:1px solid rgba(255,80,120,.38);">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 </body>
 </html>
