@@ -158,22 +158,29 @@
       #particles{ display:none; }
     }
 
-    .hero-title-rt{display:inline-flex;align-items:baseline;gap:.15em;}
+    .hero-title-rt{
+      display:inline-flex;
+      align-items:baseline;
+      justify-content:center;
+      gap:.25em;                 /* normal sentence spacing */
+    }
 
     .hero-title-rt .text-rotate{
-      will-change: transform;
-      display: inline-flex;
-      flex-wrap: nowrap;
-      white-space: nowrap;
-      align-items: baseline;
+      display:inline-flex;
+      align-items:baseline;
+      white-space:nowrap;
+      will-change:transform;
+      transform: translateZ(0);
     }
 
+    /* IMPORTANT: fixed slot width = no snapping */
     .hero-title-rt .rt-inline{
-      display: inline-block;
-      min-width: 12.5ch;        /* locks width to longest word */
-      text-align: left;
-      transition: width 0.35s ease, transform 0.35s ease;
+      display:inline-block;
+      width: 14ch;               /* adjust if needed (see note below) */
+      min-width: 14ch;
+      text-align:left;
     }
+
 
     .hero-title-rt .rt-split{
       display: inline-flex;
