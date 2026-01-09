@@ -176,8 +176,7 @@
       display: inline-flex;
       align-items: baseline;
       min-width: 13ch;
-      filter: drop-shadow(0 0 10px rgba(179,124,255,.16))
-              drop-shadow(0 0 22px rgba(249,115,226,.10));
+      
     }
 
     .hero-title-rt .rt-split{
@@ -409,22 +408,22 @@
       letter-spacing: .01em;
     }
 
-        /* Headline: premium contrast (no gradient-clip so rotating word is visible) */
+        /* Headline styling (no gradient pill; premium contrast + soft bloom) */
     .hero h1{
-      color: rgba(244,240,255,.74);
+      color: rgba(244,240,255,.72);
       text-shadow:
-        0 18px 70px rgba(0,0,0,.62),
-        0 0 24px rgba(179,124,255,.18);
+        0 18px 70px rgba(0,0,0,.60),
+        0 0 26px rgba(179,124,255,.18);
     }
 
-    /* Rotating word: slightly brighter + controlled glow */
+    /* Rotating word: slightly brighter + controlled glow (no tacky gradients) */
     .hero-title-rt .rt-inline{
-      color: rgba(244,240,255,.90);
+      color: rgba(244,240,255,.88);
       text-shadow:
-        0 18px 70px rgba(0,0,0,.62),
-        0 0 18px rgba(179,124,255,.24),
+        0 18px 70px rgba(0,0,0,.60),
+        0 0 18px rgba(179,124,255,.22),
         0 0 30px rgba(249,115,226,.10);
-      filter: none;
+      filter: none; /* avoid double glow stacking */
     }
 .lede{
       margin: 0 auto;
