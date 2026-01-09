@@ -408,8 +408,7 @@
       color: transparent;
       animation: shimmer 1.25s linear infinite;
     }
-    @keyframes shimmer{ from{ background-position:0% } to{ background-position:200% } }
-
+    @keyframes shimmer{ from{ background-position:0% } 
     .home.home-center{
       width:100%;
       min-height: 100%;
@@ -491,6 +490,8 @@
       from{ transform: translate3d(-2%, -1%, 0) scale(1.02); }
       to{ transform: translate3d(2%, 1%, 0) scale(1.06); }
     }
+    
+to{ background-position:200% } }
 
     .composer{
       padding: .85rem;
