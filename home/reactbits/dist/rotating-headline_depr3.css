@@ -1,0 +1,20 @@
+.text-rotate {
+  display: inline-flex;
+  align-items: baseline;
+  white-space: nowrap;
+}
+
+.rt-inline {
+  display: inline-block;
+  min-width: 14ch;
+  text-align: left;
+}
+
+.rt-word {
+  display: inline-flex;
+}
+
+.rt-el {
+  display: inline-block;
+  will-change: transform, opacity;
+}
