@@ -54,7 +54,13 @@
 
     *{ box-sizing:border-box; }
     html, body{ height:100%; }
-    
+    body{
+      margin:0;
+      color: var(--ink);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      background: linear-gradient(180deg, var(--bg1), var(--bg0));
+      overflow-x:hidden;
+    }
 
     /* Full-bleed animated background (Nexros-style) */
     .bg{
@@ -524,123 +530,244 @@
     #app{ opacity: 0; transform: translateY(6px); transition: opacity .28s ease, transform .28s ease; }
     body.is-ready #app{ opacity: 1; transform: none; }
 
-    /* Full-page skeleton overlay */
+    
+    /* Full-page skeleton overlay (matches actual Home layout) */
     #boot-skeleton{
       position: fixed;
       inset: 0;
-      z-index: 999;
+      z-index: 9999;
       pointer-events: none;
-      background: linear-gradient(180deg, var(--bg1), var(--bg0));
+      overflow: hidden;
+      background:
+        radial-gradient(1200px 800px at 25% 20%, rgba(179,124,255,.16), transparent 60%),
+        radial-gradient(900px 650px at 85% 10%, rgba(94,234,212,.08), transparent 55%),
+        radial-gradient(1100px 900px at 70% 80%, rgba(249,115,226,.10), transparent 55%),
+        linear-gradient(180deg, var(--bg1), var(--bg0));
     }
-    body.is-ready #boot-skeleton{ display:none; }
+
+    /* soft dark vignette like the real page */
+    #boot-skeleton::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background: radial-gradient(circle at 50% 0%, rgba(0,0,0,.10), rgba(0,0,0,.64) 62%, rgba(0,0,0,.78));
+      pointer-events:none;
+    }
 
     .sk-wrap{
       width: min(var(--max), calc(100% - 2rem));
       margin: 0 auto;
-      padding: 1.15rem 0 2.0rem;
     }
-    .sk-nav{
-      height: 64px;
-      border-radius: 18px;
-      border: 1px solid rgba(196,181,253,.10);
-      background: rgba(10,6,28,.34);
-      backdrop-filter: blur(14px);
-    }
-    .sk-hero{
-      margin-top: 2.2rem;
-      padding: 3.2rem 0 2.8rem;
-      text-align:center;
-    }
-    .sk-pill{
-      display:inline-block;
-      height: 26px;
-      width: 280px;
+
+    .shimmer{
+      position: relative;
+      overflow: hidden;
       border-radius: 999px;
-      background: rgba(196,181,253,.10);
-      border: 1px solid rgba(196,181,253,.12);
+      background: rgba(196,181,253,.08);
+      border: 1px solid rgba(196,181,253,.14);
+      box-shadow: 0 18px 60px rgba(0,0,0,.28);
     }
-    .sk-title{
-      height: 52px;
-      width: min(760px, 88%);
-      margin: 1.2rem auto 0;
+    .shimmer::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        linear-gradient(90deg,
+          rgba(255,255,255,0) 0%,
+          rgba(255,255,255,.10) 25%,
+          rgba(255,255,255,.18) 50%,
+          rgba(255,255,255,.10) 75%,
+          rgba(255,255,255,0) 100%);
+      transform: translateX(-120%);
+      animation: skShimmer 1.15s ease-in-out infinite;
+      opacity:.55;
+    }
+    @keyframes skShimmer{
+      0%{ transform: translateX(-120%); }
+      100%{ transform: translateX(120%); }
+    }
+
+    /* --- Top nav skeleton --- */
+    .sk-topnav{
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      padding: 1.15rem 0;
+      backdrop-filter: blur(14px);
+      background: linear-gradient(180deg, rgba(3,1,11,.70), rgba(3,1,11,.18));
+      border-bottom: 1px solid rgba(196,181,253,.10);
+    }
+    .sk-navrow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 1rem;
+    }
+    .sk-brand{
+      display:flex;
+      align-items:center;
+      gap:.75rem;
+      min-width: 240px;
+    }
+    .sk-logo{
+      width: 42px;
+      height: 42px;
       border-radius: 14px;
       background: rgba(196,181,253,.10);
-      border: 1px solid rgba(196,181,253,.12);
     }
-    .sk-text{
-      height: 18px;
-      width: min(860px, 92%);
-      margin: .85rem auto 0;
-      border-radius: 10px;
-      background: rgba(196,181,253,.08);
-      border: 1px solid rgba(196,181,253,.10);
-    }
-    .sk-text.sm{ width: min(720px, 86%); }
-    .sk-cta{
+    .sk-brandtext{ display:grid; gap:.45rem; }
+    .sk-navpills{
       display:flex;
       justify-content:center;
+      align-items:center;
+      gap:.6rem;
+      flex-wrap: nowrap;
+      white-space: nowrap;
+    }
+    .sk-pillnav{
+      width: 76px;
+      height: 26px;
+      border-radius: 999px;
+      background: rgba(196,181,253,.08);
+    }
+    .sk-actions{ min-width:240px; display:flex; justify-content:flex-end; }
+    .sk-pillbtn{
+      width: 132px;
+      height: 40px;
+      border-radius: 999px;
+      background: rgba(179,124,255,.18);
+      border-color: rgba(179,124,255,.22);
+    }
+
+    /* --- Hero skeleton --- */
+    .sk-hero{
+      padding: 5.6rem 0 3.3rem;
+      text-align:center;
+    }
+    .sk-hero-inner{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap: 1rem;
+    }
+    .sk-hero-logo{
+      width: 56px;
+      height: 56px;
+      border-radius: 18px;
+      background: rgba(196,181,253,.10);
+    }
+    .sk-hero-pill{
+      width: 310px;
+      height: 26px;
+      border-radius: 999px;
+      background: rgba(196,181,253,.06);
+    }
+    .sk-hero-title{ display:grid; gap:.7rem; width: min(760px, 92%); margin-top:.35rem; }
+    .sk-h1{
+      height: 28px;
+      border-radius: 14px;
+      background: rgba(179,124,255,.16);
+      border-color: rgba(179,124,255,.18);
+    }
+
+    .sk-hero-text{ display:grid; gap:.55rem; width: min(820px, 92%); margin-top:.35rem; }
+    .sk-line{
+      height: 14px;
+      border-radius: 999px;
+      background: rgba(196,181,253,.08);
+    }
+
+    .sk-cta{
+      display:flex;
       gap:.8rem;
-      margin-top: 1.4rem;
+      justify-content:center;
       flex-wrap: wrap;
+      margin-top:.75rem;
     }
     .sk-btn{
+      width: 168px;
       height: 40px;
-      width: 170px;
       border-radius: 999px;
-      background: rgba(196,181,253,.10);
-      border: 1px solid rgba(196,181,253,.12);
+      background: rgba(196,181,253,.08);
     }
-    .sk-grid{
-      width: min(var(--max), calc(100% - 2rem));
-      margin: 2.6rem auto 0;
+    .sk-btn.primary{
+      background: linear-gradient(90deg, rgba(179,124,255,.38), rgba(249,115,226,.24));
+      border-color: rgba(255,255,255,.14);
+    }
+
+    /* --- Feature cards skeleton (mirrors .featureRow) --- */
+    .sk-featureRow{
+      margin-top: 2.3rem;
       display:grid;
       grid-template-columns: repeat(3, minmax(0,1fr));
       gap: 1rem;
+      width: 100%;
+      align-items: stretch;
     }
     .sk-card{
-      height: 96px;
       border-radius: var(--r-xl);
-      background: rgba(10,6,28,.34);
-      border: 1px solid rgba(196,181,253,.12);
+      border: 1px solid rgba(196,181,253,.16);
+      background: linear-gradient(180deg, rgba(10,6,28,.52), rgba(10,6,28,.30));
+      box-shadow: var(--shadow2);
+      padding: 1.3rem 1.2rem;
+      display:grid;
+      gap:.6rem;
     }
-    .sk-panels{
-      width: min(var(--max), calc(100% - 2rem));
-      margin: 2.6rem auto 0;
+    .sk-card .sk-line{ background: rgba(196,181,253,.10); border-color: rgba(196,181,253,.14); }
+
+    /* --- Lower section + footer skeleton --- */
+    .sk-section{ padding: 2.2rem 0 2.6rem; }
+    .sk-split{
       display:grid;
       grid-template-columns: 1.1fr .9fr;
       gap: 1rem;
+      align-items: stretch;
+      margin-top: .9rem;
     }
     .sk-panel{
-      height: 120px;
       border-radius: var(--r-xl);
-      background: rgba(10,6,28,.34);
-      border: 1px solid rgba(196,181,253,.12);
+      border: 1px solid rgba(196,181,253,.14);
+      background: linear-gradient(180deg, rgba(10,6,28,.44), rgba(10,6,28,.24));
+      box-shadow: var(--shadow2);
+      padding: 1.5rem 1.35rem;
+      display:grid;
+      gap:.65rem;
+    }
+    .sk-footer{
+      margin-top: 2.4rem;
+      padding-top: 2.0rem;
+      border-top: 1px solid rgba(196,181,253,.10);
+      display:grid;
+      gap:.65rem;
+      justify-items:center;
     }
 
-    /* shimmer */
-    #boot-skeleton .shimmer{
-      position: relative;
-      overflow:hidden;
-    }
-    #boot-skeleton .shimmer::after{
-      content:"";
-      position:absolute;
-      inset:-40% -60%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,.10), transparent);
-      transform: translateX(-60%) rotate(10deg);
-      animation: skShimmer 1.05s linear infinite;
-      opacity:.9;
-    }
-    @keyframes skShimmer{
-      from{ transform: translateX(-60%) rotate(10deg); }
-      to{ transform: translateX(60%) rotate(10deg); }
-    }
+    /* widths helpers */
+    .w-35{ width:35%; }
+    .w-45{ width:45%; }
+    .w-55{ width:55%; }
+    .w-70{ width:70%; }
+    .w-72{ width:72%; }
+    .w-78{ width:78%; }
+    .w-80{ width:80%; }
+    .w-86{ width:86%; }
+    .w-90{ width:90%; }
+    .w-92{ width:92%; }
+    .w-150{ width:150px; }
+    .w-190{ width:190px; }
+
     @media (max-width: 980px){
-      .sk-grid{ grid-template-columns: 1fr; }
-      .sk-panels{ grid-template-columns: 1fr; }
+      .sk-navpills{ display:none; }
+      .sk-featureRow{ grid-template-columns: 1fr; }
+      .sk-split{ grid-template-columns: 1fr; }
+      .sk-brand, .sk-actions{ min-width: unset; }
+      .sk-hero{ padding: 4.9rem 0 2.6rem; }
+      .sk-hero-pill{ width: 240px; }
+      .sk-pillbtn{ width: 118px; }
     }
+
     @media (prefers-reduced-motion: reduce){
-      #boot-skeleton .shimmer::after{ display:none; }
+      .shimmer::before{ animation:none; }
     }
 
   </style>
@@ -656,27 +783,91 @@
 
   <!-- Boot skeleton shown until background + DOM are ready -->
   <div id="boot-skeleton" aria-hidden="true">
-    <div class="sk-wrap">
-      <div class="sk-nav shimmer"></div>
-    </div>
-    <div class="sk-hero">
-      <div class="sk-pill shimmer"></div>
-      <div class="sk-title shimmer"></div>
-      <div class="sk-text shimmer"></div>
-      <div class="sk-text sm shimmer"></div>
-      <div class="sk-cta">
-        <div class="sk-btn shimmer"></div>
-        <div class="sk-btn shimmer"></div>
+    <div class="sk-topnav">
+      <div class="sk-wrap sk-navrow">
+        <div class="sk-brand">
+          <div class="sk-logo shimmer"></div>
+          <div class="sk-brandtext">
+            <div class="sk-line w-190 shimmer"></div>
+            <div class="sk-line w-150 shimmer"></div>
+          </div>
+        </div>
+
+        <div class="sk-navpills">
+          <div class="sk-pillnav shimmer"></div>
+          <div class="sk-pillnav shimmer"></div>
+          <div class="sk-pillnav shimmer"></div>
+          <div class="sk-pillnav shimmer"></div>
+          <div class="sk-pillnav shimmer"></div>
+        </div>
+
+        <div class="sk-actions">
+          <div class="sk-pillbtn shimmer"></div>
+        </div>
       </div>
     </div>
-    <div class="sk-grid">
-      <div class="sk-card shimmer"></div>
-      <div class="sk-card shimmer"></div>
-      <div class="sk-card shimmer"></div>
+
+    <div class="sk-hero">
+      <div class="sk-wrap sk-hero-inner">
+        <div class="sk-hero-logo shimmer"></div>
+        <div class="sk-hero-pill shimmer"></div>
+
+        <div class="sk-hero-title">
+          <div class="sk-h1 shimmer"></div>
+          <div class="sk-h1 w-72 shimmer"></div>
+        </div>
+
+        <div class="sk-hero-text">
+          <div class="sk-line w-92 shimmer"></div>
+          <div class="sk-line w-86 shimmer"></div>
+          <div class="sk-line w-70 shimmer"></div>
+        </div>
+
+        <div class="sk-cta">
+          <div class="sk-btn primary shimmer"></div>
+          <div class="sk-btn shimmer"></div>
+        </div>
+
+        <div class="sk-featureRow">
+          <div class="sk-card">
+            <div class="sk-line w-55 shimmer"></div>
+            <div class="sk-line w-90 shimmer"></div>
+            <div class="sk-line w-78 shimmer"></div>
+          </div>
+          <div class="sk-card">
+            <div class="sk-line w-55 shimmer"></div>
+            <div class="sk-line w-90 shimmer"></div>
+            <div class="sk-line w-78 shimmer"></div>
+          </div>
+          <div class="sk-card">
+            <div class="sk-line w-55 shimmer"></div>
+            <div class="sk-line w-90 shimmer"></div>
+            <div class="sk-line w-78 shimmer"></div>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="sk-panels">
-      <div class="sk-panel shimmer"></div>
-      <div class="sk-panel shimmer"></div>
+
+    <div class="sk-section">
+      <div class="sk-wrap">
+        <div class="sk-split">
+          <div class="sk-panel">
+            <div class="sk-line w-45 shimmer"></div>
+            <div class="sk-line w-92 shimmer"></div>
+            <div class="sk-line w-80 shimmer"></div>
+          </div>
+          <div class="sk-panel">
+            <div class="sk-line w-55 shimmer"></div>
+            <div class="sk-line w-92 shimmer"></div>
+            <div class="sk-line w-80 shimmer"></div>
+          </div>
+        </div>
+
+        <div class="sk-footer">
+          <div class="sk-line w-35 shimmer"></div>
+          <div class="sk-line w-70 shimmer"></div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -925,119 +1116,79 @@ function initParticles(){
 
 <script>
 (function(){
-  // Robust "no-flash" boot:
-  // - Keep the real page hidden (opacity:0) while the background iframe spins up
-  // - Show an on-brand skeleton overlay
-  // - Reveal as soon as BOTH:
-  //    1) DOM is ready (layout exists)
-  //    2) Background iframe has fired load (or we time out safely)
-  //
-  // Important: This must NEVER get stuck. We always reveal after a hard timeout.
-
-  const body = document.body;
-  const iframe = document.querySelector(".beams-iframe");
-  const sk = document.getElementById("boot-skeleton");
-
-  let domReady = (document.readyState !== "loading");
+  // --- Boot gate: keep skeleton until BOTH DOM is ready and background iframe has had a chance to paint ---
+  let domReady = false;
   let bgReady = false;
   let done = false;
 
-  function finishBoot(reason){
+  function finish(){
     if (done) return;
     done = true;
 
-    body.classList.remove("is-loading");
-    body.classList.add("is-ready");
+    document.body.classList.add("is-ready");
+    document.body.classList.remove("is-loading");
 
-    if (bgReady) body.classList.add("bg-ready");
+    if (typeof initReveal === "function") initReveal();
+    if (typeof initParticles === "function") initParticles();
 
-    // Let the transition run, then remove skeleton from the DOM so it can never block clicks.
-    if (sk){
-      sk.setAttribute("aria-hidden","true");
-      sk.style.opacity = "0";
-      setTimeout(() => { try{ sk.remove(); }catch(e){} }, 240);
-    }
-
-    // Safety: ensure the iframe is visible even if classes were missed.
-    if (iframe) iframe.style.opacity = "";
-  }
-
-  // DOM ready
-  if (!domReady){
-    document.addEventListener("DOMContentLoaded", () => {
-      domReady = true;
-      maybeFinish();
-    }, { once:true });
-  }
-
-  // Background iframe ready
-  function markBgReady(){
-    bgReady = true;
-    body.classList.add("bg-ready");
-    maybeFinish();
-  }
-
-  if (iframe){
-    // If the iframe is cached and already complete, mark it ready.
-    try{
-      if (iframe.contentDocument && iframe.contentDocument.readyState === "complete"){
-        bgReady = true;
-      }
-    }catch(e){ /* ignore */ }
-
-    if (bgReady){
-      body.classList.add("bg-ready");
-    } else {
-      iframe.addEventListener("load", markBgReady, { once:true });
-      iframe.addEventListener("error", () => {
-        // If the background fails, still reveal the page.
-        markBgReady();
-      }, { once:true });
-    }
-  } else {
-    // No iframe found; don't block.
-    bgReady = true;
-    body.classList.add("bg-ready");
-  }
-
-  // A small rAF loop avoids edge cases where listeners miss because of cached fast loads.
-  const start = performance.now();
-  function poll(){
-    if (done) return;
-
-    // Refresh domReady if we started late.
-    if (!domReady && document.readyState !== "loading") domReady = true;
-
-    // Refresh bgReady if iframe became complete without firing our handler.
-    if (!bgReady && iframe){
-      try{
-        if (iframe.contentDocument && iframe.contentDocument.readyState === "complete"){
-          markBgReady();
-        }
-      }catch(e){ /* ignore */ }
-    }
-
-    maybeFinish();
-
-    if (!done && (performance.now() - start) < 1800){
-      requestAnimationFrame(poll);
-    }
+    // Remove skeleton from DOM after fade to avoid it intercepting clicks
+    window.setTimeout(() => {
+      const sk = document.getElementById("boot-skeleton");
+      if (sk) sk.remove();
+    }, 420);
   }
 
   function maybeFinish(){
-    // Primary: both ready
-    if (domReady && bgReady){
-      // One more frame so styles apply cleanly before we fade in.
-      requestAnimationFrame(() => finishBoot("ready"));
-    }
+    if (domReady && bgReady) finish();
   }
 
-  // Always reveal after a hard cap (never get stuck).
-  setTimeout(() => finishBoot("timeout"), 2200);
+  function attachBgListener(){
+    const iframe = document.querySelector(".beams-iframe");
+    if (!iframe) {
+      // No background iframe found; don't block rendering.
+      bgReady = true;
+      maybeFinish();
+      return;
+    }
 
-  poll();
+    // If it loads, we are good. If it errors, we still unblock.
+    iframe.addEventListener("load", () => {
+      bgReady = true;
+      maybeFinish();
+    }, { once: true });
+
+    iframe.addEventListener("error", () => {
+      bgReady = true;
+      maybeFinish();
+    }, { once: true });
+
+    // Safety: if the iframe is cached and load already happened before this listener attached,
+    // don't keep the skeleton forever.
+    window.setTimeout(() => {
+      if (!bgReady) {
+        bgReady = true;
+        maybeFinish();
+      }
+    }, 700);
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    domReady = true;
+    attachBgListener();
+    maybeFinish();
+  }, { once: true });
+
+  // Hard fallback (never get stuck). Keeps the "no-flash" goal while preventing indefinite loading.
+  window.setTimeout(() => {
+    if (!done) {
+      domReady = true;
+      bgReady = true;
+      finish();
+    }
+  }, 2500);
 })();
 </script>
+  </div>
 
 </body>
 </html>
