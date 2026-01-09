@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <title>Saku Network Solutions | Reliable Networks, Done Clean</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="/home/reactbits/dist/rotating-headline.css">
   <script>
   (function () {
     // If user explicitly chose desktop, do not redirect
@@ -156,6 +157,40 @@
     @media (prefers-reduced-motion: reduce){
       #particles{ display:none; }
     }
+
+    .hero-title-rt{
+      display: inline-flex;
+      align-items: baseline;
+      justify-content: center;
+      gap: .22em;
+    }
+
+    .hero-title-rt .text-rotate{
+      display: inline-flex;
+      flex-wrap: nowrap;
+      white-space: nowrap;
+      align-items: baseline;
+    }
+
+    .hero-title-rt .rt-inline{
+      display: inline-flex;
+      align-items: baseline;
+      min-width: 13ch;
+      filter: drop-shadow(0 0 10px rgba(179,124,255,.16))
+              drop-shadow(0 0 22px rgba(249,115,226,.10));
+    }
+
+    .hero-title-rt .rt-split{
+      display: inline-flex;
+      overflow: hidden;
+      padding-bottom: .08em;
+    }
+
+    .hero-title-rt .rt-el{
+      display: inline-block;
+      will-change: transform, opacity;
+    }
+
 
 
 
@@ -1008,7 +1043,7 @@
 
         <div class="eyebrow reveal">Veteran-led • Los Angeles • Small Business IT</div>
 
-        <h1 class="reveal">Network reliability is our business.</h1>
+        <h1 class="reveal hero-title-rt">Network <span id="rt-headline"></span></h1>
 
         <p class="lede reveal">
           SNS designs, installs, and supports business networks with a focus on stability, clean implementation,
@@ -1264,6 +1299,6 @@ function initParticles(){
   setTimeout(() => finishBoot(), 2500);
 })();
 </script>
-
+<script type="module" src="/home/reactbits/dist/rotating-headline.js"></script>
 </body>
 </html>
