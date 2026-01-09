@@ -31910,8 +31910,10 @@ var require_main = __commonJS({
     var import_react26 = __toESM(require_react());
     var import_client = __toESM(require_client());
     init_RotatingText2();
-    var mount = document.getElementById("rt-headline");
-    if (mount) {
+    function renderIntoMount(mount) {
+      if (!mount) return false;
+      if (mount.dataset.rtMounted === "1") return true;
+      mount.dataset.rtMounted = "1";
       (0, import_client.createRoot)(mount).render(
         /* @__PURE__ */ import_react26.default.createElement(
           RotatingText_default,
@@ -31930,6 +31932,30 @@ var require_main = __commonJS({
           }
         )
       );
+      return true;
+    }
+    function tryMount() {
+      return renderIntoMount(document.getElementById("rt-headline"));
+    }
+    function mountWithRetries() {
+      if (tryMount()) return;
+      const start = performance.now();
+      const tick = () => {
+        if (tryMount()) return;
+        if (performance.now() - start < 6e3) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+      const hero = document.querySelector(".hero") || document.body;
+      const obs = new MutationObserver(() => {
+        const el = document.getElementById("rt-headline");
+        if (el && el.dataset.rtMounted !== "1") tryMount();
+      });
+      obs.observe(hero, { childList: true, subtree: true });
+    }
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", mountWithRetries, { once: true });
+    } else {
+      mountWithRetries();
     }
   }
 });
