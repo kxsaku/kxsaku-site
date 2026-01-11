@@ -6,7 +6,7 @@ import './RotatingText.css'
 ReactDOM.createRoot(document.getElementById('root')).render(
 <RotatingText
 
-  texts={['React', 'Bits', 'Is', 'Cool!']}
+  texts={['Reliable', 'Secure', 'Stable', 'Managed']}
 
   mainClassName="px-2 sm:px-2 md:px-3 bg-cyan-300 text-black overflow-hidden py-0.5 sm:py-1 md:py-2 justify-center rounded-lg"
 
