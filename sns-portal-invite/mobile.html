@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <title>SNS · Create Account (Mobile)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://esm.sh; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com; img-src 'self' data: blob: https://*.supabase.co; font-src 'self'; frame-src https://js.stripe.com;" />
   <link href="/styles.css" rel="stylesheet"/>
   <style>
 
@@ -696,7 +697,7 @@
 <button class="btn" id="submitBtn" type="submit">Create Account</button>
 </form>
 </div>
-</div><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>
+</div><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" integrity="sha384-0cJhvyxOncqJDixLuJRbH99K17F1B6DH3D8aUBlsJlsgiqRZQpQ1EUFWdgscplLu" crossorigin="anonymous"></script><script>
 
       async function bootstrapSessionFromUrl() {
     // 1) If we already have a session in storage, use it.

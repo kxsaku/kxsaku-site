@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <title>SNS · View Inquiry</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://esm.sh; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com; img-src 'self' data: blob: https://*.supabase.co; font-src 'self'; frame-src https://js.stripe.com;" />
   <script>
   (function () {
     const forceDesktop = localStorage.getItem("sns_force_desktop") === "1";
@@ -282,7 +283,7 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" integrity="sha384-0cJhvyxOncqJDixLuJRbH99K17F1B6DH3D8aUBlsJlsgiqRZQpQ1EUFWdgscplLu" crossorigin="anonymous"></script>
 
   <script>
     /**************************************************************
