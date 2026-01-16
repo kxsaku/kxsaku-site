@@ -1,0 +1,27 @@
+/* Headline component styling - matches home page theme */
+
+.headline-rotating {
+  display: inline-flex;
+  align-items: baseline;
+  white-space: nowrap;
+}
+
+.headline-word {
+  display: inline-flex;
+  overflow: hidden;
+  padding-bottom: 0.05em;
+}
+
+.headline-char {
+  display: inline-block;
+}
+
+/* Reset any default styles when embedded */
+#rt-headline-root {
+  display: inline;
+  font: inherit;
+  color: inherit;
+  background: inherit;
+  -webkit-background-clip: inherit;
+  background-clip: inherit;
+}

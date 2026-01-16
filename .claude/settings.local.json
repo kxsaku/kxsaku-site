@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir:*)",
+      "Bash(if [ -d \"node_modules\" ])",
+      "Bash(then echo \"node_modules exists\")",
+      "Bash(else echo \"installing dependencies\")",
+      "Bash(npm install)",
+      "Bash(fi)",
+      "Bash(npm run build:*)"
+    ]
+  }
+}
