@@ -1,17 +1,13 @@
 // supabase/functions/inquiry-otp/index.ts
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { getCorsHeaders, handleCorsPrefllight } from "../_shared/cors.ts";
+import { checkRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-};
-
-function json(data: unknown, status = 200) {
+function json(req: Request, data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
+    headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
   });
 }
 
@@ -78,31 +74,35 @@ async function twilioVerifyCheck(phoneE164: string, code: string) {
 
   const data = await res.json();
   if (!res.ok) throw new Error(data?.message || "Failed to verify OTP");
-  return data; // includes `status`
+  return data;
 }
 
 serve(async (req) => {
-  try {
-    if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  if (req.method === "OPTIONS") return handleCorsPrefllight(req);
 
+  // Rate limiting for auth-related endpoints (OTP is sensitive to abuse)
+  const rateLimitResponse = checkRateLimit(req, { ...RATE_LIMITS.auth, keyPrefix: "inquiry-otp" }, getCorsHeaders(req));
+  if (rateLimitResponse) return rateLimitResponse;
+
+  try {
     const { action, phone, code, payload } = await req.json();
 
     const phoneE164 = normalizeUSPhone(phone || "");
-    if (!phoneE164) return json({ ok: false, error: "Invalid phone number." }, 400);
+    if (!phoneE164) return json(req, { ok: false, error: "Invalid phone number." }, 400);
 
     if (action === "send") {
       await twilioVerifySend(phoneE164);
-      return json({ ok: true });
+      return json(req, { ok: true });
     }
 
     if (action === "check") {
       if (!code || typeof code !== "string") {
-        return json({ ok: false, error: "Missing code." }, 400);
+        return json(req, { ok: false, error: "Missing code." }, 400);
       }
 
       const check = await twilioVerifyCheck(phoneE164, code);
       if (check?.status !== "approved") {
-        return json({ ok: false, error: "Invalid code." }, 400);
+        return json(req, { ok: false, error: "Invalid code." }, 400);
       }
 
       // Insert into Supabase using SERVICE ROLE (bypasses RLS)
@@ -113,16 +113,16 @@ serve(async (req) => {
       // payload should be the inquiry fields
       const { error } = await sb.from("inquiries").insert({
         ...payload,
-        phone: phoneE164, // store E.164
+        phone: phoneE164,
         phone_verified: true,
       });
 
       if (error) throw error;
-      return json({ ok: true });
+      return json(req, { ok: true });
     }
 
-    return json({ ok: false, error: "Invalid action." }, 400);
+    return json(req, { ok: false, error: "Invalid action." }, 400);
   } catch (e) {
-    return json({ ok: false, error: String(e?.message || e) }, 500);
+    return json(req, { ok: false, error: String((e as any)?.message || e) }, 500);
   }
 });

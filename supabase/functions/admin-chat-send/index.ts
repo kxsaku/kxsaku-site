@@ -1,6 +1,14 @@
 // supabase/functions/admin-chat-send/index.ts
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { getCorsHeaders, handleCorsPrefllight } from "../_shared/cors.ts";
+import { checkRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
+
+function getEnv(name: string) {
+  const v = Deno.env.get(name);
+  if (!v) throw new Error(`Missing env var: ${name}`);
+  return v;
+}
 
 async function resendEmail(args: {
   to: string;
@@ -32,33 +40,20 @@ async function resendEmail(args: {
   }
 }
 
-
-function json(data: unknown, status = 200) {
+function json(req: Request, data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: {
-      "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-      "Access-Control-Allow-Methods": "POST, OPTIONS",
-    },
+    headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
   });
 }
 
-function getEnv(name: string) {
-  const v = Deno.env.get(name);
-  if (!v) throw new Error(`Missing env var: ${name}`);
-  return v;
-}
-
 type AttachmentIn = {
-  attachment_id?: string;        // <- IMPORTANT
+  attachment_id?: string;
   storage_path: string;
   original_name: string;
   mime_type: string;
   size_bytes?: number | null;
 };
-
 
 type ReqBody = {
   user_id?: string;
@@ -72,11 +67,14 @@ type ReqBody = {
   }>;
 };
 
-
-
 serve(async (req) => {
-  if (req.method === "OPTIONS") return json({ ok: true }, 200);
-  if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
+  if (req.method === "OPTIONS") return handleCorsPrefllight(req);
+
+  // Rate limiting for chat endpoints
+  const rateLimitResponse = checkRateLimit(req, { ...RATE_LIMITS.chat, keyPrefix: "admin-chat-send" }, getCorsHeaders(req));
+  if (rateLimitResponse) return rateLimitResponse;
+
+  if (req.method !== "POST") return json(req, { error: "Method not allowed" }, 405);
 
   try {
     const SB_URL = getEnv("SB_URL");
@@ -85,7 +83,7 @@ serve(async (req) => {
 
     const authHeader = req.headers.get("Authorization") || "";
     const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
-    if (!token) return json({ error: "Missing Authorization bearer token" }, 401);
+    if (!token) return json(req, { error: "Missing Authorization bearer token" }, 401);
 
     const admin = createClient(SB_URL, SB_SERVICE_ROLE_KEY, {
       auth: { persistSession: false },
@@ -93,11 +91,11 @@ serve(async (req) => {
 
     // Verify caller identity (must be ADMIN_EMAIL)
     const { data: userData, error: userErr } = await admin.auth.getUser(token);
-    if (userErr) return json({ error: `Auth error: ${userErr.message}` }, 401);
+    if (userErr) return json(req, { error: `Auth error: ${userErr.message}` }, 401);
 
     const callerEmail = (userData.user?.email || "").toLowerCase();
     if (!callerEmail || callerEmail !== ADMIN_EMAIL) {
-      return json({ error: "Forbidden: admin only" }, 403);
+      return json(req, { error: "Forbidden: admin only" }, 403);
     }
 
     const body = (await req.json().catch(() => ({}))) as ReqBody;
@@ -106,20 +104,17 @@ serve(async (req) => {
     const text = textRaw.trim();
     const attachments = Array.isArray(body.attachments) ? body.attachments : [];
 
-    if (!user_id) return json({ error: "Missing user_id" }, 400);
+    if (!user_id) return json(req, { error: "Missing user_id" }, 400);
     if (!text && attachments.length === 0) {
-      return json({ error: "Missing body (or attachments)" }, 400);
+      return json(req, { error: "Missing body (or attachments)" }, 400);
     }
 
     // used for thread preview
     const preview = text ? text.slice(0, 140) : "[Attachment]";
 
-
-
     const nowIso = new Date().toISOString();
 
     // 1) Ensure thread exists (expected table: chat_threads)
-    // If chat tables don't exist yet, fail gracefully with a clear warning.
     const threadLookup = await admin
       .from("chat_threads")
       .select("id")
@@ -127,7 +122,7 @@ serve(async (req) => {
       .maybeSingle();
 
     if (threadLookup.error) {
-      return json(
+      return json(req,
         {
           error:
             "chat_threads not found (or inaccessible). Create chat tables next before sending messages.",
@@ -149,7 +144,6 @@ serve(async (req) => {
           last_message_at: nowIso,
           last_message_preview: preview,
           last_sender_role: "admin",
-          // unread_for_client means: client has something they haven't read yet
           unread_for_client: true,
           unread_for_admin: false,
         })
@@ -157,7 +151,7 @@ serve(async (req) => {
         .single();
 
       if (insThread.error) {
-        return json(
+        return json(req,
           {
             error: "Failed to create chat thread",
             details: insThread.error.message,
@@ -180,7 +174,7 @@ serve(async (req) => {
         .eq("id", threadId);
 
       if (updThread.error) {
-        return json(
+        return json(req,
           {
             error: "Failed to update chat thread",
             details: updThread.error.message,
@@ -196,9 +190,9 @@ serve(async (req) => {
       .insert({
         thread_id: threadId,
         sender_role: "admin",
-        body: text, // may be "" for attachment-only messages
+        body: text,
         created_at: nowIso,
-        delivered_at: nowIso, // delivery receipt baseline
+        delivered_at: nowIso,
       })
       .select(
         "id, sender_role, body, created_at, edited_at, original_body, deleted_at, delivered_at, read_by_client_at",
@@ -206,7 +200,7 @@ serve(async (req) => {
       .single();
 
     if (insMsg.error) {
-      return json(
+      return json(req,
         {
           error:
             "chat_messages not found (or insert failed). Create chat tables next before sending messages.",
@@ -216,36 +210,28 @@ serve(async (req) => {
       );
     }
 
-
-
-
-
     const m = insMsg.data as any;
 
-// 2b) If attachments were uploaded (chat-attachment-upload-url), link them to this message
-const attachmentIds = attachments
-  .map((a) => a?.attachment_id)
-  .filter((x): x is string => typeof x === "string" && x.length > 0);
+    // 2b) If attachments were uploaded, link them to this message
+    const attachmentIds = attachments
+      .map((a) => a?.attachment_id)
+      .filter((x): x is string => typeof x === "string" && x.length > 0);
 
-if (attachmentIds.length > 0) {
-  // Force-link the uploaded attachments to this message.
-  // Do NOT filter by thread_id/message_id here — those fields may not be set yet.
-  const upd = await admin
-    .from("chat_attachments")
-    .update({ message_id: m.id, thread_id: threadId })
-    .in("id", attachmentIds);
+    if (attachmentIds.length > 0) {
+      const upd = await admin
+        .from("chat_attachments")
+        .update({ message_id: m.id, thread_id: threadId })
+        .in("id", attachmentIds);
 
-  if (upd.error) {
-    return json(
-      { error: "Failed to link attachments to message", details: upd.error.message },
-      500,
-    );
-  }
-}
+      if (upd.error) {
+        return json(req,
+          { error: "Failed to link attachments to message", details: upd.error.message },
+          500,
+        );
+      }
+    }
 
-
-
-        // Email notify client (throttled per-thread, no message body)
+    // Email notify client (throttled per-thread, no message body)
     try {
       const APP_BASE_URL = getEnv("APP_BASE_URL");
 
@@ -301,64 +287,62 @@ if (attachmentIds.length > 0) {
       // Do not fail message send if email fails
     }
 
+    // Build attachment payload (signed URLs) for immediate rendering in admin UI
+    let outAttachments: any[] = [];
 
-// Build attachment payload (signed URLs) for immediate rendering in admin UI
-let outAttachments: any[] = [];
+    if (attachmentIds.length > 0) {
+      const { data: atts, error: attErr } = await admin
+        .from("chat_attachments")
+        .select("id, storage_bucket, storage_path, mime_type, original_name, size_bytes")
+        .eq("message_id", m.id);
 
-if (attachmentIds.length > 0) {
-  const { data: atts, error: attErr } = await admin
-    .from("chat_attachments")
-    .select("id, storage_bucket, storage_path, mime_type, original_name, size_bytes")
-    .eq("message_id", m.id);
+      if (attErr) {
+        return json(req,
+          { error: "Failed to load linked attachments", details: attErr.message },
+          500,
+        );
+      }
 
+      for (const a of atts || []) {
+        const bucket = (a as any).storage_bucket || "chat-attachments";
+        const path = (a as any).storage_path as string;
+        let signed_url: string | null = null;
 
-  if (attErr) {
-    return json(
-      { error: "Failed to load linked attachments", details: attErr.message },
-      500,
-    );
-  }
+        if (path) {
+          const signed = await admin.storage.from(bucket).createSignedUrl(path, 60 * 60);
+          if (!signed.error) signed_url = signed.data?.signedUrl || null;
+        }
 
-  for (const a of atts || []) {
-    const bucket = (a as any).storage_bucket || "chat-attachments";
-    const path = (a as any).storage_path as string;
-    let signed_url: string | null = null;
-
-    if (path) {
-      const signed = await admin.storage.from(bucket).createSignedUrl(path, 60 * 60);
-      if (!signed.error) signed_url = signed.data?.signedUrl || null;
+        outAttachments.push({
+          id: a.id,
+          storage_path: a.storage_path,
+          mime_type: a.mime_type,
+          file_name: (a as any).original_name,
+          size_bytes: a.size_bytes ?? null,
+          url: signed_url,
+          signed_url,
+        });
+      }
     }
 
-    outAttachments.push({
-      id: a.id,
-      storage_path: a.storage_path,
-      mime_type: a.mime_type,
-      file_name: (a as any).original_name,
-      size_bytes: a.size_bytes ?? null,
-      url: signed_url,
-      signed_url,
+    return json(req, {
+      ok: true,
+      thread_id: threadId,
+      message: {
+        id: m.id,
+        sender_role: m.sender_role,
+        body: m.body,
+        created_at: m.created_at,
+        edited: !!m.edited_at,
+        original_body: m.original_body || null,
+        deleted: !!m.deleted_at,
+        delivered_at: m.delivered_at || null,
+        read_by_client_at: m.read_by_client_at || null,
+        attachments: outAttachments,
+      },
     });
-  }
-}
-
-  return json({
-    ok: true,
-    thread_id: threadId,
-    message: {
-      id: m.id,
-      sender_role: m.sender_role,
-      body: m.body,
-      created_at: m.created_at,
-      edited: !!m.edited_at,
-      original_body: m.original_body || null,
-      deleted: !!m.deleted_at,
-      delivered_at: m.delivered_at || null,
-      read_by_client_at: m.read_by_client_at || null,
-      attachments: outAttachments,
-    },
-  });
   } catch (err) {
     console.error("Error in admin-chat-send:", err);
-    return json({ error: "Internal server error" }, 500);
+    return json(req, { error: "Internal server error" }, 500);
   }
 });

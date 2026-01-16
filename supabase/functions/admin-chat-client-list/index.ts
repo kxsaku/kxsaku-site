@@ -1,17 +1,13 @@
 // supabase/functions/admin-chat-client-list/index.ts
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { getCorsHeaders, handleCorsPrefllight } from "../_shared/cors.ts";
+import { checkRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-};
-
-function json(body: unknown, status = 200) {
+function json(req: Request, body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
+    headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
   });
 }
 
@@ -39,7 +35,11 @@ type ThreadRow = {
 };
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  if (req.method === "OPTIONS") return handleCorsPrefllight(req);
+
+  // Rate limiting for admin endpoints
+  const rateLimitResponse = checkRateLimit(req, { ...RATE_LIMITS.admin, keyPrefix: "admin-chat-client-list" }, getCorsHeaders(req));
+  if (rateLimitResponse) return rateLimitResponse;
 
   try {
     const SB_URL = getEnv("SB_URL");
@@ -48,23 +48,23 @@ serve(async (req) => {
 
     const authHeader = req.headers.get("Authorization") ?? "";
     const jwt = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
-    if (!jwt) return json({ error: "Missing Authorization bearer token." }, 401);
+    if (!jwt) return json(req, { error: "Missing Authorization bearer token." }, 401);
 
     const sb = createClient(SB_URL, SB_SERVICE_ROLE_KEY);
 
     // Verify caller is authenticated and is the admin email
     const { data: userData, error: userErr } = await sb.auth.getUser(jwt);
-    if (userErr || !userData?.user) return json({ error: "Invalid session." }, 401);
+    if (userErr || !userData?.user) return json(req, { error: "Invalid session." }, 401);
 
     const callerEmail = (userData.user.email ?? "").toLowerCase();
-    if (callerEmail !== ADMIN_EMAIL) return json({ error: "Forbidden." }, 403);
+    if (callerEmail !== ADMIN_EMAIL) return json(req, { error: "Forbidden." }, 403);
 
     // Pull clients from your existing profile table
     const { data: profiles, error: pErr } = await sb
       .from("client_profiles")
       .select("user_id,email,contact_name,business_name,phone");
 
-    if (pErr) return json({ error: `client_profiles query failed: ${pErr.message}` }, 500);
+    if (pErr) return json(req, { error: `client_profiles query failed: ${pErr.message}` }, 500);
 
     const clientRows: ClientRow[] = Array.isArray(profiles) ? (profiles as ClientRow[]) : [];
 
@@ -123,8 +123,8 @@ serve(async (req) => {
       return an.localeCompare(bn);
     });
 
-    return json({ clients });
+    return json(req, { clients });
   } catch (e) {
-    return json({ error: (e as Error).message ?? String(e) }, 500);
+    return json(req, { error: (e as Error).message ?? String(e) }, 500);
   }
 });

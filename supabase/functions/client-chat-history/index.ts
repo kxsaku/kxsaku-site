@@ -1,6 +1,8 @@
 // supabase/functions/client-chat-history/index.ts
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { getCorsHeaders, handleCorsPrefllight } from "../_shared/cors.ts";
+import { checkRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 
 function getEnv(name: string) {
   const v = Deno.env.get(name);
@@ -8,16 +10,10 @@ function getEnv(name: string) {
   return v;
 }
 
-function json(data: unknown, status = 200) {
+function json(req: Request, data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: {
-      "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Headers":
-        "authorization, x-client-info, apikey, content-type",
-      "Access-Control-Allow-Methods": "POST, OPTIONS",
-    },
+    headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
   });
 }
 
@@ -32,10 +28,14 @@ type AttachmentOut = {
   signed_url: string | null;
 };
 
-
 serve(async (req) => {
-  if (req.method === "OPTIONS") return json({ ok: true }, 200);
-  if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
+  if (req.method === "OPTIONS") return handleCorsPrefllight(req);
+
+  // Rate limiting for chat endpoints
+  const rateLimitResponse = checkRateLimit(req, { ...RATE_LIMITS.chat, keyPrefix: "client-chat-history" }, getCorsHeaders(req));
+  if (rateLimitResponse) return rateLimitResponse;
+
+  if (req.method !== "POST") return json(req, { error: "Method not allowed" }, 405);
 
   try {
     const SB_URL = getEnv("SB_URL");
@@ -43,18 +43,17 @@ serve(async (req) => {
 
     const authHeader = req.headers.get("Authorization") || "";
     const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
-    if (!token) return json({ error: "Missing Authorization bearer token" }, 401);
+    if (!token) return json(req, { error: "Missing Authorization bearer token" }, 401);
 
     const sb = createClient(SB_URL, SB_SERVICE_ROLE_KEY, {
       auth: { persistSession: false },
     });
 
-
     // Identify caller
     const { data: userData, error: userErr } = await sb.auth.getUser(token);
-    if (userErr) return json({ error: `Auth error: ${userErr.message}` }, 401);
+    if (userErr) return json(req, { error: `Auth error: ${userErr.message}` }, 401);
     const uid = userData.user?.id;
-    if (!uid) return json({ error: "No user found" }, 401);
+    if (!uid) return json(req, { error: "No user found" }, 401);
 
     // Optional profile (kept for compatibility with your current response shape)
     const { data: profile } = await sb
@@ -70,9 +69,9 @@ serve(async (req) => {
       .eq("user_id", uid)
       .maybeSingle();
 
-    if (thread.error) return json({ error: thread.error.message }, 500);
+    if (thread.error) return json(req, { error: thread.error.message }, 500);
     const threadId = thread.data?.id as string | undefined;
-    if (!threadId) return json({ ok: true, thread_id: null, messages: [], profile }, 200);
+    if (!threadId) return json(req, { ok: true, thread_id: null, messages: [], profile }, 200);
 
     // Load messages
     const { data: messages, error: msgErr } = await sb
@@ -81,11 +80,11 @@ serve(async (req) => {
       .eq("thread_id", threadId)
       .order("created_at", { ascending: true });
 
-    if (msgErr) return json({ error: msgErr.message }, 500);
+    if (msgErr) return json(req, { error: msgErr.message }, 500);
 
     const msgIds = (messages || []).map((m) => m.id);
     if (msgIds.length === 0) {
-      return json({ ok: true, thread_id: threadId, messages: [], profile }, 200);
+      return json(req, { ok: true, thread_id: threadId, messages: [], profile }, 200);
     }
 
     // Load attachments for those messages
@@ -94,8 +93,7 @@ serve(async (req) => {
       .select("id, message_id, storage_bucket, storage_path, mime_type, original_name, size_bytes")
       .in("message_id", msgIds);
 
-
-    if (attErr) return json({ error: `Failed to load attachments: ${attErr.message}` }, 500);
+    if (attErr) return json(req, { error: `Failed to load attachments: ${attErr.message}` }, 500);
 
     // Sign URLs (so browser can render the image)
     const byMessageId = new Map<string, AttachmentOut[]>();
@@ -105,13 +103,10 @@ serve(async (req) => {
       const path = a.storage_path as string;
       if (!path) continue;
 
-
       let signedUrl: string | null = null;
 
-      // createSignedUrl returns `{ data: { signedUrl } }`
       const signed = await sb.storage.from(bucket).createSignedUrl(path, 60 * 60);
       signedUrl = signed.error ? null : (signed.data?.signedUrl ?? null);
-
 
       const out: AttachmentOut = {
         id: String(a.id),
@@ -124,7 +119,6 @@ serve(async (req) => {
         signed_url: signedUrl,
       };
 
-
       const mid = String(a.message_id);
       if (!byMessageId.has(mid)) byMessageId.set(mid, []);
       byMessageId.get(mid)!.push(out);
@@ -135,7 +129,7 @@ serve(async (req) => {
       attachments: byMessageId.get(String(m.id)) || [],
     }));
 
-    return json(
+    return json(req,
       {
         ok: true,
         thread_id: threadId,
@@ -145,6 +139,6 @@ serve(async (req) => {
       200
     );
   } catch (e) {
-    return json({ error: String(e?.message || e) }, 500);
+    return json(req, { error: String((e as any)?.message || e) }, 500);
   }
 });

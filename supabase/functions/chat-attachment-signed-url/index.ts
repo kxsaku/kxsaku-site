@@ -1,17 +1,13 @@
 // supabase/functions/chat-attachment-signed-url/index.ts
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { getCorsHeaders, handleCorsPrefllight } from "../_shared/cors.ts";
+import { checkRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 
-function json(data: unknown, status = 200) {
+function json(req: Request, data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: {
-      "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Headers":
-        "authorization, x-client-info, apikey, content-type",
-      "Access-Control-Allow-Methods": "POST, OPTIONS",
-    },
+    headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
   });
 }
 
@@ -24,8 +20,13 @@ function getEnv(name: string) {
 type ReqBody = { attachment_id?: string };
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") return json({ ok: true }, 200);
-  if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
+  if (req.method === "OPTIONS") return handleCorsPrefllight(req);
+
+  // Rate limiting for chat endpoints
+  const rateLimitResponse = checkRateLimit(req, { ...RATE_LIMITS.chat, keyPrefix: "chat-attachment-signed-url" }, getCorsHeaders(req));
+  if (rateLimitResponse) return rateLimitResponse;
+
+  if (req.method !== "POST") return json(req, { error: "Method not allowed" }, 405);
 
   try {
     const SB_URL = getEnv("SB_URL");
@@ -34,7 +35,7 @@ serve(async (req) => {
 
     const authHeader = req.headers.get("Authorization") || "";
     const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
-    if (!token) return json({ error: "Missing Authorization bearer token" }, 401);
+    if (!token) return json(req, { error: "Missing Authorization bearer token" }, 401);
 
     const sb = createClient(SB_URL, SB_SERVICE_ROLE_KEY, {
       global: { headers: { Authorization: `Bearer ${token}` } },
@@ -42,7 +43,7 @@ serve(async (req) => {
     });
 
     const { data: userRes, error: userErr } = await sb.auth.getUser(token);
-    if (userErr || !userRes?.user) return json({ error: "Unauthorized" }, 401);
+    if (userErr || !userRes?.user) return json(req, { error: "Unauthorized" }, 401);
 
     const user = userRes.user;
     const userId = user.id;
@@ -52,7 +53,7 @@ serve(async (req) => {
 
     const body = (await req.json().catch(() => ({}))) as ReqBody;
     const attachmentId = (body.attachment_id || "").trim();
-    if (!attachmentId) return json({ error: "Missing attachment_id" }, 400);
+    if (!attachmentId) return json(req, { error: "Missing attachment_id" }, 400);
 
     // Load attachment + thread owner
     const a = await sb
@@ -61,7 +62,7 @@ serve(async (req) => {
       .eq("id", attachmentId)
       .maybeSingle();
 
-    if (a.error || !a.data) return json({ error: "Attachment not found" }, 404);
+    if (a.error || !a.data) return json(req, { error: "Attachment not found" }, 404);
 
     const t = await sb
       .from("chat_threads")
@@ -69,11 +70,11 @@ serve(async (req) => {
       .eq("id", a.data.thread_id)
       .maybeSingle();
 
-    if (t.error || !t.data) return json({ error: "Thread not found" }, 404);
+    if (t.error || !t.data) return json(req, { error: "Thread not found" }, 404);
 
     // Permission: admin can sign anything; client can sign only their own thread
     if (role === "client" && t.data.user_id !== userId) {
-      return json({ error: "Forbidden" }, 403);
+      return json(req, { error: "Forbidden" }, 403);
     }
 
     // Signed URL (10 min)
@@ -81,10 +82,10 @@ serve(async (req) => {
       .from(a.data.storage_bucket)
       .createSignedUrl(a.data.storage_path, 60 * 10);
 
-    if (signed.error) return json({ error: signed.error.message }, 400);
+    if (signed.error) return json(req, { error: signed.error.message }, 400);
 
-    return json({ ok: true, url: signed.data.signedUrl }, 200);
+    return json(req, { ok: true, url: signed.data.signedUrl }, 200);
   } catch (e) {
-    return json({ error: e?.message || String(e) }, 500);
+    return json(req, { error: (e as any)?.message || String(e) }, 500);
   }
 });

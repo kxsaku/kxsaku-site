@@ -1,17 +1,13 @@
 // supabase/functions/admin-invite/index.ts
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { getCorsHeaders, handleCorsPrefllight } from "../_shared/cors.ts";
+import { checkRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-};
-
-function json(body: unknown, status = 200) {
+function json(req: Request, body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
+    headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
   });
 }
 
@@ -22,7 +18,11 @@ function getEnv(name: string) {
 }
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  if (req.method === "OPTIONS") return handleCorsPrefllight(req);
+
+  // Rate limiting for admin endpoints
+  const rateLimitResponse = checkRateLimit(req, { ...RATE_LIMITS.admin, keyPrefix: "admin-invite" }, getCorsHeaders(req));
+  if (rateLimitResponse) return rateLimitResponse;
 
   try {
     const SITE_URL = getEnv("SITE_URL").replace(/\/+$/, "");
@@ -32,23 +32,23 @@ serve(async (req) => {
 
     const authHeader = req.headers.get("Authorization") ?? "";
     const jwt = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
-    if (!jwt) return json({ error: "Missing Authorization bearer token." }, 401);
+    if (!jwt) return json(req, { error: "Missing Authorization bearer token." }, 401);
 
     const sb = createClient(SB_URL, SB_SERVICE_ROLE_KEY);
 
     // Verify caller is authenticated and is the admin email
     const { data: userData, error: userErr } = await sb.auth.getUser(jwt);
-    if (userErr || !userData?.user) return json({ error: "Invalid session." }, 401);
+    if (userErr || !userData?.user) return json(req, { error: "Invalid session." }, 401);
 
     const callerEmail = (userData.user.email ?? "").toLowerCase();
-    if (callerEmail !== ADMIN_EMAIL) return json({ error: "Forbidden." }, 403);
+    if (callerEmail !== ADMIN_EMAIL) return json(req, { error: "Forbidden." }, 403);
 
     const body = await req.json().catch(() => ({}));
     const inviteEmailRaw = String(body.email ?? "").trim();
     const inviteEmail = inviteEmailRaw.toLowerCase();
 
     if (!inviteEmail || !inviteEmail.includes("@")) {
-      return json({ error: "Valid email required." }, 400);
+      return json(req, { error: "Valid email required." }, 400);
     }
 
     // Send invite email with redirect back to your portal invite page
@@ -60,7 +60,7 @@ serve(async (req) => {
         data: { role: "client" },
       });
 
-    if (inviteErr) return json({ error: inviteErr.message }, 400);
+    if (inviteErr) return json(req, { error: inviteErr.message }, 400);
 
     // Pre-create billing row so webhook can match quickly after checkout
     // inviteData.user should contain the new auth user id
@@ -79,9 +79,9 @@ serve(async (req) => {
       });
     }
 
-    return json({ ok: true, invited_user_id: invitedUserId ?? null });
+    return json(req, { ok: true, invited_user_id: invitedUserId ?? null });
   } catch (e) {
     console.error(e);
-    return json({ error: String(e?.message ?? e) }, 500);
+    return json(req, { error: String(e?.message ?? e) }, 500);
   }
 });

@@ -1,16 +1,13 @@
 // supabase/functions/client-chat-delete/index.ts
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { getCorsHeaders, handleCorsPrefllight } from "../_shared/cors.ts";
+import { checkRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 
-function json(data: unknown, status = 200) {
+function json(req: Request, data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: {
-      "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-      "Access-Control-Allow-Methods": "POST, OPTIONS",
-    },
+    headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
   });
 }
 
@@ -25,8 +22,13 @@ type ReqBody = {
 };
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") return json({ ok: true }, 200);
-  if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
+  if (req.method === "OPTIONS") return handleCorsPrefllight(req);
+
+  // Rate limiting for chat endpoints
+  const rateLimitResponse = checkRateLimit(req, { ...RATE_LIMITS.chat, keyPrefix: "client-chat-delete" }, getCorsHeaders(req));
+  if (rateLimitResponse) return rateLimitResponse;
+
+  if (req.method !== "POST") return json(req, { error: "Method not allowed" }, 405);
 
   try {
     const SB_URL = getEnv("SB_URL");
@@ -34,7 +36,7 @@ serve(async (req) => {
 
     const authHeader = req.headers.get("Authorization") || "";
     const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
-    if (!token) return json({ error: "Missing Authorization bearer token" }, 401);
+    if (!token) return json(req, { error: "Missing Authorization bearer token" }, 401);
 
     const sb = createClient(SB_URL, SB_SERVICE_ROLE_KEY, {
       auth: { persistSession: false },
@@ -43,13 +45,13 @@ serve(async (req) => {
 
     // Identify caller
     const { data: userData, error: userErr } = await sb.auth.getUser(token);
-    if (userErr) return json({ error: `Auth error: ${userErr.message}` }, 401);
+    if (userErr) return json(req, { error: `Auth error: ${userErr.message}` }, 401);
     const uid = userData.user?.id;
-    if (!uid) return json({ error: "No user found" }, 401);
+    if (!uid) return json(req, { error: "No user found" }, 401);
 
     const body = (await req.json().catch(() => ({}))) as ReqBody;
     const message_id = (body.message_id || "").trim();
-    if (!message_id) return json({ error: "Missing message_id" }, 400);
+    if (!message_id) return json(req, { error: "Missing message_id" }, 400);
 
     // Load message and verify ownership through thread.user_id
     const msgRes = await sb
@@ -58,12 +60,12 @@ serve(async (req) => {
       .eq("id", message_id)
       .maybeSingle();
 
-    if (msgRes.error) return json({ error: msgRes.error.message }, 500);
+    if (msgRes.error) return json(req, { error: msgRes.error.message }, 500);
     const msg = msgRes.data as any;
-    if (!msg) return json({ error: "Message not found" }, 404);
+    if (!msg) return json(req, { error: "Message not found" }, 404);
 
-    if (msg.sender_role !== "client") return json({ error: "Only client messages can be deleted" }, 403);
-    if (msg.deleted_at) return json({ ok: true, message: { id: msg.id, deleted: true } });
+    if (msg.sender_role !== "client") return json(req, { error: "Only client messages can be deleted" }, 403);
+    if (msg.deleted_at) return json(req, { ok: true, message: { id: msg.id, deleted: true } });
 
     const threadRes = await sb
       .from("chat_threads")
@@ -71,9 +73,9 @@ serve(async (req) => {
       .eq("id", msg.thread_id)
       .maybeSingle();
 
-    if (threadRes.error) return json({ error: threadRes.error.message }, 500);
+    if (threadRes.error) return json(req, { error: threadRes.error.message }, 500);
     const thread = threadRes.data as any;
-    if (!thread || thread.user_id !== uid) return json({ error: "Forbidden" }, 403);
+    if (!thread || thread.user_id !== uid) return json(req, { error: "Forbidden" }, 403);
 
     const nowIso = new Date().toISOString();
 
@@ -85,9 +87,9 @@ serve(async (req) => {
       .select("id, sender_role, body, created_at, edited_at, original_body, deleted_at, delivered_at")
       .single();
 
-    if (upd.error) return json({ error: upd.error.message }, 500);
+    if (upd.error) return json(req, { error: upd.error.message }, 500);
 
-    return json({
+    return json(req, {
       ok: true,
       message: {
         id: upd.data.id,
@@ -101,6 +103,6 @@ serve(async (req) => {
       },
     });
   } catch (e) {
-    return json({ error: e?.message || String(e) }, 500);
+    return json(req, { error: (e as any)?.message || String(e) }, 500);
   }
 });

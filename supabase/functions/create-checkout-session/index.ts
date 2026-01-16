@@ -1,17 +1,13 @@
 // supabase/functions/create-checkout-session/index.ts
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { getCorsHeaders, handleCorsPrefllight } from "../_shared/cors.ts";
+import { checkRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-};
-
-function json(body: unknown, status = 200) {
+function json(req: Request, body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
+    headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
   });
 }
 
@@ -38,7 +34,11 @@ async function stripePost(path: string, params: URLSearchParams) {
 }
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  if (req.method === "OPTIONS") return handleCorsPrefllight(req);
+
+  // Rate limiting for auth-related endpoints (prevent abuse)
+  const rateLimitResponse = checkRateLimit(req, { ...RATE_LIMITS.auth, keyPrefix: "create-checkout-session" }, getCorsHeaders(req));
+  if (rateLimitResponse) return rateLimitResponse;
 
   try {
     const SITE_URL = getEnv("SITE_URL").replace(/\/+$/, "");
@@ -48,17 +48,17 @@ serve(async (req) => {
 
     const authHeader = req.headers.get("Authorization") ?? "";
     const jwt = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
-    if (!jwt) return json({ error: "Missing Authorization bearer token." }, 401);
+    if (!jwt) return json(req, { error: "Missing Authorization bearer token." }, 401);
 
     const sb = createClient(SB_URL, SB_SERVICE_ROLE_KEY);
 
     // Identify the authenticated user
     const { data: userData, error: userErr } = await sb.auth.getUser(jwt);
-    if (userErr || !userData?.user) return json({ error: "Invalid session." }, 401);
+    if (userErr || !userData?.user) return json(req, { error: "Invalid session." }, 401);
 
     const user = userData.user;
     const email = (user.email ?? "").toLowerCase();
-    if (!email) return json({ error: "User email not found." }, 400);
+    if (!email) return json(req, { error: "User email not found." }, 400);
 
     // Look up existing Stripe customer ID (if any)
     const { data: subRow, error: subErr } = await sb
@@ -71,7 +71,7 @@ serve(async (req) => {
 
     // Block creating another checkout if already active (optional safeguard)
     if (subRow?.status === "active") {
-      return json({ error: "Subscription is already active." }, 400);
+      return json(req, { error: "Subscription is already active." }, 400);
     }
 
     let stripeCustomerId = subRow?.stripe_customer_id ?? null;
@@ -107,7 +107,6 @@ serve(async (req) => {
     // Delay the subscription billing; the $100 still charges now
     params.set("subscription_data[trial_period_days]", "30");
 
-
     params.set("payment_method_types[0]", "card");
 
     params.set(
@@ -125,12 +124,11 @@ serve(async (req) => {
     params.set("subscription_data[metadata][user_id]", user.id);
     params.set("subscription_data[metadata][email]", email);
 
-
     const session = await stripePost("checkout/sessions", params);
 
-    return json({ url: session.url });
+    return json(req, { url: session.url });
   } catch (e) {
     console.error(e);
-    return json({ error: String(e?.message ?? e) }, 500);
+    return json(req, { error: String((e as any)?.message ?? e) }, 500);
   }
 });

@@ -1,19 +1,16 @@
 // supabase/functions/system-status-set/index.ts
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { getCorsHeaders, handleCorsPrefllight } from "../_shared/cors.ts";
+import { checkRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-};
-
-function json(body: unknown, status = 200) {
+function json(req: Request, body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
+    headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
   });
 }
+
 function getEnv(name: string) {
   const v = Deno.env.get(name);
   if (!v) throw new Error(`Missing env var: ${name}`);
@@ -50,7 +47,11 @@ async function ensureAdmin(authHeader: string | null) {
 }
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  if (req.method === "OPTIONS") return handleCorsPrefllight(req);
+
+  // Rate limiting for admin endpoints
+  const rateLimitResponse = checkRateLimit(req, { ...RATE_LIMITS.admin, keyPrefix: "system-status-set" }, getCorsHeaders(req));
+  if (rateLimitResponse) return rateLimitResponse;
 
   try {
     const sb = await ensureAdmin(req.headers.get("authorization"));
@@ -60,7 +61,7 @@ serve(async (req) => {
     const message = String(body?.message || "").slice(0, 500);
 
     const allowed = new Set(["normal", "maintenance", "emergency"]);
-    if (!allowed.has(mode)) return json({ error: "Invalid mode." }, 400);
+    if (!allowed.has(mode)) return json(req, { error: "Invalid mode." }, 400);
 
     const payload = { id: 1, mode, message, updated_at: new Date().toISOString() };
 
@@ -72,8 +73,8 @@ serve(async (req) => {
 
     if (error) throw error;
 
-    return json(data);
+    return json(req, data);
   } catch (e) {
-    return json({ error: e?.message || String(e) }, 500);
+    return json(req, { error: (e as any)?.message || String(e) }, 500);
   }
 });

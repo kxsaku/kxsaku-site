@@ -1,6 +1,8 @@
 // supabase/functions/client-chat-send/index.ts
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { getCorsHeaders, handleCorsPrefllight } from "../_shared/cors.ts";
+import { checkRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 
 function getEnv(name: string) {
   const v = Deno.env.get(name);
@@ -8,19 +10,10 @@ function getEnv(name: string) {
   return v;
 }
 
-function corsHeaders() {
-  return {
-    "access-control-allow-origin": "*",
-    "access-control-allow-headers":
-      "authorization, x-client-info, apikey, content-type",
-    "access-control-allow-methods": "POST, OPTIONS",
-  };
-}
-
-function json(body: unknown, status = 200) {
+function json(req: Request, body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { ...corsHeaders(), "content-type": "application/json" },
+    headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
   });
 }
 
@@ -39,7 +32,11 @@ type ReqBody = {
 };
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders() });
+  if (req.method === "OPTIONS") return handleCorsPrefllight(req);
+
+  // Rate limiting for chat endpoints
+  const rateLimitResponse = checkRateLimit(req, { ...RATE_LIMITS.chat, keyPrefix: "client-chat-send" }, getCorsHeaders(req));
+  if (rateLimitResponse) return rateLimitResponse;
 
   try {
     const SB_URL = getEnv("SB_URL");
@@ -52,7 +49,7 @@ serve(async (req) => {
     // Verify user
     const authHeader = req.headers.get("authorization") || "";
     const jwt = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
-    if (!jwt) return json({ error: "Missing Authorization Bearer token" }, 401);
+    if (!jwt) return json(req, { error: "Missing Authorization Bearer token" }, 401);
 
     const authed = createClient(SB_URL, getEnv("SUPABASE_ANON_KEY"), {
       global: { headers: { Authorization: `Bearer ${jwt}` } },
@@ -60,7 +57,7 @@ serve(async (req) => {
     });
 
     const { data: userData, error: userErr } = await authed.auth.getUser();
-    if (userErr || !userData.user) return json({ error: "Auth error" }, 401);
+    if (userErr || !userData.user) return json(req, { error: "Auth error" }, 401);
 
     const userId = userData.user.id;
 
@@ -82,7 +79,7 @@ serve(async (req) => {
     const attachment_ids = Array.from(new Set([...attachmentIdsFromIds, ...attachmentIdsFromObjects]));
 
     if (!text && attachment_ids.length === 0) {
-      return json({ error: "Missing body" }, 400);
+      return json(req, { error: "Missing body" }, 400);
     }
 
     const nowIso = new Date().toISOString();
@@ -95,7 +92,7 @@ serve(async (req) => {
       .maybeSingle();
 
     if (threadLookup.error) {
-      return json(
+      return json(req,
         {
           error:
             "chat_threads not found (or inaccessible). Create chat tables next before sending messages.",
@@ -124,7 +121,7 @@ serve(async (req) => {
         .single();
 
       if (insThread.error) {
-        return json({ error: "Failed to create chat thread", details: insThread.error.message }, 500);
+        return json(req, { error: "Failed to create chat thread", details: insThread.error.message }, 500);
       }
       threadId = insThread.data.id;
     } else {
@@ -140,7 +137,7 @@ serve(async (req) => {
         .eq("id", threadId);
 
       if (updThread.error) {
-        return json({ error: "Failed to update chat thread", details: updThread.error.message }, 500);
+        return json(req, { error: "Failed to update chat thread", details: updThread.error.message }, 500);
       }
     }
 
@@ -158,7 +155,7 @@ serve(async (req) => {
       .single();
 
     if (insMsg.error) {
-      return json(
+      return json(req,
         {
           error:
             "chat_messages not found (or insert failed). Create chat tables next before sending messages.",
@@ -168,7 +165,7 @@ serve(async (req) => {
       );
     }
 
-    // LINK attachments to this message (THIS IS WHAT YOU WERE MISSING)
+    // LINK attachments to this message
     if (attachment_ids.length > 0) {
       const upd = await admin
         .from("chat_attachments")
@@ -177,11 +174,11 @@ serve(async (req) => {
         .in("id", attachment_ids)
         .is("message_id", null);
 
-      if (upd.error) return json({ error: "Failed to link attachments", details: upd.error.message }, 500);
+      if (upd.error) return json(req, { error: "Failed to link attachments", details: upd.error.message }, 500);
     }
 
-    return json({ ok: true, thread_id: threadId, message: insMsg.data }, 200);
+    return json(req, { ok: true, thread_id: threadId, message: insMsg.data }, 200);
   } catch (e) {
-    return json({ error: String(e?.message || e) }, 500);
+    return json(req, { error: String((e as any)?.message || e) }, 500);
   }
 });

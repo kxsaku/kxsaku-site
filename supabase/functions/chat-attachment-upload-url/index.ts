@@ -1,6 +1,8 @@
 // supabase/functions/chat-attachment-upload-url/index.ts
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { getCorsHeaders, handleCorsPrefllight } from "../_shared/cors.ts";
+import { checkRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 
 function getEnv(name: string) {
   const v = Deno.env.get(name);
@@ -8,21 +10,10 @@ function getEnv(name: string) {
   return v;
 }
 
-function cors(req: Request) {
-  const origin = req.headers.get("origin") ?? "*";
-  return {
-    "Access-Control-Allow-Origin": origin,
-    "Access-Control-Allow-Headers":
-      "authorization, x-client-info, apikey, content-type, x-requested-with",
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Credentials": "true",
-  };
-}
-
 function json(req: Request, data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { "Content-Type": "application/json", ...cors(req) },
+    headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
   });
 }
 
@@ -34,7 +25,12 @@ type ReqBody = {
 };
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response("ok", { headers: cors(req) });
+  if (req.method === "OPTIONS") return handleCorsPrefllight(req);
+
+  // Rate limiting for chat endpoints
+  const rateLimitResponse = checkRateLimit(req, { ...RATE_LIMITS.chat, keyPrefix: "chat-attachment-upload-url" }, getCorsHeaders(req));
+  if (rateLimitResponse) return rateLimitResponse;
+
   if (req.method !== "POST") return json(req, { error: "Method not allowed" }, 405);
 
   try {

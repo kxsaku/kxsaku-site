@@ -1,6 +1,8 @@
 // supabase/functions/admin-chat-history/index.ts
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { getCorsHeaders, handleCorsPrefllight } from "../_shared/cors.ts";
+import { checkRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 
 function getEnv(name: string) {
   const v = Deno.env.get(name);
@@ -8,16 +10,10 @@ function getEnv(name: string) {
   return v;
 }
 
-function json(data: unknown, status = 200) {
+function json(req: Request, data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: {
-      "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Headers":
-        "authorization, x-client-info, apikey, content-type",
-      "Access-Control-Allow-Methods": "POST, OPTIONS",
-    },
+    headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
   });
 }
 
@@ -37,8 +33,13 @@ type AttachmentOut = {
 };
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") return json({ ok: true }, 200);
-  if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
+  if (req.method === "OPTIONS") return handleCorsPrefllight(req);
+
+  // Rate limiting for chat endpoints
+  const rateLimitResponse = checkRateLimit(req, { ...RATE_LIMITS.chat, keyPrefix: "admin-chat-history" }, getCorsHeaders(req));
+  if (rateLimitResponse) return rateLimitResponse;
+
+  if (req.method !== "POST") return json(req, { error: "Method not allowed" }, 405);
 
   try {
     const SB_URL = getEnv("SB_URL");
@@ -47,7 +48,7 @@ serve(async (req) => {
 
     const authHeader = req.headers.get("Authorization") || "";
     const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
-    if (!token) return json({ error: "Missing Authorization bearer token" }, 401);
+    if (!token) return json(req, { error: "Missing Authorization bearer token" }, 401);
 
     const sb = createClient(SB_URL, SB_SERVICE_ROLE_KEY, {
       auth: { persistSession: false },
@@ -55,18 +56,18 @@ serve(async (req) => {
 
     // Verify caller is admin
     const { data: userData, error: userErr } = await sb.auth.getUser(token);
-    if (userErr) return json({ error: `Auth error: ${userErr.message}` }, 401);
+    if (userErr) return json(req, { error: `Auth error: ${userErr.message}` }, 401);
 
     const callerEmail = (userData.user?.email || "").toLowerCase();
     if (!callerEmail || callerEmail !== ADMIN_EMAIL) {
-      return json({ error: "Forbidden: admin only" }, 403);
+      return json(req, { error: "Forbidden: admin only" }, 403);
     }
 
     const body = (await req.json().catch(() => ({}))) as ReqBody;
     const targetUserId = (body.user_id || "").trim();
     const limit = Math.max(1, Math.min(200, Number(body.limit || 60)));
 
-    if (!targetUserId) return json({ error: "Missing user_id" }, 400);
+    if (!targetUserId) return json(req, { error: "Missing user_id" }, 400);
 
     // Find thread for this client
     const thread = await sb
@@ -75,11 +76,11 @@ serve(async (req) => {
       .eq("user_id", targetUserId)
       .maybeSingle();
 
-    if (thread.error) return json({ error: thread.error.message }, 500);
+    if (thread.error) return json(req, { error: thread.error.message }, 500);
     const threadId = thread.data?.id as string | undefined;
 
     if (!threadId) {
-      return json({ ok: true, thread_id: null, messages: [] }, 200);
+      return json(req, { ok: true, thread_id: null, messages: [] }, 200);
     }
 
     // Load most recent messages then reverse so UI sees chronological order
@@ -92,13 +93,13 @@ serve(async (req) => {
       .order("created_at", { ascending: false })
       .limit(limit);
 
-    if (msgErr) return json({ error: msgErr.message }, 500);
+    if (msgErr) return json(req, { error: msgErr.message }, 500);
 
     const messages = (rawMsgs || []).slice().reverse();
     const msgIds = messages.map((m) => m.id);
 
     if (msgIds.length === 0) {
-      return json({ ok: true, thread_id: threadId, messages: [] }, 200);
+      return json(req, { ok: true, thread_id: threadId, messages: [] }, 200);
     }
 
     // Load attachments for those messages
@@ -108,7 +109,7 @@ serve(async (req) => {
       .in("message_id", msgIds);
 
     if (attErr) {
-      return json({ error: `Failed to load attachments: ${attErr.message}` }, 500);
+      return json(req, { error: `Failed to load attachments: ${attErr.message}` }, 500);
     }
 
     // Sign URLs and group by message_id
@@ -147,7 +148,7 @@ serve(async (req) => {
       read_by_client_at: m.read_by_client_at ?? null,
       reply_to_message_id: m.reply_to_message_id ?? null,
 
-      // keep both “*_at” fields AND booleans for UI compatibility
+      // keep both "*_at" fields AND booleans for UI compatibility
       edited_at: m.edited_at ?? null,
       deleted_at: m.deleted_at ?? null,
       edited: !!m.edited_at,
@@ -159,8 +160,8 @@ serve(async (req) => {
       attachments: byMessageId.get(String(m.id)) || [],
     }));
 
-    return json({ ok: true, thread_id: threadId, messages: merged }, 200);
+    return json(req, { ok: true, thread_id: threadId, messages: merged }, 200);
   } catch (e) {
-    return json({ error: String((e as any)?.message || e) }, 500);
+    return json(req, { error: String((e as any)?.message || e) }, 500);
   }
 });

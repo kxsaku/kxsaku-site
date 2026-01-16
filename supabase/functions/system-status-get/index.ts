@@ -1,19 +1,16 @@
 // supabase/functions/system-status-get/index.ts
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { getCorsHeaders, handleCorsPrefllight } from "../_shared/cors.ts";
+import { checkRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-};
-
-function json(body: unknown, status = 200) {
+function json(req: Request, body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
+    headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
   });
 }
+
 function getEnv(name: string) {
   const v = Deno.env.get(name);
   if (!v) throw new Error(`Missing env var: ${name}`);
@@ -21,7 +18,11 @@ function getEnv(name: string) {
 }
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  if (req.method === "OPTIONS") return handleCorsPrefllight(req);
+
+  // Rate limiting for public endpoints
+  const rateLimitResponse = checkRateLimit(req, { ...RATE_LIMITS.public, keyPrefix: "system-status-get" }, getCorsHeaders(req));
+  if (rateLimitResponse) return rateLimitResponse;
 
   try {
     const SUPABASE_URL = getEnv("SUPABASE_URL");
@@ -44,11 +45,11 @@ serve(async (req) => {
         .select("id,mode,message,updated_at")
         .single();
       if (insErr) throw insErr;
-      return json(ins);
+      return json(req, ins);
     }
 
-    return json(data);
+    return json(req, data);
   } catch (e) {
-    return json({ error: e?.message || String(e) }, 500);
+    return json(req, { error: (e as any)?.message || String(e) }, 500);
   }
 });

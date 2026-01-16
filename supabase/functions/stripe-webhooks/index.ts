@@ -2,6 +2,7 @@
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import Stripe from "https://esm.sh/stripe@14.21.0?target=deno";
+import { checkRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 
 function getEnv(name: string) {
   const v = Deno.env.get(name);
@@ -48,10 +49,13 @@ async function verifyStripeSignature(req: Request, body: string) {
     .some((sig) => timingSafeEqual(expected, sig));
 
   if (!ok) throw new Error("Invalid Stripe signature.");
-
 }
 
 serve(async (req) => {
+  // Rate limiting for webhook endpoints (higher limit since Stripe sends bursts)
+  const rateLimitResponse = checkRateLimit(req, { ...RATE_LIMITS.webhook, keyPrefix: "stripe-webhooks" }, {});
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const SB_URL = getEnv("SB_URL");
     const SB_SERVICE_ROLE_KEY = getEnv("SB_SERVICE_ROLE_KEY");
@@ -71,7 +75,6 @@ serve(async (req) => {
     });
 
     const pickBestSubscription = (subs: any[]) => {
-      // Prefer statuses in this order
       const rank: Record<string, number> = {
         active: 1,
         trialing: 2,
@@ -88,12 +91,9 @@ serve(async (req) => {
           const ra = rank[a.status] ?? 99;
           const rb = rank[b.status] ?? 99;
           if (ra !== rb) return ra - rb;
-
-          // tie-breaker: newest created wins
           return Number(b.created ?? 0) - Number(a.created ?? 0);
         })[0] ?? null;
     };
-
 
     const upsertByCustomer = async (stripeCustomerId: string, patch: Record<string, unknown>) => {
       const { data: row, error } = await sb
@@ -103,8 +103,6 @@ serve(async (req) => {
         .maybeSingle();
 
       if (error) throw error;
-
-      // Return whether we matched a row so callers can fallback to metadata/user_id
       if (!row?.user_id) return { matched: false as const };
 
       const { error: upErr } = await sb.from("billing_subscriptions").upsert({
@@ -135,7 +133,7 @@ serve(async (req) => {
       if (upErr) throw upErr;
     };
 
-        const upsertSubscription = async (
+    const upsertSubscription = async (
       userId: string,
       email: string,
       stripeCustomerId: string,
@@ -152,47 +150,36 @@ serve(async (req) => {
       });
     };
 
-
     switch (type) {
+      case "checkout.session.completed": {
+        const session = event.data.object as any;
 
+        if (session.mode !== "subscription") break;
 
-    case "checkout.session.completed": {
-      const session = event.data.object as any;
+        const userId = session.client_reference_id || session.metadata?.user_id;
+        const email = session.customer_details?.email || session.metadata?.email;
 
-      // Only relevant for subscription checkout
-      if (session.mode !== "subscription") break;
+        const customerId =
+          typeof session.customer === "string" ? session.customer : session.customer?.id;
 
-      const userId = session.client_reference_id || session.metadata?.user_id;
-      const email = session.customer_details?.email || session.metadata?.email;
+        const subscriptionId =
+          typeof session.subscription === "string"
+            ? session.subscription
+            : session.subscription?.id;
 
-      const customerId =
-        typeof session.customer === "string" ? session.customer : session.customer?.id;
+        if (!userId || !customerId || !subscriptionId) {
+          break;
+        }
 
-      const subscriptionId =
-        typeof session.subscription === "string"
-          ? session.subscription
-          : session.subscription?.id;
+        const sub = await stripe.subscriptions.retrieve(subscriptionId);
 
-      if (!userId || !customerId || !subscriptionId) {
-        // Not enough info to link to a user row
+        await upsertSubscription(userId, email || "", customerId, sub);
+
         break;
       }
 
-      // Fetch the subscription from Stripe so we get status + current_period_end
-      const sub = await stripe.subscriptions.retrieve(subscriptionId);
-
-      await upsertSubscription(
-        userId,
-        email || "",
-        customerId,
-        sub
-      );
-
-      break;
-    }
-
-    default:
-      break;
+      default:
+        break;
     }
 
     if (
@@ -203,12 +190,10 @@ serve(async (req) => {
       const subEvent = event.data.object as any;
       const customer = subEvent.customer as string;
 
-      // IMPORTANT: when a customer has multiple subs, pick the best one (active/trialing wins)
       const list = await stripe.subscriptions.list({ customer, limit: 100, status: "all" });
       const best = pickBestSubscription(list.data);
 
       if (!best) {
-        // No subscriptions at all — mark inactive
         const patch = {
           stripe_subscription_id: null,
           status: "canceled",
@@ -221,7 +206,6 @@ serve(async (req) => {
           const metaEmail = subEvent.metadata?.email as string | undefined;
           if (metaUserId) await upsertByUser(metaUserId, metaEmail ?? null, customer, patch);
         }
-        // done
       } else {
         const currentPeriodEnd = best.current_period_end
           ? new Date(Number(best.current_period_end) * 1000).toISOString()
@@ -236,7 +220,6 @@ serve(async (req) => {
 
         const res = await upsertByCustomer(customer, patch);
 
-        // fallback to metadata if row didn't exist yet
         if (!res.matched) {
           const metaUserId = (best.metadata?.user_id || subEvent.metadata?.user_id) as string | undefined;
           const metaEmail = (best.metadata?.email || subEvent.metadata?.email) as string | undefined;
@@ -247,11 +230,6 @@ serve(async (req) => {
         }
       }
     }
-
-
-
-
-
 
     if (
       type === "invoice.payment_succeeded" ||
@@ -301,10 +279,9 @@ serve(async (req) => {
       }
     }
 
-
     return new Response("ok", { status: 200 });
   } catch (e) {
     console.error(e);
-    return new Response(`Webhook error: ${String(e?.message ?? e)}`, { status: 400 });
+    return new Response(`Webhook error: ${String((e as any)?.message ?? e)}`, { status: 400 });
   }
 });

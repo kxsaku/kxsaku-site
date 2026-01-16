@@ -1,17 +1,13 @@
 // supabase/functions/admin-client-list/index.ts
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { getCorsHeaders, handleCorsPrefllight } from "../_shared/cors.ts";
+import { checkRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-};
-
-function json(body: unknown, status = 200) {
+function json(req: Request, body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
+    headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
   });
 }
 
@@ -120,7 +116,11 @@ async function computeStripeMetrics(stripeCustomerId: string | null, stripeSubsc
 }
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  if (req.method === "OPTIONS") return handleCorsPrefllight(req);
+
+  // Rate limiting for admin endpoints
+  const rateLimitResponse = checkRateLimit(req, { ...RATE_LIMITS.admin, keyPrefix: "admin-client-list" }, getCorsHeaders(req));
+  if (rateLimitResponse) return rateLimitResponse;
 
   try {
     const SB_URL = getEnv("SB_URL");
@@ -129,16 +129,16 @@ serve(async (req) => {
 
     const authHeader = req.headers.get("Authorization") ?? "";
     const jwt = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
-    if (!jwt) return json({ error: "Missing Authorization bearer token." }, 401);
+    if (!jwt) return json(req, { error: "Missing Authorization bearer token." }, 401);
 
     const sb = createClient(SB_URL, SB_SERVICE_ROLE_KEY);
 
     // Verify caller is authenticated and is the admin email
     const { data: userData, error: userErr } = await sb.auth.getUser(jwt);
-    if (userErr || !userData?.user) return json({ error: "Invalid session." }, 401);
+    if (userErr || !userData?.user) return json(req, { error: "Invalid session." }, 401);
 
     const callerEmail = (userData.user.email ?? "").toLowerCase();
-    if (callerEmail !== ADMIN_EMAIL) return json({ error: "Forbidden." }, 403);
+    if (callerEmail !== ADMIN_EMAIL) return json(req, { error: "Forbidden." }, 403);
 
     const body = await req.json().catch(() => ({}));
     const includeStripe = body?.includeStripe !== false; // default true
@@ -148,13 +148,13 @@ serve(async (req) => {
       .from("client_profiles")
       .select("user_id,email,contact_name,business_name,phone,business_location,mailing_address,billing_address,created_at,updated_at");
 
-    if (pErr) return json({ error: "Failed to read client_profiles.", detail: pErr.message }, 500);
+    if (pErr) return json(req, { error: "Failed to read client_profiles.", detail: pErr.message }, 500);
 
     const { data: subs, error: sErr } = await sb
       .from("billing_subscriptions")
       .select("user_id,email,status,current_period_end,last_payment_status,last_payment_amount,last_payment_currency,stripe_customer_id,stripe_subscription_id,created_at,updated_at");
 
-    if (sErr) return json({ error: "Failed to read billing_subscriptions.", detail: sErr.message }, 500);
+    if (sErr) return json(req, { error: "Failed to read billing_subscriptions.", detail: sErr.message }, 500);
 
     const profById = new Map<string, any>();
     for (const p of profiles ?? []) profById.set(p.user_id, p);
@@ -258,9 +258,9 @@ serve(async (req) => {
       return na.localeCompare(nb);
     });
 
-    return json({ ok: true, clients });
+    return json(req, { ok: true, clients });
   } catch (e) {
     console.error(e);
-    return json({ error: String(e?.message ?? e) }, 500);
+    return json(req, { error: String(e?.message ?? e) }, 500);
   }
 });
