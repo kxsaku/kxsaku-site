@@ -4,6 +4,8 @@
   display: inline-flex;
   align-items: baseline;
   white-space: nowrap;
+  /* Smooth width transitions for centering */
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .headline-word {

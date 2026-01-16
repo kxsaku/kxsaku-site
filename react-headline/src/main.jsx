@@ -9,7 +9,7 @@ const rootEl = document.getElementById('rt-headline-root')
 if (rootEl) {
   ReactDOM.createRoot(rootEl).render(
     <RotatingText
-      texts={['Assessment', 'Reliability', 'Security', 'Support']}
+      texts={['Reliability', 'Security', 'Continuity', 'Affordability']}
       staggerFrom="last"
       initial={{ y: "100%", opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
@@ -17,6 +17,7 @@ if (rootEl) {
       staggerDuration={0.025}
       transition={{ type: "spring", damping: 30, stiffness: 400 }}
       rotationInterval={2500}
+      animatePresenceMode="popLayout"
       mainClassName="headline-rotating"
       splitLevelClassName="headline-word"
       elementLevelClassName="headline-char"
