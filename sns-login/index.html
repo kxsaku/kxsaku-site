@@ -142,6 +142,14 @@
     const { data: { session } } = await supabase.auth.getSession();
     if (session) window.location.href = "/sns-dashboard/";
 
+    // Enter key support for login
+    passEl.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") { e.preventDefault(); btn.click(); }
+    });
+    emailEl.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") { e.preventDefault(); btn.click(); }
+    });
+
     btn.addEventListener("click", async () => {
       msg.style.display = "none";
       btn.disabled = true;

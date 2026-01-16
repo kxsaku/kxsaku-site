@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <title>SNS · Client Chat (Admin)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://esm.sh; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com; img-src 'self' data: blob: https://*.supabase.co; font-src 'self'; frame-src https://js.stripe.com;" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://esm.sh https://cdn.quilljs.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdn.quilljs.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com; img-src 'self' data: blob: https://*.supabase.co; font-src 'self'; frame-src https://js.stripe.com;" />
   <script>
   (function () {
     // If user explicitly chose desktop, do not redirect
@@ -24,6 +24,7 @@
   </script>
 
   <link rel="stylesheet" href="/styles.css" />
+  <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet" />
 
   <style>
     /* ===========================================
@@ -298,6 +299,76 @@
     .msg.deleted{
       background: rgba(15,10,55,.28);
       border-color: rgba(255,98,98,.28);
+    }
+    .msg.broadcast{
+      max-width: 100%;
+      background: linear-gradient(180deg, rgba(255,170,100,.15), rgba(15,10,55,.45));
+      border-color: rgba(255,170,100,.28);
+      position: relative;
+    }
+    .msg.broadcast::before{
+      content: "BROADCAST";
+      position: absolute;
+      top: -8px;
+      left: 12px;
+      background: rgba(255,170,100,.9);
+      color: #1a0f00;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+      letter-spacing: 0.08em;
+    }
+
+    /* Broadcast composer styles */
+    .broadcast-composer{
+      padding: 1.5rem;
+      border-radius: 18px;
+      border: 1px solid rgba(255,170,100,.28);
+      background: rgba(15,10,55,.45);
+      margin: 1rem;
+    }
+    .broadcast-composer h3{
+      margin: 0 0 0.5rem;
+      font-size: 0.9rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(255,170,100,.95);
+    }
+    .broadcast-composer .muted{
+      margin-bottom: 1rem;
+      font-size: 0.85rem;
+      color: rgba(244,240,255,.65);
+    }
+    #broadcastEditor{
+      height: 200px;
+      background: rgba(9,6,34,.60);
+      border-radius: 14px;
+      margin-bottom: 1rem;
+    }
+    #broadcastEditor .ql-toolbar{
+      border-radius: 14px 14px 0 0;
+      border-color: rgba(129,118,255,.22);
+      background: rgba(15,10,55,.55);
+    }
+    #broadcastEditor .ql-container{
+      border-radius: 0 0 14px 14px;
+      border-color: rgba(129,118,255,.22);
+      font-size: 0.95rem;
+    }
+    #broadcastEditor .ql-editor{
+      color: var(--ink);
+      min-height: 120px;
+    }
+    #broadcastEditor .ql-editor.ql-blank::before{
+      color: rgba(244,240,255,.45);
+      font-style: normal;
+    }
+    .broadcast-actions{
+      display: flex;
+      gap: 0.65rem;
+      justify-content: flex-end;
+      flex-wrap: wrap;
     }
 
     .msg .text{ white-space:pre-wrap; line-height:1.35; font-size:.92rem; }
@@ -1472,6 +1543,9 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" integrity="sha384-0cJhvyxOncqJDixLuJRbH99K17F1B6DH3D8aUBlsJlsgiqRZQpQ1EUFWdgscplLu" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js" integrity="sha384-+mbV2IY1Zk/X1p/nWllGySJSUN8uMs+gUAN10Or95UBH0fpj6GfKgPmgC5EXieXG" crossorigin="anonymous"></script>
+  <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
   <script>
     const SUPABASE_URL = "https://jgvxmpsjtkedzgygynbl.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpndnhtcHNqdGtlZHpneWd5bmJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0NzgxMjYsImV4cCI6MjA4MTA1NDEyNn0.OCh23RWm8COtxWuumYvKUmfMOLOW01B1zrbtzcr3w6Y";
@@ -2966,8 +3040,142 @@ ${(Array.isArray(m.attachments) && m.attachments.length > 1) ? `
     });
 
     sendBtn.addEventListener("click", sendMessage);
-    
-    // Broadcast (UI only for now)
+
+    // PDF Export functionality
+    exportBtn.addEventListener("click", () => {
+      if (!activeClient || !messages.length) {
+        showChatErr("No client or messages to export.");
+        return;
+      }
+
+      try {
+        const { jsPDF } = window.jspdf;
+        if (!jsPDF) {
+          showChatErr("PDF library not loaded.");
+          return;
+        }
+
+        const doc = new jsPDF();
+
+        // Header
+        doc.setFontSize(18);
+        doc.setTextColor(80, 60, 120);
+        doc.text("SNS Chat Export", 14, 20);
+
+        // Client info
+        doc.setFontSize(11);
+        doc.setTextColor(60, 60, 60);
+        const clientName = activeClient.full_name || activeClient.email || "Client";
+        const businessName = activeClient.business_name || "";
+        doc.text(`Client: ${clientName}${businessName ? ` (${businessName})` : ""}`, 14, 30);
+
+        // Date range
+        const dates = messages.map(m => new Date(m.created_at)).sort((a, b) => a - b);
+        const minDate = dates[0]?.toLocaleDateString() || "—";
+        const maxDate = dates[dates.length - 1]?.toLocaleDateString() || "—";
+        doc.text(`Date Range: ${minDate} - ${maxDate}`, 14, 36);
+        doc.text(`Exported: ${new Date().toLocaleString()}`, 14, 42);
+
+        // Messages table
+        const tableData = messages.map(m => [
+          new Date(m.created_at).toLocaleString(),
+          m.sender_role === "admin" ? "Admin" : "Client",
+          m.deleted ? "[Deleted]" : (m.body || "[Attachment]").slice(0, 100)
+        ]);
+
+        doc.autoTable({
+          startY: 50,
+          head: [["Time", "Sender", "Message"]],
+          body: tableData,
+          headStyles: { fillColor: [80, 60, 120] },
+          styles: { fontSize: 9, cellPadding: 3 },
+          columnStyles: {
+            0: { cellWidth: 40 },
+            1: { cellWidth: 20 },
+            2: { cellWidth: "auto" }
+          },
+          margin: { left: 14, right: 14 },
+          didDrawPage: function(data) {
+            // Footer
+            doc.setFontSize(8);
+            doc.setTextColor(150, 150, 150);
+            doc.text(
+              `Page ${doc.internal.getCurrentPageInfo().pageNumber}`,
+              doc.internal.pageSize.width / 2,
+              doc.internal.pageSize.height - 10,
+              { align: "center" }
+            );
+          }
+        });
+
+        // Generate safe filename
+        const safeName = clientName.replace(/[^a-zA-Z0-9]/g, "_").slice(0, 30);
+        const dateStr = new Date().toISOString().slice(0, 10);
+        doc.save(`SNS_Chat_${safeName}_${dateStr}.pdf`);
+
+        showChatErr(""); // Clear any errors
+      } catch (e) {
+        console.error("PDF export error:", e);
+        showChatErr("Failed to export PDF: " + (e?.message || String(e)));
+      }
+    });
+
+    // Broadcast feature with Quill editor
+    let broadcastQuill = null;
+
+    function initBroadcastComposer() {
+      if (broadcastQuill) return;
+
+      const editorEl = document.getElementById("broadcastEditor");
+      if (!editorEl || !window.Quill) return;
+
+      broadcastQuill = new Quill("#broadcastEditor", {
+        theme: "snow",
+        placeholder: "Compose your broadcast message...",
+        modules: {
+          toolbar: [
+            ["bold", "italic", "underline"],
+            [{ "list": "ordered" }, { "list": "bullet" }],
+            ["link"],
+            ["clean"]
+          ]
+        }
+      });
+    }
+
+    async function sendBroadcast() {
+      if (!broadcastQuill) return;
+
+      const html = broadcastQuill.root.innerHTML;
+      const text = broadcastQuill.getText().trim();
+
+      if (!text) {
+        showChatErr("Broadcast message cannot be empty.");
+        return;
+      }
+
+      const confirmSend = confirm("Send this broadcast to ALL active clients?");
+      if (!confirmSend) return;
+
+      try {
+        showChatErr("");
+        const result = await callEdge("admin-broadcast", {
+          content: text,
+          content_html: html
+        });
+
+        if (result?.ok) {
+          alert(`Broadcast sent to ${result.sent_count || 0} client(s).`);
+          broadcastQuill.setText("");
+          setMode("home");
+        } else {
+          showChatErr(result?.error || "Broadcast failed.");
+        }
+      } catch (e) {
+        showChatErr(e?.message || String(e));
+      }
+    }
+
     broadcastBtn.addEventListener("click", () => {
       setMode("broadcast");
       stopRealtime();
@@ -2977,15 +3185,39 @@ ${(Array.isArray(m.attachments) && m.attachments.length > 1) ? `
       clearChatErr();
 
       messagesEl.innerHTML = `
-        <div class="msg" style="max-width:100%; opacity:.85;">
-          <div class="text">Broadcast composer ready. (We’ll wire delivery logic next.)</div>
+        <div class="broadcast-composer">
+          <h3>Compose Broadcast</h3>
+          <p class="muted">This message will be sent to ALL active clients.</p>
+          <div id="broadcastEditor"></div>
+          <div class="broadcast-actions">
+            <button class="btn btn-soft" id="broadcastCancel" type="button">Cancel</button>
+            <button class="btn btn-primary" id="broadcastSend" type="button">Send to All Clients</button>
+          </div>
         </div>
       `;
 
-      composer.value = "";
-      composer.focus();
-      sendBtn.disabled = false;
-      chatAttachBtn.disabled = false;
+      // Initialize Quill after DOM update
+      setTimeout(() => {
+        initBroadcastComposer();
+
+        // Bind cancel button
+        const cancelBtn = document.getElementById("broadcastCancel");
+        if (cancelBtn) {
+          cancelBtn.addEventListener("click", () => {
+            setMode("home");
+            broadcastQuill = null;
+          });
+        }
+
+        // Bind send button
+        const sendBroadcastBtn = document.getElementById("broadcastSend");
+        if (sendBroadcastBtn) {
+          sendBroadcastBtn.addEventListener("click", sendBroadcast);
+        }
+      }, 50);
+
+      sendBtn.disabled = true;
+      chatAttachBtn.disabled = true;
     });
 
 composer.addEventListener("keydown", (e) => {

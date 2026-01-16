@@ -983,6 +983,82 @@ th {
 }
 
 /* =============================================
+   Animation Utilities
+   ============================================= */
+
+/* Fade In Up animation */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fadeInUp 0.35s ease-out both;
+}
+
+/* Staggered children animation */
+.animate-stagger > *:nth-child(1) { animation: fadeInUp 0.3s ease-out both; animation-delay: 50ms; }
+.animate-stagger > *:nth-child(2) { animation: fadeInUp 0.3s ease-out both; animation-delay: 100ms; }
+.animate-stagger > *:nth-child(3) { animation: fadeInUp 0.3s ease-out both; animation-delay: 150ms; }
+.animate-stagger > *:nth-child(4) { animation: fadeInUp 0.3s ease-out both; animation-delay: 200ms; }
+.animate-stagger > *:nth-child(5) { animation: fadeInUp 0.3s ease-out both; animation-delay: 250ms; }
+.animate-stagger > *:nth-child(n+6) { animation: fadeInUp 0.3s ease-out both; animation-delay: 300ms; }
+
+/* Shimmer effect for loading states */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.shimmer {
+  background: linear-gradient(90deg, rgba(129,118,255,.08), rgba(179,124,255,.18), rgba(129,118,255,.08));
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Pulse glow effect */
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(179,124,255,.4); }
+  50% { box-shadow: 0 0 0 8px rgba(179,124,255,0); }
+}
+.pulse-glow {
+  animation: pulseGlow 2s infinite;
+}
+
+/* Hover lift effect */
+.hover-lift {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0,0,0,.35);
+}
+
+/* Interactive card effect */
+.card-interactive {
+  transition: border-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+}
+.card-interactive:hover {
+  border-color: var(--color-accent-border);
+  transform: translateY(-1px);
+}
+
+/* Online pulse animation for status dots */
+@keyframes onlinePulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.15); }
+}
+.dot-online-pulse {
+  animation: onlinePulse 2s infinite;
+}
+
+/* Skeleton loading placeholder */
+.skeleton {
+  background: linear-gradient(90deg, rgba(129,118,255,.1) 25%, rgba(179,124,255,.2) 50%, rgba(129,118,255,.1) 75%);
+  background-size: 400% 100%;
+  animation: shimmer 1.2s infinite;
+  border-radius: var(--radius-sm);
+}
+
+/* =============================================
    Accessibility: Reduced Motion
    ============================================= */
 @media (prefers-reduced-motion: reduce) {

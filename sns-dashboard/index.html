@@ -1483,10 +1483,54 @@ document.addEventListener("visibilitychange", () => {
       chatOnlineText.textContent = on ? "Online" : "Offline";
     }
 
-    // Unread indicator (client-side: “new” just for UI feedback)
+    // Unread indicator (client-side: "new" just for UI feedback)
     function setUnread(hasNew){
       chatUnreadDot.classList.toggle("new", !!hasNew);
       chatUnreadText.textContent = hasNew ? "New message" : "No new messages";
+    }
+
+    // Presence tracking - sends heartbeats to the server
+    let presenceInterval = null;
+
+    async function sendPresence(action = "heartbeat") {
+      try {
+        await callFn("client-presence", { action });
+      } catch (e) {
+        // Silent fail - presence is not critical
+        console.debug("Presence update failed:", e);
+      }
+    }
+
+    function startPresenceTracking() {
+      // Initial heartbeat
+      sendPresence("heartbeat");
+      setClientOnline(true);
+
+      // Periodic heartbeat every 30 seconds
+      presenceInterval = setInterval(() => {
+        if (document.visibilityState === "visible") {
+          sendPresence("heartbeat");
+        }
+      }, 30000);
+
+      // Send offline on page unload
+      window.addEventListener("beforeunload", () => {
+        // Use sendBeacon for reliable delivery during unload
+        const url = `${FN_BASE}/client-presence`;
+        const body = JSON.stringify({ action: "offline" });
+        navigator.sendBeacon(url, body);
+      });
+
+      // Handle visibility changes
+      document.addEventListener("visibilitychange", () => {
+        if (document.hidden) {
+          sendPresence("offline");
+          setClientOnline(false);
+        } else {
+          sendPresence("heartbeat");
+          setClientOnline(true);
+        }
+      });
     }
 
 
@@ -1534,8 +1578,8 @@ document.addEventListener("visibilitychange", () => {
         elPeriodEnd.textContent = "Current Period End: —";
         manageBtn.style.display = "none";
       }
-            // Init chat
-      setClientOnline(true);
+            // Init chat and presence tracking
+      startPresenceTracking();
       await chatLoadHistory();
     }
 

@@ -692,6 +692,14 @@ document.addEventListener("mouseout", (e) => {
       await loadInquiries();
     });
 
+    // Enter key support for login
+    loginPass.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") { e.preventDefault(); loginBtn.click(); }
+    });
+    loginEmail.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") { e.preventDefault(); loginBtn.click(); }
+    });
+
     loginBtn.addEventListener("click", async () => {
       loginErr.style.display = "none";
       loginErr.textContent = "";
