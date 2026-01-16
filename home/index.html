@@ -385,17 +385,35 @@
       color: transparent;
     }
 
-    /* Smooth centering for rotating headline */
+    /* Rotating headline container */
     .hero-title-rt {
-      display: inline-flex;
-      align-items: baseline;
+      margin: 1.2rem auto .9rem;
+      font-size: clamp(2.4rem, 5.2vw, 4.0rem);
+      line-height: 1.06;
+      letter-spacing: .01em;
+      display: flex;
       justify-content: center;
       width: 100%;
-      max-width: none;
     }
-    .hero-title-rt #rt-headline-root {
-      display: inline-flex;
-      min-width: 13ch; /* Width of longest word: "Affordability" */
+    .hero-title-rt .rotating-text-demo {
+      font-size: inherit;
+      line-height: inherit;
+    }
+    .hero-title-rt .rotating-text-ptag {
+      background: linear-gradient(180deg,
+        rgba(179,124,255,.60),
+        rgba(244,240,255,.42) 60%,
+        rgba(249,115,226,.32)
+      );
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .hero-title-rt .rotating-text-main {
+      background-color: #5227ff;
+      -webkit-background-clip: padding-box;
+      background-clip: padding-box;
+      color: #fff;
     }
 
 
@@ -742,9 +760,7 @@
 <img alt="Saku Network Solutions logo" src="/assets/sns-logo-purple.png"/>
 </div>
 <div class="eyebrow reveal">Veteran-led • Los Angeles • Small Business IT</div>
-<h1 class="reveal hero-title-rt">
-  Network&nbsp;<span id="rt-headline-root"></span>
-</h1>
+<div class="reveal hero-title-rt" id="rt-headline-root"></div>
 <p class="lede reveal">
           SNS designs, installs, and supports business networks with a focus on stability, clean implementation,
           and security-minded configuration.

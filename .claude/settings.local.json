@@ -7,7 +7,13 @@
       "Bash(else echo \"installing dependencies\")",
       "Bash(npm install)",
       "Bash(fi)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "WebFetch(domain:reactbits.dev)",
+      "WebSearch",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:deepwiki.com)",
+      "WebFetch(domain:api.github.com)"
     ]
   }
 }
