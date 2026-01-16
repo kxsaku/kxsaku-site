@@ -19,7 +19,6 @@ function json(req: Request, data: unknown, status = 200) {
 
 type ReqBody = {
   content?: string;
-  content_html?: string;
 };
 
 serve(async (req) => {
@@ -50,14 +49,15 @@ serve(async (req) => {
 
     const body = (await req.json().catch(() => ({}))) as ReqBody;
     const content = (body.content || "").trim();
-    const contentHtml = (body.content_html || "").trim();
 
     if (!content) {
       return json(req, { error: "Missing content" }, 400);
     }
 
     const nowIso = new Date().toISOString();
-    const preview = content.slice(0, 140);
+    // Prepend broadcast indicator to message
+    const broadcastBody = `📢 BROADCAST\n\n${content}`;
+    const preview = broadcastBody.slice(0, 140);
 
     // Get all chat threads
     const { data: threads, error: threadsErr } = await admin
@@ -69,30 +69,30 @@ serve(async (req) => {
     }
 
     if (!threads || threads.length === 0) {
-      return json(req, { ok: true, sent_count: 0, message: "No threads to broadcast to" }, 200);
+      return json(req, { ok: true, sent_count: 0, message: "No client threads exist yet" }, 200);
     }
 
     let sentCount = 0;
+    const errors: string[] = [];
 
     // Insert broadcast message to each thread
     for (const thread of threads) {
       const threadId = thread.id;
 
-      // Insert message
+      // Insert message (using only standard columns)
       const msgInsert = await admin
         .from("chat_messages")
         .insert({
           thread_id: threadId,
           sender_role: "admin",
-          body: content,
-          content_html: contentHtml || null,
-          is_broadcast: true,
+          body: broadcastBody,
           created_at: nowIso,
           delivered_at: nowIso,
         });
 
       if (msgInsert.error) {
         console.error(`Failed to insert broadcast to thread ${threadId}:`, msgInsert.error);
+        errors.push(`Thread ${threadId}: ${msgInsert.error.message}`);
         continue;
       }
 
@@ -102,7 +102,7 @@ serve(async (req) => {
         .update({
           last_admin_msg_at: nowIso,
           last_message_at: nowIso,
-          last_message_preview: `[Broadcast] ${preview}`,
+          last_message_preview: preview,
           last_sender_role: "admin",
           unread_for_client: true,
         })
@@ -115,10 +115,11 @@ serve(async (req) => {
       ok: true,
       sent_count: sentCount,
       total_threads: threads.length,
+      errors: errors.length > 0 ? errors : undefined,
     }, 200);
 
   } catch (err) {
     console.error("Error in admin-broadcast:", err);
-    return json(req, { error: "Internal server error" }, 500);
+    return json(req, { error: String((err as Error)?.message || err) }, 500);
   }
 });

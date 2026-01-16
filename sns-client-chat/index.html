@@ -2598,8 +2598,8 @@ async function goHome(){
       }
       if (hb){
         hb.addEventListener("click", () => {
-          // Placeholder only (you said we can implement later)
-          alert("Broadcast: coming next. For now, select a client to chat.");
+          // Trigger the broadcast mode (same as menu button)
+          broadcastBtn.click();
         });
       }
     }
@@ -3146,7 +3146,6 @@ ${(Array.isArray(m.attachments) && m.attachments.length > 1) ? `
     async function sendBroadcast() {
       if (!broadcastQuill) return;
 
-      const html = broadcastQuill.root.innerHTML;
       const text = broadcastQuill.getText().trim();
 
       if (!text) {
@@ -3154,25 +3153,54 @@ ${(Array.isArray(m.attachments) && m.attachments.length > 1) ? `
         return;
       }
 
-      const confirmSend = confirm("Send this broadcast to ALL active clients?");
-      if (!confirmSend) return;
+      // Disable button and show sending state
+      const sendBroadcastBtn = document.getElementById("broadcastSend");
+      if (sendBroadcastBtn) {
+        sendBroadcastBtn.disabled = true;
+        sendBroadcastBtn.textContent = "Sending...";
+      }
 
       try {
         showChatErr("");
         const result = await callEdge("admin-broadcast", {
-          content: text,
-          content_html: html
+          content: text
         });
 
         if (result?.ok) {
-          alert(`Broadcast sent to ${result.sent_count || 0} client(s).`);
           broadcastQuill.setText("");
-          setMode("home");
+          // Show success in the composer area
+          messagesEl.innerHTML = `
+            <div class="broadcast-composer">
+              <h3 style="color: var(--ok);">Broadcast Sent</h3>
+              <p class="muted">Message delivered to ${result.sent_count || 0} client(s).</p>
+              <div class="broadcast-actions" style="margin-top: 1rem;">
+                <button class="btn btn-soft" id="broadcastDone" type="button">Done</button>
+                <button class="btn btn-primary" id="broadcastAnother" type="button">Send Another</button>
+              </div>
+            </div>
+          `;
+
+          document.getElementById("broadcastDone")?.addEventListener("click", () => {
+            setMode("home");
+            broadcastQuill = null;
+          });
+
+          document.getElementById("broadcastAnother")?.addEventListener("click", () => {
+            broadcastBtn.click();
+          });
         } else {
           showChatErr(result?.error || "Broadcast failed.");
+          if (sendBroadcastBtn) {
+            sendBroadcastBtn.disabled = false;
+            sendBroadcastBtn.textContent = "Send to All Clients";
+          }
         }
       } catch (e) {
         showChatErr(e?.message || String(e));
+        if (sendBroadcastBtn) {
+          sendBroadcastBtn.disabled = false;
+          sendBroadcastBtn.textContent = "Send to All Clients";
+        }
       }
     }
 
