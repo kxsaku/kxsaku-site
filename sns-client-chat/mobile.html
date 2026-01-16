@@ -2,25 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>SNS · Client Chat (Admin)</title>
+  <title>SNS · Client Chat (Admin) - Mobile</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <script>
-  (function () {
-    // If user explicitly chose desktop, do not redirect
-    if (localStorage.getItem("sns_force_desktop") === "1") return;
-
-    // phone-ish: small viewport + touch
-    var isPhone = window.matchMedia("(max-width: 740px)").matches &&
-                  ("ontouchstart" in window || navigator.maxTouchPoints > 0);
-
-    // avoid loops
-    var alreadyMobile = location.pathname.endsWith("/sns-client-chat/mobile.html");
-
-    if (isPhone && !alreadyMobile) {
-      location.replace("/sns-client-chat/mobile.html");
-    }
-  })();
-  </script>
 
   <link rel="stylesheet" href="/styles.css" />
 
@@ -759,13 +742,199 @@
     }
 
     @media (max-width: 980px){
-      body{ overflow:auto; } /* allow normal scroll on small screens */
+      body{ overflow:auto; }
       .wrap{ height:auto; }
       .layout{ grid-template-columns: 1fr; height:auto; }
       .card{ min-height: 72vh; }
     }
     @media (prefers-reduced-motion: reduce){
       *{ animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+    }
+
+    /* =========================
+       MOBILE-SPECIFIC OVERRIDES
+       ========================= */
+    body{ overflow:auto; }
+    .wrap{
+      width: 100%;
+      padding: .75rem;
+      height: auto;
+      min-height: 100vh;
+      gap: .75rem;
+    }
+
+    .toprow{
+      flex-direction: column;
+      align-items: stretch;
+      gap: .75rem;
+    }
+    .toprow h1{ font-size: 1.1rem; text-align: center; }
+    .toprow .sub{ text-align: center; font-size: .85rem; }
+    .top-actions{
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .top-actions .pill{ font-size: .75rem; padding: .45rem .75rem; }
+
+    .card{
+      padding: .75rem;
+      border-radius: 18px;
+      min-height: auto;
+    }
+
+    .layout{
+      grid-template-columns: 1fr !important;
+      gap: 0;
+      height: auto !important;
+    }
+
+    /* Mobile tabs for switching panels */
+    .mobile-tabs{
+      display: flex;
+      gap: .5rem;
+      margin-bottom: .75rem;
+    }
+    .mobile-tab{
+      flex: 1;
+      padding: .65rem .75rem;
+      border-radius: 14px;
+      border: 1px solid rgba(129,118,255,.25);
+      background: rgba(9,6,34,.45);
+      color: rgba(244,240,255,.75);
+      font-size: .8rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      text-align: center;
+      cursor: pointer;
+      transition: all .15s ease;
+    }
+    .mobile-tab.active{
+      background: rgba(179,124,255,.18);
+      border-color: rgba(179,124,255,.45);
+      color: var(--ink);
+    }
+
+    /* Panel visibility on mobile */
+    .panel{ display: none; }
+    .panel.mobile-visible{ display: flex; }
+
+    .panel{
+      border-radius: 14px;
+      padding: .75rem;
+    }
+    .panel-header{
+      flex-direction: column;
+      align-items: stretch;
+      gap: .65rem;
+    }
+    .panel-header > div:last-child{
+      flex-direction: row;
+      justify-content: space-between;
+    }
+    .panel-title{ font-size: 1rem; }
+    .search{
+      padding: .7rem .85rem;
+      font-size: .95rem;
+    }
+
+    .client-list{ max-height: 50vh; }
+    .client{
+      padding: .85rem .75rem;
+      border-radius: 14px;
+    }
+    .client .name{ font-size: .95rem; }
+    .client .meta{ font-size: .8rem; }
+
+    /* Chat panel mobile */
+    #chatPanel.mobile-visible{
+      min-height: 70vh;
+      display: flex;
+    }
+    .chat-header{
+      padding: .65rem .75rem;
+      flex-direction: column;
+      align-items: stretch;
+      gap: .55rem;
+    }
+    .chat-title{ font-size: 1rem; }
+    .chat-sub{ font-size: .85rem; }
+    .chat-actions{
+      justify-content: flex-end;
+    }
+
+    .messages{
+      padding: .65rem;
+      min-height: 40vh;
+    }
+    .msg{
+      padding: .75rem .85rem;
+      border-radius: 14px;
+      max-width: 92%;
+    }
+    .msg .body{ font-size: .95rem; }
+    .msg .ts{ font-size: .7rem; }
+
+    .composer{
+      padding: .65rem;
+      gap: .45rem;
+      flex-wrap: wrap;
+    }
+    .composer .box{ flex: 1 1 100%; order: -1; }
+    .composer textarea{
+      min-height: 48px;
+      font-size: .95rem;
+      padding: .65rem .75rem;
+    }
+    .composer .btn{
+      flex: 1;
+      padding: .65rem .85rem;
+      font-size: .75rem;
+    }
+
+    /* Home view mobile */
+    .home.home-center{
+      padding: 1.5rem 1rem;
+      min-height: 60vh;
+    }
+    .home-title{ font-size: clamp(1.1rem, 4vw, 1.5rem); }
+    .home-sub{ font-size: .95rem; }
+    .home-glass{
+      padding: .85rem;
+      border-radius: 18px;
+    }
+
+    /* Modals mobile */
+    .origModal{ padding: 12px; }
+    .origCard{
+      max-width: 100% !important;
+      max-height: 90vh;
+      overflow-y: auto;
+      border-radius: 18px;
+    }
+    .origHeader{ padding: .85rem; }
+    .origBody{ padding: .85rem; }
+
+    /* Notes view mobile */
+    .notesShell{ grid-template-columns: 1fr; }
+    .notesSidebar{
+      max-height: 40vh;
+      overflow-y: auto;
+    }
+    .notesMain{ padding: .85rem; }
+    .notesTitleInput{ font-size: 1.1rem; }
+    .notesBody{ min-height: 35vh; }
+
+    /* Login overlay mobile */
+    .login-card{
+      max-width: 100%;
+      padding: 1.25rem;
+      border-radius: 18px;
+    }
+    .login-title{ font-size: 1.3rem; }
+    .field input{
+      padding: .75rem .85rem;
+      font-size: .95rem;
     }
 
     /* --------------------------
@@ -1337,13 +1506,20 @@
         </a>
 
         <button class="btn btn-soft" id="logoutBtn" type="button">Logout</button>
+        <a class="btn btn-soft" id="viewDesktop" href="#">Desktop</a>
       </div>
     </div>
 
     <div class="card">
+      <!-- Mobile tabs -->
+      <div class="mobile-tabs">
+        <button class="mobile-tab active" id="tabClients" type="button">Clients</button>
+        <button class="mobile-tab" id="tabChat" type="button">Chat</button>
+      </div>
+
       <div class="layout">
         <!-- Left: Client list -->
-        <div class="panel">
+        <div class="panel mobile-visible" id="clientsPanel">
           <div class="panel-header">
             <div style="min-width:0;">
               <div class="panel-title">Clients</div>
@@ -3634,6 +3810,57 @@ if (noteClientChip){
   </div>
 </div>
 
+<script>
+// Mobile tab switching
+(function(){
+  const tabClients = document.getElementById('tabClients');
+  const tabChat = document.getElementById('tabChat');
+  const clientsPanel = document.getElementById('clientsPanel');
+  const chatPanel = document.getElementById('chatPanel');
+
+  function showClients(){
+    tabClients.classList.add('active');
+    tabChat.classList.remove('active');
+    clientsPanel.classList.add('mobile-visible');
+    chatPanel.classList.remove('mobile-visible');
+  }
+
+  function showChat(){
+    tabChat.classList.add('active');
+    tabClients.classList.remove('active');
+    chatPanel.classList.add('mobile-visible');
+    clientsPanel.classList.remove('mobile-visible');
+  }
+
+  tabClients.addEventListener('click', showClients);
+  tabChat.addEventListener('click', showChat);
+
+  // Auto-switch to chat when a client is selected
+  const clientList = document.getElementById('clientList');
+  if(clientList){
+    clientList.addEventListener('click', function(e){
+      const client = e.target.closest('.client');
+      if(client){
+        setTimeout(showChat, 100);
+      }
+    });
+  }
+
+  // Start with clients panel visible
+  showClients();
+})();
+
+// View Desktop Site preference
+(function(){
+  const a = document.getElementById("viewDesktop");
+  if (!a) return;
+  a.addEventListener("click", function(e){
+    e.preventDefault();
+    localStorage.setItem("sns_force_desktop", "1");
+    location.replace("/sns-client-chat/");
+  });
+})();
+</script>
 
 </body>
 </html>
