@@ -357,6 +357,27 @@
       filter: brightness(1.03);
       background: rgba(182,123,255,.06);
     }
+
+    /* Terms styling */
+    .term{
+      padding: .85rem 0;
+      border-top: 1px solid rgba(255,255,255,.08);
+    }
+    .term:first-of-type{ border-top: 0; padding-top: 0; }
+    .term b{
+      display: block;
+      font-size: .88rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      margin-bottom: .35rem;
+    }
+    .term span{
+      display: block;
+      color: rgba(244,240,255,.70);
+      line-height: 1.65;
+      font-size: .95rem;
+    }
+
     .pill{
       display:inline-flex;
       padding:.42rem .72rem;
@@ -660,6 +681,71 @@
       </div>
     </section>
 
+    <!-- TERMS -->
+    <section id="terms" class="section">
+      <div class="wrap">
+        <div class="kicker reveal">
+          <span class="dot"></span>
+          Client Terms & Policies
+        </div>
+
+        <div class="card reveal" style="margin-top:1.0rem;">
+          <h3 style="margin:0 0 .5rem; font-size:.9rem; letter-spacing:.1em; text-transform:uppercase;">Terms Overview</h3>
+          <p class="lede" style="margin:0 0 1rem; font-size:.92rem;">Last updated: <span id="lastUpdated"></span></p>
+
+          <div class="term">
+            <b>1) Scope of Work</b>
+            <span>Work is performed against an agreed scope. If scope changes midstream, SNS confirms the change before continuing so time and cost stay predictable.</span>
+          </div>
+
+          <div class="term">
+            <b>2) Scheduling & Deposits</b>
+            <span>Some issues only become visible on-site. For certain projects or equipment procurement, a deposit may be required to reserve time and/or purchase hardware.</span>
+          </div>
+
+          <div class="term">
+            <b>3) Payments (One-Time Work)</b>
+            <span>One-time work is invoiced after completion unless otherwise agreed. If an invoice becomes overdue, ongoing support may pause until resolved.</span>
+          </div>
+
+          <div class="term">
+            <b>4) Subscription Support</b>
+            <span>Subscription support is billed on the schedule shown at checkout. If payment fails or becomes past due, service can be paused until brought current.</span>
+          </div>
+
+          <div class="term">
+            <b>5) Access & Ownership</b>
+            <span>Client-owned systems remain client-owned. If SNS is granted admin access, it's for performing the agreed work. Access can be reduced or removed after the job.</span>
+          </div>
+
+          <div class="term">
+            <b>6) Data Handling & Privacy</b>
+            <span>SNS minimizes data collection. Information submitted is used to respond, schedule, and deliver service. Technical details may be retained for continuity.</span>
+          </div>
+
+          <div class="term">
+            <b>7) Third-Party Services</b>
+            <span>Some outcomes depend on third parties (ISP, vendor portals, payment processors). SNS can configure and harden, but cannot guarantee third-party availability.</span>
+          </div>
+
+          <div class="term">
+            <b>8) Acceptable Use</b>
+            <span>Do not submit false information, impersonate others, or attempt unauthorized access. SNS may restrict access to protect systems and service quality.</span>
+          </div>
+
+          <div class="term">
+            <b>9) Service Limitations</b>
+            <span>Networking work involves variables outside any one party's control. SNS focuses on measurable improvement, but cannot promise "perfect Wi-Fi everywhere."</span>
+          </div>
+
+          <div class="term">
+            <b>10) Changes to Terms</b>
+            <span>SNS may update these terms to reflect product changes, policy improvements, or legal requirements. The "Last updated" date reflects the most recent revision.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- CTA -->
     <section class="section">
       <div class="wrap">
@@ -705,6 +791,15 @@
         });
       }, { threshold: 0.12 });
       els.forEach(el => io.observe(el));
+    })();
+
+    // Last updated date
+    (function(){
+      const el = document.getElementById("lastUpdated");
+      if (!el) return;
+      const d = new Date();
+      const pad = (n) => String(n).padStart(2, "0");
+      el.textContent = d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
     })();
   </script>
 
