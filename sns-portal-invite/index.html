@@ -21,47 +21,120 @@
 
   <link rel="stylesheet" href="/styles.css" />
   <style>
-    body{ margin:0; background: radial-gradient(circle at top, #342067, #050315 55%, #020010); color:#f4f0ff; font-family: ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial; }
-    .wrap{ max-width: 860px; margin: 0 auto; padding: 3rem 1rem 4rem; }
-    .card{ background: rgba(7,4,25,.78); border: 1px solid rgba(129,118,255,.25); border-radius: 18px; padding: 18px; box-shadow: 0 18px 60px rgba(0,0,0,.5); backdrop-filter: blur(14px); }
-    h1{ margin:0 0 .25rem; letter-spacing:.14em; text-transform:uppercase; font-size:1.1rem; }
-    p{ margin:.4rem 0 1rem; color: rgba(244,240,255,.82); line-height:1.45; }
-    label{ display:block; margin:.9rem 0 .35rem; font-size:.9rem; color: rgba(244,240,255,.9); }
-    input, textarea, select{
-      width:100%; padding: 12px 12px; border-radius: 12px;
-      border:1px solid rgba(129,118,255,.25);
-      background: rgba(10,6,35,.65);
-      color:#f4f0ff; outline:none;
+    /* Page-specific: invite form layout */
+    .invite-wrap {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 3rem 1rem 4rem;
     }
-    input:focus, textarea:focus, select:focus{ border-color: rgba(129,118,255,.55); }
-    .row{ display:grid; grid-template-columns:1fr 1fr; gap: 14px; }
-    @media (max-width: 720px){ .row{ grid-template-columns:1fr; } }
-    .btn{
+    .invite-card {
+      background: var(--color-surface-card);
+      border: 1px solid var(--color-border-card);
+      border-radius: var(--radius-xl);
+      padding: 1.25rem;
+      box-shadow: var(--shadow-lg);
+      backdrop-filter: blur(14px);
+    }
+    .invite-card h1 {
+      margin: 0 0 .25rem;
+      font-size: 1.1rem;
+    }
+    .invite-card p {
+      margin: .4rem 0 1rem;
+      color: var(--color-text-muted);
+      line-height: 1.45;
+    }
+    .invite-card label {
+      display: block;
+      margin: .9rem 0 .35rem;
+      font-size: .9rem;
+      color: var(--color-text-label);
+    }
+    .invite-card input,
+    .invite-card textarea,
+    .invite-card select {
+      width: 100%;
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--color-border-input);
+      background: var(--color-surface-input);
+      color: var(--color-text-primary);
+      outline: none;
+    }
+    .invite-card input:focus,
+    .invite-card textarea:focus,
+    .invite-card select:focus {
+      border-color: #9c88ff;
+      box-shadow: 0 0 0 1px rgba(156, 136, 255, 0.55);
+    }
+    .invite-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    @media (max-width: 720px) {
+      .invite-row { grid-template-columns: 1fr; }
+    }
+    .invite-btn {
       margin-top: 14px;
-      width:100%;
+      width: 100%;
       padding: 12px 14px;
-      border-radius: 14px;
-      border: 1px solid rgba(129,118,255,.35);
-      background: rgba(129,118,255,.18);
-      color:#f4f0ff;
-      cursor:pointer;
-      font-weight:600;
-      letter-spacing:.08em;
-      text-transform:uppercase;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--color-border);
+      background: var(--color-accent-soft);
+      color: var(--color-text-primary);
+      cursor: pointer;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      transition: transform 0.08s ease, border-color 0.12s ease, filter 0.12s ease;
     }
-    .btn:disabled{ opacity:.6; cursor:not-allowed; }
-    .msg{ margin-top: 12px; padding: 12px 14px; border-radius: 14px; border:1px solid rgba(255,255,255,.12); display:none; }
-    .msg.err{ background: rgba(255,55,120,.10); border-color: rgba(255,55,120,.35); }
-    .msg.ok{ background: rgba(80,255,180,.08); border-color: rgba(80,255,180,.28); }
-    .meterWrap{ margin-top: 8px; }
-    .meterBar{ height: 10px; border-radius: 999px; background: rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.10); overflow:hidden; }
-    .meterFill{ height:100%; width:0%; transition: width .2s ease; }
-    .hint{ font-size:.85rem; color: rgba(244,240,255,.72); margin-top: 6px; }
+    .invite-btn:hover {
+      border-color: var(--color-accent);
+      filter: brightness(1.05);
+    }
+    .invite-btn:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+    }
+    .msg {
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(255,255,255,.12);
+      display: none;
+    }
+    .msg.err {
+      background: rgba(255,55,120,.10);
+      border-color: rgba(255,55,120,.35);
+    }
+    .msg.ok {
+      background: rgba(80,255,180,.08);
+      border-color: rgba(80,255,180,.28);
+    }
+    .meterWrap { margin-top: 8px; }
+    .meterBar {
+      height: 10px;
+      border-radius: var(--radius-pill);
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.10);
+      overflow: hidden;
+    }
+    .meterFill {
+      height: 100%;
+      width: 0%;
+      transition: width .2s ease;
+    }
+    .hint {
+      font-size: .85rem;
+      color: var(--color-text-muted);
+      margin-top: 6px;
+    }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="card">
+  <div class="invite-wrap">
+    <div class="invite-card">
       <h1>Create Your SNS Account</h1>
       <p>Set your password and confirm your business details. This account is invite-only.</p>
 
@@ -71,7 +144,7 @@
         <label>Email</label>
         <input id="email" type="email" disabled />
 
-        <div class="row">
+        <div class="invite-row">
           <div>
             <label>Password</label>
             <input id="pw" type="password" autocomplete="new-password" placeholder="Create a password" />
@@ -88,7 +161,7 @@
 
         <hr style="border:none;border-top:1px solid rgba(255,255,255,.10); margin: 18px 0;" />
 
-        <div class="row">
+        <div class="invite-row">
           <div>
             <label>Contact Name</label>
             <input id="contact_name" />
@@ -99,7 +172,7 @@
           </div>
         </div>
 
-        <div class="row">
+        <div class="invite-row">
           <div>
             <label>Phone</label>
             <input id="phone" placeholder="+1..." />
@@ -125,12 +198,12 @@
           <input id="billing_address" placeholder="Street, City, State, ZIP" />
         </div>
 
-        <button id="submitBtn" class="btn" type="submit">Create Account</button>
+        <button id="submitBtn" class="invite-btn" type="submit">Create Account</button>
       </form>
     </div>
   </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" integrity="sha384-0cJhvyxOncqJDixLuJRbH99K17F1B6DH3D8aUBlsJlsgiqRZQpQ1EUFWdgscplLu" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" integrity="sha384-0cJhvyxOncqJDixLuJRbH99K17F1B6DH3D8aUBlsJlsgiqRZQpQ1EUFWdgscplLu" crossorigin="anonymous"></script>
 <script>
   const { createClient } = supabase;
 

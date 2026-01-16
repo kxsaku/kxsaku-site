@@ -16,42 +16,44 @@
   })();
 </script>
 
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="/styles.css" />
   <style>
+    /* Page-specific: Success page layout */
     .page-shell {
       min-height: 100vh;
       width: 100%;
-      background: radial-gradient(circle at top, #342067, #050315 55%, #020010);
-      color: #f4f0ff;
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 2rem 1rem;
     }
+
+    /* Page-specific: Success card styling */
     .sns-success-card {
       max-width: 520px;
       width: 100%;
-      background: rgba(9, 6, 34, 0.96);
+      background: var(--color-surface-card);
       border-radius: 30px;
-      border: 1px solid rgba(130, 106, 255, 0.4);
+      border: 1px solid var(--color-border-card);
       padding: 2.25rem 2rem 2.4rem;
       text-align: center;
-      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.7);
+      box-shadow: var(--shadow-xl);
     }
     .sns-success-card h1 {
       font-size: 1.7rem;
       margin-bottom: 0.5rem;
+      color: var(--color-text-primary);
     }
     .sns-success-card p {
       font-size: 0.95rem;
-      color: #c5bcff;
+      color: var(--color-text-sub);
       margin-bottom: 1.5rem;
     }
     .sns-success-card a {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      border-radius: 999px;
+      border-radius: var(--radius-pill);
       padding: 0.75rem 1.6rem;
       font-size: 0.85rem;
       font-weight: 600;
@@ -60,12 +62,12 @@
       text-decoration: none;
       background-image: linear-gradient(135deg, #b659ff, #6a7bff);
       color: #fff;
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65);
+      box-shadow: var(--shadow-md);
       transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.12s ease;
     }
     .sns-success-card a:hover {
       transform: translateY(-1px);
-      box-shadow: 0 20px 55px rgba(0, 0, 0, 0.75);
+      box-shadow: var(--shadow-lg);
       filter: brightness(1.05);
     }
   </style>

@@ -18,197 +18,140 @@
 
   <link rel="stylesheet" href="/styles.css" />
   <style>
-    :root{
-      --bg0:#050315;
-      --cardA: rgba(12,8,36,.72);
-      --cardB: rgba(8,5,28,.52);
-      --border: rgba(140,130,255,.20);
-      --border2: rgba(255,255,255,.10);
-      --text:#f4f0ff;
-      --muted: rgba(244,240,255,.78);
-      --muted2: rgba(244,240,255,.60);
-      --glow: rgba(125,95,255,.28);
-      --shadow: 0 22px 80px rgba(0,0,0,.55);
-      --radius: 22px;
-    }
-
-    *{ box-sizing:border-box; }
-    html,body{ height:100%; }
-    body{
-      margin:0;
-      min-height:100vh;
-      color:var(--text);
-      font-family: ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial;
+    /* Page-specific: centered layout */
+    body {
       background:
         radial-gradient(1100px 420px at 50% -120px, rgba(120,95,255,.35), transparent 60%),
         radial-gradient(900px 520px at 20% 10%, rgba(70,35,160,.30), transparent 55%),
-        radial-gradient(circle at top, #342067, #050315 55%, #020010);
-      display:grid;
-      place-items:center;
+        var(--color-bg-gradient);
+      display: grid;
+      place-items: center;
       padding: 44px 18px;
     }
 
-    .wrap{ width: min(920px, 100%); }
+    .wrap { width: min(920px, 100%); }
 
-    .card{
-      position:relative;
-      border-radius: var(--radius);
+    /* Page-specific: success card styling */
+    .success-card {
+      position: relative;
+      border-radius: var(--radius-xl);
       padding: 22px;
-      background: linear-gradient(180deg, var(--cardA), var(--cardB));
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow);
+      background: linear-gradient(180deg, rgba(12,8,36,.72), rgba(8,5,28,.52));
+      border: 1px solid var(--color-border);
+      box-shadow: var(--shadow-lg);
       backdrop-filter: blur(16px);
-      overflow:hidden;
+      overflow: hidden;
 
-      opacity:0;
+      opacity: 0;
       transform: translateY(10px);
       animation: enter .36s ease forwards;
     }
-    @keyframes enter{
-      to{ opacity:1; transform: translateY(0); }
+
+    @keyframes enter {
+      to { opacity: 1; transform: translateY(0); }
     }
 
-    .card:before{
-      content:"";
-      position:absolute; inset:-2px;
+    .success-card::before {
+      content: "";
+      position: absolute;
+      inset: -2px;
       background:
-        radial-gradient(520px 220px at 18% 0%, var(--glow), transparent 55%),
+        radial-gradient(520px 220px at 18% 0%, var(--glow-accent), transparent 55%),
         radial-gradient(420px 240px at 85% 15%, rgba(170,140,255,.14), transparent 55%);
-      pointer-events:none;
-      opacity:.95;
+      pointer-events: none;
+      opacity: .95;
     }
-    .card:after{
-      content:"";
-      position:absolute; inset:0;
-      border-radius: var(--radius);
-      padding:1px;
+
+    .success-card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: var(--radius-xl);
+      padding: 1px;
       background: linear-gradient(90deg, rgba(255,255,255,.08), rgba(140,130,255,.18), rgba(255,255,255,.08));
-      mask: linear-gradient(#000 0 0) content-box,
-      linear-gradient(#000 0 0);
+      mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
       -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
       -webkit-mask-composite: xor;
       mask-composite: exclude;
-      opacity:.55;
-      pointer-events:none;
+      opacity: .55;
+      pointer-events: none;
     }
-    .card > *{ position:relative; z-index:1; }
 
-    .topline{
-      display:flex;
-      align-items:center;
-      gap:14px;
-      justify-content:space-between;
-      flex-wrap:wrap;
+    .success-card > * { position: relative; z-index: 1; }
+
+    /* Page-specific: layout helpers */
+    .topline {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      justify-content: space-between;
+      flex-wrap: wrap;
       margin-bottom: 12px;
     }
 
-    .titleBlock{ display:flex; align-items:center; gap:14px; }
+    .titleBlock { display: flex; align-items: center; gap: 14px; }
 
-    .badge{
-      width: 44px; height: 44px;
+    .badge {
+      width: 44px;
+      height: 44px;
       border-radius: 14px;
       border: 1px solid rgba(255,255,255,.12);
       background: rgba(255,255,255,.06);
-      display:grid;
-      place-items:center;
-      box-shadow: 0 14px 36px rgba(0,0,0,.30);
+      display: grid;
+      place-items: center;
+      box-shadow: var(--shadow-sm);
       animation: floaty 4.6s ease-in-out infinite;
     }
-    @keyframes floaty{
-      0%,100%{ transform: translateY(0); }
-      50%{ transform: translateY(-4px); }
+
+    @keyframes floaty {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
     }
 
-    h1{
-      margin:0;
+    h1 {
       font-size: 14px;
-      letter-spacing:.22em;
-      text-transform:uppercase;
-      line-height:1.2;
-    }
-    .sub{
-      margin-top:6px;
-      color: var(--muted2);
-      font-size: 13px;
-      line-height:1.45;
+      line-height: 1.2;
     }
 
-    .divider{
-      height:1px;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,.10), transparent);
+    .sub {
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .divider {
       margin: 14px 0 16px;
     }
 
-    .pillrow{
-      display:flex; gap:10px; flex-wrap:wrap;
+    .pillrow {
       margin-top: 2px;
     }
-    .pill{
-      display:inline-flex; align-items:center; gap:8px;
-      padding:7px 10px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.06);
-      font-size: 12.5px;
-      color: rgba(244,240,255,.88);
-      line-height:1;
-    }
-    .pill strong{ color: rgba(244,240,255,.96); }
 
-    .actions{
-      display:flex; gap:10px; flex-wrap:wrap;
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
       margin-top: 16px;
     }
 
-    .btn{
-      appearance:none;
-      border: 1px solid rgba(160,150,255,.32);
-      background: linear-gradient(180deg, rgba(140,125,255,.22), rgba(110,95,255,.10));
-      color: var(--text);
-      text-decoration:none;
-      padding: 12px 14px;
-      border-radius: 14px;
-      font-weight: 800;
-      letter-spacing:.10em;
-      text-transform:uppercase;
-      font-size: 12px;
-      cursor:pointer;
-      box-shadow: 0 10px 24px rgba(0,0,0,.22);
-      transition: transform .12s ease, border-color .12s ease, box-shadow .12s ease, background .12s ease;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      min-width: 210px;
-    }
-    .btn:hover{
-      transform: translateY(-1px);
-      border-color: rgba(190,180,255,.45);
-      box-shadow: 0 14px 34px rgba(0,0,0,.28);
-    }
-    .btn:active{ transform: translateY(0); }
-
-    .btnGhost{
-      background: rgba(255,255,255,.05);
-      border-color: rgba(255,255,255,.14);
-      box-shadow:none;
+    .actions .btn {
       min-width: 210px;
     }
 
-    @media (max-width: 520px){
-      .btn{ width:100%; min-width: unset; }
+    @media (max-width: 520px) {
+      .actions .btn { width: 100%; min-width: unset; }
     }
 
-    .fineprint{
+    .fineprint {
       margin-top: 12px;
-      color: var(--muted2);
+      color: var(--color-text-muted2);
       font-size: 12px;
-      line-height:1.45;
+      line-height: 1.45;
     }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <div class="card">
+    <div class="success-card">
       <div class="topline">
         <div class="titleBlock">
           <div class="badge" aria-hidden="true">
@@ -232,8 +175,8 @@
       </div>
 
       <div class="actions">
-        <a class="btn" href="/sns-dashboard/index.html">Return to Dashboard</a>
-        <a class="btn btnGhost" href="/sns-dashboard/index.html">Manage Subscription</a>
+        <a class="btn btn-primary" href="/sns-dashboard/index.html">Return to Dashboard</a>
+        <a class="btn btn-ghost" href="/sns-dashboard/index.html">Manage Subscription</a>
       </div>
 
       <div class="fineprint">

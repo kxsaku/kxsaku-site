@@ -18,166 +18,148 @@
 
   <link rel="stylesheet" href="/styles.css" />
   <style>
-    :root{
-      --bg0:#050315;
-      --cardA: rgba(12,8,36,.72);
-      --cardB: rgba(8,5,28,.52);
-      --border: rgba(140,130,255,.20);
-      --text:#f4f0ff;
-      --muted: rgba(244,240,255,.78);
-      --muted2: rgba(244,240,255,.60);
-      --glow: rgba(125,95,255,.22);
-      --shadow: 0 22px 80px rgba(0,0,0,.55);
-      --radius: 22px;
-    }
-
-    *{ box-sizing:border-box; }
-    html,body{ height:100%; }
-    body{
-      margin:0;
-      min-height:100vh;
-      color:var(--text);
-      font-family: ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial;
+    /* Page-specific: centered layout with custom background */
+    body {
       background:
         radial-gradient(1100px 420px at 50% -120px, rgba(120,95,255,.30), transparent 60%),
         radial-gradient(900px 520px at 20% 10%, rgba(70,35,160,.26), transparent 55%),
-        radial-gradient(circle at top, #342067, #050315 55%, #020010);
-      display:grid;
-      place-items:center;
+        var(--color-bg-gradient);
+      display: grid;
+      place-items: center;
       padding: 44px 18px;
     }
 
-    .wrap{ width: min(920px, 100%); }
+    .wrap { width: min(920px, 100%); }
 
-    .card{
-      position:relative;
-      border-radius: var(--radius);
+    /* Cancel card with entrance animation */
+    .cancel-card {
+      position: relative;
+      border-radius: var(--radius-lg);
       padding: 22px;
-      background: linear-gradient(180deg, var(--cardA), var(--cardB));
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow);
+      background: linear-gradient(180deg, rgba(12,8,36,.72), rgba(8,5,28,.52));
+      border: 1px solid rgba(140,130,255,.20);
+      box-shadow: var(--shadow-lg);
       backdrop-filter: blur(16px);
-      overflow:hidden;
-
-      opacity:0;
+      overflow: hidden;
+      opacity: 0;
       transform: translateY(10px);
       animation: enter .36s ease forwards;
     }
-    @keyframes enter{
-      to{ opacity:1; transform: translateY(0); }
+    @keyframes enter {
+      to { opacity: 1; transform: translateY(0); }
     }
-
-    .card:before{
-      content:"";
-      position:absolute; inset:-2px;
+    .cancel-card::before {
+      content: "";
+      position: absolute;
+      inset: -2px;
       background:
-        radial-gradient(520px 220px at 18% 0%, var(--glow), transparent 55%),
+        radial-gradient(520px 220px at 18% 0%, var(--glow-accent), transparent 55%),
         radial-gradient(520px 220px at 85% 10%, rgba(255,110,155,.10), transparent 55%);
-      pointer-events:none;
-      opacity:.95;
+      pointer-events: none;
+      opacity: .95;
     }
-    .card > *{ position:relative; z-index:1; }
+    .cancel-card > * { position: relative; z-index: 1; }
 
-    .titleBlock{ display:flex; align-items:center; gap:14px; }
+    .titleBlock { display: flex; align-items: center; gap: 14px; }
 
-    .badge{
-      width: 44px; height: 44px;
-      border-radius: 14px;
+    .badge {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-sm);
       border: 1px solid rgba(255,255,255,.12);
       background: rgba(255,255,255,.06);
-      display:grid;
-      place-items:center;
+      display: grid;
+      place-items: center;
       box-shadow: 0 14px 36px rgba(0,0,0,.30);
       animation: floaty 4.6s ease-in-out infinite;
     }
-    @keyframes floaty{
-      0%,100%{ transform: translateY(0); }
-      50%{ transform: translateY(-4px); }
+    @keyframes floaty {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
     }
 
-    h1{
-      margin:0;
+    h1 {
       font-size: 14px;
-      letter-spacing:.22em;
-      text-transform:uppercase;
-      line-height:1.2;
-    }
-    .sub{
-      margin-top:6px;
-      color: var(--muted2);
-      font-size: 13px;
-      line-height:1.45;
+      line-height: 1.2;
     }
 
-    .divider{
-      height:1px;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,.10), transparent);
+    .sub {
+      margin-top: 6px;
+      color: var(--color-text-muted2);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .divider {
       margin: 14px 0 16px;
     }
 
-    .pillrow{
-      display:flex; gap:10px; flex-wrap:wrap;
+    .pillrow {
       margin-top: 2px;
     }
-    .pill{
-      display:inline-flex; align-items:center; gap:8px;
-      padding:7px 10px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.12);
+
+    .cancel-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 10px;
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(255,255,255,.12);
       background: rgba(255,255,255,.06);
       font-size: 12.5px;
       color: rgba(244,240,255,.88);
-      line-height:1;
+      line-height: 1;
     }
-    .pill strong{ color: rgba(244,240,255,.96); }
+    .cancel-pill strong { color: rgba(244,240,255,.96); }
 
-    .actions{
-      display:flex; gap:10px; flex-wrap:wrap;
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
       margin-top: 16px;
     }
 
-    .btn{
-      appearance:none;
+    .cancel-btn {
+      appearance: none;
       border: 1px solid rgba(160,150,255,.32);
       background: linear-gradient(180deg, rgba(140,125,255,.22), rgba(110,95,255,.10));
-      color: var(--text);
-      text-decoration:none;
+      color: var(--color-text-primary);
+      text-decoration: none;
       padding: 12px 14px;
-      border-radius: 14px;
+      border-radius: var(--radius-sm);
       font-weight: 800;
-      letter-spacing:.10em;
-      text-transform:uppercase;
+      letter-spacing: .10em;
+      text-transform: uppercase;
       font-size: 12px;
-      cursor:pointer;
+      cursor: pointer;
       box-shadow: 0 10px 24px rgba(0,0,0,.22);
       transition: transform .12s ease, border-color .12s ease, box-shadow .12s ease, background .12s ease;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       min-width: 210px;
     }
-    .btn:hover{
+    .cancel-btn:hover {
       transform: translateY(-1px);
       border-color: rgba(190,180,255,.45);
       box-shadow: 0 14px 34px rgba(0,0,0,.28);
     }
-    .btn:active{ transform: translateY(0); }
+    .cancel-btn:active { transform: translateY(0); }
 
-    .btnGhost{
+    .cancel-btn-ghost {
       background: rgba(255,255,255,.05);
       border-color: rgba(255,255,255,.14);
-      box-shadow:none;
-      min-width: 210px;
+      box-shadow: none;
     }
 
-    @media (max-width: 520px){
-      .btn{ width:100%; min-width: unset; }
+    @media (max-width: 520px) {
+      .cancel-btn { width: 100%; min-width: unset; }
     }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <div class="card">
+    <div class="cancel-card">
       <div class="titleBlock">
         <div class="badge" aria-hidden="true">
           <!-- X icon -->
@@ -194,13 +176,13 @@
       <div class="divider"></div>
 
       <div class="pillrow" aria-label="Summary">
-        <div class="pill"><strong>Status</strong>: Not started</div>
-        <div class="pill"><strong>Next step</strong>: Return to dashboard</div>
+        <div class="cancel-pill"><strong>Status</strong>: Not started</div>
+        <div class="cancel-pill"><strong>Next step</strong>: Return to dashboard</div>
       </div>
 
       <div class="actions">
-        <a class="btn" href="/sns-dashboard/index.html">Return to Dashboard</a>
-        <a class="btn btnGhost" href="/sns-dashboard/index.html">Try Again</a>
+        <a class="cancel-btn" href="/sns-dashboard/index.html">Return to Dashboard</a>
+        <a class="cancel-btn cancel-btn-ghost" href="/sns-dashboard/index.html">Try Again</a>
       </div>
     </div>
   </div>

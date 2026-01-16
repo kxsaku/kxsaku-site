@@ -19,146 +19,137 @@
 
   <link rel="stylesheet" href="/styles.css" />
   <style>
-    body { margin:0; background: radial-gradient(circle at top, #342067, #050315 55%, #020010); color:#f4f0ff; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial; min-height:100vh; }
-    .wrap { max-width: 1100px; margin: 0 auto; padding: 3rem 1rem 4rem; min-height:100vh; }
-    .toprow { display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; }
-    h1 { margin:0; letter-spacing:.18em; text-transform:uppercase; font-size: 1.2rem; }
-    .sub { opacity:.8; margin-top:.4rem; }
-    .btnrow { display:flex; gap:.7rem; align-items:center; }
-    .btn { cursor:pointer; border:1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.06); color:#f4f0ff; padding:.65rem 1rem; border-radius:999px; letter-spacing:.12em; text-transform:uppercase; font-weight:700; font-size:.75rem; }
-    .btn:hover { background: rgba(255,255,255,.10); }
-    .card { margin-top:1.4rem; border-radius: 22px; background: rgba(15, 10, 35, .72); border:1px solid rgba(255,255,255,.12); box-shadow: 0 20px 60px rgba(0,0,0,.55); overflow:hidden; }
-    .banner { padding: 1rem 1.25rem; border-bottom:1px solid rgba(255,255,255,.10); }
-    .warn { margin: 1rem 1.25rem; padding: .9rem 1rem; border-radius: 14px; border:1px solid rgba(255, 80, 160, .35); background: rgba(255, 70, 140, .10); color:#ffd7ea; display:none; }
+    /* Page-specific: wrap override for narrower max-width */
+    .wrap { max-width: 1100px; padding: 3rem 1rem 4rem; min-height: 100vh; }
+
+    /* Page-specific: enhanced background */
+    body {
+      background:
+        radial-gradient(1100px 420px at 50% -120px, rgba(120,95,255,.35), transparent 60%),
+        radial-gradient(900px 520px at 20% 10%, rgba(70,35,160,.30), transparent 55%),
+        var(--color-bg-gradient);
+    }
+
+    /* Page-specific: button row layout */
+    .btnrow { display: flex; gap: .7rem; align-items: center; }
+
+    /* Page-specific: banner section */
+    .banner { padding: 1rem 1.25rem; border-bottom: 1px solid var(--color-border-subtle); }
+
+    /* Page-specific: warning message */
+    .warn {
+      margin: 1rem 1.25rem;
+      padding: .9rem 1rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(255, 80, 160, .35);
+      background: rgba(255, 70, 140, .10);
+      color: #ffd7ea;
+      display: none;
+    }
+
+    /* Page-specific: table wrapper */
     .tablewrap { padding: 1.1rem 1.25rem 1.25rem; }
-    table { width:100%; border-collapse:separate; border-spacing:0 10px; }
-    th { text-align:left; font-size:.72rem; opacity:.75; letter-spacing:.18em; text-transform:uppercase; padding:0 .8rem; }
-    td { padding: .9rem .8rem; background: rgba(255,255,255,.05); border-top:1px solid rgba(255,255,255,.10); border-bottom:1px solid rgba(255,255,255,.10); }
-    tr td:first-child { border-left:1px solid rgba(255,255,255,.10); border-top-left-radius:14px; border-bottom-left-radius:14px; }
-    tr td:last-child { border-right:1px solid rgba(255,255,255,.10); border-top-right-radius:14px; border-bottom-right-radius:14px; }
-    .pill { display:inline-flex; align-items:center; gap:.45rem; padding:.35rem .65rem; border-radius:999px; border:1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.06); font-size:.75rem; }
-    .muted { opacity:.8; }
-    .empty { padding: 2rem 1.25rem; opacity:.85; }
 
-    /* ============================
-   SNS Dashboard-style Motion/UI
-   ============================ */
+    /* Page-specific: table styling with row separation */
+    table { border-collapse: separate; border-spacing: 0 10px; }
+    td {
+      padding: .9rem .8rem;
+      background: rgba(255,255,255,.05);
+      border-top: 1px solid rgba(255,255,255,.10);
+      border-bottom: 1px solid rgba(255,255,255,.10);
+    }
+    tr td:first-child {
+      border-left: 1px solid rgba(255,255,255,.10);
+      border-top-left-radius: var(--radius-sm);
+      border-bottom-left-radius: var(--radius-sm);
+    }
+    tr td:last-child {
+      border-right: 1px solid rgba(255,255,255,.10);
+      border-top-right-radius: var(--radius-sm);
+      border-bottom-right-radius: var(--radius-sm);
+    }
 
-@media (prefers-reduced-motion: reduce) {
-  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
-}
+    /* Page-specific: empty state */
+    .empty { padding: 2rem 1.25rem; opacity: .85; display: none; }
 
-:root{
-  --bg0:#050315;
-  --bg1:#0a0524;
-  --card: rgba(10, 6, 32, .62);
-  --border: rgba(140, 130, 255, .20);
-  --text:#f4f0ff;
-  --muted: rgba(244,240,255,.72);
-  --muted2: rgba(244,240,255,.55);
-  --glow: rgba(125, 95, 255, .22);
-  --shadow: 0 22px 80px rgba(0,0,0,.55);
-  --radius: 20px;
-}
+    /* Page-specific: entrance animations */
+    @keyframes snsFadeUp {
+      from { opacity: 0; transform: translateY(10px); filter: blur(2px); }
+      to   { opacity: 1; transform: translateY(0);   filter: blur(0); }
+    }
+    @keyframes snsSheen {
+      0%   { transform: translateX(-35%) rotate(12deg); opacity: 0; }
+      20%  { opacity: .10; }
+      60%  { opacity: .08; }
+      100% { transform: translateX(140%) rotate(12deg); opacity: 0; }
+    }
+    .sns-anim-1 { animation: snsFadeUp .55s ease-out both; }
+    .sns-anim-2 { animation: snsFadeUp .65s ease-out both; animation-delay: .06s; }
 
-body{
-  background:
-    radial-gradient(1100px 420px at 50% -120px, rgba(120,95,255,.35), transparent 60%),
-    radial-gradient(900px 520px at 20% 10%, rgba(70,35,160,.30), transparent 55%),
-    radial-gradient(circle at top, #342067, #050315 55%, #020010);
-  color: var(--text);
-}
+    /* Page-specific: enhanced card with glow and sheen */
+    .sns-card {
+      position: relative;
+      background: linear-gradient(180deg, rgba(12,8,36,.70), rgba(8,5,28,.50));
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      backdrop-filter: blur(16px);
+      overflow: hidden;
+    }
+    .sns-card::before {
+      content: "";
+      position: absolute;
+      inset: -2px;
+      background: radial-gradient(520px 220px at 18% 0%, var(--glow-accent), transparent 55%);
+      pointer-events: none;
+      opacity: .9;
+    }
+    .sns-card::after {
+      content: "";
+      position: absolute;
+      top: -30%;
+      left: -60%;
+      width: 50%;
+      height: 160%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.10), transparent);
+      transform: rotate(12deg);
+      animation: snsSheen 7.5s ease-in-out infinite;
+      pointer-events: none;
+      opacity: .08;
+    }
+    .sns-card > * { position: relative; z-index: 1; }
 
-/* Entrance animations */
-@keyframes snsFadeUp {
-  from { opacity: 0; transform: translateY(10px); filter: blur(2px); }
-  to   { opacity: 1; transform: translateY(0);   filter: blur(0); }
-}
+    /* Page-specific: row hover effect */
+    .sns-row {
+      transition: transform .12s ease, border-color .12s ease, box-shadow .12s ease, background .12s ease;
+      border-radius: var(--radius-sm);
+    }
+    .sns-row:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 14px 34px rgba(0,0,0,.28);
+    }
 
-@keyframes snsSheen {
-  0%   { transform: translateX(-35%) rotate(12deg); opacity: 0; }
-  20%  { opacity: .10; }
-  60%  { opacity: .08; }
-  100% { transform: translateX(140%) rotate(12deg); opacity: 0; }
-}
-
-/* Apply animation to the main title area and the history card */
-.sns-anim-1 { animation: snsFadeUp .55s ease-out both; }
-.sns-anim-2 { animation: snsFadeUp .65s ease-out both; animation-delay: .06s; }
-
-/* Card styling to match dashboard */
-.sns-card{
-  position: relative;
-  background: linear-gradient(180deg, rgba(12,8,36,.70), rgba(8,5,28,.50));
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  backdrop-filter: blur(16px);
-  overflow: hidden;
-}
-
-.sns-card::before{
-  content:"";
-  position:absolute; inset:-2px;
-  background: radial-gradient(520px 220px at 18% 0%, var(--glow), transparent 55%);
-  pointer-events:none;
-  opacity:.9;
-}
-
-.sns-card::after{
-  content:"";
-  position:absolute;
-  top:-30%;
-  left:-60%;
-  width: 50%;
-  height: 160%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,.10), transparent);
-  transform: rotate(12deg);
-  animation: snsSheen 7.5s ease-in-out infinite;
-  pointer-events:none;
-  opacity:.08;
-}
-
-.sns-card > *{ position:relative; z-index:1; }
-
-/* Row hover lift like dashboard */
-.sns-row{
-  transition: transform .12s ease, border-color .12s ease, box-shadow .12s ease, background .12s ease;
-  border-radius: 14px;
-}
-
-.sns-row:hover{
-  transform: translateY(-1px);
-  box-shadow: 0 14px 34px rgba(0,0,0,.28);
-}
-
-/* Buttons consistent with dashboard */
-.sns-btn{
-  padding: 12px 14px;
-  border-radius: 14px;
-  border: 1px solid rgba(160,150,255,.32);
-  background: linear-gradient(180deg, rgba(140,125,255,.22), rgba(110,95,255,.10));
-  color: var(--text);
-  cursor:pointer;
-  font-weight:700;
-  letter-spacing:.10em;
-  text-transform:uppercase;
-  font-size: 12px;
-  transition: transform .12s ease, border-color .12s ease, box-shadow .12s ease;
-  box-shadow: 0 10px 24px rgba(0,0,0,.22);
-}
-.sns-btn:hover{
-  transform: translateY(-1px);
-  border-color: rgba(190,180,255,.45);
-  box-shadow: 0 14px 34px rgba(0,0,0,.28);
-}
-.sns-btn:active{ transform: translateY(0); }
-
-/* Subtle text tones */
-.sns-muted{ color: var(--muted); }
-.sns-muted2{ color: var(--muted2); }
-
-
+    /* Page-specific: dashboard-style buttons */
+    .sns-btn {
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(160,150,255,.32);
+      background: linear-gradient(180deg, rgba(140,125,255,.22), rgba(110,95,255,.10));
+      color: var(--color-text-primary);
+      cursor: pointer;
+      font-weight: 700;
+      letter-spacing: .10em;
+      text-transform: uppercase;
+      font-size: 12px;
+      transition: transform .12s ease, border-color .12s ease, box-shadow .12s ease;
+      box-shadow: var(--shadow-sm);
+    }
+    .sns-btn:hover {
+      transform: translateY(-1px);
+      border-color: rgba(190,180,255,.45);
+      box-shadow: 0 14px 34px rgba(0,0,0,.28);
+    }
+    .sns-btn:active { transform: translateY(0); }
   </style>
 </head>
 

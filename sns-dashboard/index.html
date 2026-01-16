@@ -19,309 +19,201 @@
 
   <link rel="stylesheet" href="/styles.css" />
 <style>
-  :root{
-    --bg0:#050315;
-    --bg1:#0a0524;
-    --card: rgba(10, 6, 32, .62);
-    --card2: rgba(10, 6, 32, .40);
-    --border: rgba(140, 130, 255, .20);
-    --border2: rgba(255,255,255,.10);
-    --text:#f4f0ff;
-    --muted: rgba(244,240,255,.72);
-    --muted2: rgba(244,240,255,.55);
-    --glow: rgba(125, 95, 255, .22);
-    --shadow: 0 22px 80px rgba(0,0,0,.55);
-    --radius: 20px;
-  }
+  /* =============================================
+     SNS Dashboard - Page-specific styles
+     Uses /styles.css for base components
+     ============================================= */
 
-  *{ box-sizing:border-box; }
-  html,body{ height:100%; }
-  body{
-    margin:0;
-    min-height:100vh;
-    color:var(--text);
-    font-family: ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial;
+  /* Dashboard-specific body background with animated gradient */
+  body {
     background:
       radial-gradient(1100px 420px at 50% -120px, rgba(120,95,255,.35), transparent 60%),
       radial-gradient(900px 520px at 20% 10%, rgba(70,35,160,.30), transparent 55%),
       radial-gradient(circle at top, #342067, #050315 55%, #020010);
   }
 
-  .wrap{ max-width: 1120px; margin: 0 auto; padding: 44px 18px 64px; }
+  /* Dashboard wrap override */
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 44px 18px 64px; }
 
-  .top{
-    display:flex; justify-content:space-between; align-items:flex-start;
-    gap:16px; flex-wrap:wrap; margin-bottom: 14px;
+  /* Top section */
+  .top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
   }
 
-  h1{
-    margin:0;
+  /* Page title */
+  h1 {
     font-size: 14px;
-    letter-spacing:.20em;
-    text-transform:uppercase;
   }
 
-  .muted{ color: var(--muted); }
-  .mutedSm{ color: var(--muted2); font-size: 12px; }
-
-  .grid{ display:grid; grid-template-columns: 1.15fr .85fr; gap: 18px; margin-top: 18px; }
-  @media (max-width: 920px){ .grid{ grid-template-columns:1fr; } }
-
-  .card{
-    position:relative;
+  /* Card glass effect for dashboard */
+  .card {
+    position: relative;
     background: linear-gradient(180deg, rgba(12,8,36,.70), rgba(8,5,28,.50));
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
+    border: 1px solid var(--color-border);
+    border-radius: 20px;
     padding: 18px;
-    box-shadow: var(--shadow);
+    box-shadow: var(--shadow-lg);
     backdrop-filter: blur(16px);
-    overflow:hidden;
+    overflow: hidden;
   }
-  .card:before{
-    content:"";
-    position:absolute; inset:-2px;
-    background: radial-gradient(520px 220px at 18% 0%, var(--glow), transparent 55%);
-    pointer-events:none;
-    opacity:.9;
+  .card::before {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    background: radial-gradient(520px 220px at 18% 0%, var(--glow-accent), transparent 55%);
+    pointer-events: none;
+    opacity: 0.9;
   }
-  .card > *{ position:relative; z-index:1; }
+  .card > * { position: relative; z-index: 1; }
 
-  .cardHeader{
-    display:flex; justify-content:space-between; align-items:flex-start;
-    gap:14px; flex-wrap:wrap;
-    margin-bottom: 12px;
-  }
-
-  .cardTitle{
-    font-size: 12px;
-    letter-spacing:.14em;
-    text-transform:uppercase;
-    color: var(--muted2);
-  }
-
-  .cardStatus{
-    margin-top: 6px;
-    font-size: 13px;
-    color: var(--muted);
-  }
-
-  .divider{
-    height:1px;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,.10), transparent);
-    margin: 12px 0 14px;
-  }
-
-  /* Pills */
-  .pillrow{
-    display:flex;
-    gap:10px;
-    flex-wrap:wrap;
-    margin-top: 10px;
-  }
-  .pill{
-    display:inline-flex;
-    align-items:center;
-    gap:8px;
-    padding:7px 10px;
-    border-radius:999px;
-    border: 1px solid rgba(255,255,255,.12);
-    background: rgba(255,255,255,.06);
-    font-size: 12.5px;
-    color: rgba(244,240,255,.86);
-    line-height:1;
-  }
-  .pill strong{
-    font-weight:700;
-    color: rgba(244,240,255,.95);
-  }
-
-  /* Buttons */
-  .btn{
-    padding: 12px 14px;
-    border-radius: 14px;
-    border: 1px solid rgba(160,150,255,.32);
-    background:
-      linear-gradient(180deg, rgba(140,125,255,.22), rgba(110,95,255,.10));
-    color: var(--text);
-    cursor:pointer;
-    font-weight:700;
-    letter-spacing:.10em;
-    text-transform:uppercase;
-    font-size: 12px;
-    transition: transform .12s ease, border-color .12s ease, background .12s ease, box-shadow .12s ease;
-    box-shadow: 0 10px 24px rgba(0,0,0,.22);
-  }
-  .btn:hover{
-    transform: translateY(-1px);
-    border-color: rgba(190,180,255,.45);
-    box-shadow: 0 14px 34px rgba(0,0,0,.28);
-  }
-  .btn:active{ transform: translateY(0px); }
-  .btn:disabled{ opacity:.55; cursor:not-allowed; transform:none; }
-
-  .btnGhost{
+  /* Ghost button variant (maps to btn-ghost in styles.css but with local customization) */
+  .btnGhost {
     background: rgba(255,255,255,.05);
     border-color: rgba(255,255,255,.14);
-    box-shadow:none;
+    box-shadow: none;
   }
 
-  .row{
-    display:flex;
-    gap:10px;
-    flex-wrap:wrap;
-    margin-top: 14px;
-  }
-
-  @media (max-width: 520px){
-    .row .btn{ width:100%; }
-  }
-
-  /* Inquiry detail layout (replaces <pre>) */
-  .inqMeta{
-    display:grid;
+  /* Inquiry detail layout */
+  .inqMeta {
+    display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 10px 14px;
   }
-  @media (max-width: 620px){
-    .inqMeta{ grid-template-columns: 1fr; }
+  @media (max-width: 620px) {
+    .inqMeta { grid-template-columns: 1fr; }
   }
 
-  .kv{
+  .kv {
     padding: 10px 12px;
     border-radius: 14px;
     border: 1px solid rgba(255,255,255,.10);
     background: rgba(255,255,255,.04);
   }
-  .kv .k{
+  .kv .k {
     font-size: 11px;
-    letter-spacing:.12em;
-    text-transform:uppercase;
-    color: var(--muted2);
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--color-text-muted2);
     margin-bottom: 6px;
   }
-  .kv .v{
+  .kv .v {
     font-size: 13px;
     color: rgba(244,240,255,.92);
     word-break: break-word;
   }
 
-  .note{
+  .note {
     margin-top: 12px;
-    line-height:1.5;
-    color: var(--muted);
+    line-height: 1.5;
+    color: var(--color-text-muted);
     font-size: 13px;
   }
 
   /* --------------------------
-   Page + card animations
--------------------------- */
+     Page + card animations
+     -------------------------- */
 
-/* Respect accessibility */
-@media (prefers-reduced-motion: reduce){
-  *{ animation: none !important; transition: none !important; scroll-behavior: auto !important; }
-}
+  /* Subtle background drift */
+  @keyframes bgFloat {
+    0%   { background-position: 50% 0%, 20% 10%, 0% 0%; }
+    50%  { background-position: 52% 6%, 18% 14%, 0% 0%; }
+    100% { background-position: 50% 0%, 20% 10%, 0% 0%; }
+  }
 
-/* Subtle background drift */
-@keyframes bgFloat {
-  0%   { background-position: 50% 0%, 20% 10%, 0% 0%; }
-  50%  { background-position: 52% 6%, 18% 14%, 0% 0%; }
-  100% { background-position: 50% 0%, 20% 10%, 0% 0%; }
-}
+  /* Top header fades in */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
 
-/* Top header fades in */
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
+  /* Cards "pop in" */
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(14px) scale(.985); filter: blur(6px); }
+    to   { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+  }
 
-/* Cards “pop in” */
-@keyframes cardIn {
-  from { opacity: 0; transform: translateY(14px) scale(.985); filter: blur(6px); }
-  to   { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
-}
+  /* Soft highlight sweep across cards */
+  @keyframes sheen {
+    0%   { transform: translateX(-120%) rotate(12deg); opacity: 0; }
+    15%  { opacity: .22; }
+    40%  { opacity: .10; }
+    100% { transform: translateX(140%) rotate(12deg); opacity: 0; }
+  }
 
-/* Soft highlight sweep across cards */
-@keyframes sheen {
-  0%   { transform: translateX(-120%) rotate(12deg); opacity: 0; }
-  15%  { opacity: .22; }
-  40%  { opacity: .10; }
-  100% { transform: translateX(140%) rotate(12deg); opacity: 0; }
-}
+  /* Pills gently appear */
+  @keyframes pillIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
 
-/* Pills gently appear */
-@keyframes pillIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
+  /* Apply bg drift to body */
+  body {
+    animation: bgFloat 14s ease-in-out infinite;
+  }
 
-/* Apply bg drift to body */
-body{
-  animation: bgFloat 14s ease-in-out infinite;
-}
+  /* Animate header + grid on load */
+  .top {
+    animation: fadeUp .55s ease both;
+  }
 
-/* Animate header + grid on load */
-.top{
-  animation: fadeUp .55s ease both;
-}
+  /* Cards animate in with stagger */
+  .card {
+    opacity: 0;
+    animation: cardIn .65s cubic-bezier(.2,.9,.2,1) both;
+  }
+  .card:nth-child(1) { animation-delay: .10s; }
+  .card:nth-child(2) { animation-delay: .22s; }
 
-/* Cards animate in with stagger */
-.card{
-  opacity: 0;
-  animation: cardIn .65s cubic-bezier(.2,.9,.2,1) both;
-}
-.card:nth-child(1){ animation-delay: .10s; }
-.card:nth-child(2){ animation-delay: .22s; }
+  /* Add a sheen layer on cards */
+  .card::after {
+    content: "";
+    position: absolute;
+    top: -40%;
+    left: -30%;
+    width: 40%;
+    height: 180%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.10), transparent);
+    filter: blur(1px);
+    pointer-events: none;
+    opacity: 0;
+    transform: translateX(-120%) rotate(12deg);
+    animation: sheen 4.8s ease-in-out infinite;
+    animation-delay: 1.2s;
+  }
 
-/* Add a sheen layer on cards */
-.card::after{
-  content:"";
-  position:absolute;
-  top:-40%;
-  left:-30%;
-  width: 40%;
-  height: 180%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255,255,255,.10),
-    transparent
-  );
-  filter: blur(1px);
-  pointer-events:none;
-  opacity: 0;
-  transform: translateX(-120%) rotate(12deg);
-  animation: sheen 4.8s ease-in-out infinite;
-  animation-delay: 1.2s; /* lets the initial card-in finish */
-}
+  /* Pills animate in when visible */
+  .pillrow .pill {
+    opacity: 0;
+    animation: pillIn .45s ease both;
+  }
+  .pillrow .pill:nth-child(1) { animation-delay: .35s; }
+  .pillrow .pill:nth-child(2) { animation-delay: .42s; }
+  .pillrow .pill:nth-child(3) { animation-delay: .49s; }
+  .pillrow .pill:nth-child(4) { animation-delay: .56s; }
 
-/* Pills animate in when visible (simple: animate whenever rendered) */
-.pillrow .pill{
-  opacity: 0;
-  animation: pillIn .45s ease both;
-}
-.pillrow .pill:nth-child(1){ animation-delay: .35s; }
-.pillrow .pill:nth-child(2){ animation-delay: .42s; }
-.pillrow .pill:nth-child(3){ animation-delay: .49s; }
-.pillrow .pill:nth-child(4){ animation-delay: .56s; }
+  /* Make the cards feel more "alive" on hover */
+  .card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(190,180,255,.32);
+    box-shadow: 0 26px 95px rgba(0,0,0,.62);
+  }
+  .card {
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  }
 
-/* Make the cards feel more “alive” on hover */
-.card:hover{
-  transform: translateY(-2px);
-  border-color: rgba(190,180,255,.32);
-  box-shadow: 0 26px 95px rgba(0,0,0,.62);
-}
-.card{
-  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
-}
-
-/* Dynamic content fade-in */
-@keyframes contentIn{
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.fadeIn{
-  animation: contentIn .35s ease both;
-}
+  /* Dynamic content fade-in */
+  @keyframes contentIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .fadeIn {
+    animation: contentIn .35s ease both;
+  }
 
 /* --------------------------
    Client Chat (Dashboard)

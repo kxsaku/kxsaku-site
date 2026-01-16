@@ -6,9 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://esm.sh; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com; img-src 'self' data: blob: https://*.supabase.co; font-src 'self'; frame-src https://js.stripe.com;" />
   <meta name="description" content="SNS client login to access your dashboard and subscription." />
+  <link rel="stylesheet" href="/styles.css" />
 
   <style>
-    /* ===== NAV + THEME (reference: provided mobile.html) ===== */
+    /* ===== MOBILE-SPECIFIC VARIABLES ===== */
     :root{
       --bg0:#03010b;
       --bg1:#060214;
@@ -36,19 +37,14 @@
       --max: 640px;
     }
 
-    *{ box-sizing:border-box; }
-    html, body{ height:100%; }
+    /* Override body for mobile gradient */
     body{
-      margin:0;
-      color: var(--ink);
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
       background:
         radial-gradient(1200px 800px at 25% 20%, rgba(179,124,255,.18), transparent 60%),
         radial-gradient(900px 650px at 85% 10%, rgba(94,234,212,.10), transparent 55%),
         radial-gradient(1100px 900px at 70% 80%, rgba(249,115,226,.12), transparent 55%),
         linear-gradient(180deg, var(--bg1), var(--bg0));
       overflow-x:hidden;
-      min-height:100vh;
     }
 
     /* Full-bleed animated background */
@@ -118,9 +114,10 @@
       z-index: 1;
     }
 
+    /* Override wrap for mobile */
     .wrap{
       width: min(var(--max), calc(100% - 1.25rem));
-      margin: 0 auto;
+      padding: 0;
     }
 
     /* Mobile sticky header */
@@ -188,30 +185,16 @@
       max-width: 70vw;
     }
 
+    /* Mobile btn overrides */
     .btn{
-      position: relative;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
       height: 42px;
       padding: 0 16px;
-      border-radius: 999px;
-      border: 1px solid rgba(196,181,253,.18);
+      border-color: rgba(196,181,253,.18);
       background: rgba(0,0,0,.18);
-      color: var(--ink);
-      text-decoration:none;
       font-weight: 800;
-      font-size: .78rem;
-      letter-spacing: .12em;
-      text-transform: uppercase;
       box-shadow: 0 12px 40px rgba(0,0,0,.32);
       backdrop-filter: blur(10px);
-      transition: transform .14s ease, border-color .14s ease, filter .14s ease, background .14s ease;
-      will-change: transform;
-      overflow:hidden;
-      white-space: nowrap;
       -webkit-tap-highlight-color: transparent;
-      cursor:pointer;
     }
     .btn:active{
       transform: translateY(0);
@@ -363,6 +346,7 @@
       max-width: 62ch;
     }
 
+    /* Mobile card overrides */
     .card{
       margin-top: 1.25rem;
       background: rgba(10, 6, 24, .55);
@@ -370,6 +354,7 @@
       border-radius: 20px;
       box-shadow: var(--shadow2);
       overflow:hidden;
+      padding: 0;
     }
     .card-h{
       padding: 1.1rem 1.05rem .9rem;
@@ -381,10 +366,11 @@
       letter-spacing:.18em;
       text-transform:uppercase;
     }
-    .card-h p{ margin:.55rem 0 0; color: rgba(244,240,255,.78); line-height:1.55; }
+    .card-h p{ margin:.55rem 0 0; color: var(--color-text-muted); line-height:1.55; }
 
     .card-b{ padding: 1.05rem; display:grid; gap: .95rem; }
 
+    /* Mobile form fields */
     label{
       font-size:.78rem;
       letter-spacing:.16em;
@@ -408,8 +394,8 @@
       background: rgba(179,124,255,.08);
     }
 
-    .row{ display:grid; grid-template-columns: 1fr; gap:.45rem; }
-    .row > *{ min-width: 0; }
+    .form-row{ display:grid; grid-template-columns: 1fr; gap:.45rem; }
+    .form-row > *{ min-width: 0; }
 
     .actions{
       display:grid;
@@ -546,12 +532,12 @@
           <div class="card-b">
             <div id="msg" class="msg"></div>
 
-            <div class="row">
+            <div class="form-row">
               <label for="email">Email</label>
               <input id="email" type="email" autocomplete="email" placeholder="you@domain.com" />
             </div>
 
-            <div class="row">
+            <div class="form-row">
               <label for="password">Password</label>
               <input id="password" type="password" autocomplete="current-password" placeholder="••••••••" />
             </div>

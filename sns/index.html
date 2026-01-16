@@ -22,35 +22,11 @@
 </script>
 
   <title>SNS · Services</title>
+  <link rel="stylesheet" href="/styles.css" />
 
   <style>
-    :root{
-      --bg0:#050315;
-      --bg1:#07031b;
-      --bg2:#020010;
-
-      --ink:#f4f0ff;
-      --muted:rgba(244,240,255,.74);
-
-      --card:rgba(12,10,28,.62);
-      --card2:rgba(12,10,28,.46);
-      --stroke:rgba(255,255,255,.10);
-
-      --accent:#b67bff;
-      --accent2:#8a5dff;
-
-      --shadow: 0 18px 60px rgba(0,0,0,.45);
-      --radius: 22px;
-
-      --wrap: 1120px;
-    }
-
-    *{ box-sizing:border-box; }
-    html,body{ height:100%; }
+    /* SNS page-specific: custom background for services pages */
     body{
-      margin:0;
-      color:var(--ink);
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
       background:
         radial-gradient(1200px 700px at 30% 10%, rgba(182,123,255,.18), transparent 60%),
         radial-gradient(900px 600px at 85% 20%, rgba(124,92,255,.14), transparent 60%),
@@ -59,7 +35,7 @@
       overflow-x:hidden;
     }
 
-    /* animated “Nexros-like” moving veil */
+    /* animated "Nexros-like" moving veil */
     .bg{
       position:fixed;
       inset:0;
@@ -102,13 +78,14 @@
       mix-blend-mode: overlay;
     }
 
+    /* SNS page wrap override */
     .wrap{
-      max-width: var(--wrap);
+      max-width: 1120px;
       margin: 0 auto;
       padding: 0 1.1rem;
     }
 
-    /* Top nav (matches home) */
+    /* Top nav (SNS-specific styling) */
     .topnav{
       position:sticky;
       top:0;
@@ -156,7 +133,7 @@
     }
     .brand span{
       display:block;
-      color: rgba(244,240,255,.65);
+      color: var(--color-text-muted);
       font-size:.82rem;
       margin-top:.14rem;
     }
@@ -170,9 +147,9 @@
     }
     .navlinks a{
       text-decoration:none;
-      color: rgba(244,240,255,.72);
+      color: var(--color-text-muted);
       padding: .55rem .85rem;
-      border-radius: 999px;
+      border-radius: var(--radius-pill);
       border: 1px solid transparent;
       letter-spacing:.12em;
       font-size: .78rem;
@@ -180,13 +157,13 @@
       transition: transform .15s ease, background .15s ease, border-color .15s ease, color .15s ease;
     }
     .navlinks a:hover{
-      color: rgba(244,240,255,.95);
+      color: var(--color-text-primary);
       background: rgba(182,123,255,.10);
       border-color: rgba(255,255,255,.10);
       transform: translateY(-1px);
     }
     .navlinks a.active{
-      color: rgba(244,240,255,.95);
+      color: var(--color-text-primary);
       background: rgba(182,123,255,.16);
       border-color: rgba(255,255,255,.12);
     }
@@ -199,31 +176,7 @@
       min-width: 170px;
     }
 
-    .btn{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:.5rem;
-      padding: .72rem 1.05rem;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.14);
-      color: rgba(244,240,255,.92);
-      text-decoration:none;
-      font-weight: 700;
-      letter-spacing:.12em;
-      font-size:.78rem;
-      text-transform: uppercase;
-      box-shadow: 0 10px 30px rgba(0,0,0,.25);
-      transition: transform .15s ease, background .15s ease, border-color .15s ease, filter .15s ease;
-      will-change: transform;
-    }
-    .btn:hover{
-      transform: translateY(-2px);
-      border-color: rgba(255,255,255,.16);
-      background: rgba(182,123,255,.10);
-      filter: brightness(1.05);
-    }
+    /* SNS button overrides for gradient primary */
     .btn.primary{
       background: linear-gradient(90deg, rgba(182,123,255,.95), rgba(138,93,255,.95));
       border-color: rgba(255,255,255,.18);
@@ -233,6 +186,7 @@
     .btn.primary:hover{
       background: linear-gradient(90deg, rgba(182,123,255,1), rgba(138,93,255,1));
       filter:none;
+      transform: translateY(-2px);
     }
 
     /* Sections */
@@ -247,22 +201,22 @@
       align-items:center;
       gap:.55rem;
       padding: .42rem .8rem;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(182,123,255,.08);
-      color: rgba(244,240,255,.82);
+      border-radius: var(--radius-pill);
+      border: 1px solid var(--color-border-subtle);
+      background: var(--color-accent-soft);
+      color: var(--color-text-muted);
       letter-spacing:.16em;
       font-size:.72rem;
       text-transform: uppercase;
     }
     .kicker .dot{
       width: 8px; height: 8px;
-      border-radius: 999px;
-      background: rgba(182,123,255,.9);
+      border-radius: var(--radius-pill);
+      background: var(--color-accent);
       box-shadow: 0 0 0 6px rgba(182,123,255,.15);
     }
 
-    /* Hero (different from home, more “template-like”) */
+    /* Hero (different from home, more "template-like") */
     .hero{
       padding: 4.5rem 0 2.2rem;
     }
@@ -279,7 +233,7 @@
       letter-spacing: -.02em;
     }
     .hero h1 .grad{
-      background: linear-gradient(90deg, rgba(244,240,255,.95), rgba(182,123,255,.78));
+      background: linear-gradient(90deg, var(--color-text-primary), var(--color-accent));
       -webkit-background-clip: text;
       background-clip:text;
       color: transparent;
@@ -287,7 +241,7 @@
     .hero p{
       margin:0;
       max-width: 58ch;
-      color: rgba(244,240,255,.74);
+      color: var(--color-text-muted);
       line-height: 1.65;
       font-size: 1.02rem;
     }
@@ -298,12 +252,12 @@
       flex-wrap:wrap;
     }
 
-    /* Right-side “animated” showcase panel */
+    /* Right-side "animated" showcase panel */
     .showcase{
-      border-radius: var(--radius);
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(12,10,28,.52);
-      box-shadow: var(--shadow);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--color-border-subtle);
+      background: var(--color-surface-glass);
+      box-shadow: var(--shadow-md);
       overflow:hidden;
       position:relative;
       min-height: 360px;
@@ -335,7 +289,7 @@
       align-items:center;
       justify-content:space-between;
       padding: 1.05rem 1.1rem;
-      border-bottom: 1px solid rgba(255,255,255,.08);
+      border-bottom: 1px solid var(--color-border-subtle);
       gap:1rem;
     }
     .chipRow{
@@ -343,12 +297,12 @@
       gap:.5rem;
       flex-wrap:wrap;
     }
-    .chip{
+    .sns-chip{
       padding: .42rem .72rem;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.10);
+      border-radius: var(--radius-pill);
+      border: 1px solid var(--color-border-subtle);
       background: rgba(0,0,0,.12);
-      color: rgba(244,240,255,.78);
+      color: var(--color-text-muted);
       font-size: .72rem;
       letter-spacing:.12em;
       text-transform: uppercase;
@@ -356,8 +310,8 @@
     }
     .pulse{
       width: 10px; height: 10px;
-      border-radius: 999px;
-      background: rgba(182,123,255,.9);
+      border-radius: var(--radius-pill);
+      background: var(--color-accent);
       box-shadow: 0 0 0 0 rgba(182,123,255,.45);
       animation: pulse 1.6s ease-out infinite;
       display:inline-block;
@@ -376,9 +330,9 @@
     }
 
     .miniCard{
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(12,10,28,.55);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--color-border-subtle);
+      background: var(--color-surface-glass);
       padding: .9rem .95rem;
       display:flex;
       align-items:flex-start;
@@ -388,16 +342,16 @@
     .miniCard:hover{
       transform: translateY(-2px);
       border-color: rgba(255,255,255,.14);
-      background: rgba(182,123,255,.07);
+      background: var(--color-accent-soft);
     }
     .ico{
       width: 42px; height: 42px;
-      border-radius: 14px;
+      border-radius: var(--radius-sm);
       display:flex;
       align-items:center;
       justify-content:center;
       border: 1px solid rgba(255,255,255,.12);
-      background: rgba(182,123,255,.10);
+      background: var(--color-accent-soft);
       flex: 0 0 auto;
       position:relative;
       overflow:hidden;
@@ -420,18 +374,18 @@
     }
     .miniCard p{
       margin:.35rem 0 0;
-      color: rgba(244,240,255,.70);
+      color: var(--color-text-muted);
       line-height: 1.55;
       font-size:.92rem;
     }
 
-    /* “Gallery strip” like template (but ours) */
+    /* "Gallery strip" like template (but ours) */
     .strip{
       padding: 1.35rem 0 0;
     }
     .marquee{
-      border-top: 1px solid rgba(255,255,255,.06);
-      border-bottom: 1px solid rgba(255,255,255,.06);
+      border-top: 1px solid var(--color-border-subtle);
+      border-bottom: 1px solid var(--color-border-subtle);
       background: rgba(0,0,0,.10);
       overflow:hidden;
       position:relative;
@@ -452,17 +406,17 @@
       align-items:center;
       gap:.6rem;
       padding:.55rem .9rem;
-      border-radius: 999px;
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(12,10,28,.45);
-      color: rgba(244,240,255,.80);
+      border-radius: var(--radius-pill);
+      border:1px solid var(--color-border-subtle);
+      background: var(--color-surface-glass);
+      color: var(--color-text-muted);
       font-size: .75rem;
       letter-spacing:.14em;
       text-transform: uppercase;
       white-space:nowrap;
     }
     .badge b{
-      color: rgba(244,240,255,.92);
+      color: var(--color-text-primary);
       letter-spacing:.10em;
     }
 
@@ -473,56 +427,59 @@
       gap: 1rem;
       margin-top: 1.8rem;
     }
-    .card{
-      border-radius: var(--radius);
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(12,10,28,.52);
-      box-shadow: var(--shadow);
+    /* SNS card overrides - extends base .card from styles.css */
+    .sns-card{
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--color-border-subtle);
+      background: var(--color-surface-glass);
+      box-shadow: var(--shadow-md);
       padding: 1.35rem 1.25rem;
       position:relative;
       overflow:hidden;
       transition: transform .18s ease, border-color .18s ease, background .18s ease;
       min-height: 210px;
+      margin-top: 0;
     }
-    .card:hover{
+    .sns-card:hover{
       transform: translateY(-4px);
       border-color: rgba(255,255,255,.14);
-      background: rgba(182,123,255,.06);
+      background: var(--color-accent-soft);
     }
-    .card .top{
+    .sns-card .top{
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap:1rem;
     }
-    .pill{
+    /* SNS pill override */
+    .sns-pill{
       display:inline-flex;
       padding:.42rem .72rem;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.10);
+      border-radius: var(--radius-pill);
+      border: 1px solid var(--color-border-subtle);
       background: rgba(0,0,0,.12);
-      color: rgba(244,240,255,.78);
+      color: var(--color-text-muted);
       font-size: .72rem;
       letter-spacing:.14em;
       text-transform: uppercase;
       white-space:nowrap;
     }
-    .card h3{
+    .sns-card h3{
       margin: .9rem 0 .5rem;
       font-size: 1.06rem;
       letter-spacing:.06em;
       text-transform: uppercase;
     }
-    .card p{
+    .sns-card p{
       margin:0;
-      color: rgba(244,240,255,.70);
+      color: var(--color-text-muted);
       line-height: 1.6;
       font-size: .98rem;
     }
-    .card .ctaLink{
+    .sns-card .ctaLink{
       display:inline-flex;
       margin-top: 1.05rem;
-      color: rgba(244,240,255,.88);
+      color: var(--color-text-primary);
       text-decoration:none;
       font-weight: 800;
       letter-spacing:.12em;
@@ -532,13 +489,13 @@
       gap:.4rem;
       align-items:center;
     }
-    .card .ctaLink:hover{ opacity:1; }
+    .sns-card .ctaLink:hover{ opacity:1; }
     .arrow{
       display:inline-block;
       transform: translateY(-1px);
       transition: transform .15s ease;
     }
-    .card:hover .arrow{
+    .sns-card:hover .arrow{
       transform: translate(2px,-1px);
     }
 
@@ -551,10 +508,10 @@
       align-items:start;
     }
     .step{
-      border-radius: var(--radius);
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(12,10,28,.50);
-      box-shadow: var(--shadow);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--color-border-subtle);
+      background: var(--color-surface-glass);
+      box-shadow: var(--shadow-md);
       padding: 1.25rem 1.25rem;
       position:relative;
       overflow:hidden;
@@ -564,11 +521,11 @@
       align-items:center;
       justify-content:center;
       width: 38px; height: 38px;
-      border-radius: 14px;
-      background: rgba(182,123,255,.12);
-      border: 1px solid rgba(255,255,255,.10);
+      border-radius: var(--radius-sm);
+      background: var(--color-accent-soft);
+      border: 1px solid var(--color-border-subtle);
       font-weight: 900;
-      color: rgba(244,240,255,.92);
+      color: var(--color-text-primary);
       box-shadow: 0 16px 40px rgba(0,0,0,.25);
     }
     .step h4{
@@ -579,7 +536,7 @@
     }
     .step p{
       margin:0;
-      color: rgba(244,240,255,.70);
+      color: var(--color-text-muted);
       line-height:1.65;
     }
 
@@ -591,10 +548,10 @@
       gap: 1rem;
     }
     .price{
-      border-radius: var(--radius);
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(12,10,28,.52);
-      box-shadow: var(--shadow);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--color-border-subtle);
+      background: var(--color-surface-glass);
+      box-shadow: var(--shadow-md);
       padding: 1.35rem 1.25rem;
       position:relative;
       overflow:hidden;
@@ -604,10 +561,10 @@
     .price:hover{
       transform: translateY(-4px);
       border-color: rgba(255,255,255,.14);
-      background: rgba(182,123,255,.06);
+      background: var(--color-accent-soft);
     }
     .price.featured{
-      border-color: rgba(182,123,255,.28);
+      border-color: var(--color-accent-border);
       box-shadow: 0 24px 80px rgba(182,123,255,.16);
     }
     .price h3{
@@ -621,7 +578,7 @@
       font-weight: 950;
       letter-spacing: -.02em;
       margin: .65rem 0 .9rem;
-      background: linear-gradient(90deg, rgba(244,240,255,.95), rgba(182,123,255,.78));
+      background: linear-gradient(90deg, var(--color-text-primary), var(--color-accent));
       -webkit-background-clip:text;
       background-clip:text;
       color: transparent;
@@ -629,12 +586,12 @@
     .price ul{
       margin: 0;
       padding-left: 1.05rem;
-      color: rgba(244,240,255,.72);
+      color: var(--color-text-muted);
       line-height: 1.75;
     }
     .price .foot{
       margin-top: 1.1rem;
-      color: rgba(244,240,255,.62);
+      color: var(--color-text-muted2);
       font-size: .92rem;
       line-height:1.55;
     }
@@ -647,10 +604,10 @@
       gap: 1rem;
     }
     details{
-      border-radius: var(--radius);
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(12,10,28,.50);
-      box-shadow: var(--shadow);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--color-border-subtle);
+      background: var(--color-surface-glass);
+      box-shadow: var(--shadow-md);
       padding: 1rem 1.1rem;
     }
     summary{
@@ -672,24 +629,24 @@
       display:flex;
       align-items:center;
       justify-content:center;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(182,123,255,.08);
+      border: 1px solid var(--color-border-subtle);
+      background: var(--color-accent-soft);
       transition: transform .15s ease;
       flex: 0 0 auto;
     }
     details[open] .caret{ transform: rotate(90deg); }
     details p{
       margin: .85rem 0 0;
-      color: rgba(244,240,255,.72);
+      color: var(--color-text-muted);
       line-height: 1.65;
     }
 
     /* CTA panel */
     .ctaPanel{
-      border-radius: calc(var(--radius) + 6px);
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(12,10,28,.52);
-      box-shadow: var(--shadow);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--color-border-subtle);
+      background: var(--color-surface-glass);
+      box-shadow: var(--shadow-md);
       padding: 1.65rem 1.35rem;
       display:flex;
       align-items:center;
@@ -717,7 +674,7 @@
     }
     .ctaPanel p{
       margin:.55rem 0 0;
-      color: rgba(244,240,255,.70);
+      color: var(--color-text-muted);
       line-height: 1.6;
       max-width: 60ch;
     }
@@ -730,17 +687,17 @@
 
     footer{
       padding: 2.8rem 0 3.4rem;
-      color: rgba(244,240,255,.55);
-      border-top: 1px solid rgba(255,255,255,.06);
+      color: var(--color-text-muted2);
+      border-top: 1px solid var(--color-border-subtle);
       background: rgba(0,0,0,.08);
     }
     footer a{
-      color: rgba(244,240,255,.72);
+      color: var(--color-text-muted);
       text-decoration:none;
       border-bottom: 1px solid rgba(244,240,255,.18);
       padding-bottom:2px;
     }
-    footer a:hover{ color: rgba(244,240,255,.92); }
+    footer a:hover{ color: var(--color-text-primary); }
 
     /* reveal animation */
     .reveal{
@@ -834,11 +791,11 @@
           <aside class="showcase reveal" aria-label="Service Overview Panel">
             <div class="showTop">
               <div class="chipRow">
-                <span class="chip"><span class="pulse"></span>&nbsp;Live readiness</span>
-                <span class="chip">Wi-Fi under load</span>
-                <span class="chip">Secure segmentation</span>
+                <span class="sns-chip"><span class="pulse"></span>&nbsp;Live readiness</span>
+                <span class="sns-chip">Wi-Fi under load</span>
+                <span class="sns-chip">Secure segmentation</span>
               </div>
-              <span class="chip">SNS / SERVICES</span>
+              <span class="sns-chip">SNS / SERVICES</span>
             </div>
 
             <div class="showBody">
@@ -926,60 +883,60 @@
         </p>
 
         <div class="grid3">
-          <article class="card reveal">
+          <article class="sns-card reveal">
             <div class="top">
-              <span class="pill">Starting point</span>
-              <span class="pill">On-site</span>
+              <span class="sns-pill">Starting point</span>
+              <span class="sns-pill">On-site</span>
             </div>
             <h3>Environment + Network Assessment</h3>
             <p>Survey the physical layout, wiring, equipment, coverage, and current configuration. You get a clear scope and plan.</p>
             <a class="ctaLink" href="/sns-inquiry/">Start with assessment <span class="arrow">→</span></a>
           </article>
 
-          <article class="card reveal">
+          <article class="sns-card reveal">
             <div class="top">
-              <span class="pill">Wi-Fi</span>
-              <span class="pill">Stability</span>
+              <span class="sns-pill">Wi-Fi</span>
+              <span class="sns-pill">Stability</span>
             </div>
             <h3>Wi-Fi Under Load Fix</h3>
             <p>Stop drops, interference, and bandwidth abuse. Tune RF, placement, and configuration — and upgrade only if needed.</p>
             <a class="ctaLink" href="/sns-inquiry/">Fix Wi-Fi stability <span class="arrow">→</span></a>
           </article>
 
-          <article class="card reveal">
+          <article class="sns-card reveal">
             <div class="top">
-              <span class="pill">Security</span>
-              <span class="pill">VLANs</span>
+              <span class="sns-pill">Security</span>
+              <span class="sns-pill">VLANs</span>
             </div>
             <h3>Segmentation + Guest Isolation</h3>
             <p>Separate staff, guests, and business-critical devices. Clean policies that reduce risk and prevent network abuse.</p>
             <a class="ctaLink" href="/sns-inquiry/">Harden the network <span class="arrow">→</span></a>
           </article>
 
-          <article class="card reveal">
+          <article class="sns-card reveal">
             <div class="top">
-              <span class="pill">Hardware</span>
-              <span class="pill">Deploy</span>
+              <span class="sns-pill">Hardware</span>
+              <span class="sns-pill">Deploy</span>
             </div>
             <h3>Switch/AP/Router Install</h3>
             <p>Installation done clean: cabling, mounting, labeling, configuration, validation, and documented handoff.</p>
             <a class="ctaLink" href="/sns-inquiry/">Plan an install <span class="arrow">→</span></a>
           </article>
 
-          <article class="card reveal">
+          <article class="sns-card reveal">
             <div class="top">
-              <span class="pill">Clean-up</span>
-              <span class="pill">Docs</span>
+              <span class="sns-pill">Clean-up</span>
+              <span class="sns-pill">Docs</span>
             </div>
             <h3>Network Cleanup + Documentation</h3>
             <p>Untangle old configs and “mystery gear.” Build a simple diagram + notes so changes stay controlled.</p>
             <a class="ctaLink" href="/sns-inquiry/">Clean it up <span class="arrow">→</span></a>
           </article>
 
-          <article class="card reveal">
+          <article class="sns-card reveal">
             <div class="top">
-              <span class="pill">Membership</span>
-              <span class="pill">Support</span>
+              <span class="sns-pill">Membership</span>
+              <span class="sns-pill">Support</span>
             </div>
             <h3>Ongoing Support</h3>
             <p>Optional monthly support for continuous admin, monitoring, and quick changes as you grow.</p>
@@ -1051,7 +1008,7 @@
 
         <div class="pricing">
           <div class="price reveal">
-            <span class="pill">One-time</span>
+            <span class="sns-pill">One-time</span>
             <h3>Assessment</h3>
             <div class="amount">$50</div>
             <ul>
@@ -1064,7 +1021,7 @@
           </div>
 
           <div class="price featured reveal">
-            <span class="pill">Most common</span>
+            <span class="sns-pill">Most common</span>
             <h3>Fix & Deploy</h3>
             <div class="amount">$200-1000</div>
             <ul>
@@ -1077,7 +1034,7 @@
           </div>
 
           <div class="price reveal">
-            <span class="pill">Monthly</span>
+            <span class="sns-pill">Monthly</span>
             <h3>Ongoing Support</h3>
             <div class="amount">$75/mo</div>
             <ul>

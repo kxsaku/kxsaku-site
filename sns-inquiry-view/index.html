@@ -17,102 +17,115 @@
   })();
 </script>
 
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="/styles.css" />
 
   <style>
-    body { margin:0; background: radial-gradient(circle at top, #342067, #050315 55%, #020010); color:#f4f0ff; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial; }
-    .wrap { max-width: 1050px; margin: 0 auto; padding: 3rem 1rem 4rem; }
+    /* Page-specific: wrap max-width override */
+    .wrap { max-width: 1050px; }
 
-    .toprow { display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; }
-    h1 { margin:0; letter-spacing:.18em; text-transform:uppercase; font-size: 1.2rem; }
-    .sub { color:#bdb7ff; margin-top:.6rem; }
+    /* Page-specific: toprow alignment */
+    .toprow { align-items: flex-start; }
 
-    .pill { display:inline-flex; align-items:center; gap:.5rem; padding:.55rem .95rem; border-radius:999px; border:1px solid rgba(129,118,255,.35); background: rgba(9,6,34,.65); color:#d9d3ff; font-size:.85rem; }
+    /* Page-specific: h1 size override */
+    h1 { font-size: 1.2rem; }
 
-    .card {
-      margin-top: 1.75rem;
-      background: rgba(9, 6, 34, 0.9);
-      border: 1px solid rgba(130, 106, 255, 0.3);
-      border-radius: 28px;
-      box-shadow: 0 25px 80px rgba(0, 0, 0, 0.65);
-      backdrop-filter: blur(16px);
-      padding: 1.25rem 1.25rem 1.1rem;
-      overflow:hidden;
-    }
-
-    .btn {
-      border-radius:999px;
-      padding:.65rem 1.05rem;
-      border:1px solid rgba(129,118,255,.35);
-      background: rgba(15, 10, 55, 0.8);
-      color:#f4f0ff;
-      cursor:pointer;
-      letter-spacing:.08em;
-      text-transform:uppercase;
-      font-size:.78rem;
-      transition: transform .08s ease, box-shadow .12s ease, border-color .12s ease, filter .12s ease;
-      user-select:none;
-      text-decoration:none;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:.4rem;
-      white-space:nowrap;
-    }
-    .btn:hover { transform: translateY(-1px); border-color:#b37cff; box-shadow:0 0 0 1px rgba(179,124,255,.35); filter:brightness(1.05); }
-    .btn:active { transform: translateY(1px); }
-    .btn-danger { border-color: rgba(255,98,98,.45); }
-    .btn-danger:hover { border-color:#ff6262; box-shadow:0 0 0 1px rgba(255,98,98,.25); }
-
-    .toolbar { display:flex; flex-wrap:wrap; gap:.6rem; align-items:center; justify-content:space-between; margin-bottom: 1rem; }
-    .toolbar-left, .toolbar-right { display:flex; flex-wrap:wrap; gap:.6rem; align-items:center; }
-
-    .grid {
-      display:grid;
+    /* Page-specific: detail grid layout */
+    .detail-grid {
+      display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 1rem 1.25rem;
       margin-top: 1rem;
     }
-    .field { padding: .85rem .95rem; border:1px solid rgba(129,118,255,.18); border-radius:18px; background: rgba(9,6,34,.35); }
-    .k { display:block; font-size:.78rem; color:#cfc8ff; letter-spacing:.12em; text-transform:uppercase; margin-bottom:.35rem; }
-    .v { color:#f4f0ff; line-height:1.45; white-space: pre-wrap; overflow-wrap:anywhere; }
+
+    /* Page-specific: key-value field display */
+    .kv-field {
+      padding: 0.85rem 0.95rem;
+      border: 1px solid var(--color-border-subtle);
+      border-radius: var(--radius-lg);
+      background: rgba(9, 6, 34, 0.35);
+    }
+    .kv-field .k {
+      display: block;
+      font-size: 0.78rem;
+      color: var(--color-text-label);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 0.35rem;
+    }
+    .kv-field .v {
+      color: var(--color-text-primary);
+      line-height: 1.45;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
     .full { grid-column: 1 / -1; }
 
-    .err { margin-top:.8rem; color:#ff9494; font-size:.95rem; }
-    .muted { color:#bdb7ff; font-size:.85rem; }
-
-    /* Login overlay */
-    .overlay {
-      position:fixed; inset:0;
-      background: rgba(0,0,0,.55);
-      backdrop-filter: blur(8px);
-      display:flex; align-items:center; justify-content:center;
-      padding: 1rem;
-      z-index: 9999;
+    /* Page-specific: login form field variant */
+    .field2 label {
+      display: block;
+      margin: 0.7rem 0 0.35rem;
+      font-size: 0.78rem;
+      color: #d5cffc;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
     }
-    .login-card {
-      width: min(520px, 100%);
-      background: rgba(9, 6, 34, 0.95);
-      border: 1px solid rgba(130, 106, 255, 0.35);
-      border-radius: 28px;
-      box-shadow: 0 25px 90px rgba(0, 0, 0, 0.75);
-      padding: 1.75rem 1.5rem 1.4rem;
-    }
-    .login-title { margin:0; letter-spacing:.16em; text-transform:uppercase; font-size:1.05rem; }
-    .login-sub { margin:.6rem 0 1.1rem; color:#bdb7ff; line-height:1.45; font-size:.9rem; }
-    .field2 label { display:block; margin:.7rem 0 .35rem; font-size:.78rem; color:#d5cffc; letter-spacing:.1em; text-transform:uppercase; }
     .field2 input {
-      width:100%;
-      border-radius: 999px;
-      border: 1px solid rgba(129,118,255,.35);
-      background: rgba(9,6,34,.95);
-      color:#f4f0ff;
-      padding:.75rem 1rem;
-      outline:none;
+      width: 100%;
+      border-radius: var(--radius-pill);
+      border: 1px solid var(--color-border-input);
+      background: var(--color-surface-input);
+      color: var(--color-text-primary);
+      padding: 0.75rem 1rem;
+      outline: none;
     }
-    .field2 input:focus { border-color:#9c88ff; box-shadow:0 0 0 1px rgba(156,136,255,.55); }
-    .login-actions { display:flex; gap:.7rem; justify-content:space-between; align-items:center; margin-top: 1.1rem; flex-wrap:wrap; }
-    .tiny { font-size:.8rem; color:#9ea0d7; }
+    .field2 input:focus {
+      border-color: #9c88ff;
+      box-shadow: 0 0 0 1px rgba(156, 136, 255, 0.55);
+    }
+
+    /* Page-specific: notes field styling */
+    .fieldbox { margin-top: 14px; }
+    .fieldbox .label {
+      font-size: 0.78rem;
+      color: var(--color-text-label);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+
+    /* Page-specific: ok message */
+    .ok {
+      margin-top: 0.8rem;
+      color: #7af9c4;
+      font-size: 0.9rem;
+      display: none;
+    }
+
+    /* Page-specific: login close button */
+    .login-close {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      border: 1px solid rgba(129, 118, 255, 0.25);
+      background: var(--color-surface-btn-soft);
+      color: var(--color-text-primary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.08s ease, filter 0.12s ease, border-color 0.12s ease;
+    }
+    .login-close:hover {
+      transform: translateY(-1px);
+      border-color: var(--color-accent);
+      filter: brightness(1.08);
+    }
+    .login-close:active {
+      transform: translateY(1px);
+    }
   </style>
 </head>
 
@@ -149,73 +162,73 @@
       <div id="err" class="err" style="display:none;"></div>
 
       <div id="content" style="display:none;">
-        <div class="grid">
-          <div class="field">
+        <div class="detail-grid">
+          <div class="kv-field">
             <span class="k">Created</span>
             <div class="v" id="createdAt"></div>
           </div>
-          <div class="field">
+          <div class="kv-field">
             <span class="k">Status</span>
             <div class="v" id="status"></div>
           </div>
 
-          <div class="field">
+          <div class="kv-field">
             <span class="k">Priority</span>
             <div class="v" id="priority"></div>
           </div>
-          <div class="field">
+          <div class="kv-field">
             <span class="k">Team size</span>
             <div class="v" id="companySize"></div>
           </div>
 
-          <div class="field">
+          <div class="kv-field">
             <span class="k">Contact name</span>
             <div class="v" id="contactName"></div>
           </div>
-          <div class="field">
+          <div class="kv-field">
             <span class="k">Business</span>
             <div class="v" id="businessName"></div>
           </div>
 
-          <div class="field">
+          <div class="kv-field">
             <span class="k">Email</span>
             <div class="v" id="email"></div>
           </div>
-          <div class="field">
+          <div class="kv-field">
             <span class="k">Phone</span>
             <div class="v" id="phone"></div>
           </div>
 
-          <div class="field full">
+          <div class="kv-field full">
             <span class="k">Location</span>
             <div class="v" id="location"></div>
           </div>
 
-          <div class="field full">
+          <div class="kv-field full">
             <span class="k">Services requested</span>
             <div class="v" id="services"></div>
           </div>
 
-          <div class="field full">
+          <div class="kv-field full">
             <span class="k">Current setup</span>
             <div class="v" id="currentSetup"></div>
           </div>
 
-          <div class="field full">
+          <div class="kv-field full">
             <span class="k">Goals</span>
             <div class="v" id="goals"></div>
           </div>
 
-          <div class="field">
+          <div class="kv-field">
             <span class="k">Budget</span>
             <div class="v" id="budget"></div>
           </div>
-          <div class="field">
+          <div class="kv-field">
             <span class="k">Timeline</span>
             <div class="v" id="timeline"></div>
           </div>
 
-          <div class="field full">
+          <div class="kv-field full">
             <span class="k">Extra notes</span>
             <div class="v" id="extraNotes"></div>
           </div>

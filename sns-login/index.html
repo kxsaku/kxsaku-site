@@ -5,6 +5,7 @@
   <title>SNS · Client Login</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://esm.sh; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com; img-src 'self' data: blob: https://*.supabase.co; font-src 'self'; frame-src https://js.stripe.com;" />
+  <link rel="stylesheet" href="/styles.css" />
   <script>
   (function () {
     const forceDesktop = localStorage.getItem("sns_force_desktop") === "1";
@@ -18,60 +19,50 @@
 </script>
 
   <style>
-    *, *::before, *::after { box-sizing: border-box; }
-    html, body { height:100%; }
-    body{
-      margin:0;
-      min-height:100vh;
-      background: radial-gradient(circle at top, #342067, #050315 55%, #020010);
-      background-color:#050315;
-      color:#f4f0ff;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
-    }
-    .wrap{ max-width: 980px; margin:0 auto; padding: 2.5rem 1rem 4rem; }
+    /* Page-specific layout */
+    .wrap{ max-width: 980px; padding: 2.5rem 1rem 4rem; }
     .topbar{ display:flex; justify-content:space-between; align-items:center; gap:1rem; }
-    .brand{ display:flex; align-items:center; gap:.75rem; text-decoration:none; color:#f4f0ff; }
+    .brand{ display:flex; align-items:center; gap:.75rem; text-decoration:none; color:var(--color-text-primary); }
     .brand strong{ letter-spacing:.18em; text-transform:uppercase; font-size: .95rem; }
-    .btn{
-      appearance:none; border:1px solid rgba(180,150,255,.35);
-      background: rgba(40,20,80,.35);
-      color:#f4f0ff; padding:.7rem 1rem; border-radius: 999px;
-      text-decoration:none; cursor:pointer; font-weight:700; letter-spacing:.12em;
-      text-transform:uppercase; font-size:.78rem;
-      transition: transform .12s ease, border-color .12s ease, background .12s ease;
-    }
-    .btn:hover{ transform: translateY(-1px); border-color: rgba(200,170,255,.65); background: rgba(60,30,120,.35); }
-    .card{
+
+    /* Login card structure */
+    .login-card{
       margin-top: 2rem;
       background: rgba(10, 6, 24, .55);
       border: 1px solid rgba(180,150,255,.22);
       border-radius: 18px;
       box-shadow: 0 18px 70px rgba(0,0,0,.55);
       overflow:hidden;
+      width: 100%;
+      max-width: 100%;
+      padding: 0;
     }
     .card-h{
       padding: 1.4rem 1.4rem 1rem;
       border-bottom: 1px solid rgba(180,150,255,.12);
     }
     .card-h h1{ margin:0; font-size: 1.05rem; letter-spacing:.18em; text-transform:uppercase; }
-    .card-h p{ margin:.55rem 0 0; color: rgba(244,240,255,.78); }
+    .card-h p{ margin:.55rem 0 0; color: var(--color-text-muted); }
     .card-b{ padding: 1.4rem; display:grid; gap: .9rem; }
+
+    /* Form fields */
     label{ font-size:.78rem; letter-spacing:.16em; text-transform:uppercase; color: rgba(244,240,255,.75); }
     input{
       width:100%;
       max-width: 100%;
       padding: .9rem 1rem;
       border-radius: 14px;
-      border: 1px solid rgba(180,150,255,.22);
-      background: rgba(5,3,18,.55);
-      color:#f4f0ff;
+      border: 1px solid var(--color-border-input);
+      background: var(--color-surface-input);
+      color: var(--color-text-primary);
       outline:none;
     }
     input:focus{ border-color: rgba(200,170,255,.6); }
-    .row{ display:grid; grid-template-columns: 1fr; gap:.4rem; }
-        /* Critical: allow row children to shrink instead of overflowing */
-    .row > * { min-width: 0; }
+    .form-row{ display:grid; grid-template-columns: 1fr; gap:.4rem; }
+    .form-row > * { min-width: 0; }
     .actions{ display:flex; gap:.8rem; align-items:center; justify-content:flex-end; margin-top:.4rem; flex-wrap:wrap; }
+
+    /* Message box */
     .msg{
       display:none;
       padding:.9rem 1rem;
@@ -80,6 +71,8 @@
       background: rgba(60,0,30,.25);
       color:#ffd6e6;
     }
+
+    /* Muted link */
     .muted-link{
       color: rgba(200,170,255,.85);
       text-decoration:none;
@@ -100,7 +93,7 @@
       <a class="btn" href="/sns/">Back</a>
     </div>
 
-    <div class="card">
+    <div class="login-card">
       <div class="card-h">
         <h1>Client Login</h1>
         <p>Log in to view your dashboard and subscription.</p>
@@ -108,19 +101,19 @@
       <div class="card-b">
         <div id="msg" class="msg"></div>
 
-        <div class="row">
+        <div class="form-row">
           <label for="email">Email</label>
           <input id="email" type="email" autocomplete="email" placeholder="you@domain.com" />
         </div>
 
-        <div class="row">
+        <div class="form-row">
           <label for="password">Password</label>
           <input id="password" type="password" autocomplete="current-password" placeholder="••••••••" />
         </div>
 
         <div class="actions">
           <a class="muted-link" href="/sns-portal-invite/">Have an invite?</a>
-          <button id="loginBtn" class="btn">Login</button>
+          <button id="loginBtn" class="btn btn-primary">Login</button>
         </div>
       </div>
     </div>
