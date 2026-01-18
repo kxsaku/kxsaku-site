@@ -10,7 +10,6 @@
   <style>
 /* ============================================================
    Mobile Nav (scoped) — matches your other mobile pages
-   (scoped so it does NOT affect existing .btn styles here)
    ============================================================ */
 .mnav-wrap{
   width: min(640px, calc(100% - 1.25rem));
@@ -81,10 +80,13 @@
   display:grid;
   place-items:center;
   cursor:pointer;
-  transition: transform .14s ease, border-color .14s ease, filter .14s ease;
+  transition: transform .18s cubic-bezier(.34,1.56,.64,1), border-color .14s ease, filter .14s ease;
   -webkit-tap-highlight-color: transparent;
 }
-.mnav-iconBtn:active{ filter: brightness(1.04); }
+.mnav-iconBtn:active{
+  filter: brightness(1.04);
+  transform: scale(0.95);
+}
 .mnav-iconBtn svg{ opacity:.92; }
 
 .mnav-scrim{
@@ -94,7 +96,7 @@
   background: rgba(0,0,0,.55);
   opacity: 0;
   pointer-events: none;
-  transition: opacity .18s ease;
+  transition: opacity .25s ease;
 }
 .mnav-scrim.open{ opacity:1; pointer-events:auto; }
 
@@ -103,7 +105,7 @@
   left: 0; right: 0; top: 0;
   z-index: 8000;
   transform: translateY(-110%);
-  transition: transform .24s cubic-bezier(.2,.9,.2,1);
+  transition: transform .3s cubic-bezier(.2,.9,.2,1);
   padding: .95rem 0 .9rem;
   backdrop-filter: blur(16px);
   background: linear-gradient(180deg, rgba(3,1,11,.92), rgba(3,1,11,.58));
@@ -134,13 +136,14 @@
   border-radius: 16px;
   border: 1px solid rgba(196,181,253,.10);
   background: rgba(196,181,253,.04);
-  transition: border-color .14s ease, filter .14s ease, background .14s ease, color .14s ease;
+  transition: border-color .18s ease, filter .14s ease, background .18s ease, color .18s ease, transform .15s ease;
   -webkit-tap-highlight-color: transparent;
 }
 .mnav-links a:active{
   border-color: rgba(196,181,253,.22);
   filter: brightness(1.04);
   color: rgba(244,240,255,.92);
+  transform: scale(0.98);
 }
 .mnav-links a.active{
   background: rgba(179,124,255,.16);
@@ -158,27 +161,30 @@
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  height: 42px;
-  padding: 0 16px;
+  height: 44px;
+  padding: 0 18px;
   border-radius: 999px;
   border: 1px solid rgba(196,181,253,.18);
-  background: rgba(0,0,0,.18);
+  background: linear-gradient(180deg, rgba(15, 10, 50, 0.8), rgba(10, 6, 38, 0.85));
   color: rgba(244,240,255,.92);
   text-decoration:none;
-  font-weight: 800;
+  font-weight: 600;
   font-size: .78rem;
   letter-spacing: .12em;
   text-transform: uppercase;
   box-shadow: 0 12px 40px rgba(0,0,0,.32);
   backdrop-filter: blur(10px);
-  transition: filter .14s ease, border-color .14s ease, background .14s ease;
+  transition: filter .14s ease, border-color .18s ease, background .18s ease, transform .15s cubic-bezier(.34,1.56,.64,1);
   overflow:hidden;
   white-space: nowrap;
   -webkit-tap-highlight-color: transparent;
 }
-.mnav-btn:active{ filter:brightness(1.03); }
+.mnav-btn:active{
+  filter:brightness(1.03);
+  transform: scale(0.97);
+}
 .mnav-btn.primary{
-  background: linear-gradient(90deg, rgba(179,124,255,.92), rgba(249,115,226,.72));
+  background: linear-gradient(90deg, rgba(179,124,255,.85), rgba(249,115,226,.65));
   border-color: rgba(255,255,255,.18);
 }
 .mnav-actions .mnav-btn{ width:100%; }
@@ -189,43 +195,552 @@
 
 
 /* ============================================================
-   Mobile fitting overrides for sns-admin
+   Mobile Page Styles
    ============================================================ */
-@media (max-width: 820px){
-  .wrap{
-    width: min(640px, calc(100% - 1.25rem));
-    padding: 1.4rem 0 2.4rem;
-  }
-  .toprow{
-    flex-direction: column;
-    align-items: stretch;
-    gap: .85rem;
-  }
-  .top-actions{
-    justify-content: flex-start;
-  }
-  h1{ font-size: 1.25rem; }
-  .card{ border-radius: 22px; padding: 1.05rem .95rem 1rem; }
-  /* Invite row: prevent overflow */
-  #inviteEmail{
-    min-width: 0 !important;
-    width: 100% !important;
-  }
-  #inviteBtn{
-    width: 100%;
-  }
-  /* Ensure any direct style min-width doesn't break */
-  input[type="email"][id="inviteEmail"]{
-    min-width: 0 !important;
-  }
-  /* Table scroll is OK; make it feel intentional */
-  .tableScroll{
-    overflow:auto;
-    -webkit-overflow-scrolling: touch;
-    border-radius: 18px;
-    border: 1px solid rgba(129,118,255,.18);
-  }
-  table{ min-width: 980px; }
+
+/* Page entry animation */
+.page-enter {
+  animation: slideInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.page-enter-delay-1 { animation-delay: 100ms; }
+.page-enter-delay-2 { animation-delay: 200ms; }
+.page-enter-delay-3 { animation-delay: 300ms; }
+
+/* Mobile wrap adjustments */
+.wrap{
+  width: min(640px, calc(100% - 1.25rem));
+  padding: 1.4rem 0 2.4rem;
+  margin: 0 auto;
+}
+
+.toprow{
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: .85rem;
+}
+
+.top-actions{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+h1{
+  font-size: 1.25rem;
+  margin: 0;
+  letter-spacing: 0.14em;
+}
+
+/* Admin panel mobile */
+.admin-panel-mobile {
+  position: relative;
+  margin-top: 1.25rem;
+  background: linear-gradient(165deg, rgba(15, 10, 45, 0.95), rgba(8, 5, 28, 0.90));
+  border: 1px solid rgba(130, 106, 255, 0.22);
+  border-radius: 22px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(16px);
+  padding: 1.15rem;
+  overflow: hidden;
+}
+
+.admin-panel-mobile::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 150px;
+  background: radial-gradient(ellipse 400px 150px at 20% 0%, rgba(125, 95, 255, 0.1), transparent);
+  pointer-events: none;
+}
+
+/* Invite card mobile */
+.invite-card-mobile {
+  position: relative;
+  background: linear-gradient(165deg, rgba(18, 12, 48, 0.7), rgba(12, 8, 36, 0.6));
+  border: 1px solid rgba(129, 118, 255, 0.18);
+  border-radius: 18px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  overflow: hidden;
+}
+
+.invite-card-mobile::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 150px;
+  height: 80px;
+  background: radial-gradient(ellipse at 100% 0%, rgba(179, 124, 255, 0.08), transparent);
+  pointer-events: none;
+}
+
+.invite-card-mobile .invite-title {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(244, 240, 255, 0.85);
+  margin-bottom: 0.35rem;
+}
+
+.invite-card-mobile .invite-desc {
+  font-size: 0.82rem;
+  color: rgba(189, 183, 255, 0.6);
+  line-height: 1.4;
+  margin-bottom: 0.85rem;
+}
+
+.invite-card-mobile .invite-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.invite-card-mobile input {
+  width: 100%;
+}
+
+/* Toolbar sections mobile */
+.toolbar-mobile {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding: 1rem;
+  background: linear-gradient(180deg, rgba(10, 6, 32, 0.5), rgba(8, 5, 28, 0.4));
+  border: 1px solid rgba(129, 118, 255, 0.1);
+  border-radius: 18px;
+  margin-bottom: 1rem;
+}
+
+.toolbar-section-mobile {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.toolbar-section-mobile .section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid rgba(129, 118, 255, 0.08);
+}
+
+.toolbar-section-mobile .section-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  background: linear-gradient(135deg, rgba(179, 124, 255, 0.18), rgba(129, 118, 255, 0.08));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toolbar-section-mobile .section-icon svg {
+  width: 11px;
+  height: 11px;
+  color: var(--color-accent);
+}
+
+.toolbar-section-mobile .section-title {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(189, 183, 255, 0.7);
+}
+
+.toolbar-section-mobile .section-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+/* Button styles mobile */
+.btn-mobile {
+  position: relative;
+  border-radius: 999px;
+  padding: 0.6rem 0.95rem;
+  border: 1px solid rgba(129, 118, 255, 0.28);
+  background: linear-gradient(180deg, rgba(18, 12, 55, 0.85), rgba(14, 10, 48, 0.9));
+  color: var(--color-text-primary);
+  cursor: pointer;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  font-weight: 600;
+  transition:
+    transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.2s ease,
+    border-color 0.2s ease,
+    background 0.2s ease;
+  user-select: none;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn-mobile:active {
+  transform: scale(0.96);
+}
+
+.btn-mobile.primary {
+  background: linear-gradient(180deg, rgba(179, 124, 255, 0.28), rgba(140, 100, 220, 0.22));
+  border-color: rgba(179, 124, 255, 0.4);
+}
+
+.btn-mobile.danger {
+  border-color: rgba(255, 98, 98, 0.35);
+  background: linear-gradient(180deg, rgba(255, 98, 98, 0.12), rgba(200, 60, 60, 0.08));
+}
+
+.btn-mobile svg {
+  width: 13px;
+  height: 13px;
+  opacity: 0.85;
+}
+
+/* Priority buttons */
+.priority-btn-mobile {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.priority-btn-mobile .dot {
+  transition: transform 0.2s ease, box-shadow 0.25s ease;
+}
+
+.priority-btn-mobile:active .dot {
+  transform: scale(1.25);
+}
+
+.priority-btn-mobile:active .dot.dot-red { box-shadow: 0 0 12px rgba(255, 98, 98, 0.6); }
+.priority-btn-mobile:active .dot.dot-yellow { box-shadow: 0 0 12px rgba(255, 212, 90, 0.6); }
+.priority-btn-mobile:active .dot.dot-green { box-shadow: 0 0 12px rgba(108, 255, 176, 0.6); }
+
+/* Search mobile */
+.search-mobile {
+  position: relative;
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.search-mobile svg {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 15px;
+  height: 15px;
+  color: rgba(189, 183, 255, 0.45);
+  pointer-events: none;
+  transition: color 0.2s ease;
+}
+
+.search-mobile input {
+  padding-left: 38px;
+  width: 100%;
+}
+
+.search-mobile:focus-within svg {
+  color: var(--color-accent);
+}
+
+/* Table mobile */
+.table-wrapper-mobile {
+  border-radius: 18px;
+  border: 1px solid rgba(129, 118, 255, 0.12);
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(10, 6, 32, 0.4), rgba(8, 5, 28, 0.3));
+}
+
+.table-scroll-mobile {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-scroll-mobile table {
+  min-width: 920px;
+}
+
+/* Table row styles */
+#rows tr {
+  transition:
+    background 0.2s ease,
+    transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+#rows tr:active {
+  background: rgba(179, 124, 255, 0.08);
+}
+
+/* Status text mobile */
+.status-text-m {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.status-text-m::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-text-m.s-assigned {
+  background: rgba(189, 183, 255, 0.1);
+  color: rgba(189, 183, 255, 0.9);
+  border: 1px solid rgba(189, 183, 255, 0.18);
+}
+
+.status-text-m.s-assigned::before {
+  background: rgba(189, 183, 255, 0.7);
+}
+
+.status-text-m.s-working {
+  background: rgba(123, 184, 255, 0.12);
+  color: rgba(123, 184, 255, 0.95);
+  border: 1px solid rgba(123, 184, 255, 0.22);
+}
+
+.status-text-m.s-working::before {
+  background: rgba(123, 184, 255, 0.9);
+}
+
+.status-text-m.s-completed {
+  background: rgba(108, 255, 176, 0.1);
+  color: rgba(122, 249, 196, 0.95);
+  border: 1px solid rgba(108, 255, 176, 0.18);
+}
+
+.status-text-m.s-completed::before {
+  background: rgba(108, 255, 176, 0.9);
+}
+
+/* Priority display mobile */
+.priority-m {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  text-transform: capitalize;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.priority-m .flag-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.priority-m.p-red .flag-dot {
+  background: var(--color-error);
+  box-shadow: 0 0 8px rgba(255, 98, 98, 0.5);
+}
+
+.priority-m.p-yellow .flag-dot {
+  background: var(--color-warning);
+  box-shadow: 0 0 8px rgba(255, 212, 90, 0.5);
+}
+
+.priority-m.p-green .flag-dot {
+  background: var(--color-success);
+  box-shadow: 0 0 8px rgba(108, 255, 176, 0.5);
+}
+
+.priority-m.p-none .flag-dot {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Row action buttons mobile */
+.row-actions-m {
+  display: flex;
+  gap: 0.35rem;
+  justify-content: flex-end;
+}
+
+.row-btn-m {
+  padding: 0.45rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid rgba(129, 118, 255, 0.2);
+  background: linear-gradient(180deg, rgba(18, 12, 50, 0.75), rgba(14, 10, 45, 0.8));
+  color: var(--color-text-primary);
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.row-btn-m:active {
+  transform: scale(0.94);
+  border-color: rgba(179, 124, 255, 0.4);
+}
+
+.row-btn-m.danger {
+  border-color: rgba(255, 98, 98, 0.28);
+}
+
+.row-btn-m.danger:active {
+  border-color: rgba(255, 98, 98, 0.5);
+}
+
+/* Checkbox mobile */
+table input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(129, 118, 255, 0.32);
+  border-radius: 5px;
+  background: rgba(10, 6, 30, 0.75);
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+}
+
+table input[type="checkbox"]:checked {
+  background: linear-gradient(135deg, var(--color-accent), rgba(140, 100, 220, 0.9));
+  border-color: var(--color-accent);
+  animation: popIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+table input[type="checkbox"]:checked::after {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 2px;
+  width: 5px;
+  height: 9px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* Message boxes mobile */
+.msg-box-m {
+  padding: 0.75rem 0.95rem;
+  border-radius: 12px;
+  font-size: 0.82rem;
+  display: none;
+  align-items: center;
+  gap: 0.55rem;
+  margin-top: 0.75rem;
+  animation: slideInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.msg-box-m.visible {
+  display: flex;
+}
+
+.msg-box-m.error {
+  background: rgba(255, 98, 98, 0.1);
+  border: 1px solid rgba(255, 98, 98, 0.22);
+  color: rgba(255, 148, 148, 0.95);
+}
+
+.msg-box-m.success {
+  background: rgba(108, 255, 176, 0.08);
+  border: 1px solid rgba(108, 255, 176, 0.18);
+  color: rgba(122, 249, 196, 0.95);
+}
+
+.msg-box-m svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+/* User pill mobile */
+.user-pill-m {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.5rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid rgba(129, 118, 255, 0.22);
+  background: linear-gradient(180deg, rgba(15, 10, 45, 0.65), rgba(10, 6, 32, 0.7));
+  color: rgba(217, 211, 255, 0.88);
+  font-size: 0.78rem;
+}
+
+.user-pill-m svg {
+  width: 13px;
+  height: 13px;
+  opacity: 0.85;
+}
+
+/* Meta info mobile */
+.meta-info-m {
+  margin-top: 0.85rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(129, 118, 255, 0.06);
+  font-size: 0.78rem;
+  color: rgba(189, 183, 255, 0.45);
+}
+
+/* Footer mobile */
+.page-footer-m {
+  margin-top: 1.25rem;
+  text-align: center;
+  font-size: 0.78rem;
+  color: rgba(189, 183, 255, 0.4);
+  animation: fadeInUp 0.5s ease both;
+  animation-delay: 400ms;
+}
+
+/* Icon button mobile */
+.icon-btn-m {
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  border: 1px solid rgba(129, 118, 255, 0.22);
+  background: linear-gradient(180deg, rgba(15, 10, 50, 0.75), rgba(12, 8, 42, 0.8));
+  color: rgba(217, 211, 255, 0.88);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.icon-btn-m:active {
+  transform: scale(0.92);
+  border-color: rgba(179, 124, 255, 0.45);
+}
+
+.icon-btn-m svg {
+  width: 17px;
+  height: 17px;
+  opacity: 0.88;
 }
 
 </style>
@@ -295,93 +810,171 @@
   </header>
 
 <div class="wrap">
-    <div class="toprow">
-      <div>
-        <h1>SNS INQUIRIES</h1>
-        <div class="sub">Internal dashboard</div>
-      </div>
-      <div class="top-actions">
-        <span class="pill" id="whoami">Not signed in</span>
-
-        <a class="icon-btn" href="/sns/index.html" title="Back to SNS Home" aria-label="Home">
-          <svg viewBox="0 0 24 24" fill="none">
-            <path d="M3 11.5L12 4l9 7.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M5.5 10.5V20h13V10.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </a>
-
-        <button class="btn" id="logoutBtn" style="display:none;">Logout</button>
-      </div>
-
-      </div>
-
-    <div class="card" id="adminCard" style="display:none;">
-
-      <div class="card" style="margin-top:14px;">
-  <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+  <!-- Page Header -->
+  <div class="toprow page-enter">
     <div>
-      <div style="letter-spacing:.08em; text-transform:uppercase; font-size:.85rem; color: rgba(244,240,255,.75);">Invite Client (Invite-only accounts)</div>
-      <div class="muted" style="margin-top:6px;">Sends a secure one-time invite link to create a password and activate their dashboard.</div>
+      <h1>SNS INQUIRIES</h1>
+      <div class="sub">Internal dashboard</div>
     </div>
-    <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-      <input id="inviteEmail" type="email" placeholder="client@email.com" style="min-width:260px;" />
-      <button id="inviteBtn" class="btn">Send Invite</button>
-    </div>
-  </div>
-  <div id="inviteMsg" class="muted" style="margin-top:10px;"></div>
-</div>
+    <div class="top-actions">
+      <span class="user-pill-m" id="whoami">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="8" r="4"/>
+          <path d="M4 20c0-4 4-6 8-6s8 2 8 6"/>
+        </svg>
+        Not signed in
+      </span>
 
-<div class="toolbar toolbar-grid">
-  <div class="toolgroup">
-    <div class="tooltitle">Status</div>
-    <div class="toolrow">
-      <button class="btn btn-soft" id="markWorkingBtn">Working</button>
-      <button class="btn btn-soft" id="markCompletedBtn">Completed</button>
-      <button class="btn btn-soft" id="resetAssignedBtn">Assigned</button>
-    </div>
-  </div>
+      <a class="icon-btn-m" href="/sns/index.html" title="Back to SNS Home" aria-label="Home">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 11.5L12 4l9 7.5"/>
+          <path d="M5.5 10.5V20h13V10.5"/>
+        </svg>
+      </a>
 
-  <div class="toolgroup toolgroup-right">
-    <div class="tooltitle">Manage</div>
-    <div class="toolrow">
-      <button class="btn btn-danger" id="deleteSelectedBtn">Delete selected</button>
-      <button class="btn btn-danger" id="resetWorkOrdersBtn" type="button">Reset WO #'s</button>
-      <a class="btn btn-primary" href="/sns-client-list/index.html">Client List</a>
-    </div>
-  </div>
-
-  <div class="toolgroup">
-    <div class="tooltitle">Priority</div>
-    <div class="toolrow">
-      <button class="btn btn-chip" id="flagRedBtn"><span class="dot dot-red"></span>Red</button>
-      <button class="btn btn-chip" id="flagYellowBtn"><span class="dot dot-yellow"></span>Yellow</button>
-      <button class="btn btn-chip" id="flagGreenBtn"><span class="dot dot-green"></span>Green</button>
-      <button class="btn btn-chip" id="flagNoneBtn"><span class="dot dot-none"></span>Clear</button>
+      <button class="btn-mobile" id="logoutBtn" style="display:none;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        Logout
+      </button>
     </div>
   </div>
 
-  <div class="toolgroup toolgroup-right">
-  <div class="tooltitle">Search</div>
-  <div class="toolrow">
-    <input id="searchBox" type="text" placeholder="Search" class="input" style="width:min(520px, 100%);" />
-  </div>
-</div>
+  <!-- Main Admin Panel -->
+  <div class="admin-panel-mobile page-enter page-enter-delay-1" id="adminCard" style="display:none;">
 
-
-  <div class="toolgroup toolgroup-right toolgroup-sync">
-    <div class="tooltitle">Sync</div>
-    <div class="toolrow">
-      <button class="btn btn-primary" id="refreshBtn">Refresh</button>
+    <!-- Invite Client Section -->
+    <div class="invite-card-mobile">
+      <div class="invite-title">Invite Client</div>
+      <div class="invite-desc">Sends a secure one-time invite link to activate their dashboard.</div>
+      <div class="invite-form">
+        <input id="inviteEmail" type="email" placeholder="client@email.com" class="input-enhanced" />
+        <button id="inviteBtn" class="btn-mobile primary" style="width:100%;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 2L11 13"/>
+            <path d="M22 2L15 22L11 13L2 9L22 2Z"/>
+          </svg>
+          Send Invite
+        </button>
+      </div>
+      <div id="inviteMsg" class="meta-info-m"></div>
     </div>
-  </div>
-</div>
 
+    <!-- Toolbar -->
+    <div class="toolbar-mobile">
+      <!-- Status -->
+      <div class="toolbar-section-mobile">
+        <div class="section-header">
+          <div class="section-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 6v6l4 2"/>
+            </svg>
+          </div>
+          <span class="section-title">Status</span>
+        </div>
+        <div class="section-actions">
+          <button class="btn-mobile" id="markWorkingBtn">Working</button>
+          <button class="btn-mobile" id="markCompletedBtn">Completed</button>
+          <button class="btn-mobile" id="resetAssignedBtn">Assigned</button>
+        </div>
+      </div>
 
-      <div class="err" id="errBox"></div>
-      <div class="ok" id="okBox"></div>
+      <!-- Priority -->
+      <div class="toolbar-section-mobile">
+        <div class="section-header">
+          <div class="section-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/>
+              <line x1="4" y1="22" x2="4" y2="15"/>
+            </svg>
+          </div>
+          <span class="section-title">Priority</span>
+        </div>
+        <div class="section-actions">
+          <button class="btn-mobile priority-btn-mobile" id="flagRedBtn"><span class="dot dot-red"></span>Red</button>
+          <button class="btn-mobile priority-btn-mobile" id="flagYellowBtn"><span class="dot dot-yellow"></span>Yellow</button>
+          <button class="btn-mobile priority-btn-mobile" id="flagGreenBtn"><span class="dot dot-green"></span>Green</button>
+          <button class="btn-mobile priority-btn-mobile" id="flagNoneBtn"><span class="dot dot-none"></span>Clear</button>
+        </div>
+      </div>
 
-      <div class="tableScroll">
-        <table>
+      <!-- Manage -->
+      <div class="toolbar-section-mobile">
+        <div class="section-header">
+          <div class="section-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"/>
+              <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+            </svg>
+          </div>
+          <span class="section-title">Manage</span>
+        </div>
+        <div class="section-actions">
+          <button class="btn-mobile danger" id="deleteSelectedBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"/>
+              <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+            </svg>
+            Delete
+          </button>
+          <button class="btn-mobile danger" id="resetWorkOrdersBtn" type="button">Reset WO</button>
+          <a class="btn-mobile primary" href="/sns-client-list/index.html">Clients</a>
+        </div>
+      </div>
+
+      <!-- Search -->
+      <div class="toolbar-section-mobile">
+        <div class="section-header">
+          <div class="section-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+          </div>
+          <span class="section-title">Search</span>
+        </div>
+        <div class="search-mobile">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input id="searchBox" type="text" placeholder="Search inquiries..." class="input-enhanced" />
+        </div>
+        <button class="btn-mobile primary" id="refreshBtn" style="width:100%;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="23 4 23 10 17 10"/>
+            <path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/>
+          </svg>
+          Refresh
+        </button>
+      </div>
+    </div>
+
+    <!-- Messages -->
+    <div class="msg-box-m error" id="errBox">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="15" y1="9" x2="9" y2="15"/>
+        <line x1="9" y1="9" x2="15" y2="15"/>
+      </svg>
+      <span></span>
+    </div>
+    <div class="msg-box-m success" id="okBox">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+        <polyline points="22 4 12 14.01 9 11.01"/>
+      </svg>
+      <span></span>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrapper-mobile page-enter page-enter-delay-2">
+      <div class="table-scroll-mobile">
+        <table class="table-enhanced">
           <thead>
             <tr>
               <th style="width:42px;"><input type="checkbox" id="selectAll"></th>
@@ -392,634 +985,628 @@
               <th>Contact</th>
               <th>Business</th>
               <th>Services</th>
-              <th style="width:230px; text-align:right;">Actions</th>
+              <th style="width:200px; text-align:right;">Actions</th>
             </tr>
           </thead>
           <tbody id="rows"></tbody>
         </table>
       </div>
-
-
-
-  <div class="muted" id="detailsMeta" style="margin-top:.7rem;"></div>
-
-
-</div>
-
-
-      <div class="muted" style="margin-top:.8rem;">
-        © 2025 kxsaku · Built from the homelab.
-      </div>
     </div>
+
+    <div class="meta-info-m" id="detailsMeta"></div>
   </div>
 
-  <!-- Login overlay -->
-  <div class="overlay" id="loginOverlay" style="display:none;">
-    <div class="login-card" style="position:relative;">
-        <button class="login-close" id="loginCloseBtn" type="button" aria-label="Close">
-            <svg viewBox="0 0 24 24" fill="none">
-                <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
-            </svg>
-            </button>
-        <h2 class="login-title">Admin login</h2>
-      <p class="login-sub">
-        Sign in to view and manage inquiries. This page can load publicly, but data is protected by Supabase policies.
-      </p>
-
-      <div class="field">
-        <label for="loginEmail">Email</label>
-        <input id="loginEmail" type="email" autocomplete="username" placeholder="Email">
-      </div>
-
-      <div class="field">
-        <label for="loginPass">Password</label>
-        <input id="loginPass" type="password" autocomplete="current-password" placeholder="••••••••">
-      </div>
-
-      <div class="login-actions">
-        <span class="tiny" id="loginHint"></span>
-        <button class="btn" id="loginBtn">Sign in</button>
-      </div>
-
-      <div class="err" id="loginErr" style="display:none;"></div>
-    </div>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" integrity="sha384-0cJhvyxOncqJDixLuJRbH99K17F1B6DH3D8aUBlsJlsgiqRZQpQ1EUFWdgscplLu" crossorigin="anonymous"></script>
-<!-- Global Quick Look tooltip (floats above everything) -->
-<div id="qlTooltip" style="
-  position: fixed;
-  z-index: 99999;
-  display: none;
-  pointer-events: none;
-  max-width: 420px;
-  padding: 12px 14px;
-  border-radius: 16px;
-  border: 1px solid rgba(129,118,255,.35);
-  background: rgba(9, 6, 34, 0.98);
-  color: #f4f0ff;
-  box-shadow: 0 25px 80px rgba(0,0,0,.65);
-  backdrop-filter: blur(16px);
-">
+  <!-- Footer -->
+  <footer class="page-footer-m">
+    © 2025 kxsaku · Built from the homelab.
+  </footer>
 </div>
 
-  <script>
-    /**************************************************************
-     * REQUIRED: Paste your Supabase details below
-     **************************************************************/
-    const SUPABASE_URL = "https://jgvxmpsjtkedzgygynbl.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpndnhtcHNqdGtlZHpneWd5bmJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0NzgxMjYsImV4cCI6MjA4MTA1NDEyNn0.OCh23RWm8COtxWuumYvKUmfMOLOW01B1zrbtzcr3w6Y";
-    const ADMIN_EMAIL = "brandon.sns@pm.me";
-    /**************************************************************/
+<!-- Login overlay -->
+<div class="login-modal-overlay" id="loginOverlay" style="display:none;">
+  <div class="login-modal">
+    <button class="login-modal-close" id="loginCloseBtn" type="button" aria-label="Close">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+        <line x1="6" y1="6" x2="18" y2="18"/>
+        <line x1="18" y1="6" x2="6" y2="18"/>
+      </svg>
+    </button>
 
-    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    <h2 class="login-modal-title">Admin Login</h2>
+    <p class="login-modal-subtitle">
+      Sign in to view and manage inquiries.
+    </p>
 
-    const inviteEmailEl = document.getElementById("inviteEmail");
-const inviteBtn = document.getElementById("inviteBtn");
-const inviteMsg = document.getElementById("inviteMsg");
+    <div class="login-modal-field">
+      <label for="loginEmail">Email</label>
+      <input id="loginEmail" type="email" autocomplete="username" placeholder="Email" class="input-enhanced">
+    </div>
 
-async function callEdge(fnName, payload = {}) {
-  const { data: sess } = await sb.auth.getSession();
-  const token = sess?.session?.access_token;
-  if (!token) throw new Error("Not logged in.");
+    <div class="login-modal-field">
+      <label for="loginPass">Password</label>
+      <input id="loginPass" type="password" autocomplete="current-password" placeholder="••••••••" class="input-enhanced">
+    </div>
 
-  const res = await fetch(`${SUPABASE_URL}/functions/v1/${fnName}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${token}`,
-    },
-    body: JSON.stringify(payload),
-  });
+    <div class="login-modal-actions">
+      <span class="tiny" id="loginHint"></span>
+      <button class="btn-enhanced primary" id="loginBtn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/>
+          <polyline points="10 17 15 12 10 7"/>
+          <line x1="15" y1="12" x2="3" y2="12"/>
+        </svg>
+        Sign In
+      </button>
+    </div>
 
-  const j = await res.json();
-  if (!res.ok) throw new Error(j?.error || "Request failed");
-  return j;
-}
+    <div class="msg-box-m error" id="loginErr" style="display:none;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="15" y1="9" x2="9" y2="15"/>
+        <line x1="9" y1="9" x2="15" y2="15"/>
+      </svg>
+      <span></span>
+    </div>
+  </div>
+</div>
 
-inviteBtn?.addEventListener("click", async () => {
-  inviteMsg.textContent = "";
-  const email = (inviteEmailEl.value || "").trim().toLowerCase();
-  if (!email) return (inviteMsg.textContent = "Enter an email.");
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" integrity="sha384-0cJhvyxOncqJDixLuJRbH99K17F1B6DH3D8aUBlsJlsgiqRZQpQ1EUFWdgscplLu" crossorigin="anonymous"></script>
 
-  inviteBtn.disabled = true;
-  try {
-    await callEdge("admin-invite", { email });
-    inviteMsg.textContent = `Invite sent to ${email}`;
-  } catch (e) {
-    inviteMsg.textContent = e?.message || String(e);
-  } finally {
-    inviteBtn.disabled = false;
+<!-- Quick Look Tooltip -->
+<div id="qlTooltip" class="quicklook-tooltip">
+  <div class="quicklook-header">Quick Look</div>
+  <div class="quicklook-content"></div>
+</div>
+
+<script>
+  /**************************************************************
+   * REQUIRED: Paste your Supabase details below
+   **************************************************************/
+  const SUPABASE_URL = "https://jgvxmpsjtkedzgygynbl.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpndnhtcHNqdGtlZHpneWd5bmJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0NzgxMjYsImV4cCI6MjA4MTA1NDEyNn0.OCh23RWm8COtxWuumYvKUmfMOLOW01B1zrbtzcr3w6Y";
+  const ADMIN_EMAIL = "brandon.sns@pm.me";
+  /**************************************************************/
+
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  const inviteEmailEl = document.getElementById("inviteEmail");
+  const inviteBtn = document.getElementById("inviteBtn");
+  const inviteMsg = document.getElementById("inviteMsg");
+
+  async function callEdge(fnName, payload = {}) {
+    const { data: sess } = await sb.auth.getSession();
+    const token = sess?.session?.access_token;
+    if (!token) throw new Error("Not logged in.");
+
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/${fnName}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const j = await res.json();
+    if (!res.ok) throw new Error(j?.error || "Request failed");
+    return j;
   }
-});
 
+  inviteBtn?.addEventListener("click", async () => {
+    inviteMsg.textContent = "";
+    const email = (inviteEmailEl.value || "").trim().toLowerCase();
+    if (!email) return (inviteMsg.textContent = "Enter an email.");
 
-    const searchBox = document.getElementById("searchBox");
-
-
-
-let allInquiries = [];
-let filteredInquiries = [];
-
-
-function fmtWO(n){
-  if (n == null) return "";
-  return "WO-" + String(n).padStart(6, "0");
-}
-
-function includesCI(haystack, needle){
-  return (haystack || "").toString().toLowerCase().includes((needle || "").toString().toLowerCase());
-}
-    const rowsEl = document.getElementById("rows");
-    const errBox = document.getElementById("errBox");
-    const okBox = document.getElementById("okBox");
-    const whoami = document.getElementById("whoami");
-    const logoutBtn = document.getElementById("logoutBtn");
-    const loginCloseBtn = document.getElementById("loginCloseBtn");
-
-    const loginOverlay = document.getElementById("loginOverlay");
-    const loginBtn = document.getElementById("loginBtn");
-    const loginEmail = document.getElementById("loginEmail");
-    const loginPass = document.getElementById("loginPass");
-    const loginErr = document.getElementById("loginErr");
-    const loginHint = document.getElementById("loginHint");
-
-    const selectAll = document.getElementById("selectAll");
-    const refreshBtn = document.getElementById("refreshBtn");
-    const resetWorkOrdersBtn = document.getElementById("resetWorkOrdersBtn");
-
-    function showErr(msg) { errBox.style.display = "block"; errBox.textContent = msg; }
-    function clearErr() { errBox.style.display = "none"; errBox.textContent = ""; }
-    function showOk(msg) { okBox.style.display = "block"; okBox.textContent = msg; setTimeout(() => okBox.style.display="none", 2000); }
-
-    const adminCard = document.getElementById("adminCard");
-
-    function getEmail(r){
-      return (r?.contact_email ?? r?.email ?? r?.contactEmail ?? r?.contact_email_address ?? r?.contactEmailAddress ?? "");
+    inviteBtn.disabled = true;
+    try {
+      await callEdge("admin-invite", { email });
+      inviteMsg.textContent = `Invite sent to ${email}`;
+      inviteMsg.style.color = "rgba(122, 249, 196, 0.95)";
+    } catch (e) {
+      inviteMsg.textContent = e?.message || String(e);
+      inviteMsg.style.color = "rgba(255, 148, 148, 0.95)";
+    } finally {
+      inviteBtn.disabled = false;
     }
-    function getPhone(r){
-      return (r?.contact_phone ?? r?.phone ?? r?.contactPhone ?? r?.contact_phone_number ?? r?.contactPhoneNumber ?? "");
-    }
-
-    function setLocked(isLocked){
-    if (isLocked){
-        adminCard.style.display = "none";   // nothing visible behind overlay
-    } else {
-        adminCard.style.display = "block";
-      }
-    }
-
-    function applySearchAndRender(){
-  const q = (searchBox?.value || "").trim().toLowerCase();
-
-  filteredInquiries = !q ? allInquiries : allInquiries.filter(r => {
-    const wo = fmtWO(r.work_order);
-    const services = Array.isArray(r.services) ? r.services.join(", ") : (r.services || "");
-    return (
-      includesCI(r.contact_name, q) ||
-      includesCI(getEmail(r), q) ||
-      includesCI(getPhone(r), q) ||
-      includesCI(r.business_name, q) ||
-      includesCI(services, q) ||
-      includesCI(wo, q) ||
-      includesCI(r.work_order, q)
-    );
   });
 
-  rowsEl.innerHTML = filteredInquiries.map(r => `
-    <tr data-rowid="${sanitize(r.id)}">
-      <td><input type="checkbox" data-id="${sanitize(r.id)}"></td>
-      <td>${sanitize(fmtDate(r.created_at))}</td>
-      <td>${sanitize(fmtWO(r.work_order))}</td>
-      <td><span class="flag ${flagClass(r.priority_flag)}"></span>${sanitize(r.priority_flag || "none")}</td>
-      <td class="status ${statusClass(r.status)}">${sanitize(r.status || "assigned")}</td>
-      <td>${sanitize(r.contact_name || "")}</td>
-      <td>${sanitize(r.business_name || "")}</td>
-      <td>${sanitize(Array.isArray(r.services) ? r.services.join(", ") : (r.services || ""))}</td>
-      <td style="text-align:right; white-space:nowrap;">
-        <button class="btn btn-soft" data-eye="${sanitize(r.id)}" type="button" title="Quick look">👁️</button>
-        <button class="btn btn-soft" data-view="${sanitize(r.id)}" type="button">View</button>
-        <button class="btn btn-danger" data-del="${sanitize(r.id)}" type="button">Delete</button>
-      </td>
-    </tr>
-  `).join("");
+  const searchBox = document.getElementById("searchBox");
 
-  // keep “select all” sane after rerender
-  selectAll.checked = false;
-}
+  let allInquiries = [];
+  let filteredInquiries = [];
 
-    
-if (resetWorkOrdersBtn) {
-  resetWorkOrdersBtn.addEventListener("click", async () => {
+  function fmtWO(n){
+    if (n == null) return "";
+    return "WO-" + String(n).padStart(6, "0");
+  }
+
+  function includesCI(haystack, needle){
+    return (haystack || "").toString().toLowerCase().includes((needle || "").toString().toLowerCase());
+  }
+
+  const rowsEl = document.getElementById("rows");
+  const errBox = document.getElementById("errBox");
+  const okBox = document.getElementById("okBox");
+  const whoami = document.getElementById("whoami");
+  const logoutBtn = document.getElementById("logoutBtn");
+  const loginCloseBtn = document.getElementById("loginCloseBtn");
+
+  const loginOverlay = document.getElementById("loginOverlay");
+  const loginBtn = document.getElementById("loginBtn");
+  const loginEmail = document.getElementById("loginEmail");
+  const loginPass = document.getElementById("loginPass");
+  const loginErr = document.getElementById("loginErr");
+  const loginHint = document.getElementById("loginHint");
+
+  const selectAll = document.getElementById("selectAll");
+  const refreshBtn = document.getElementById("refreshBtn");
+  const resetWorkOrdersBtn = document.getElementById("resetWorkOrdersBtn");
+
+  function showErr(msg) {
+    errBox.querySelector("span").textContent = msg;
+    errBox.classList.add("visible");
+    errBox.style.display = "flex";
+  }
+
+  function clearErr() {
+    errBox.classList.remove("visible");
+    errBox.style.display = "none";
+    errBox.querySelector("span").textContent = "";
+  }
+
+  function showOk(msg) {
+    okBox.querySelector("span").textContent = msg;
+    okBox.classList.add("visible");
+    okBox.style.display = "flex";
+    setTimeout(() => {
+      okBox.classList.remove("visible");
+      okBox.style.display = "none";
+    }, 2500);
+  }
+
+  const adminCard = document.getElementById("adminCard");
+
+  function getEmail(r){
+    return (r?.contact_email ?? r?.email ?? r?.contactEmail ?? r?.contact_email_address ?? r?.contactEmailAddress ?? "");
+  }
+  function getPhone(r){
+    return (r?.contact_phone ?? r?.phone ?? r?.contactPhone ?? r?.contact_phone_number ?? r?.contactPhoneNumber ?? "");
+  }
+
+  function setLocked(isLocked){
+    if (isLocked){
+      adminCard.style.display = "none";
+    } else {
+      adminCard.style.display = "block";
+    }
+  }
+
+  function getPriorityClass(flag) {
+    if (flag === "red") return "p-red";
+    if (flag === "yellow") return "p-yellow";
+    if (flag === "green") return "p-green";
+    return "p-none";
+  }
+
+  function getStatusClass(status) {
+    if (status === "working") return "s-working";
+    if (status === "completed") return "s-completed";
+    return "s-assigned";
+  }
+
+  function applySearchAndRender(){
+    const q = (searchBox?.value || "").trim().toLowerCase();
+
+    filteredInquiries = !q ? allInquiries : allInquiries.filter(r => {
+      const wo = fmtWO(r.work_order);
+      const services = Array.isArray(r.services) ? r.services.join(", ") : (r.services || "");
+      return (
+        includesCI(r.contact_name, q) ||
+        includesCI(getEmail(r), q) ||
+        includesCI(getPhone(r), q) ||
+        includesCI(r.business_name, q) ||
+        includesCI(services, q) ||
+        includesCI(wo, q) ||
+        includesCI(r.work_order, q)
+      );
+    });
+
+    rowsEl.innerHTML = filteredInquiries.map(r => `
+      <tr data-rowid="${sanitize(r.id)}">
+        <td><input type="checkbox" data-id="${sanitize(r.id)}"></td>
+        <td>${sanitize(fmtDate(r.created_at))}</td>
+        <td><span style="font-family:monospace; opacity:0.9; font-size:0.8rem;">${sanitize(fmtWO(r.work_order))}</span></td>
+        <td>
+          <span class="priority-m ${getPriorityClass(r.priority_flag)}">
+            <span class="flag-dot"></span>
+            ${sanitize(r.priority_flag || "none")}
+          </span>
+        </td>
+        <td>
+          <span class="status-text-m ${getStatusClass(r.status)}">
+            ${sanitize(r.status || "assigned")}
+          </span>
+        </td>
+        <td>${sanitize(r.contact_name || "")}</td>
+        <td>${sanitize(r.business_name || "")}</td>
+        <td>${sanitize(Array.isArray(r.services) ? r.services.join(", ") : (r.services || ""))}</td>
+        <td>
+          <div class="row-actions-m">
+            <button class="row-btn-m" data-eye="${sanitize(r.id)}" type="button" title="Quick look">👁️</button>
+            <button class="row-btn-m" data-view="${sanitize(r.id)}" type="button">View</button>
+            <button class="row-btn-m danger" data-del="${sanitize(r.id)}" type="button">Del</button>
+          </div>
+        </td>
+      </tr>
+    `).join("");
+
+    selectAll.checked = false;
+  }
+
+  if (resetWorkOrdersBtn) {
+    resetWorkOrdersBtn.addEventListener("click", async () => {
+      clearErr();
+
+      const user = await requireAdminSession();
+      if (!user) return;
+
+      const ok1 = confirm("Are you sure you want to RESET ALL work order numbers? This will renumber every inquiry.");
+      if (!ok1) return;
+
+      const ok2 = confirm("Last warning: This cannot be undone. Proceed?");
+      if (!ok2) return;
+
+      resetWorkOrdersBtn.disabled = true;
+      resetWorkOrdersBtn.style.opacity = "0.6";
+
+      const { error } = await sb.rpc("reset_work_orders");
+
+      resetWorkOrdersBtn.disabled = false;
+      resetWorkOrdersBtn.style.opacity = "1";
+
+      if (error) {
+        showErr("Reset failed: " + error.message);
+        return;
+      }
+
+      showOk("Work order numbers reset.");
+      await loadInquiries();
+    });
+  }
+
+  loginCloseBtn.addEventListener("click", () => {
+    hideLogin();
+    if (history.length > 1) history.back();
+    else window.location.href = "/";
+  });
+
+  function showLogin(msg) {
+    if (adminCard) adminCard.style.display = "none";
+    loginOverlay.style.display = "flex";
+    loginErr.style.display = "none";
+    loginErr.querySelector("span").textContent = "";
+    loginHint.textContent = msg || "";
+    loginEmail.value = "";
+    loginPass.value = "";
+  }
+
+  function hideLogin() {
+    loginOverlay.style.display = "none";
+    loginErr.style.display = "none";
+    loginErr.querySelector("span").textContent = "";
+    loginHint.textContent = "";
+  }
+
+  function sanitize(s) {
+    return (s ?? "").toString().replace(/[&<>"']/g, m => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;" }[m]));
+  }
+
+  function fmtDate(iso) {
+    const d = new Date(iso);
+    return d.toLocaleString(undefined, { year:"numeric", month:"short", day:"2-digit", hour:"2-digit", minute:"2-digit" });
+  }
+
+  function flagClass(v) {
+    if (v === "red") return "f-red";
+    if (v === "yellow") return "f-yellow";
+    if (v === "green") return "f-green";
+    return "f-none";
+  }
+
+  function statusClass(v) {
+    if (v === "working") return "s-working";
+    if (v === "completed") return "s-completed";
+    return "s-assigned";
+  }
+
+  function getSelectedIds() {
+    return Array.from(document.querySelectorAll("input[data-id]:checked")).map(x => x.getAttribute("data-id"));
+  }
+
+  async function requireAdminSession() {
+    const { data: { user } } = await sb.auth.getUser();
+
+    if (!user) {
+      whoami.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg> Not signed in`;
+      logoutBtn.style.display = "none";
+      setLocked(true);
+      showLogin("Sign in to load inquiries.");
+      return null;
+    }
+
+    if ((user.email || "").toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+      await sb.auth.signOut();
+      whoami.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg> Wrong account`;
+      logoutBtn.style.display = "none";
+      setLocked(true);
+      showLogin("Use your admin email to sign in.");
+      return null;
+    }
+
+    whoami.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg> ${sanitize(user.email)}`;
+    logoutBtn.style.display = "inline-flex";
+    setLocked(false);
+    hideLogin();
+    if (adminCard) adminCard.style.display = "block";
+    return user;
+  }
+
+  let loadNonce = 0;
+
+  async function loadInquiries() {
+    const myNonce = ++loadNonce;
     clearErr();
 
+    refreshBtn.disabled = true;
+    refreshBtn.style.opacity = "0.6";
+
     const user = await requireAdminSession();
-    if (!user) return;
-
-    const ok1 = confirm("Are you sure you want to RESET ALL work order numbers? This will renumber every inquiry.");
-    if (!ok1) return;
-
-    const ok2 = confirm("Last warning: This cannot be undone. Proceed?");
-    if (!ok2) return;
-
-    resetWorkOrdersBtn.disabled = true;
-    resetWorkOrdersBtn.style.opacity = "0.6";
-
-    const { error } = await sb.rpc("reset_work_orders");
-
-    resetWorkOrdersBtn.disabled = false;
-    resetWorkOrdersBtn.style.opacity = "1";
-
-    if (error) {
-      showErr("Reset failed: " + error.message);
+    if (!user) {
+      refreshBtn.disabled = false;
+      refreshBtn.style.opacity = "1";
       return;
     }
 
-    showOk("Work order numbers reset.");
+    const { data, error } = await sb
+      .from("inquiries")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(200);
+
+    if (myNonce !== loadNonce) return;
+
+    refreshBtn.disabled = false;
+    refreshBtn.style.opacity = "1";
+
+    if (error) {
+      rowsEl.innerHTML = "";
+      showErr("Could not load inquiries: " + error.message);
+      return;
+    }
+
+    if (!data || data.length === 0) {
+      rowsEl.innerHTML = `<tr><td colspan="9" class="muted" style="padding:1.2rem .6rem; text-align:center;">
+        No inquiries returned.
+      </td></tr>`;
+      return;
+    }
+
+    allInquiries = data;
+    applySearchAndRender();
+    selectAll.checked = false;
+  }
+
+  async function updateMany(patch) {
+    clearErr();
+    const ids = getSelectedIds();
+    if (ids.length === 0) { showErr("Select at least one inquiry."); return; }
+
+    const { error } = await sb.from("inquiries").update(patch).in("id", ids);
+    if (error) { showErr(error.message); return; }
+
+    showOk("Updated " + ids.length + " inquiry(s).");
+    await loadInquiries();
+  }
+
+  async function deleteMany(ids) {
+    clearErr();
+    if (!ids || ids.length === 0) { showErr("Select at least one inquiry."); return; }
+
+    const ok = confirm(`Delete ${ids.length} inquiry(s)? This cannot be undone.`);
+    if (!ok) return;
+
+    const { error, count } = await sb
+      .from("inquiries")
+      .delete({ count: "exact" })
+      .in("id", ids);
+
+    if (error) {
+      showErr("Delete failed: " + error.message);
+      return;
+    }
+
+    if (!count || count === 0) {
+      showErr("Delete request returned 0 deleted rows. This usually means RLS is blocking DELETE.");
+      return;
+    }
+
+    showOk(`${count} inquiry deleted.`);
+    await loadInquiries();
+  }
+
+  // Quick Look Tooltip
+  const qlTooltip = document.getElementById("qlTooltip");
+  const qlContent = qlTooltip.querySelector(".quicklook-content");
+
+  function showTooltip(html, x, y) {
+    qlContent.innerHTML = html;
+    qlTooltip.style.display = "block";
+
+    const pad = 14;
+    const rect = qlTooltip.getBoundingClientRect();
+
+    let left = x + 14;
+    let top  = y + 14;
+
+    if (left + rect.width + pad > window.innerWidth) left = window.innerWidth - rect.width - pad;
+    if (top + rect.height + pad > window.innerHeight) top = window.innerHeight - rect.height - pad;
+
+    qlTooltip.style.left = left + "px";
+    qlTooltip.style.top  = top + "px";
+  }
+
+  function hideTooltip() {
+    qlTooltip.style.display = "none";
+    qlContent.innerHTML = "";
+  }
+
+  document.addEventListener("click", async (e) => {
+    const viewBtn = e.target.closest("[data-view]");
+    if (viewBtn) {
+      const id = viewBtn.getAttribute("data-view");
+      window.location.href = `/sns-inquiry-view/index.html?id=${encodeURIComponent(id)}`;
+      return;
+    }
+
+    const delBtn = e.target.closest("[data-del]");
+    if (delBtn) {
+      const id = delBtn.getAttribute("data-del");
+      await deleteMany([id]);
+      return;
+    }
+  });
+
+  document.addEventListener("mousemove", (e) => {
+    if (qlTooltip.style.display === "block") {
+      showTooltip(qlContent.innerHTML, e.clientX, e.clientY);
+    }
+  });
+
+  document.addEventListener("mouseover", (e) => {
+    const eyeBtn = e.target.closest("[data-eye]");
+    if (!eyeBtn) return;
+
+    const row = eyeBtn.closest("tr");
+    if (!row) return;
+
+    const tds = row.querySelectorAll("td");
+    const date     = tds[1]?.textContent?.trim() || "";
+    const workOrder= tds[2]?.textContent?.trim() || "";
+    const priority = tds[3]?.textContent?.trim() || "";
+    const status   = tds[4]?.textContent?.trim() || "";
+    const contact  = tds[5]?.textContent?.trim() || "";
+    const business = tds[6]?.textContent?.trim() || "";
+    const services = tds[7]?.textContent?.trim() || "";
+
+    const html = `
+      <div class="quicklook-row"><span class="quicklook-label">Date</span><span class="quicklook-value">${sanitize(date)}</span></div>
+      <div class="quicklook-row"><span class="quicklook-label">Work Order</span><span class="quicklook-value">${sanitize(workOrder)}</span></div>
+      <div class="quicklook-row"><span class="quicklook-label">Status</span><span class="quicklook-value">${sanitize(status)}</span></div>
+      <div class="quicklook-row"><span class="quicklook-label">Priority</span><span class="quicklook-value">${sanitize(priority)}</span></div>
+      <div class="quicklook-row" style="margin-top:0.5rem;"><span class="quicklook-label">Contact</span><span class="quicklook-value">${sanitize(contact)}</span></div>
+      <div class="quicklook-row"><span class="quicklook-label">Business</span><span class="quicklook-value">${sanitize(business)}</span></div>
+      <div class="quicklook-row" style="margin-top:0.5rem;"><span class="quicklook-label">Services</span><span class="quicklook-value">${sanitize(services)}</span></div>
+    `;
+
+    showTooltip(html, e.clientX, e.clientY);
+  });
+
+  searchBox.addEventListener("input", () => applySearchAndRender());
+
+  document.addEventListener("mouseout", (e) => {
+    const eyeBtn = e.target.closest("[data-eye]");
+    if (!eyeBtn) return;
+    if (e.relatedTarget && eyeBtn.contains(e.relatedTarget)) return;
+    hideTooltip();
+  });
+
+  document.getElementById("refreshBtn").addEventListener("click", () => loadInquiries());
+  document.getElementById("markWorkingBtn").addEventListener("click", () => updateMany({ status: "working" }));
+  document.getElementById("markCompletedBtn").addEventListener("click", () => updateMany({ status: "completed" }));
+  document.getElementById("resetAssignedBtn").addEventListener("click", () => updateMany({ status: "assigned" }));
+
+  document.getElementById("flagRedBtn").addEventListener("click", () => updateMany({ priority_flag: "red" }));
+  document.getElementById("flagYellowBtn").addEventListener("click", () => updateMany({ priority_flag: "yellow" }));
+  document.getElementById("flagGreenBtn").addEventListener("click", () => updateMany({ priority_flag: "green" }));
+  document.getElementById("flagNoneBtn").addEventListener("click", () => updateMany({ priority_flag: "none" }));
+
+  document.getElementById("deleteSelectedBtn").addEventListener("click", () => deleteMany(getSelectedIds()));
+
+  selectAll.addEventListener("change", (e) => {
+    document.querySelectorAll("input[data-id]").forEach(cb => cb.checked = e.target.checked);
+  });
+
+  logoutBtn.addEventListener("click", async () => {
+    await sb.auth.signOut();
+    showOk("Signed out.");
     await loadInquiries();
   });
-}
 
-    loginCloseBtn.addEventListener("click", () => {
-    hideLogin();
-
-    // Go back to the page you were on before clicking Admin (best UX)
-    if (history.length > 1) history.back();
-    else window.location.href = "/"; // fallback
-    });
-
-
-
-    function showLogin(msg) {
-    // Hide the admin UI entirely (no blurred “leak” behind the modal)
-    if (adminCard) adminCard.style.display = "none";
-
-    loginOverlay.style.display = "flex";
+  loginBtn.addEventListener("click", async () => {
     loginErr.style.display = "none";
-    loginErr.textContent = "";
-    loginHint.textContent = msg || "";
+    loginErr.querySelector("span").textContent = "";
 
-    // DO NOT prefill email
-    loginEmail.value = "";
-    loginPass.value = "";
-    }
+    try {
+      const email = loginEmail.value.trim();
+      const password = loginPass.value;
 
-    function hideLogin() {
-      loginOverlay.style.display = "none";
-      loginErr.style.display = "none";
-      loginErr.textContent = "";
-      loginHint.textContent = "";
-    }
+      const { error } = await sb.auth.signInWithPassword({ email, password });
+      if (error) throw error;
 
-    function sanitize(s) {
-      return (s ?? "").toString().replace(/[&<>"']/g, m => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;" }[m]));
-    }
-
-    function fmtDate(iso) {
-      const d = new Date(iso);
-      return d.toLocaleString(undefined, { year:"numeric", month:"short", day:"2-digit", hour:"2-digit", minute:"2-digit" });
-    }
-
-    function flagClass(v) {
-      if (v === "red") return "f-red";
-      if (v === "yellow") return "f-yellow";
-      if (v === "green") return "f-green";
-      return "f-none";
-    }
-
-    function statusClass(v) {
-      if (v === "working") return "s-working";
-      if (v === "completed") return "s-completed";
-      return "s-assigned";
-    }
-
-    function getSelectedIds() {
-      return Array.from(document.querySelectorAll("input[data-id]:checked")).map(x => x.getAttribute("data-id"));
-    }
-
-    async function requireAdminSession() {
-      const { data: { user } } = await sb.auth.getUser();
-
-      if (!user) {
-        whoami.textContent = "Not signed in";
-        logoutBtn.style.display = "none";
-        setLocked(true);
-        showLogin("Sign in to load inquiries.");
-        return null;
-      }
-
-      if ((user.email || "").toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
-        await sb.auth.signOut();
-        whoami.textContent = "Wrong account";
-        logoutBtn.style.display = "none";
-        setLocked(true);
-        showLogin("Use your admin email to sign in.");
-        return null;
-      }
-
-      whoami.textContent = "Signed in: " + user.email;
-      logoutBtn.style.display = "inline-flex";
-      setLocked(false);
-      hideLogin();
-      if (adminCard) adminCard.style.display = "block";
-      return user;
-    }
-
-    // Prevent overlapping renders (this fixes the duplicates/refresh weirdness)
-    let loadNonce = 0;
-
-    async function loadInquiries() {
-      const myNonce = ++loadNonce;
-      clearErr();
-
-      refreshBtn.disabled = true;
-      refreshBtn.style.opacity = "0.6";
-
-      // Require admin first
-      const user = await requireAdminSession();
-      if (!user) {
-        refreshBtn.disabled = false;
-        refreshBtn.style.opacity = "1";
-        return;
-      }
-
-      // Query
-      const { data, error } = await sb
-        .from("inquiries")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(200);
-
-
-      // If another load started after this one, ignore this result
-      if (myNonce !== loadNonce) return;
-
-      refreshBtn.disabled = false;
-      refreshBtn.style.opacity = "1";
-
-      if (error) {
-        rowsEl.innerHTML = "";
-        showErr("Could not load inquiries: " + error.message);
-        return;
-      }
-
-      if (!data || data.length === 0) {
-        rowsEl.innerHTML = `<tr><td colspan="9" class="muted" style="padding:1.2rem .6rem;">
-          No inquiries returned.
-        </td></tr>`;
-        return;
-      }
-
-
-      // Build rows once (avoids duplicate append behavior)
-      allInquiries = data;
-      applySearchAndRender();
-
-      
-
-      selectAll.checked = false;
-    }
-
-    async function updateMany(patch) {
-      clearErr();
-      const ids = getSelectedIds();
-      if (ids.length === 0) { showErr("Select at least one inquiry."); return; }
-
-      const { error } = await sb.from("inquiries").update(patch).in("id", ids);
-      if (error) { showErr(error.message); return; }
-
-      showOk("Updated " + ids.length + " inquiry(s).");
       await loadInquiries();
+    } catch (e) {
+      loginErr.style.display = "flex";
+      loginErr.querySelector("span").textContent = e.message || "Login failed.";
+    }
+  });
+
+  sb.auth.onAuthStateChange(() => { loadInquiries(); });
+
+  loadInquiries();
+</script>
+
+<script>
+  // Mobile menu (scoped)
+  (function(){
+    const menu = document.getElementById("mnavMenu");
+    const scrim = document.getElementById("mnavScrim");
+    const openBtn = document.getElementById("mnavOpen");
+    const closeBtn = document.getElementById("mnavClose");
+
+    function open(){
+      menu.classList.add("open");
+      scrim.classList.add("open");
+      menu.setAttribute("aria-hidden","false");
+      scrim.setAttribute("aria-hidden","false");
+      document.body.style.overflow = "hidden";
+    }
+    function close(){
+      menu.classList.remove("open");
+      scrim.classList.remove("open");
+      menu.setAttribute("aria-hidden","true");
+      scrim.setAttribute("aria-hidden","true");
+      document.body.style.overflow = "";
     }
 
-        async function deleteMany(ids) {
-  clearErr();
-  if (!ids || ids.length === 0) { showErr("Select at least one inquiry."); return; }
-
-  const ok = confirm(`Delete ${ids.length} inquiry(s)? This cannot be undone.`);
-  if (!ok) return;
-
-  const { error, count } = await sb
-    .from("inquiries")
-    .delete({ count: "exact" })
-    .in("id", ids);
-
-  if (error) {
-    showErr("Delete failed: " + error.message);
-    return;
-  }
-
-  if (!count || count === 0) {
-    showErr("Delete request returned 0 deleted rows. This usually means RLS is blocking DELETE.");
-    return;
-  }
-
-  showOk(`${count} inquiry deleted.`);
-  await loadInquiries();
-}
-
-
-
-    // Toolbar events
-
-    // --- Tooltip helpers (global floating tooltip; not clipped) ---
-const qlTooltip = document.getElementById("qlTooltip");
-
-function showTooltip(html, x, y) {
-  qlTooltip.innerHTML = html;
-  qlTooltip.style.display = "block";
-
-  const pad = 14;
-  // Force layout so rect is accurate after innerHTML change
-  const rect = qlTooltip.getBoundingClientRect();
-
-  let left = x + 14;
-  let top  = y + 14;
-
-  if (left + rect.width + pad > window.innerWidth) left = window.innerWidth - rect.width - pad;
-  if (top + rect.height + pad > window.innerHeight) top = window.innerHeight - rect.height - pad;
-
-  qlTooltip.style.left = left + "px";
-  qlTooltip.style.top  = top + "px";
-}
-
-function hideTooltip() {
-  qlTooltip.style.display = "none";
-  qlTooltip.innerHTML = "";
-}
-
-// --- Row-level actions + tooltip (event delegation) ---
-
-
-
-document.addEventListener("click", async (e) => {
-  const viewBtn = e.target.closest("[data-view]");
-  if (viewBtn) {
-    const id = viewBtn.getAttribute("data-view");
-    window.location.href = `/sns-inquiry-view/index.html?id=${encodeURIComponent(id)}`;
-    return;
-  }
-
-  const delBtn = e.target.closest("[data-del]");
-  if (delBtn) {
-    const id = delBtn.getAttribute("data-del");
-    await deleteMany([id]);
-    return;
-  }
-});
-
-// Keep tooltip near cursor when visible
-document.addEventListener("mousemove", (e) => {
-  if (qlTooltip.style.display === "block") {
-    showTooltip(qlTooltip.innerHTML, e.clientX, e.clientY);
-  }
-});
-
-// IMPORTANT: use mouseover/mouseout (mouseenter doesn't bubble reliably for delegation)
-document.addEventListener("mouseover", (e) => {
-  const eyeBtn = e.target.closest("[data-eye]");
-  if (!eyeBtn) return;
-
-  const row = eyeBtn.closest("tr");
-  if (!row) return;
-
-  const tds = row.querySelectorAll("td");
-  const date     = tds[1]?.textContent?.trim() || "";
-  const workOrder= tds[2]?.textContent?.trim() || "";
-  const priority = tds[3]?.textContent?.trim() || "";
-  const status   = tds[4]?.textContent?.trim() || "";
-  const contact  = tds[5]?.textContent?.trim() || "";
-  const business = tds[6]?.textContent?.trim() || "";
-  const services = tds[7]?.textContent?.trim() || "";
-
-  const html = `
-    <div style="letter-spacing:.14em; text-transform:uppercase; font-size:.78rem; color:#cfc8ff; margin-bottom:.5rem;">
-      Quick Look
-    </div>
-    <div style="font-size:.92rem; line-height:1.45;">
-      <div><span style="color:#bdb7ff;">Date:</span> ${sanitize(date)}</div>
-      <div><span style="color:#bdb7ff;">Work Order:</span> ${sanitize(workOrder)}</div>
-      <div><span style="color:#bdb7ff;">Status:</span> ${sanitize(status)}</div>
-      <div><span style="color:#bdb7ff;">Priority:</span> ${sanitize(priority)}</div>
-      <div style="margin-top:.45rem;"><span style="color:#bdb7ff;">Contact:</span> ${sanitize(contact)}</div>
-      <div><span style="color:#bdb7ff;">Business:</span> ${sanitize(business)}</div>
-      <div style="margin-top:.45rem;"><span style="color:#bdb7ff;">Services:</span> ${sanitize(services)}</div>
-    </div>
-  `;
-
-  showTooltip(html, e.clientX, e.clientY);
-});
-
-// Search
-searchBox.addEventListener("input", () => applySearchAndRender());
-
-
-
-
-document.addEventListener("mouseout", (e) => {
-  const eyeBtn = e.target.closest("[data-eye]");
-  if (!eyeBtn) return;
-
-  // If you're still inside the same eye button, ignore
-  if (e.relatedTarget && eyeBtn.contains(e.relatedTarget)) return;
-
-  hideTooltip();
-});
-
-    document.getElementById("refreshBtn").addEventListener("click", () => loadInquiries());
-    document.getElementById("markWorkingBtn").addEventListener("click", () => updateMany({ status: "working" }));
-    document.getElementById("markCompletedBtn").addEventListener("click", () => updateMany({ status: "completed" }));
-    document.getElementById("resetAssignedBtn").addEventListener("click", () => updateMany({ status: "assigned" }));
-
-    document.getElementById("flagRedBtn").addEventListener("click", () => updateMany({ priority_flag: "red" }));
-    document.getElementById("flagYellowBtn").addEventListener("click", () => updateMany({ priority_flag: "yellow" }));
-    document.getElementById("flagGreenBtn").addEventListener("click", () => updateMany({ priority_flag: "green" }));
-    document.getElementById("flagNoneBtn").addEventListener("click", () => updateMany({ priority_flag: "none" }));
-
-
-    document.getElementById("deleteSelectedBtn").addEventListener("click", () => deleteMany(getSelectedIds()));
-
-
-
-
-    selectAll.addEventListener("change", (e) => {
-      document.querySelectorAll("input[data-id]").forEach(cb => cb.checked = e.target.checked);
+    openBtn?.addEventListener("click", open);
+    closeBtn?.addEventListener("click", close);
+    scrim?.addEventListener("click", close);
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") close();
     });
+  })();
 
-    // Row-level delete (event delegation)
-
-    logoutBtn.addEventListener("click", async () => {
-      await sb.auth.signOut();
-      showOk("Signed out.");
-      await loadInquiries();
+  // View Desktop Site preference (same behavior as other mobile pages)
+  (function(){
+    const a = document.getElementById("mnavViewDesktop");
+    if (!a) return;
+    a.addEventListener("click", function(e){
+      e.preventDefault();
+      localStorage.setItem("sns_force_desktop", "1");
+      location.replace("/sns-admin/");
     });
-
-    loginBtn.addEventListener("click", async () => {
-      loginErr.style.display = "none";
-      loginErr.textContent = "";
-
-      try {
-        const email = loginEmail.value.trim();
-        const password = loginPass.value;
-
-        const { error } = await sb.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-
-        await loadInquiries();
-      } catch (e) {
-        loginErr.style.display = "block";
-        loginErr.textContent = e.message || "Login failed.";
-      }
-    });
-
-    // Important: This can fire during session restore. With nonce guard above, it won’t duplicate rows.
-    sb.auth.onAuthStateChange(() => { loadInquiries(); });
-
-    loadInquiries();
-  </script>
-
-  <script>
-    // Mobile menu (scoped)
-    (function(){
-      const menu = document.getElementById("mnavMenu");
-      const scrim = document.getElementById("mnavScrim");
-      const openBtn = document.getElementById("mnavOpen");
-      const closeBtn = document.getElementById("mnavClose");
-
-      function open(){
-        menu.classList.add("open");
-        scrim.classList.add("open");
-        menu.setAttribute("aria-hidden","false");
-        scrim.setAttribute("aria-hidden","false");
-        document.body.style.overflow = "hidden";
-      }
-      function close(){
-        menu.classList.remove("open");
-        scrim.classList.remove("open");
-        menu.setAttribute("aria-hidden","true");
-        scrim.setAttribute("aria-hidden","true");
-        document.body.style.overflow = "";
-      }
-
-      openBtn?.addEventListener("click", open);
-      closeBtn?.addEventListener("click", close);
-      scrim?.addEventListener("click", close);
-      window.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") close();
-      });
-    })();
-
-    // View Desktop Site preference (same behavior as other mobile pages)
-    (function(){
-      const a = document.getElementById("mnavViewDesktop");
-      if (!a) return;
-      a.addEventListener("click", function(e){
-        e.preventDefault();
-        localStorage.setItem("sns_force_desktop", "1");
-        location.replace("/sns-admin/");
-      });
-    })();
-  </script>
+  })();
+</script>
 
 </body>
 </html>

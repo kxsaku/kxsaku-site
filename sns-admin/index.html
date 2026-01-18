@@ -20,186 +20,697 @@
   <link rel="stylesheet" href="/styles.css" />
 
   <style>
-    /* Page-specific: tooltip title styling */
-    .tooltitle {
-      font-size: 0.75rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--color-text-muted);
+    /* Page-specific admin styles */
+
+    /* Page entry animation */
+    .page-enter {
+      animation: slideInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
     }
+
+    .page-enter-delay-1 { animation-delay: 100ms; }
+    .page-enter-delay-2 { animation-delay: 200ms; }
+    .page-enter-delay-3 { animation-delay: 300ms; }
+
+    /* Toolbar section grid */
+    .admin-toolbar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1rem;
+      padding: 1.25rem;
+      background: linear-gradient(180deg, rgba(10, 6, 32, 0.6), rgba(8, 5, 28, 0.5));
+      border: 1px solid rgba(129, 118, 255, 0.12);
+      border-radius: 20px;
+      margin-bottom: 1.25rem;
+    }
+
+    .toolbar-section {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .toolbar-section-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid rgba(129, 118, 255, 0.1);
+    }
+
+    .toolbar-section-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      background: linear-gradient(135deg, rgba(179, 124, 255, 0.2), rgba(129, 118, 255, 0.1));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .toolbar-section-icon svg {
+      width: 12px;
+      height: 12px;
+      color: var(--color-accent);
+    }
+
+    .toolbar-section-title {
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(189, 183, 255, 0.75);
+    }
+
+    .toolbar-section-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    /* Search section styling */
+    .search-section {
+      grid-column: span 2;
+    }
+
+    @media (max-width: 900px) {
+      .search-section {
+        grid-column: span 1;
+      }
+    }
+
+    .search-wrapper {
+      position: relative;
+      width: 100%;
+    }
+
+    .search-wrapper svg {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      color: rgba(189, 183, 255, 0.5);
+      pointer-events: none;
+      transition: color 0.2s ease;
+    }
+
+    .search-wrapper input {
+      padding-left: 42px;
+    }
+
+    .search-wrapper:focus-within svg {
+      color: var(--color-accent);
+    }
+
+    /* Table wrapper */
+    .table-wrapper {
+      border-radius: 20px;
+      border: 1px solid rgba(129, 118, 255, 0.15);
+      overflow: hidden;
+      background: linear-gradient(180deg, rgba(10, 6, 32, 0.5), rgba(8, 5, 28, 0.4));
+    }
+
+    .table-scroll {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* Enhanced table row hover */
+    #rows tr {
+      transition:
+        background 0.2s ease,
+        transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1),
+        box-shadow 0.2s ease;
+    }
+
+    #rows tr:hover {
+      background: rgba(179, 124, 255, 0.06);
+      transform: translateX(3px);
+    }
+
+    /* Status text enhanced */
+    .status-text {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      transition: transform 0.15s ease, box-shadow 0.2s ease;
+    }
+
+    .status-text:hover {
+      transform: scale(1.03);
+    }
+
+    .status-text::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .status-text.s-assigned {
+      background: rgba(189, 183, 255, 0.1);
+      color: rgba(189, 183, 255, 0.9);
+      border: 1px solid rgba(189, 183, 255, 0.2);
+    }
+
+    .status-text.s-assigned::before {
+      background: rgba(189, 183, 255, 0.7);
+    }
+
+    .status-text.s-working {
+      background: rgba(123, 184, 255, 0.12);
+      color: rgba(123, 184, 255, 0.95);
+      border: 1px solid rgba(123, 184, 255, 0.25);
+    }
+
+    .status-text.s-working::before {
+      background: rgba(123, 184, 255, 0.9);
+      animation: pulseGlow 2s infinite;
+    }
+
+    .status-text.s-completed {
+      background: rgba(108, 255, 176, 0.1);
+      color: rgba(122, 249, 196, 0.95);
+      border: 1px solid rgba(108, 255, 176, 0.2);
+    }
+
+    .status-text.s-completed::before {
+      background: rgba(108, 255, 176, 0.9);
+    }
+
+    /* Priority display enhanced */
+    .priority-display {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.3rem 0.65rem;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      text-transform: capitalize;
+      transition: transform 0.15s ease;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .priority-display:hover {
+      transform: scale(1.03);
+    }
+
+    .priority-display .flag-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      transition: transform 0.2s ease, box-shadow 0.3s ease;
+    }
+
+    .priority-display:hover .flag-dot {
+      transform: scale(1.25);
+    }
+
+    .priority-display.p-red .flag-dot {
+      background: var(--color-error);
+      box-shadow: 0 0 10px rgba(255, 98, 98, 0.6);
+    }
+
+    .priority-display.p-yellow .flag-dot {
+      background: var(--color-warning);
+      box-shadow: 0 0 10px rgba(255, 212, 90, 0.6);
+    }
+
+    .priority-display.p-green .flag-dot {
+      background: var(--color-success);
+      box-shadow: 0 0 10px rgba(108, 255, 176, 0.6);
+    }
+
+    .priority-display.p-none .flag-dot {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Action buttons in table */
+    .row-actions {
+      display: flex;
+      gap: 0.4rem;
+      justify-content: flex-end;
+    }
+
+    .row-action-btn {
+      padding: 0.5rem 0.7rem;
+      border-radius: 999px;
+      border: 1px solid rgba(129, 118, 255, 0.22);
+      background: linear-gradient(180deg, rgba(18, 12, 50, 0.8), rgba(14, 10, 45, 0.85));
+      color: var(--color-text-primary);
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition:
+        transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1),
+        border-color 0.2s ease,
+        background 0.2s ease,
+        box-shadow 0.2s ease;
+    }
+
+    .row-action-btn:hover {
+      transform: translateY(-2px) scale(1.03);
+      border-color: rgba(179, 124, 255, 0.45);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    }
+
+    .row-action-btn:active {
+      transform: scale(0.96);
+    }
+
+    .row-action-btn.danger {
+      border-color: rgba(255, 98, 98, 0.3);
+    }
+
+    .row-action-btn.danger:hover {
+      border-color: rgba(255, 98, 98, 0.55);
+      background: linear-gradient(180deg, rgba(255, 98, 98, 0.12), rgba(200, 60, 60, 0.08));
+    }
+
+    /* Checkbox enhanced */
+    table input[type="checkbox"] {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(129, 118, 255, 0.35);
+      border-radius: 5px;
+      background: rgba(10, 6, 30, 0.8);
+      cursor: pointer;
+      transition:
+        border-color 0.2s ease,
+        background 0.2s ease,
+        transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1),
+        box-shadow 0.2s ease;
+      position: relative;
+    }
+
+    table input[type="checkbox"]:hover {
+      border-color: rgba(179, 124, 255, 0.55);
+      transform: scale(1.05);
+    }
+
+    table input[type="checkbox"]:checked {
+      background: linear-gradient(135deg, var(--color-accent), rgba(140, 100, 220, 0.9));
+      border-color: var(--color-accent);
+      animation: popIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    table input[type="checkbox"]:checked::after {
+      content: "";
+      position: absolute;
+      left: 5px;
+      top: 2px;
+      width: 5px;
+      height: 9px;
+      border: solid white;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+
+    /* Message boxes */
+    .msg-box {
+      padding: 0.85rem 1.1rem;
+      border-radius: 14px;
+      font-size: 0.88rem;
+      display: none;
+      align-items: center;
+      gap: 0.65rem;
+      margin-top: 0.85rem;
+      animation: slideInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    .msg-box.visible {
+      display: flex;
+    }
+
+    .msg-box.error {
+      background: rgba(255, 98, 98, 0.1);
+      border: 1px solid rgba(255, 98, 98, 0.25);
+      color: rgba(255, 148, 148, 0.95);
+    }
+
+    .msg-box.success {
+      background: rgba(108, 255, 176, 0.08);
+      border: 1px solid rgba(108, 255, 176, 0.2);
+      color: rgba(122, 249, 196, 0.95);
+    }
+
+    .msg-box-icon {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+
+    /* Meta info */
+    .meta-info {
+      margin-top: 1rem;
+      padding-top: 0.85rem;
+      border-top: 1px solid rgba(129, 118, 255, 0.08);
+      font-size: 0.82rem;
+      color: rgba(189, 183, 255, 0.5);
+    }
+
+    /* Footer */
+    .page-footer {
+      margin-top: 1.5rem;
+      text-align: center;
+      font-size: 0.82rem;
+      color: rgba(189, 183, 255, 0.45);
+      animation: fadeInUp 0.5s ease both;
+      animation-delay: 400ms;
+    }
+
+    /* Button with icon */
+    .btn-icon {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .btn-icon svg {
+      width: 14px;
+      height: 14px;
+      opacity: 0.85;
+    }
+
+    /* Dot buttons in priority section */
+    .priority-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .priority-btn .dot {
+      transition: transform 0.2s ease, box-shadow 0.3s ease;
+    }
+
+    .priority-btn:hover .dot {
+      transform: scale(1.3);
+    }
+
+    .priority-btn:hover .dot.dot-red { box-shadow: 0 0 12px rgba(255, 98, 98, 0.6); }
+    .priority-btn:hover .dot.dot-yellow { box-shadow: 0 0 12px rgba(255, 212, 90, 0.6); }
+    .priority-btn:hover .dot.dot-green { box-shadow: 0 0 12px rgba(108, 255, 176, 0.6); }
   </style>
 </head>
 
 <body>
   <div class="wrap">
-    <div class="toprow">
-      <div>
+    <!-- Page Header -->
+    <header class="page-header page-enter">
+      <div class="page-header-content">
         <h1>SNS INQUIRIES</h1>
         <div class="sub">Internal dashboard</div>
       </div>
-      <div class="top-actions">
-        <span class="pill" id="whoami">Not signed in</span>
+      <div class="page-header-actions">
+        <span class="pill-enhanced" id="whoami">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="8" r="4"/>
+            <path d="M4 20c0-4 4-6 8-6s8 2 8 6"/>
+          </svg>
+          Not signed in
+        </span>
 
-        <a class="icon-btn" href="/sns/index.html" title="Back to SNS Home" aria-label="Home">
-          <svg viewBox="0 0 24 24" fill="none">
-            <path d="M3 11.5L12 4l9 7.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M5.5 10.5V20h13V10.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+        <a class="icon-btn-enhanced" href="/sns/index.html" title="Back to SNS Home" aria-label="Home">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 11.5L12 4l9 7.5"/>
+            <path d="M5.5 10.5V20h13V10.5"/>
           </svg>
         </a>
 
-        <button class="btn" id="logoutBtn" style="display:none;">Logout</button>
+        <button class="btn-enhanced" id="logoutBtn" style="display:none;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+          Logout
+        </button>
       </div>
+    </header>
 
-      </div>
+    <!-- Main Admin Panel -->
+    <div class="admin-panel page-enter page-enter-delay-1" id="adminCard" style="display:none;">
 
-    <div class="card" id="adminCard" style="display:none;">
-
-      <div class="card" style="margin-top:14px;">
-  <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
-    <div>
-      <div style="letter-spacing:.08em; text-transform:uppercase; font-size:.85rem; color: rgba(244,240,255,.75);">Invite Client (Invite-only accounts)</div>
-      <div class="muted" style="margin-top:6px;">Sends a secure one-time invite link to create a password and activate their dashboard.</div>
-    </div>
-    <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-      <input id="inviteEmail" type="email" placeholder="client@email.com" style="min-width:260px;" />
-      <button id="inviteBtn" class="btn">Send Invite</button>
-    </div>
-  </div>
-  <div id="inviteMsg" class="muted" style="margin-top:10px;"></div>
-</div>
-
-<div class="toolbar toolbar-grid">
-  <div class="toolgroup">
-    <div class="tooltitle">Status</div>
-    <div class="toolrow">
-      <button class="btn btn-soft" id="markWorkingBtn">Working</button>
-      <button class="btn btn-soft" id="markCompletedBtn">Completed</button>
-      <button class="btn btn-soft" id="resetAssignedBtn">Assigned</button>
-    </div>
-  </div>
-
-  <div class="toolgroup toolgroup-right">
-    <div class="tooltitle">Manage</div>
-    <div class="toolrow">
-      <button class="btn btn-danger" id="deleteSelectedBtn">Delete selected</button>
-      <button class="btn btn-danger" id="resetWorkOrdersBtn" type="button">Reset WO #'s</button>
-      <a class="btn btn-primary" href="/sns-client-list/index.html">Client List</a>
-      <a class="btn btn-primary" href="/sns-client-chat/index.html">Client Chat</a>
-    </div>
-  </div>
-
-  <div class="toolgroup">
-    <div class="tooltitle">Priority</div>
-    <div class="toolrow">
-      <button class="btn btn-chip" id="flagRedBtn"><span class="dot dot-red"></span>Red</button>
-      <button class="btn btn-chip" id="flagYellowBtn"><span class="dot dot-yellow"></span>Yellow</button>
-      <button class="btn btn-chip" id="flagGreenBtn"><span class="dot dot-green"></span>Green</button>
-      <button class="btn btn-chip" id="flagNoneBtn"><span class="dot dot-none"></span>Clear</button>
-    </div>
-  </div>
-
-  <div class="toolgroup toolgroup-right">
-  <div class="tooltitle">Search</div>
-  <div class="toolrow">
-    <input id="searchBox" type="text" placeholder="Search" class="input" style="width:min(520px, 100%);" />
-  </div>
-</div>
-
-
-  <div class="toolgroup toolgroup-right toolgroup-sync">
-    <div class="tooltitle">Sync</div>
-    <div class="toolrow">
-      <button class="btn btn-primary" id="refreshBtn">Refresh</button>
-    </div>
-  </div>
-</div>
-
-
-      <div class="err" id="errBox"></div>
-      <div class="ok" id="okBox"></div>
-
-      <div style="overflow:auto;">
-        <table>
-          <thead>
-            <tr>
-              <th style="width:42px;"><input type="checkbox" id="selectAll"></th>
-              <th>Date</th>
-              <th>Work Order</th>
-              <th>Priority</th>
-              <th>Status</th>
-              <th>Contact</th>
-              <th>Business</th>
-              <th>Services</th>
-              <th style="width:230px; text-align:right;">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="rows"></tbody>
-        </table>
-      </div>
-
-
-
-  <div class="muted" id="detailsMeta" style="margin-top:.7rem;"></div>
-
-
-</div>
-
-
-      <div class="muted" style="margin-top:.8rem;">
-        © 2025 kxsaku · Built from the homelab.
-      </div>
-    </div>
-  </div>
-
-  <!-- Login overlay -->
-  <div class="overlay" id="loginOverlay" style="display:none;">
-    <div class="login-card" style="position:relative;">
-        <button class="login-close" id="loginCloseBtn" type="button" aria-label="Close">
-            <svg viewBox="0 0 24 24" fill="none">
-                <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+      <!-- Invite Client Section -->
+      <div class="invite-card anim-slide-up">
+        <div class="invite-card-header">
+          <div class="invite-card-title">Invite Client (Invite-only accounts)</div>
+          <div class="invite-card-description">Sends a secure one-time invite link to create a password and activate their dashboard.</div>
+        </div>
+        <div class="invite-card-form">
+          <input id="inviteEmail" type="email" placeholder="client@email.com" class="input-enhanced" />
+          <button id="inviteBtn" class="btn-enhanced primary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 2L11 13"/>
+              <path d="M22 2L15 22L11 13L2 9L22 2Z"/>
             </svg>
+            Send Invite
+          </button>
+        </div>
+        <div id="inviteMsg" class="meta-info"></div>
+      </div>
+
+      <!-- Toolbar Grid -->
+      <div class="admin-toolbar anim-slide-up anim-delay-1">
+        <!-- Status Section -->
+        <div class="toolbar-section">
+          <div class="toolbar-section-header">
+            <div class="toolbar-section-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 6v6l4 2"/>
+              </svg>
+            </div>
+            <span class="toolbar-section-title">Status</span>
+          </div>
+          <div class="toolbar-section-actions">
+            <button class="btn-enhanced soft" id="markWorkingBtn">Working</button>
+            <button class="btn-enhanced soft" id="markCompletedBtn">Completed</button>
+            <button class="btn-enhanced soft" id="resetAssignedBtn">Assigned</button>
+          </div>
+        </div>
+
+        <!-- Priority Section -->
+        <div class="toolbar-section">
+          <div class="toolbar-section-header">
+            <div class="toolbar-section-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/>
+                <line x1="4" y1="22" x2="4" y2="15"/>
+              </svg>
+            </div>
+            <span class="toolbar-section-title">Priority</span>
+          </div>
+          <div class="toolbar-section-actions">
+            <button class="btn-enhanced soft priority-btn" id="flagRedBtn"><span class="dot dot-red"></span>Red</button>
+            <button class="btn-enhanced soft priority-btn" id="flagYellowBtn"><span class="dot dot-yellow"></span>Yellow</button>
+            <button class="btn-enhanced soft priority-btn" id="flagGreenBtn"><span class="dot dot-green"></span>Green</button>
+            <button class="btn-enhanced soft priority-btn" id="flagNoneBtn"><span class="dot dot-none"></span>Clear</button>
+          </div>
+        </div>
+
+        <!-- Manage Section -->
+        <div class="toolbar-section">
+          <div class="toolbar-section-header">
+            <div class="toolbar-section-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+              </svg>
+            </div>
+            <span class="toolbar-section-title">Manage</span>
+          </div>
+          <div class="toolbar-section-actions">
+            <button class="btn-enhanced danger" id="deleteSelectedBtn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+              </svg>
+              Delete Selected
             </button>
-        <h2 class="login-title">Admin login</h2>
-      <p class="login-sub">
+            <button class="btn-enhanced danger" id="resetWorkOrdersBtn" type="button">Reset WO #'s</button>
+          </div>
+        </div>
+
+        <!-- Links Section -->
+        <div class="toolbar-section">
+          <div class="toolbar-section-header">
+            <div class="toolbar-section-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/>
+                <polyline points="15 3 21 3 21 9"/>
+                <line x1="10" y1="14" x2="21" y2="3"/>
+              </svg>
+            </div>
+            <span class="toolbar-section-title">Quick Links</span>
+          </div>
+          <div class="toolbar-section-actions">
+            <a class="btn-enhanced primary" href="/sns-client-list/index.html">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 00-3-3.87"/>
+                <path d="M16 3.13a4 4 0 010 7.75"/>
+              </svg>
+              Client List
+            </a>
+            <a class="btn-enhanced primary" href="/sns-client-chat/index.html">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+              </svg>
+              Client Chat
+            </a>
+          </div>
+        </div>
+
+        <!-- Search Section -->
+        <div class="toolbar-section search-section">
+          <div class="toolbar-section-header">
+            <div class="toolbar-section-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+            </div>
+            <span class="toolbar-section-title">Search</span>
+          </div>
+          <div class="toolbar-section-actions" style="width:100%;">
+            <div class="search-wrapper" style="flex:1; max-width:520px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              <input id="searchBox" type="text" placeholder="Search inquiries..." class="input-enhanced" />
+            </div>
+            <button class="btn-enhanced primary" id="refreshBtn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="23 4 23 10 17 10"/>
+                <path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/>
+              </svg>
+              Refresh
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Messages -->
+      <div class="msg-box error" id="errBox">
+        <svg class="msg-box-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="15" y1="9" x2="9" y2="15"/>
+          <line x1="9" y1="9" x2="15" y2="15"/>
+        </svg>
+        <span></span>
+      </div>
+      <div class="msg-box success" id="okBox">
+        <svg class="msg-box-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+          <polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+        <span></span>
+      </div>
+
+      <!-- Table -->
+      <div class="table-wrapper anim-slide-up anim-delay-2">
+        <div class="table-scroll">
+          <table class="table-enhanced">
+            <thead>
+              <tr>
+                <th style="width:42px;"><input type="checkbox" id="selectAll"></th>
+                <th>Date</th>
+                <th>Work Order</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Contact</th>
+                <th>Business</th>
+                <th>Services</th>
+                <th style="width:220px; text-align:right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="meta-info" id="detailsMeta"></div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="page-footer">
+      © 2025 kxsaku · Built from the homelab.
+    </footer>
+  </div>
+
+  <!-- Login Overlay -->
+  <div class="login-modal-overlay" id="loginOverlay" style="display:none;">
+    <div class="login-modal">
+      <button class="login-modal-close" id="loginCloseBtn" type="button" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+          <line x1="6" y1="6" x2="18" y2="18"/>
+          <line x1="18" y1="6" x2="6" y2="18"/>
+        </svg>
+      </button>
+
+      <h2 class="login-modal-title">Admin Login</h2>
+      <p class="login-modal-subtitle">
         Sign in to view and manage inquiries. This page can load publicly, but data is protected by Supabase policies.
       </p>
 
-      <div class="field">
+      <div class="login-modal-field">
         <label for="loginEmail">Email</label>
-        <input id="loginEmail" type="email" autocomplete="username" placeholder="Email">
+        <input id="loginEmail" type="email" autocomplete="username" placeholder="Email" class="input-enhanced">
       </div>
 
-      <div class="field">
+      <div class="login-modal-field">
         <label for="loginPass">Password</label>
-        <input id="loginPass" type="password" autocomplete="current-password" placeholder="••••••••">
+        <input id="loginPass" type="password" autocomplete="current-password" placeholder="••••••••" class="input-enhanced">
       </div>
 
-      <div class="login-actions">
+      <div class="login-modal-actions">
         <span class="tiny" id="loginHint"></span>
-        <button class="btn" id="loginBtn">Sign in</button>
+        <button class="btn-enhanced primary" id="loginBtn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/>
+            <polyline points="10 17 15 12 10 7"/>
+            <line x1="15" y1="12" x2="3" y2="12"/>
+          </svg>
+          Sign In
+        </button>
       </div>
 
-      <div class="err" id="loginErr" style="display:none;"></div>
+      <div class="msg-box error" id="loginErr" style="display:none;">
+        <svg class="msg-box-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="15" y1="9" x2="9" y2="15"/>
+          <line x1="9" y1="9" x2="15" y2="15"/>
+        </svg>
+        <span></span>
+      </div>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" integrity="sha384-0cJhvyxOncqJDixLuJRbH99K17F1B6DH3D8aUBlsJlsgiqRZQpQ1EUFWdgscplLu" crossorigin="anonymous"></script>
-<!-- Global Quick Look tooltip (floats above everything) -->
-<div id="qlTooltip" style="
-  position: fixed;
-  z-index: 99999;
-  display: none;
-  pointer-events: none;
-  max-width: 420px;
-  padding: 12px 14px;
-  border-radius: 16px;
-  border: 1px solid rgba(129,118,255,.35);
-  background: rgba(9, 6, 34, 0.98);
-  color: #f4f0ff;
-  box-shadow: 0 25px 80px rgba(0,0,0,.65);
-  backdrop-filter: blur(16px);
-">
-</div>
+
+  <!-- Quick Look Tooltip -->
+  <div id="qlTooltip" class="quicklook-tooltip">
+    <div class="quicklook-header">Quick Look</div>
+    <div class="quicklook-content"></div>
+  </div>
 
   <script>
     /**************************************************************
@@ -213,61 +724,60 @@
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     const inviteEmailEl = document.getElementById("inviteEmail");
-const inviteBtn = document.getElementById("inviteBtn");
-const inviteMsg = document.getElementById("inviteMsg");
+    const inviteBtn = document.getElementById("inviteBtn");
+    const inviteMsg = document.getElementById("inviteMsg");
 
-async function callEdge(fnName, payload = {}) {
-  const { data: sess } = await sb.auth.getSession();
-  const token = sess?.session?.access_token;
-  if (!token) throw new Error("Not logged in.");
+    async function callEdge(fnName, payload = {}) {
+      const { data: sess } = await sb.auth.getSession();
+      const token = sess?.session?.access_token;
+      if (!token) throw new Error("Not logged in.");
 
-  const res = await fetch(`${SUPABASE_URL}/functions/v1/${fnName}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${token}`,
-    },
-    body: JSON.stringify(payload),
-  });
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/${fnName}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
 
-  const j = await res.json();
-  if (!res.ok) throw new Error(j?.error || "Request failed");
-  return j;
-}
+      const j = await res.json();
+      if (!res.ok) throw new Error(j?.error || "Request failed");
+      return j;
+    }
 
-inviteBtn?.addEventListener("click", async () => {
-  inviteMsg.textContent = "";
-  const email = (inviteEmailEl.value || "").trim().toLowerCase();
-  if (!email) return (inviteMsg.textContent = "Enter an email.");
+    inviteBtn?.addEventListener("click", async () => {
+      inviteMsg.textContent = "";
+      const email = (inviteEmailEl.value || "").trim().toLowerCase();
+      if (!email) return (inviteMsg.textContent = "Enter an email.");
 
-  inviteBtn.disabled = true;
-  try {
-    await callEdge("admin-invite", { email });
-    inviteMsg.textContent = `Invite sent to ${email}`;
-  } catch (e) {
-    inviteMsg.textContent = e?.message || String(e);
-  } finally {
-    inviteBtn.disabled = false;
-  }
-});
-
+      inviteBtn.disabled = true;
+      try {
+        await callEdge("admin-invite", { email });
+        inviteMsg.textContent = `Invite sent to ${email}`;
+        inviteMsg.style.color = "rgba(122, 249, 196, 0.95)";
+      } catch (e) {
+        inviteMsg.textContent = e?.message || String(e);
+        inviteMsg.style.color = "rgba(255, 148, 148, 0.95)";
+      } finally {
+        inviteBtn.disabled = false;
+      }
+    });
 
     const searchBox = document.getElementById("searchBox");
 
+    let allInquiries = [];
+    let filteredInquiries = [];
 
+    function fmtWO(n){
+      if (n == null) return "";
+      return "WO-" + String(n).padStart(6, "0");
+    }
 
-let allInquiries = [];
-let filteredInquiries = [];
+    function includesCI(haystack, needle){
+      return (haystack || "").toString().toLowerCase().includes((needle || "").toString().toLowerCase());
+    }
 
-
-function fmtWO(n){
-  if (n == null) return "";
-  return "WO-" + String(n).padStart(6, "0");
-}
-
-function includesCI(haystack, needle){
-  return (haystack || "").toString().toLowerCase().includes((needle || "").toString().toLowerCase());
-}
     const rowsEl = document.getElementById("rows");
     const errBox = document.getElementById("errBox");
     const okBox = document.getElementById("okBox");
@@ -286,9 +796,27 @@ function includesCI(haystack, needle){
     const refreshBtn = document.getElementById("refreshBtn");
     const resetWorkOrdersBtn = document.getElementById("resetWorkOrdersBtn");
 
-    function showErr(msg) { errBox.style.display = "block"; errBox.textContent = msg; }
-    function clearErr() { errBox.style.display = "none"; errBox.textContent = ""; }
-    function showOk(msg) { okBox.style.display = "block"; okBox.textContent = msg; setTimeout(() => okBox.style.display="none", 2000); }
+    function showErr(msg) {
+      errBox.querySelector("span").textContent = msg;
+      errBox.classList.add("visible");
+      errBox.style.display = "flex";
+    }
+
+    function clearErr() {
+      errBox.classList.remove("visible");
+      errBox.style.display = "none";
+      errBox.querySelector("span").textContent = "";
+    }
+
+    function showOk(msg) {
+      okBox.querySelector("span").textContent = msg;
+      okBox.classList.add("visible");
+      okBox.style.display = "flex";
+      setTimeout(() => {
+        okBox.classList.remove("visible");
+        okBox.style.display = "none";
+      }, 2500);
+    }
 
     const adminCard = document.getElementById("adminCard");
 
@@ -300,112 +828,126 @@ function includesCI(haystack, needle){
     }
 
     function setLocked(isLocked){
-    if (isLocked){
-        adminCard.style.display = "none";   // nothing visible behind overlay
-    } else {
+      if (isLocked){
+        adminCard.style.display = "none";
+      } else {
         adminCard.style.display = "block";
       }
     }
 
-    function applySearchAndRender(){
-  const q = (searchBox?.value || "").trim().toLowerCase();
-
-  filteredInquiries = !q ? allInquiries : allInquiries.filter(r => {
-    const wo = fmtWO(r.work_order);
-    const services = Array.isArray(r.services) ? r.services.join(", ") : (r.services || "");
-    return (
-      includesCI(r.contact_name, q) ||
-      includesCI(getEmail(r), q) ||
-      includesCI(getPhone(r), q) ||
-      includesCI(r.business_name, q) ||
-      includesCI(services, q) ||
-      includesCI(wo, q) ||
-      includesCI(r.work_order, q)
-    );
-  });
-
-  rowsEl.innerHTML = filteredInquiries.map(r => `
-    <tr data-rowid="${sanitize(r.id)}">
-      <td><input type="checkbox" data-id="${sanitize(r.id)}"></td>
-      <td>${sanitize(fmtDate(r.created_at))}</td>
-      <td>${sanitize(fmtWO(r.work_order))}</td>
-      <td><span class="flag ${flagClass(r.priority_flag)}"></span>${sanitize(r.priority_flag || "none")}</td>
-      <td class="status ${statusClass(r.status)}">${sanitize(r.status || "assigned")}</td>
-      <td>${sanitize(r.contact_name || "")}</td>
-      <td>${sanitize(r.business_name || "")}</td>
-      <td>${sanitize(Array.isArray(r.services) ? r.services.join(", ") : (r.services || ""))}</td>
-      <td style="text-align:right; white-space:nowrap;">
-        <button class="btn btn-soft" data-eye="${sanitize(r.id)}" type="button" title="Quick look">👁️</button>
-        <button class="btn btn-soft" data-view="${sanitize(r.id)}" type="button">View</button>
-        <button class="btn btn-danger" data-del="${sanitize(r.id)}" type="button">Delete</button>
-      </td>
-    </tr>
-  `).join("");
-
-  // keep “select all” sane after rerender
-  selectAll.checked = false;
-}
-
-    
-if (resetWorkOrdersBtn) {
-  resetWorkOrdersBtn.addEventListener("click", async () => {
-    clearErr();
-
-    const user = await requireAdminSession();
-    if (!user) return;
-
-    const ok1 = confirm("Are you sure you want to RESET ALL work order numbers? This will renumber every inquiry.");
-    if (!ok1) return;
-
-    const ok2 = confirm("Last warning: This cannot be undone. Proceed?");
-    if (!ok2) return;
-
-    resetWorkOrdersBtn.disabled = true;
-    resetWorkOrdersBtn.style.opacity = "0.6";
-
-    const { error } = await sb.rpc("reset_work_orders");
-
-    resetWorkOrdersBtn.disabled = false;
-    resetWorkOrdersBtn.style.opacity = "1";
-
-    if (error) {
-      showErr("Reset failed: " + error.message);
-      return;
+    function getPriorityClass(flag) {
+      if (flag === "red") return "p-red";
+      if (flag === "yellow") return "p-yellow";
+      if (flag === "green") return "p-green";
+      return "p-none";
     }
 
-    showOk("Work order numbers reset.");
-    await loadInquiries();
-  });
-}
+    function getStatusClass(status) {
+      if (status === "working") return "s-working";
+      if (status === "completed") return "s-completed";
+      return "s-assigned";
+    }
+
+    function applySearchAndRender(){
+      const q = (searchBox?.value || "").trim().toLowerCase();
+
+      filteredInquiries = !q ? allInquiries : allInquiries.filter(r => {
+        const wo = fmtWO(r.work_order);
+        const services = Array.isArray(r.services) ? r.services.join(", ") : (r.services || "");
+        return (
+          includesCI(r.contact_name, q) ||
+          includesCI(getEmail(r), q) ||
+          includesCI(getPhone(r), q) ||
+          includesCI(r.business_name, q) ||
+          includesCI(services, q) ||
+          includesCI(wo, q) ||
+          includesCI(r.work_order, q)
+        );
+      });
+
+      rowsEl.innerHTML = filteredInquiries.map(r => `
+        <tr data-rowid="${sanitize(r.id)}">
+          <td><input type="checkbox" data-id="${sanitize(r.id)}"></td>
+          <td>${sanitize(fmtDate(r.created_at))}</td>
+          <td><span style="font-family:monospace; opacity:0.9;">${sanitize(fmtWO(r.work_order))}</span></td>
+          <td>
+            <span class="priority-display ${getPriorityClass(r.priority_flag)}">
+              <span class="flag-dot"></span>
+              ${sanitize(r.priority_flag || "none")}
+            </span>
+          </td>
+          <td>
+            <span class="status-text ${getStatusClass(r.status)}">
+              ${sanitize(r.status || "assigned")}
+            </span>
+          </td>
+          <td>${sanitize(r.contact_name || "")}</td>
+          <td>${sanitize(r.business_name || "")}</td>
+          <td>${sanitize(Array.isArray(r.services) ? r.services.join(", ") : (r.services || ""))}</td>
+          <td>
+            <div class="row-actions">
+              <button class="row-action-btn" data-eye="${sanitize(r.id)}" type="button" title="Quick look">👁️</button>
+              <button class="row-action-btn" data-view="${sanitize(r.id)}" type="button">View</button>
+              <button class="row-action-btn danger" data-del="${sanitize(r.id)}" type="button">Delete</button>
+            </div>
+          </td>
+        </tr>
+      `).join("");
+
+      selectAll.checked = false;
+    }
+
+    if (resetWorkOrdersBtn) {
+      resetWorkOrdersBtn.addEventListener("click", async () => {
+        clearErr();
+
+        const user = await requireAdminSession();
+        if (!user) return;
+
+        const ok1 = confirm("Are you sure you want to RESET ALL work order numbers? This will renumber every inquiry.");
+        if (!ok1) return;
+
+        const ok2 = confirm("Last warning: This cannot be undone. Proceed?");
+        if (!ok2) return;
+
+        resetWorkOrdersBtn.disabled = true;
+        resetWorkOrdersBtn.style.opacity = "0.6";
+
+        const { error } = await sb.rpc("reset_work_orders");
+
+        resetWorkOrdersBtn.disabled = false;
+        resetWorkOrdersBtn.style.opacity = "1";
+
+        if (error) {
+          showErr("Reset failed: " + error.message);
+          return;
+        }
+
+        showOk("Work order numbers reset.");
+        await loadInquiries();
+      });
+    }
 
     loginCloseBtn.addEventListener("click", () => {
-    hideLogin();
-
-    // Go back to the page you were on before clicking Admin (best UX)
-    if (history.length > 1) history.back();
-    else window.location.href = "/"; // fallback
+      hideLogin();
+      if (history.length > 1) history.back();
+      else window.location.href = "/";
     });
 
-
-
     function showLogin(msg) {
-    // Hide the admin UI entirely (no blurred “leak” behind the modal)
-    if (adminCard) adminCard.style.display = "none";
-
-    loginOverlay.style.display = "flex";
-    loginErr.style.display = "none";
-    loginErr.textContent = "";
-    loginHint.textContent = msg || "";
-
-    // DO NOT prefill email
-    loginEmail.value = "";
-    loginPass.value = "";
+      if (adminCard) adminCard.style.display = "none";
+      loginOverlay.style.display = "flex";
+      loginErr.style.display = "none";
+      loginErr.querySelector("span").textContent = "";
+      loginHint.textContent = msg || "";
+      loginEmail.value = "";
+      loginPass.value = "";
     }
 
     function hideLogin() {
       loginOverlay.style.display = "none";
       loginErr.style.display = "none";
-      loginErr.textContent = "";
+      loginErr.querySelector("span").textContent = "";
       loginHint.textContent = "";
     }
 
@@ -439,7 +981,7 @@ if (resetWorkOrdersBtn) {
       const { data: { user } } = await sb.auth.getUser();
 
       if (!user) {
-        whoami.textContent = "Not signed in";
+        whoami.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg> Not signed in`;
         logoutBtn.style.display = "none";
         setLocked(true);
         showLogin("Sign in to load inquiries.");
@@ -448,14 +990,14 @@ if (resetWorkOrdersBtn) {
 
       if ((user.email || "").toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
         await sb.auth.signOut();
-        whoami.textContent = "Wrong account";
+        whoami.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg> Wrong account`;
         logoutBtn.style.display = "none";
         setLocked(true);
         showLogin("Use your admin email to sign in.");
         return null;
       }
 
-      whoami.textContent = "Signed in: " + user.email;
+      whoami.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg> ${sanitize(user.email)}`;
       logoutBtn.style.display = "inline-flex";
       setLocked(false);
       hideLogin();
@@ -463,7 +1005,6 @@ if (resetWorkOrdersBtn) {
       return user;
     }
 
-    // Prevent overlapping renders (this fixes the duplicates/refresh weirdness)
     let loadNonce = 0;
 
     async function loadInquiries() {
@@ -473,7 +1014,6 @@ if (resetWorkOrdersBtn) {
       refreshBtn.disabled = true;
       refreshBtn.style.opacity = "0.6";
 
-      // Require admin first
       const user = await requireAdminSession();
       if (!user) {
         refreshBtn.disabled = false;
@@ -481,15 +1021,12 @@ if (resetWorkOrdersBtn) {
         return;
       }
 
-      // Query
       const { data, error } = await sb
         .from("inquiries")
         .select("*")
         .order("created_at", { ascending: false })
         .limit(200);
 
-
-      // If another load started after this one, ignore this result
       if (myNonce !== loadNonce) return;
 
       refreshBtn.disabled = false;
@@ -502,19 +1039,14 @@ if (resetWorkOrdersBtn) {
       }
 
       if (!data || data.length === 0) {
-        rowsEl.innerHTML = `<tr><td colspan="9" class="muted" style="padding:1.2rem .6rem;">
+        rowsEl.innerHTML = `<tr><td colspan="9" class="muted" style="padding:1.5rem 1rem; text-align:center;">
           No inquiries returned.
         </td></tr>`;
         return;
       }
 
-
-      // Build rows once (avoids duplicate append behavior)
       allInquiries = data;
       applySearchAndRender();
-
-      
-
       selectAll.checked = false;
     }
 
@@ -530,139 +1062,117 @@ if (resetWorkOrdersBtn) {
       await loadInquiries();
     }
 
-        async function deleteMany(ids) {
-  clearErr();
-  if (!ids || ids.length === 0) { showErr("Select at least one inquiry."); return; }
+    async function deleteMany(ids) {
+      clearErr();
+      if (!ids || ids.length === 0) { showErr("Select at least one inquiry."); return; }
 
-  const ok = confirm(`Delete ${ids.length} inquiry(s)? This cannot be undone.`);
-  if (!ok) return;
+      const ok = confirm(`Delete ${ids.length} inquiry(s)? This cannot be undone.`);
+      if (!ok) return;
 
-  const { error, count } = await sb
-    .from("inquiries")
-    .delete({ count: "exact" })
-    .in("id", ids);
+      const { error, count } = await sb
+        .from("inquiries")
+        .delete({ count: "exact" })
+        .in("id", ids);
 
-  if (error) {
-    showErr("Delete failed: " + error.message);
-    return;
-  }
+      if (error) {
+        showErr("Delete failed: " + error.message);
+        return;
+      }
 
-  if (!count || count === 0) {
-    showErr("Delete request returned 0 deleted rows. This usually means RLS is blocking DELETE.");
-    return;
-  }
+      if (!count || count === 0) {
+        showErr("Delete request returned 0 deleted rows. This usually means RLS is blocking DELETE.");
+        return;
+      }
 
-  showOk(`${count} inquiry deleted.`);
-  await loadInquiries();
-}
+      showOk(`${count} inquiry deleted.`);
+      await loadInquiries();
+    }
 
+    // Quick Look Tooltip
+    const qlTooltip = document.getElementById("qlTooltip");
+    const qlContent = qlTooltip.querySelector(".quicklook-content");
 
+    function showTooltip(html, x, y) {
+      qlContent.innerHTML = html;
+      qlTooltip.style.display = "block";
 
-    // Toolbar events
+      const pad = 14;
+      const rect = qlTooltip.getBoundingClientRect();
 
-    // --- Tooltip helpers (global floating tooltip; not clipped) ---
-const qlTooltip = document.getElementById("qlTooltip");
+      let left = x + 14;
+      let top  = y + 14;
 
-function showTooltip(html, x, y) {
-  qlTooltip.innerHTML = html;
-  qlTooltip.style.display = "block";
+      if (left + rect.width + pad > window.innerWidth) left = window.innerWidth - rect.width - pad;
+      if (top + rect.height + pad > window.innerHeight) top = window.innerHeight - rect.height - pad;
 
-  const pad = 14;
-  // Force layout so rect is accurate after innerHTML change
-  const rect = qlTooltip.getBoundingClientRect();
+      qlTooltip.style.left = left + "px";
+      qlTooltip.style.top  = top + "px";
+    }
 
-  let left = x + 14;
-  let top  = y + 14;
+    function hideTooltip() {
+      qlTooltip.style.display = "none";
+      qlContent.innerHTML = "";
+    }
 
-  if (left + rect.width + pad > window.innerWidth) left = window.innerWidth - rect.width - pad;
-  if (top + rect.height + pad > window.innerHeight) top = window.innerHeight - rect.height - pad;
+    document.addEventListener("click", async (e) => {
+      const viewBtn = e.target.closest("[data-view]");
+      if (viewBtn) {
+        const id = viewBtn.getAttribute("data-view");
+        window.location.href = `/sns-inquiry-view/index.html?id=${encodeURIComponent(id)}`;
+        return;
+      }
 
-  qlTooltip.style.left = left + "px";
-  qlTooltip.style.top  = top + "px";
-}
+      const delBtn = e.target.closest("[data-del]");
+      if (delBtn) {
+        const id = delBtn.getAttribute("data-del");
+        await deleteMany([id]);
+        return;
+      }
+    });
 
-function hideTooltip() {
-  qlTooltip.style.display = "none";
-  qlTooltip.innerHTML = "";
-}
+    document.addEventListener("mousemove", (e) => {
+      if (qlTooltip.style.display === "block") {
+        showTooltip(qlContent.innerHTML, e.clientX, e.clientY);
+      }
+    });
 
-// --- Row-level actions + tooltip (event delegation) ---
+    document.addEventListener("mouseover", (e) => {
+      const eyeBtn = e.target.closest("[data-eye]");
+      if (!eyeBtn) return;
 
+      const row = eyeBtn.closest("tr");
+      if (!row) return;
 
+      const tds = row.querySelectorAll("td");
+      const date     = tds[1]?.textContent?.trim() || "";
+      const workOrder= tds[2]?.textContent?.trim() || "";
+      const priority = tds[3]?.textContent?.trim() || "";
+      const status   = tds[4]?.textContent?.trim() || "";
+      const contact  = tds[5]?.textContent?.trim() || "";
+      const business = tds[6]?.textContent?.trim() || "";
+      const services = tds[7]?.textContent?.trim() || "";
 
-document.addEventListener("click", async (e) => {
-  const viewBtn = e.target.closest("[data-view]");
-  if (viewBtn) {
-    const id = viewBtn.getAttribute("data-view");
-    window.location.href = `/sns-inquiry-view/index.html?id=${encodeURIComponent(id)}`;
-    return;
-  }
+      const html = `
+        <div class="quicklook-row"><span class="quicklook-label">Date</span><span class="quicklook-value">${sanitize(date)}</span></div>
+        <div class="quicklook-row"><span class="quicklook-label">Work Order</span><span class="quicklook-value">${sanitize(workOrder)}</span></div>
+        <div class="quicklook-row"><span class="quicklook-label">Status</span><span class="quicklook-value">${sanitize(status)}</span></div>
+        <div class="quicklook-row"><span class="quicklook-label">Priority</span><span class="quicklook-value">${sanitize(priority)}</span></div>
+        <div class="quicklook-row" style="margin-top:0.5rem;"><span class="quicklook-label">Contact</span><span class="quicklook-value">${sanitize(contact)}</span></div>
+        <div class="quicklook-row"><span class="quicklook-label">Business</span><span class="quicklook-value">${sanitize(business)}</span></div>
+        <div class="quicklook-row" style="margin-top:0.5rem;"><span class="quicklook-label">Services</span><span class="quicklook-value">${sanitize(services)}</span></div>
+      `;
 
-  const delBtn = e.target.closest("[data-del]");
-  if (delBtn) {
-    const id = delBtn.getAttribute("data-del");
-    await deleteMany([id]);
-    return;
-  }
-});
+      showTooltip(html, e.clientX, e.clientY);
+    });
 
-// Keep tooltip near cursor when visible
-document.addEventListener("mousemove", (e) => {
-  if (qlTooltip.style.display === "block") {
-    showTooltip(qlTooltip.innerHTML, e.clientX, e.clientY);
-  }
-});
+    searchBox.addEventListener("input", () => applySearchAndRender());
 
-// IMPORTANT: use mouseover/mouseout (mouseenter doesn't bubble reliably for delegation)
-document.addEventListener("mouseover", (e) => {
-  const eyeBtn = e.target.closest("[data-eye]");
-  if (!eyeBtn) return;
-
-  const row = eyeBtn.closest("tr");
-  if (!row) return;
-
-  const tds = row.querySelectorAll("td");
-  const date     = tds[1]?.textContent?.trim() || "";
-  const workOrder= tds[2]?.textContent?.trim() || "";
-  const priority = tds[3]?.textContent?.trim() || "";
-  const status   = tds[4]?.textContent?.trim() || "";
-  const contact  = tds[5]?.textContent?.trim() || "";
-  const business = tds[6]?.textContent?.trim() || "";
-  const services = tds[7]?.textContent?.trim() || "";
-
-  const html = `
-    <div style="letter-spacing:.14em; text-transform:uppercase; font-size:.78rem; color:#cfc8ff; margin-bottom:.5rem;">
-      Quick Look
-    </div>
-    <div style="font-size:.92rem; line-height:1.45;">
-      <div><span style="color:#bdb7ff;">Date:</span> ${sanitize(date)}</div>
-      <div><span style="color:#bdb7ff;">Work Order:</span> ${sanitize(workOrder)}</div>
-      <div><span style="color:#bdb7ff;">Status:</span> ${sanitize(status)}</div>
-      <div><span style="color:#bdb7ff;">Priority:</span> ${sanitize(priority)}</div>
-      <div style="margin-top:.45rem;"><span style="color:#bdb7ff;">Contact:</span> ${sanitize(contact)}</div>
-      <div><span style="color:#bdb7ff;">Business:</span> ${sanitize(business)}</div>
-      <div style="margin-top:.45rem;"><span style="color:#bdb7ff;">Services:</span> ${sanitize(services)}</div>
-    </div>
-  `;
-
-  showTooltip(html, e.clientX, e.clientY);
-});
-
-// Search
-searchBox.addEventListener("input", () => applySearchAndRender());
-
-
-
-
-document.addEventListener("mouseout", (e) => {
-  const eyeBtn = e.target.closest("[data-eye]");
-  if (!eyeBtn) return;
-
-  // If you're still inside the same eye button, ignore
-  if (e.relatedTarget && eyeBtn.contains(e.relatedTarget)) return;
-
-  hideTooltip();
-});
+    document.addEventListener("mouseout", (e) => {
+      const eyeBtn = e.target.closest("[data-eye]");
+      if (!eyeBtn) return;
+      if (e.relatedTarget && eyeBtn.contains(e.relatedTarget)) return;
+      hideTooltip();
+    });
 
     document.getElementById("refreshBtn").addEventListener("click", () => loadInquiries());
     document.getElementById("markWorkingBtn").addEventListener("click", () => updateMany({ status: "working" }));
@@ -674,17 +1184,11 @@ document.addEventListener("mouseout", (e) => {
     document.getElementById("flagGreenBtn").addEventListener("click", () => updateMany({ priority_flag: "green" }));
     document.getElementById("flagNoneBtn").addEventListener("click", () => updateMany({ priority_flag: "none" }));
 
-
     document.getElementById("deleteSelectedBtn").addEventListener("click", () => deleteMany(getSelectedIds()));
-
-
-
 
     selectAll.addEventListener("change", (e) => {
       document.querySelectorAll("input[data-id]").forEach(cb => cb.checked = e.target.checked);
     });
-
-    // Row-level delete (event delegation)
 
     logoutBtn.addEventListener("click", async () => {
       await sb.auth.signOut();
@@ -702,7 +1206,7 @@ document.addEventListener("mouseout", (e) => {
 
     loginBtn.addEventListener("click", async () => {
       loginErr.style.display = "none";
-      loginErr.textContent = "";
+      loginErr.querySelector("span").textContent = "";
 
       try {
         const email = loginEmail.value.trim();
@@ -713,12 +1217,11 @@ document.addEventListener("mouseout", (e) => {
 
         await loadInquiries();
       } catch (e) {
-        loginErr.style.display = "block";
-        loginErr.textContent = e.message || "Login failed.";
+        loginErr.style.display = "flex";
+        loginErr.querySelector("span").textContent = e.message || "Login failed.";
       }
     });
 
-    // Important: This can fire during session restore. With nonce guard above, it won’t duplicate rows.
     sb.auth.onAuthStateChange(() => { loadInquiries(); });
 
     loadInquiries();
