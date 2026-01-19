@@ -4,7 +4,7 @@ import { View, StyleSheet } from 'react-native';
 import { MotiView } from 'moti';
 import { colors } from '../../theme';
 
-type StatusColor = 'green' | 'yellow' | 'red' | 'none' | 'info';
+type StatusColor = 'green' | 'yellow' | 'orange' | 'red' | 'none' | 'info';
 
 interface StatusDotProps {
   color: StatusColor;
@@ -58,6 +58,7 @@ function getColor(color: StatusColor): string {
   const colorMap: Record<StatusColor, string> = {
     green: colors.success,
     yellow: colors.warning,
+    orange: '#ff9f43',
     red: colors.error,
     info: colors.info,
     none: 'rgba(255, 255, 255, 0.18)',

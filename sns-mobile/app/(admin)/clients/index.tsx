@@ -129,13 +129,11 @@ export default function AdminClientsScreen() {
           <View style={styles.clientHeader}>
             <View style={styles.clientInfo}>
               <View style={styles.nameRow}>
-                <StatusDot color={getStatusColor(item.subscription?.status || null)} />
+                <View style={styles.statusDots}>
+                  <StatusDot color={getStatusColor(item.subscription?.status || null)} />
+                  <StatusDot color={item.is_online ? 'green' : 'orange'} pulse={item.is_online} />
+                </View>
                 <Text style={styles.clientName}>{item.contact_name}</Text>
-                {item.is_online && (
-                  <View style={styles.onlineBadge}>
-                    <Text style={styles.onlineText}>ONLINE</Text>
-                  </View>
-                )}
               </View>
               {item.business_name && (
                 <Text style={styles.businessName}>{item.business_name}</Text>
@@ -320,6 +318,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
+  statusDots: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
   clientName: {
     fontSize: 16,
     fontWeight: '600',
@@ -341,19 +344,6 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '700',
     color: colors.white,
-    letterSpacing: 0.5,
-  },
-  onlineBadge: {
-    backgroundColor: colors.success,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 999,
-    marginLeft: 6,
-  },
-  onlineText: {
-    fontSize: 9,
-    fontWeight: '700',
-    color: colors.bgPrimary,
     letterSpacing: 0.5,
   },
   clientEmail: {
