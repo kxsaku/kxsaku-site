@@ -701,7 +701,17 @@
 
 
     async function requireUser() {
-      const { data: { session } } = await sb.auth.getSession();
+      // First try to get existing session
+      let { data: { session } } = await sb.auth.getSession();
+
+      // If we have a session but the token might be stale, refresh it
+      if (session) {
+        const { data: refreshData, error: refreshError } = await sb.auth.refreshSession();
+        if (!refreshError && refreshData.session) {
+          session = refreshData.session;
+        }
+      }
+
       const user = session?.user;
 
       if (!user) {
