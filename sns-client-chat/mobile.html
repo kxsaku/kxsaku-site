@@ -3480,6 +3480,12 @@ composer.addEventListener("keydown", (e) => {
           const still = notes.find(x => x.id === activeNoteId);
           if (!still && notes.length) setActiveNote(notes[0].id);
         }
+      }catch(e){
+        // On error, show empty state instead of skeleton
+        notes = [];
+        renderNotesList();
+        console.error("loadNotes error:", e);
+        showChatErr("Failed to load notes: " + (e?.message || String(e)));
       }finally{
         setNotesBusy(false);
       }
@@ -3505,49 +3511,57 @@ composer.addEventListener("keydown", (e) => {
 
     async function createNewNote(){
       setNotesBusy(true, "Creating…");
-  // Instant, blank note (optimistic)
-  const tempId = `temp_${Date.now()}`;
-  const nowIso = new Date().toISOString();
-  const temp = {
-    id: tempId,
-    title: "",
-    body: "",
-    client_user_id: null,
-    client_label: null,
-    created_at: nowIso,
-    updated_at: nowIso,
-  };
-  notes = [temp, ...(Array.isArray(notes) ? notes : [])];
-  activeNoteId = tempId;
-  renderNotesList();
-  setActiveNote(tempId);
-
-  if (noteTitleEl) noteTitleEl.value = "";
-  if (noteBodyEl) noteBodyEl.value = "";
-  if (noteClientChip){
-    noteClientChip.style.display = "none";
-    noteClientChip.textContent = "";
-  }
-  if (noteTitleEl) noteTitleEl.focus();
-
-  // Create on backend (no id) and replace temp id
-  try{
-    const res = await callNotes("upsert", { note: { title: "", body: "" } });
-    if (res?.note?.id){
-      const real = res.note;
-      const idx = notes.findIndex(x => x.id === tempId);
-      if (idx >= 0) notes[idx] = { ...notes[idx], ...real };
-      activeNoteId = real.id;
+      // Instant, blank note (optimistic)
+      const tempId = `temp_${Date.now()}`;
+      const nowIso = new Date().toISOString();
+      const temp = {
+        id: tempId,
+        title: "",
+        body: "",
+        client_user_id: null,
+        client_label: null,
+        created_at: nowIso,
+        updated_at: nowIso,
+      };
+      notes = [temp, ...(Array.isArray(notes) ? notes : [])];
+      activeNoteId = tempId;
       renderNotesList();
-      setActiveNote(real.id);
-      showSaved();
+      setActiveNote(tempId);
+
+      if (noteTitleEl) noteTitleEl.value = "";
+      if (noteBodyEl) noteBodyEl.value = "";
+      if (noteClientChip){
+        noteClientChip.style.display = "none";
+        noteClientChip.textContent = "";
+      }
+      if (noteTitleEl) noteTitleEl.focus();
+
+      // Create on backend (no id) and replace temp id
+      try{
+        const res = await callNotes("upsert", { note: { title: "", body: "" } });
+        if (res?.note?.id){
+          const real = res.note;
+          const idx = notes.findIndex(x => x.id === tempId);
+          if (idx >= 0) notes[idx] = { ...notes[idx], ...real };
+          activeNoteId = real.id;
+          renderNotesList();
+          setActiveNote(real.id);
+          showSaved();
+        } else {
+          throw new Error("Failed to create note - no ID returned");
+        }
+      }catch(e){
+        // Remove the temp note and show error
+        notes = notes.filter(x => x.id !== tempId);
+        activeNoteId = notes.length ? notes[0].id : null;
+        renderNotesList();
+        if (activeNoteId) setActiveNote(activeNoteId);
+        console.error("createNewNote error:", e);
+        showChatErr("Failed to create note: " + (e?.message || String(e)));
+      }finally{
+        setNotesBusy(false);
+      }
     }
-  }catch(_){
-    // keep temp locally; save will retry on next input
-  }finally{
-    setNotesBusy(false);
-  }
-}
 
 
     if (noteNewBtn) noteNewBtn.addEventListener("click", createNewNote);
@@ -3557,15 +3571,31 @@ composer.addEventListener("keydown", (e) => {
       saveTimer = setTimeout(async () => {
         const n = notes.find(x => x.id === activeNoteId);
         if (!n) return;
+
+        // Don't save if the note still has a temp ID (creation failed)
+        if (String(activeNoteId).startsWith("temp_")) {
+          console.warn("Cannot save note with temp ID - creation may have failed");
+          showChatErr("Note creation failed. Please try creating a new note.");
+          return;
+        }
+
         const title = (noteTitleEl?.value || "").trim();
         const body = String(noteBodyEl?.value || "");
-        const res = await callNotes("upsert", { note: { id: activeNoteId, title, body, client_user_id: n.client_user_id || null, client_label: n.client_label || null } });
-        if (res?.note){
-          // merge updated fields
-          const idx = notes.findIndex(x => x.id === activeNoteId);
-          if (idx >= 0) notes[idx] = { ...notes[idx], ...res.note };
-          renderNotesList();
-          showSaved();
+
+        try {
+          const res = await callNotes("upsert", { note: { id: activeNoteId, title, body, client_user_id: n.client_user_id || null, client_label: n.client_label || null } });
+          if (res?.note){
+            // merge updated fields
+            const idx = notes.findIndex(x => x.id === activeNoteId);
+            if (idx >= 0) notes[idx] = { ...notes[idx], ...res.note };
+            renderNotesList();
+            showSaved();
+          } else {
+            throw new Error("Save failed - no response");
+          }
+        } catch(e) {
+          console.error("scheduleSave error:", e);
+          showChatErr("Failed to save note: " + (e?.message || String(e)));
         }
       }, 450);
     }
