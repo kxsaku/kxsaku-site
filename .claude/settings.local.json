@@ -17,7 +17,15 @@
       "WebFetch(domain:www.jsdelivr.com)",
       "Bash(curl:*)",
       "Bash(openssl dgst:*)",
-      "Bash(openssl base64:*)"
+      "Bash(openssl base64:*)",
+      "Bash(npx create-expo-app@latest:*)",
+      "Bash(npx expo install:*)",
+      "Bash(npm install:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx expo export:*)",
+      "Bash(npx expo-doctor:*)",
+      "Bash(timeout 20 npx expo start:*)",
+      "Bash(ls:*)"
     ]
   }
 }
