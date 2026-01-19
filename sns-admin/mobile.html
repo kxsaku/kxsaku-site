@@ -1003,50 +1003,34 @@ table input[type="checkbox"]:checked::after {
 </div>
 
 <!-- Login overlay -->
-<div class="login-modal-overlay" id="loginOverlay" style="display:none;">
-  <div class="login-modal">
-    <button class="login-modal-close" id="loginCloseBtn" type="button" aria-label="Close">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
-        <line x1="6" y1="6" x2="18" y2="18"/>
-        <line x1="18" y1="6" x2="6" y2="18"/>
+<div class="overlay" id="loginOverlay" style="display:none;">
+  <div class="login-card" style="position:relative;">
+    <button class="login-close" id="loginCloseBtn" type="button" aria-label="Close">
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
       </svg>
     </button>
-
-    <h2 class="login-modal-title">Admin Login</h2>
-    <p class="login-modal-subtitle">
+    <h2 class="login-title">Admin login</h2>
+    <p class="login-sub">
       Sign in to view and manage inquiries.
     </p>
 
-    <div class="login-modal-field">
+    <div class="field">
       <label for="loginEmail">Email</label>
-      <input id="loginEmail" type="email" autocomplete="username" placeholder="Email" class="input-enhanced">
+      <input id="loginEmail" type="email" autocomplete="username" placeholder="Email">
     </div>
 
-    <div class="login-modal-field">
+    <div class="field">
       <label for="loginPass">Password</label>
-      <input id="loginPass" type="password" autocomplete="current-password" placeholder="••••••••" class="input-enhanced">
+      <input id="loginPass" type="password" autocomplete="current-password" placeholder="••••••••">
     </div>
 
-    <div class="login-modal-actions">
+    <div class="login-actions">
       <span class="tiny" id="loginHint"></span>
-      <button class="btn-enhanced primary" id="loginBtn">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/>
-          <polyline points="10 17 15 12 10 7"/>
-          <line x1="15" y1="12" x2="3" y2="12"/>
-        </svg>
-        Sign In
-      </button>
+      <button class="btn" id="loginBtn">Sign in</button>
     </div>
 
-    <div class="msg-box-m error" id="loginErr" style="display:none;">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="12" cy="12" r="10"/>
-        <line x1="15" y1="9" x2="9" y2="15"/>
-        <line x1="9" y1="9" x2="15" y2="15"/>
-      </svg>
-      <span></span>
-    </div>
+    <div class="err" id="loginErr" style="display:none;"></div>
   </div>
 </div>
 
@@ -1284,7 +1268,7 @@ table input[type="checkbox"]:checked::after {
     if (adminCard) adminCard.style.display = "none";
     loginOverlay.style.display = "flex";
     loginErr.style.display = "none";
-    loginErr.querySelector("span").textContent = "";
+    loginErr.textContent = "";
     loginHint.textContent = msg || "";
     loginEmail.value = "";
     loginPass.value = "";
@@ -1293,7 +1277,7 @@ table input[type="checkbox"]:checked::after {
   function hideLogin() {
     loginOverlay.style.display = "none";
     loginErr.style.display = "none";
-    loginErr.querySelector("span").textContent = "";
+    loginErr.textContent = "";
     loginHint.textContent = "";
   }
 
@@ -1544,7 +1528,7 @@ table input[type="checkbox"]:checked::after {
 
   loginBtn.addEventListener("click", async () => {
     loginErr.style.display = "none";
-    loginErr.querySelector("span").textContent = "";
+    loginErr.textContent = "";
 
     try {
       const email = loginEmail.value.trim();
@@ -1555,8 +1539,8 @@ table input[type="checkbox"]:checked::after {
 
       await loadInquiries();
     } catch (e) {
-      loginErr.style.display = "flex";
-      loginErr.querySelector("span").textContent = e.message || "Login failed.";
+      loginErr.style.display = "block";
+      loginErr.textContent = e.message || "Login failed.";
     }
   });
 
