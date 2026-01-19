@@ -8,6 +8,10 @@
   <link rel="stylesheet" href="/styles.css" />
 
   <style>
+    /* ===========================================
+       SNS Client List Mobile - Enhanced Styles
+       =========================================== */
+
     /* Page-specific variables */
     :root {
       --bg0: #03010b;
@@ -22,6 +26,21 @@
       --shadow: 0 18px 50px rgba(0,0,0,.38);
       --shadow2: 0 25px 90px rgba(0,0,0,.60);
       --max: 720px;
+    }
+
+    /* Enhanced page entry animations */
+    @keyframes slideInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes slideInLeft {
+      from { opacity: 0; transform: translateX(-15px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes scaleInBounce {
+      0% { opacity: 0; transform: scale(0.92); }
+      70% { transform: scale(1.02); }
+      100% { opacity: 1; transform: scale(1); }
     }
 
     /* Page-specific: custom background */
@@ -71,23 +90,37 @@
     /* Page-specific: pill size tweak */
     .pill { padding: .52rem .82rem; font-size: .78rem; white-space: nowrap; }
 
-    /* Page-specific: card with animation */
+    /* Page-specific: card with animation - enhanced */
     .card {
       position: relative;
       margin-top: 10px;
-      background: rgba(9, 6, 34, 0.88);
+      background: linear-gradient(165deg, rgba(15, 10, 45, 0.92), rgba(8, 5, 28, 0.88));
       border: 1px solid rgba(130, 106, 255, 0.28);
       border-radius: var(--r-xl);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(16px);
-      padding: 14px 14px 12px;
+      box-shadow:
+        var(--shadow),
+        0 0 0 1px rgba(255, 255, 255, 0.03) inset,
+        0 1px 0 rgba(255, 255, 255, 0.05) inset;
+      backdrop-filter: blur(20px);
+      padding: 16px 16px 14px;
       opacity: 0;
       animation: cardIn .65s cubic-bezier(.2,.9,.2,1) both;
       animation-delay: .10s;
       transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+      overflow: hidden;
+    }
+    .card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 120px;
+      background: radial-gradient(ellipse 400px 120px at 30% 0%, rgba(179, 124, 255, 0.1), transparent);
+      pointer-events: none;
     }
     @keyframes cardIn { from { opacity: 0; transform: translateY(14px) scale(.985); filter: blur(6px); } to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); } }
-    .card:hover { transform: translateY(-2px); border-color: rgba(190,180,255,.32); box-shadow: var(--shadow2); }
+    .card:active { transform: scale(0.99); border-color: rgba(190,180,255,.35); }
 
     /* Page-specific: section titles */
     .section-title { margin: 0 0 8px; color: rgba(244,240,255,.78); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; }
@@ -101,19 +134,24 @@
       flex: 0 0 auto;
       border-radius: 999px;
       border: 1px solid rgba(129,118,255,.30);
-      background: rgba(15, 10, 55, 0.45);
+      background: linear-gradient(180deg, rgba(15, 10, 55, 0.5), rgba(12, 8, 45, 0.45));
       color: rgba(244,240,255,.88);
-      padding: 9px 12px;
+      padding: 10px 14px;
       font-size: 12px;
+      font-weight: 500;
       letter-spacing: .08em;
       text-transform: uppercase;
       cursor: pointer;
       user-select: none;
-      transition: transform .10s ease, border-color .12s ease, filter .12s ease;
+      transition: transform .15s cubic-bezier(0.34, 1.56, 0.64, 1), border-color .15s ease, background .15s ease, box-shadow .15s ease;
       white-space: nowrap;
     }
-    .chip:hover { transform: translateY(-1px); border-color: rgba(179,124,255,.55); filter: brightness(1.06); }
-    .chip.active { border-color: rgba(179,124,255,.85); box-shadow: 0 0 0 1px rgba(179,124,255,.22); background: rgba(179,124,255,.16); }
+    .chip:active { transform: scale(0.96); border-color: rgba(179,124,255,.55); }
+    .chip.active {
+      border-color: rgba(179,124,255,.85);
+      box-shadow: 0 0 0 1px rgba(179,124,255,.22), 0 4px 16px rgba(179,124,255,.2);
+      background: linear-gradient(180deg, rgba(179,124,255,.22), rgba(140,100,220,.16));
+    }
 
     /* Page-specific: meta row */
     .meta { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(129,118,255,.14); }
@@ -127,11 +165,17 @@
     .client {
       border-radius: var(--r-xl);
       border: 1px solid rgba(129,118,255,.18);
-      background: rgba(15, 10, 55, 0.40);
-      padding: 12px 12px 10px;
-      transition: transform .16s ease, border-color .16s ease, filter .16s ease;
+      background: linear-gradient(180deg, rgba(15, 10, 55, 0.45), rgba(10, 6, 32, 0.4));
+      padding: 14px 14px 12px;
+      transition: transform .15s cubic-bezier(0.34, 1.56, 0.64, 1), border-color .15s ease, box-shadow .15s ease;
+      animation: slideInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
     }
-    .client:hover { transform: translateY(-1px); border-color: rgba(179,124,255,.30); filter: brightness(1.02); }
+    .client:nth-child(1) { animation-delay: 0ms; }
+    .client:nth-child(2) { animation-delay: 40ms; }
+    .client:nth-child(3) { animation-delay: 80ms; }
+    .client:nth-child(4) { animation-delay: 120ms; }
+    .client:nth-child(5) { animation-delay: 160ms; }
+    .client:active { transform: scale(0.98); border-color: rgba(179,124,255,.35); box-shadow: 0 0 0 1px rgba(179,124,255,.15); }
 
     .client-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
     .name { font-weight: 650; letter-spacing: .02em; font-size: 14px; line-height: 1.25; }
@@ -156,28 +200,49 @@
 
     .client-actions { display: flex; gap: 8px; margin-top: 10px; }
 
-    /* Page-specific: bottom sheet modal */
-    .sheet { position: fixed; inset: 0; background: rgba(0,0,0,.55); backdrop-filter: blur(10px); display: none; z-index: 9999; }
+    /* Page-specific: bottom sheet modal - enhanced */
+    .sheet {
+      position: fixed;
+      inset: 0;
+      background: rgba(3, 1, 15, 0.7);
+      backdrop-filter: blur(12px);
+      display: none;
+      z-index: 9999;
+      animation: overlayIn 0.2s ease both;
+    }
     .sheet.open { display: block; }
+    @keyframes overlayIn { from { opacity: 0; } to { opacity: 1; } }
 
     .sheet-card {
       position: absolute;
       left: 0;
       right: 0;
       bottom: 0;
-      border-radius: 26px 26px 0 0;
+      border-radius: 28px 28px 0 0;
       border: 1px solid rgba(130, 106, 255, 0.35);
-      background: rgba(9, 6, 34, 0.96);
-      box-shadow: 0 -30px 90px rgba(0,0,0,.70);
-      padding: 12px 14px 14px;
-      transform: translateY(16px);
-      opacity: 0;
-      animation: sheetIn .16s ease-out forwards;
-      max-height: 86vh;
+      border-bottom: none;
+      background: linear-gradient(170deg, rgba(18, 12, 48, 0.98), rgba(10, 6, 32, 0.99));
+      box-shadow:
+        0 -30px 100px rgba(0,0,0,.65),
+        0 0 0 1px rgba(255, 255, 255, 0.03) inset;
+      padding: 14px 16px 20px;
+      transform: translateY(100%);
+      animation: sheetIn .3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      max-height: 88vh;
       overflow: auto;
       -webkit-overflow-scrolling: touch;
     }
-    @keyframes sheetIn { to { transform: translateY(0); opacity: 1; } }
+    .sheet-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 100px;
+      background: radial-gradient(ellipse 350px 100px at 30% 0%, rgba(179, 124, 255, 0.12), transparent);
+      pointer-events: none;
+    }
+    @keyframes sheetIn { to { transform: translateY(0); } }
 
     .handle { width: 46px; height: 5px; border-radius: 999px; background: rgba(196,181,253,.28); margin: 6px auto 10px; }
     .sheet-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }

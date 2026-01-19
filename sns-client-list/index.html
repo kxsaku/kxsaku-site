@@ -19,36 +19,220 @@
   <link rel="stylesheet" href="/styles.css" />
 
   <style>
-    /* Page-specific: toprow flex-wrap */
-    .toprow { flex-wrap: wrap; }
+    /* ===========================================
+       SNS Client List - Enhanced Page Styles
+       =========================================== */
 
-    /* Page-specific: search input width constraint */
-    .input { width: min(520px, 100%); }
-
-    /* Page-specific: status tag styling */
-    .tag {
-      padding: .42rem .7rem;
-      border: 1px solid rgba(129,118,255,.28);
-      background: rgba(15, 10, 55, 0.55);
-      font-size: .76rem;
-      letter-spacing: .10em;
-      text-transform: uppercase;
-      color: #e9e5ff;
+    /* Page entry animations */
+    @keyframes slideInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes slideInLeft {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes scaleInBounce {
+      0% { opacity: 0; transform: scale(0.9); }
+      70% { transform: scale(1.02); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+    @keyframes pop {
+      from { transform: translateY(10px) scale(.985); opacity: 0; }
+      to { transform: translateY(0) scale(1); opacity: 1; }
     }
 
-    /* Page-specific: additional dot colors */
-    .dot-blue { background: #7bb8ff; }
-    .dot-gray { background: rgba(255,255,255,.18); }
+    /* Page header enhanced */
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+      animation: slideInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
 
-    /* Page-specific: row hover animation */
-    tbody tr { transition: transform .10s ease, background .12s ease; }
-    tbody tr:hover { transform: translateY(-1px); background: rgba(196,181,253,.05); }
+    .page-header h1 {
+      margin: 0;
+      font-size: 1.5rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      animation: slideInLeft 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
 
-    /* Page-specific: Modal */
+    .page-header .sub {
+      margin-top: 0.4rem;
+      animation: slideInLeft 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation-delay: 50ms;
+    }
+
+    .page-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      animation: slideInRight 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    /* Admin panel card enhanced */
+    .admin-panel {
+      background: linear-gradient(165deg, rgba(15, 10, 45, 0.95), rgba(8, 5, 28, 0.90));
+      border: 1px solid rgba(130, 106, 255, 0.25);
+      border-radius: 28px;
+      box-shadow:
+        0 25px 80px rgba(0, 0, 0, 0.55),
+        0 0 0 1px rgba(255, 255, 255, 0.03) inset,
+        0 1px 0 rgba(255, 255, 255, 0.05) inset;
+      padding: 1.5rem;
+      backdrop-filter: blur(20px);
+      position: relative;
+      overflow: hidden;
+      animation: slideInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation-delay: 100ms;
+    }
+
+    .admin-panel::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 200px;
+      background: radial-gradient(ellipse 600px 200px at 30% 0%, rgba(179, 124, 255, 0.12), transparent);
+      pointer-events: none;
+    }
+
+    /* Enhanced toolbar grid */
+    .toolbar-grid {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .toolgroup {
+      background: linear-gradient(180deg, rgba(10, 6, 32, 0.6), rgba(8, 5, 28, 0.5));
+      border: 1px solid rgba(129, 118, 255, 0.12);
+      border-radius: 18px;
+      padding: 1rem;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .toolgroup:hover {
+      border-color: rgba(129, 118, 255, 0.22);
+    }
+
+    .tooltitle {
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(189, 183, 255, 0.75);
+      margin-bottom: 0.65rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid rgba(129, 118, 255, 0.1);
+    }
+
+    .toolrow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    /* Enhanced search input */
+    .input {
+      width: min(520px, 100%);
+      border-radius: 999px;
+      border: 1px solid rgba(129, 118, 255, 0.3);
+      background: linear-gradient(180deg, rgba(10, 6, 32, 0.95), rgba(8, 5, 28, 0.98));
+      color: var(--color-text-primary);
+      padding: 0.8rem 1.15rem;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+    }
+
+    .input::placeholder { color: rgba(189, 183, 255, 0.4); }
+    .input:hover { border-color: rgba(129, 118, 255, 0.45); }
+    .input:focus {
+      border-color: rgba(179, 124, 255, 0.6);
+      box-shadow: 0 0 0 3px rgba(179, 124, 255, 0.15), 0 4px 20px rgba(0, 0, 0, 0.2);
+      background: rgba(12, 8, 36, 0.98);
+    }
+
+    /* Enhanced tag styling */
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.38rem 0.75rem;
+      border: 1px solid rgba(129, 118, 255, 0.28);
+      background: linear-gradient(180deg, rgba(15, 10, 55, 0.6), rgba(12, 8, 45, 0.55));
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      color: #e9e5ff;
+      transition: transform 0.15s ease, box-shadow 0.2s ease;
+    }
+
+    .tag:hover { transform: scale(1.03); }
+
+    /* Dot colors enhanced */
+    .dot-blue { background: #7bb8ff; box-shadow: 0 0 8px rgba(123, 184, 255, 0.5); }
+    .dot-gray { background: rgba(255, 255, 255, 0.25); }
+    .dot-green { box-shadow: 0 0 8px rgba(108, 255, 176, 0.5); }
+    .dot-yellow { box-shadow: 0 0 8px rgba(255, 212, 90, 0.5); }
+    .dot-red { box-shadow: 0 0 8px rgba(255, 98, 98, 0.5); }
+
+    /* Enhanced table wrapper */
+    .table-wrapper {
+      border-radius: 20px;
+      border: 1px solid rgba(129, 118, 255, 0.15);
+      overflow: hidden;
+      background: linear-gradient(180deg, rgba(10, 6, 32, 0.5), rgba(8, 5, 28, 0.4));
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Table row animations */
+    tbody tr {
+      transition:
+        transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1),
+        background 0.2s ease,
+        box-shadow 0.2s ease;
+      animation: slideInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    tbody tr:nth-child(1) { animation-delay: 0ms; }
+    tbody tr:nth-child(2) { animation-delay: 30ms; }
+    tbody tr:nth-child(3) { animation-delay: 60ms; }
+    tbody tr:nth-child(4) { animation-delay: 90ms; }
+    tbody tr:nth-child(5) { animation-delay: 120ms; }
+    tbody tr:nth-child(6) { animation-delay: 150ms; }
+    tbody tr:nth-child(7) { animation-delay: 180ms; }
+    tbody tr:nth-child(8) { animation-delay: 210ms; }
+    tbody tr:nth-child(9) { animation-delay: 240ms; }
+    tbody tr:nth-child(10) { animation-delay: 270ms; }
+
+    tbody tr:hover {
+      transform: translateX(3px);
+      background: rgba(179, 124, 255, 0.06);
+    }
+
+    /* Enhanced modal */
     .modal {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,.55);
+      background: rgba(3, 1, 15, 0.75);
       backdrop-filter: blur(10px);
       display: none;
       align-items: center;
@@ -60,67 +244,177 @@
 
     .modal-card {
       width: min(920px, 100%);
-      border-radius: 26px;
+      border-radius: 28px;
       border: 1px solid rgba(130, 106, 255, 0.35);
-      background: rgba(9, 6, 34, 0.95);
-      box-shadow: 0 30px 90px rgba(0,0,0,.75);
-      backdrop-filter: blur(16px);
-      padding: 1.2rem 1.2rem 1rem;
+      background: linear-gradient(170deg, rgba(18, 12, 48, 0.98), rgba(10, 6, 32, 0.99));
+      box-shadow:
+        0 30px 100px rgba(0, 0, 0, 0.6),
+        0 0 0 1px rgba(255, 255, 255, 0.03) inset,
+        0 1px 0 rgba(255, 255, 255, 0.05) inset;
+      backdrop-filter: blur(20px);
+      padding: 1.5rem;
       position: relative;
-      animation: pop .14s ease-out;
-    }
-    @keyframes pop {
-      from { transform: translateY(10px) scale(.985); opacity: 0; }
-      to { transform: translateY(0) scale(1); opacity: 1; }
+      animation: scaleInBounce 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+      overflow: hidden;
     }
 
-    .modal-title { margin: 0; letter-spacing: .14em; text-transform: uppercase; font-size: 1rem; }
-    .modal-sub { margin: .55rem 0 0; color: #bdb7ff; font-size: .9rem; line-height: 1.45; }
+    .modal-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 150px;
+      background: radial-gradient(ellipse 400px 150px at 30% 0%, rgba(179, 124, 255, 0.15), transparent);
+      pointer-events: none;
+    }
+
+    .modal-title {
+      position: relative;
+      margin: 0;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      font-size: 1.05rem;
+    }
+
+    .modal-sub {
+      position: relative;
+      margin: 0.6rem 0 0;
+      color: rgba(189, 183, 255, 0.75);
+      font-size: 0.9rem;
+      line-height: 1.45;
+    }
 
     .close {
       position: absolute;
-      top: 14px;
-      right: 14px;
-      width: 36px;
-      height: 36px;
-      border-radius: 999px;
-      border: 1px solid rgba(129,118,255,.28);
-      background: rgba(15, 10, 55, 0.55);
+      top: 1rem;
+      right: 1rem;
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      border: 1px solid rgba(129, 118, 255, 0.25);
+      background: rgba(15, 10, 45, 0.6);
       color: #f4f0ff;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      transition: transform .08s ease, border-color .12s ease, filter .12s ease;
+      transition:
+        transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+        border-color 0.2s ease,
+        background 0.2s ease;
+      z-index: 1;
     }
-    .close:hover { transform: translateY(-1px); border-color: rgba(179,124,255,.55); filter: brightness(1.08); }
-    .close:active { transform: translateY(1px); }
-    .close svg { width: 16px; height: 16px; opacity: .9; }
 
-    /* Page-specific: Modal detail grid */
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem .85rem; margin-top: 1rem; }
+    .close:hover {
+      transform: scale(1.08) rotate(90deg);
+      border-color: rgba(179, 124, 255, 0.45);
+      background: rgba(20, 15, 55, 0.8);
+    }
+
+    .close:active { transform: scale(0.95) rotate(90deg); }
+    .close svg { width: 16px; height: 16px; opacity: 0.9; }
+
+    /* Modal detail grid enhanced */
+    .grid {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem 0.85rem;
+      margin-top: 1.25rem;
+    }
     @media (max-width: 820px) { .grid { grid-template-columns: 1fr; } }
 
     .kv {
-      border-radius: 18px;
-      border: 1px solid rgba(129,118,255,.18);
-      background: rgba(15, 10, 55, 0.40);
-      padding: .75rem .85rem;
+      border-radius: 16px;
+      border: 1px solid rgba(129, 118, 255, 0.18);
+      background: linear-gradient(180deg, rgba(15, 10, 55, 0.45), rgba(10, 6, 32, 0.4));
+      padding: 0.85rem 1rem;
+      transition: border-color 0.2s ease, transform 0.15s ease;
     }
-    .k { color: #cfc8ff; font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; margin-bottom: .35rem; }
-    .v { color: #f4f0ff; font-size: .95rem; word-break: break-word; }
+
+    .kv:hover {
+      border-color: rgba(129, 118, 255, 0.32);
+      transform: translateY(-1px);
+    }
+
+    .k {
+      color: rgba(207, 200, 255, 0.8);
+      font-size: 0.70rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 0.4rem;
+    }
+
+    .v {
+      color: #f4f0ff;
+      font-size: 0.95rem;
+      word-break: break-word;
+      line-height: 1.4;
+    }
+
+    /* Enhanced button micro-interactions */
+    .btn {
+      transition:
+        transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1),
+        box-shadow 0.2s ease,
+        border-color 0.2s ease,
+        background 0.2s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn:active {
+      transform: translateY(0) scale(0.98);
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 6px 24px rgba(179, 124, 255, 0.35);
+    }
+
+    /* Pill enhanced */
+    .pill {
+      transition: transform 0.15s ease, box-shadow 0.2s ease;
+    }
+
+    .pill:hover {
+      transform: scale(1.02);
+    }
+
+    /* Footer styling */
+    .page-footer {
+      margin-top: 1.5rem;
+      text-align: center;
+      font-size: 0.82rem;
+      color: rgba(189, 183, 255, 0.45);
+      animation: slideInUp 0.5s ease both;
+      animation-delay: 300ms;
+    }
+
+    /* Reduced motion support */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
   </style>
 </head>
 
 <body>
   <div class="wrap">
-    <div class="toprow">
+    <!-- Page Header -->
+    <header class="page-header">
       <div>
         <h1>SNS CLIENT LIST</h1>
         <div class="sub">Admin-only client registry</div>
       </div>
 
-      <div class="top-actions">
+      <div class="page-header-actions">
         <span class="pill" id="whoami">Not signed in</span>
 
         <a class="icon-btn" href="/sns-admin/index.html" title="Back to Admin" aria-label="Back">
@@ -131,9 +425,10 @@
 
         <button class="btn" id="logoutBtn" style="display:none;">Logout</button>
       </div>
-    </div>
+    </header>
 
-    <div class="card" id="adminCard" style="display:none;">
+    <!-- Main Admin Panel -->
+    <div class="admin-panel" id="adminCard" style="display:none;">
       <div class="toolbar-grid">
         <div class="toolgroup">
           <div class="tooltitle">Subscription</div>
@@ -171,25 +466,31 @@
       <div class="err" id="errBox"></div>
       <div class="ok" id="okBox"></div>
 
-      <div style="overflow:auto;">
-        <table>
-          <thead>
-            <tr>
-              <th style="width:190px;">Subscription</th>
-              <th>Name</th>
-              <th>Business</th>
-              <th style="width:190px;">Phone</th>
-              <th style="width:210px; text-align:right;">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="rows"></tbody>
-        </table>
+      <!-- Table Section -->
+      <div class="table-wrapper">
+        <div style="overflow:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:190px;">Subscription</th>
+                <th>Name</th>
+                <th>Business</th>
+                <th style="width:190px;">Phone</th>
+                <th style="width:210px; text-align:right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
       </div>
 
-      <div class="muted" id="meta" style="margin-top:.8rem;"></div>
-
-      <div class="muted" style="margin-top:.8rem;">© 2025 kxsaku · Built from the homelab.</div>
+      <div class="muted" id="meta" style="margin-top:1rem;"></div>
     </div>
+
+    <!-- Footer -->
+    <footer class="page-footer">
+      © 2025 kxsaku · Built from the homelab.
+    </footer>
   </div>
 
   <div class="overlay" id="loginOverlay" style="display:none;">

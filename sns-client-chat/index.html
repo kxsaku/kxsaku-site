@@ -45,6 +45,24 @@
       --r-md: 16px;
     }
 
+    /* Page entry animations */
+    @keyframes slideInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes slideInLeft {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes scaleIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
     /* Chat page body - full height, no scroll (internal scrolls only) */
     body {
       overflow: hidden;
@@ -59,7 +77,41 @@
       gap: 1.15rem;
     }
 
-    /* Override toprow for flex-start alignment */
+    /* Page header enhanced */
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      flex: 0 0 auto;
+      animation: slideInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    .page-header h1 {
+      margin: 0;
+      font-size: 1.5rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      animation: slideInLeft 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    .page-header .sub {
+      margin-top: 0.4rem;
+      color: var(--muted);
+      animation: slideInLeft 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation-delay: 50ms;
+    }
+
+    .page-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      animation: slideInRight 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    /* Override toprow for flex-start alignment (legacy support) */
     .toprow {
       align-items: flex-start;
       flex: 0 0 auto;
@@ -74,16 +126,21 @@
     /* Card override for chat layout */
     .card {
       margin-top: 0;
-      background: var(--glass);
+      background: linear-gradient(165deg, rgba(15, 10, 45, 0.92), rgba(8, 5, 28, 0.88));
       border: 1px solid rgba(130, 106, 255, 0.28);
       border-radius: var(--r-xl);
-      box-shadow: var(--shadow-lg);
-      backdrop-filter: blur(16px);
+      box-shadow:
+        0 25px 80px rgba(0, 0, 0, 0.55),
+        0 0 0 1px rgba(255, 255, 255, 0.03) inset,
+        0 1px 0 rgba(255, 255, 255, 0.05) inset;
+      backdrop-filter: blur(20px);
       padding: 1.05rem;
       position: relative;
       overflow: hidden;
       flex: 1 1 auto;
       min-height: 0;  /* critical for internal scrolling */
+      animation: scaleIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation-delay: 100ms;
     }
 
     /* Ambient “breathing” glow */
@@ -1264,13 +1321,14 @@
 
 <body>
   <div class="wrap">
-    <div class="toprow">
+    <!-- Page Header -->
+    <header class="page-header">
       <div>
         <h1>SNS CLIENT CHAT</h1>
         <div class="sub">Admin-only messaging terminal</div>
       </div>
 
-      <div class="top-actions">
+      <div class="page-header-actions">
         <span class="pill" id="whoami">Signed in: —</span>
 
         <a class="icon-btn" href="/sns-admin/" title="Back to Admin">
@@ -1281,7 +1339,7 @@
 
         <button class="btn btn-soft" id="logoutBtn" type="button">Logout</button>
       </div>
-    </div>
+    </header>
 
     <div class="card">
       <div class="layout">
