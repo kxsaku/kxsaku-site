@@ -536,6 +536,16 @@ h1{
   background: rgba(108, 255, 176, 0.9);
 }
 
+.status-text-m.s-walkaway {
+  background: rgba(255, 170, 100, 0.12);
+  color: rgba(255, 190, 130, 0.95);
+  border: 1px solid rgba(255, 170, 100, 0.25);
+}
+
+.status-text-m.s-walkaway::before {
+  background: rgba(255, 170, 100, 0.9);
+}
+
 /* Priority display mobile */
 .priority-m {
   display: inline-flex;
@@ -879,6 +889,7 @@ table input[type="checkbox"]:checked::after {
         <div class="section-actions">
           <button class="btn-mobile" id="markWorkingBtn">Working</button>
           <button class="btn-mobile" id="markCompletedBtn">Completed</button>
+          <button class="btn-mobile" id="markWalkawayBtn">Walk-Away</button>
           <button class="btn-mobile" id="resetAssignedBtn">Assigned</button>
         </div>
       </div>
@@ -1175,6 +1186,7 @@ table input[type="checkbox"]:checked::after {
   function getStatusClass(status) {
     if (status === "working") return "s-working";
     if (status === "completed") return "s-completed";
+    if (status === "walkaway") return "s-walkaway";
     return "s-assigned";
   }
 
@@ -1507,6 +1519,7 @@ table input[type="checkbox"]:checked::after {
   document.getElementById("refreshBtn").addEventListener("click", () => loadInquiries());
   document.getElementById("markWorkingBtn").addEventListener("click", () => updateMany({ status: "working" }));
   document.getElementById("markCompletedBtn").addEventListener("click", () => updateMany({ status: "completed" }));
+  document.getElementById("markWalkawayBtn").addEventListener("click", () => updateMany({ status: "walkaway" }));
   document.getElementById("resetAssignedBtn").addEventListener("click", () => updateMany({ status: "assigned" }));
 
   document.getElementById("flagRedBtn").addEventListener("click", () => updateMany({ priority_flag: "red" }));

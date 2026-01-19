@@ -206,6 +206,16 @@
       background: rgba(108, 255, 176, 0.9);
     }
 
+    .status-text.s-walkaway {
+      background: rgba(255, 170, 100, 0.12);
+      color: rgba(255, 190, 130, 0.95);
+      border: 1px solid rgba(255, 170, 100, 0.25);
+    }
+
+    .status-text.s-walkaway::before {
+      background: rgba(255, 170, 100, 0.9);
+    }
+
     /* Priority display enhanced */
     .priority-display {
       display: inline-flex;
@@ -501,6 +511,7 @@
           <div class="toolbar-section-actions">
             <button class="btn-enhanced soft" id="markWorkingBtn">Working</button>
             <button class="btn-enhanced soft" id="markCompletedBtn">Completed</button>
+            <button class="btn-enhanced soft" id="markWalkawayBtn">Walk-Away</button>
             <button class="btn-enhanced soft" id="resetAssignedBtn">Assigned</button>
           </div>
         </div>
@@ -829,6 +840,7 @@
     function getStatusClass(status) {
       if (status === "working") return "s-working";
       if (status === "completed") return "s-completed";
+      if (status === "walkaway") return "s-walkaway";
       return "s-assigned";
     }
 
@@ -1161,6 +1173,7 @@
     document.getElementById("refreshBtn").addEventListener("click", () => loadInquiries());
     document.getElementById("markWorkingBtn").addEventListener("click", () => updateMany({ status: "working" }));
     document.getElementById("markCompletedBtn").addEventListener("click", () => updateMany({ status: "completed" }));
+    document.getElementById("markWalkawayBtn").addEventListener("click", () => updateMany({ status: "walkaway" }));
     document.getElementById("resetAssignedBtn").addEventListener("click", () => updateMany({ status: "assigned" }));
 
     document.getElementById("flagRedBtn").addEventListener("click", () => updateMany({ priority_flag: "red" }));
