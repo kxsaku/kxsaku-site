@@ -3,6 +3,7 @@ import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { getCorsHeaders, handleCorsPrefllight } from "../_shared/cors.ts";
 import { checkRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 import { ensureAdmin } from "../_shared/auth.ts";
+import { logAuditEvent } from "../_shared/audit.ts";
 
 function json(req: Request, body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -28,7 +29,7 @@ serve(async (req) => {
     const SITE_URL = getEnv("SITE_URL").replace(/\/+$/, "");
 
     // Verify caller is authenticated and is an admin (database-backed check)
-    const { sb } = await ensureAdmin(req.headers.get("Authorization"));
+    const { sb, email: adminEmail } = await ensureAdmin(req.headers.get("Authorization"));
 
     const body = await req.json().catch(() => ({}));
     const inviteEmailRaw = String(body.email ?? "").trim();
@@ -65,6 +66,14 @@ serve(async (req) => {
         email: inviteEmail,
       });
     }
+
+    // Audit log the invite
+    await logAuditEvent(sb, adminEmail, {
+      action: "client_invite",
+      targetTable: "auth.users",
+      targetId: invitedUserId ?? undefined,
+      details: { invited_email: inviteEmail },
+    }, req);
 
     return json(req, { ok: true, invited_user_id: invitedUserId ?? null });
   } catch (e) {

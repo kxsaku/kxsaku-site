@@ -3,6 +3,7 @@ import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { getCorsHeaders, handleCorsPrefllight } from "../_shared/cors.ts";
 import { checkRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 import { ensureAdmin } from "../_shared/auth.ts";
+import { logAuditEvent } from "../_shared/audit.ts";
 
 function json(req: Request, body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -20,7 +21,7 @@ serve(async (req) => {
 
   try {
     const auth = req.headers.get("authorization");
-    const { sb } = await ensureAdmin(auth);
+    const { sb, email: adminEmail } = await ensureAdmin(auth);
 
     const body = await req.json().catch(() => ({}));
     const action = String(body?.action || "").toLowerCase();
@@ -76,6 +77,12 @@ serve(async (req) => {
           .select("id,title,body,client_user_id,client_label,created_at,updated_at")
           .single();
         if (error) throw error;
+        await logAuditEvent(sb, adminEmail, {
+          action: "note_update",
+          targetTable: "sns_internal_notes",
+          targetId: id,
+          details: { title: payload.title },
+        }, req);
         return json(req, { note: data });
       } else {
         const { data, error } = await sb
@@ -84,6 +91,12 @@ serve(async (req) => {
           .select("id,title,body,client_user_id,client_label,created_at,updated_at")
           .single();
         if (error) throw error;
+        await logAuditEvent(sb, adminEmail, {
+          action: "note_create",
+          targetTable: "sns_internal_notes",
+          targetId: data.id,
+          details: { title: payload.title },
+        }, req);
         return json(req, { note: data });
       }
     }
@@ -95,6 +108,11 @@ serve(async (req) => {
 
       const { error } = await sb.from("sns_internal_notes").delete().eq("id", id);
       if (error) throw error;
+      await logAuditEvent(sb, adminEmail, {
+        action: "note_delete",
+        targetTable: "sns_internal_notes",
+        targetId: id,
+      }, req);
       return json(req, { ok: true });
     }
 

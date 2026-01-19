@@ -3,6 +3,7 @@ import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { getCorsHeaders, handleCorsPrefllight } from "../_shared/cors.ts";
 import { checkRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 import { ensureAdmin } from "../_shared/auth.ts";
+import { logAuditEvent } from "../_shared/audit.ts";
 
 function getEnv(name: string) {
   const v = Deno.env.get(name);
@@ -78,7 +79,7 @@ serve(async (req) => {
 
   try {
     // Verify caller is authenticated and is an admin (database-backed check)
-    const { sb: admin } = await ensureAdmin(req.headers.get("Authorization"));
+    const { sb: admin, email: adminEmail } = await ensureAdmin(req.headers.get("Authorization"));
 
     const body = (await req.json().catch(() => ({}))) as ReqBody;
     const user_id = (body.user_id || "").trim();
@@ -306,6 +307,14 @@ serve(async (req) => {
         });
       }
     }
+
+    // Audit log the message
+    await logAuditEvent(admin, adminEmail, {
+      action: "chat_send",
+      targetTable: "chat_messages",
+      targetId: m.id,
+      details: { recipient_user_id: user_id, has_attachments: outAttachments.length > 0 },
+    }, req);
 
     return json(req, {
       ok: true,

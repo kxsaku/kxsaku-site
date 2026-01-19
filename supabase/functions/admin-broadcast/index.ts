@@ -4,6 +4,7 @@ import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { getCorsHeaders, handleCorsPrefllight } from "../_shared/cors.ts";
 import { checkRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 import { ensureAdmin } from "../_shared/auth.ts";
+import { logAuditEvent } from "../_shared/audit.ts";
 
 function json(req: Request, data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -27,7 +28,7 @@ serve(async (req) => {
 
   try {
     // Verify caller is authenticated and is an admin (database-backed check)
-    const { sb: admin } = await ensureAdmin(req.headers.get("Authorization"));
+    const { sb: admin, email: adminEmail } = await ensureAdmin(req.headers.get("Authorization"));
 
     const body = (await req.json().catch(() => ({}))) as ReqBody;
     const content = (body.content || "").trim();
@@ -92,6 +93,13 @@ serve(async (req) => {
 
       sentCount++;
     }
+
+    // Audit log the broadcast
+    await logAuditEvent(admin, adminEmail, {
+      action: "chat_broadcast",
+      targetTable: "chat_messages",
+      details: { sent_count: sentCount, total_threads: threads.length },
+    }, req);
 
     return json(req, {
       ok: true,
