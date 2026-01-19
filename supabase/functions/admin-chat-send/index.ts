@@ -1,8 +1,8 @@
 // supabase/functions/admin-chat-send/index.ts
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders, handleCorsPrefllight } from "../_shared/cors.ts";
 import { checkRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
+import { ensureAdmin } from "../_shared/auth.ts";
 
 function getEnv(name: string) {
   const v = Deno.env.get(name);
@@ -77,26 +77,8 @@ serve(async (req) => {
   if (req.method !== "POST") return json(req, { error: "Method not allowed" }, 405);
 
   try {
-    const SB_URL = getEnv("SB_URL");
-    const SB_SERVICE_ROLE_KEY = getEnv("SB_SERVICE_ROLE_KEY");
-    const ADMIN_EMAIL = (getEnv("ADMIN_EMAIL") || "").toLowerCase();
-
-    const authHeader = req.headers.get("Authorization") || "";
-    const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
-    if (!token) return json(req, { error: "Missing Authorization bearer token" }, 401);
-
-    const admin = createClient(SB_URL, SB_SERVICE_ROLE_KEY, {
-      auth: { persistSession: false },
-    });
-
-    // Verify caller identity (must be ADMIN_EMAIL)
-    const { data: userData, error: userErr } = await admin.auth.getUser(token);
-    if (userErr) return json(req, { error: `Auth error: ${userErr.message}` }, 401);
-
-    const callerEmail = (userData.user?.email || "").toLowerCase();
-    if (!callerEmail || callerEmail !== ADMIN_EMAIL) {
-      return json(req, { error: "Forbidden: admin only" }, 403);
-    }
+    // Verify caller is authenticated and is an admin (database-backed check)
+    const { sb: admin } = await ensureAdmin(req.headers.get("Authorization"));
 
     const body = (await req.json().catch(() => ({}))) as ReqBody;
     const user_id = (body.user_id || "").trim();

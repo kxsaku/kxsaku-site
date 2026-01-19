@@ -1,8 +1,8 @@
 // supabase/functions/create-portal-session/index.ts
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders, handleCorsPrefllight } from "../_shared/cors.ts";
 import { checkRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
+import { ensureAuthenticated } from "../_shared/auth.ts";
 
 function json(req: Request, body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -42,24 +42,14 @@ serve(async (req) => {
 
   try {
     const SITE_URL = getEnv("SITE_URL").replace(/\/+$/, "");
-    const SB_URL = getEnv("SB_URL");
-    const SB_SERVICE_ROLE_KEY = getEnv("SB_SERVICE_ROLE_KEY");
 
-    const authHeader = req.headers.get("Authorization") ?? "";
-    const jwt = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
-    if (!jwt) return json(req, { error: "Missing Authorization bearer token." }, 401);
-
-    const sb = createClient(SB_URL, SB_SERVICE_ROLE_KEY);
-
-    const { data: userData, error: userErr } = await sb.auth.getUser(jwt);
-    if (userErr || !userData?.user) return json(req, { error: "Invalid session." }, 401);
-
-    const user = userData.user;
+    // Verify caller is authenticated
+    const { sb, userId } = await ensureAuthenticated(req.headers.get("Authorization"));
 
     const { data: subRow, error: subErr } = await sb
       .from("billing_subscriptions")
       .select("stripe_customer_id")
-      .eq("user_id", user.id)
+      .eq("user_id", userId)
       .maybeSingle();
 
     if (subErr) throw subErr;

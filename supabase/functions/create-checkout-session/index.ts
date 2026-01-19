@@ -1,8 +1,8 @@
 // supabase/functions/create-checkout-session/index.ts
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders, handleCorsPrefllight } from "../_shared/cors.ts";
 import { checkRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
+import { ensureAuthenticated } from "../_shared/auth.ts";
 
 function json(req: Request, body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -42,29 +42,16 @@ serve(async (req) => {
 
   try {
     const SITE_URL = getEnv("SITE_URL").replace(/\/+$/, "");
-    const SB_URL = getEnv("SB_URL");
-    const SB_SERVICE_ROLE_KEY = getEnv("SB_SERVICE_ROLE_KEY");
     const PRICE_ID = getEnv("STRIPE_PRICE_ID");
 
-    const authHeader = req.headers.get("Authorization") ?? "";
-    const jwt = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
-    if (!jwt) return json(req, { error: "Missing Authorization bearer token." }, 401);
-
-    const sb = createClient(SB_URL, SB_SERVICE_ROLE_KEY);
-
-    // Identify the authenticated user
-    const { data: userData, error: userErr } = await sb.auth.getUser(jwt);
-    if (userErr || !userData?.user) return json(req, { error: "Invalid session." }, 401);
-
-    const user = userData.user;
-    const email = (user.email ?? "").toLowerCase();
-    if (!email) return json(req, { error: "User email not found." }, 400);
+    // Verify caller is authenticated
+    const { sb, email, userId } = await ensureAuthenticated(req.headers.get("Authorization"));
 
     // Look up existing Stripe customer ID (if any)
     const { data: subRow, error: subErr } = await sb
       .from("billing_subscriptions")
       .select("stripe_customer_id,status")
-      .eq("user_id", user.id)
+      .eq("user_id", userId)
       .maybeSingle();
 
     if (subErr) throw subErr;
@@ -82,7 +69,7 @@ serve(async (req) => {
       stripeCustomerId = cust.id;
 
       await sb.from("billing_subscriptions").upsert({
-        user_id: user.id,
+        user_id: userId,
         email,
         stripe_customer_id: stripeCustomerId,
         status: subRow?.status ?? "inactive",
@@ -116,12 +103,12 @@ serve(async (req) => {
     params.set("cancel_url", `${SITE_URL}/sns-subscribe-cancel/index.html`);
 
     // Helpful mapping (checkout session)
-    params.set("client_reference_id", user.id);
-    params.set("metadata[user_id]", user.id);
+    params.set("client_reference_id", userId);
+    params.set("metadata[user_id]", userId);
     params.set("metadata[email]", email);
 
     // IMPORTANT: also attach mapping to the *subscription* so customer.subscription.* events can map to user
-    params.set("subscription_data[metadata][user_id]", user.id);
+    params.set("subscription_data[metadata][user_id]", userId);
     params.set("subscription_data[metadata][email]", email);
 
     const session = await stripePost("checkout/sessions", params);

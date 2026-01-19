@@ -1,14 +1,9 @@
 // supabase/functions/admin-broadcast/index.ts
 // Sends a broadcast message to all client chat threads
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders, handleCorsPrefllight } from "../_shared/cors.ts";
-
-function getEnv(name: string) {
-  const v = Deno.env.get(name);
-  if (!v) throw new Error(`Missing env var: ${name}`);
-  return v;
-}
+import { checkRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
+import { ensureAdmin } from "../_shared/auth.ts";
 
 function json(req: Request, data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -23,29 +18,16 @@ type ReqBody = {
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return handleCorsPrefllight(req);
+
+  // Rate limiting for admin endpoints
+  const rateLimitResponse = checkRateLimit(req, { ...RATE_LIMITS.admin, keyPrefix: "admin-broadcast" }, getCorsHeaders(req));
+  if (rateLimitResponse) return rateLimitResponse;
+
   if (req.method !== "POST") return json(req, { error: "Method not allowed" }, 405);
 
   try {
-    const SB_URL = getEnv("SB_URL");
-    const SB_SERVICE_ROLE_KEY = getEnv("SB_SERVICE_ROLE_KEY");
-    const ADMIN_EMAIL = (getEnv("ADMIN_EMAIL") || "").toLowerCase();
-
-    const authHeader = req.headers.get("Authorization") || "";
-    const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
-    if (!token) return json(req, { error: "Missing Authorization bearer token" }, 401);
-
-    const admin = createClient(SB_URL, SB_SERVICE_ROLE_KEY, {
-      auth: { persistSession: false },
-    });
-
-    // Verify caller identity (must be ADMIN_EMAIL)
-    const { data: userData, error: userErr } = await admin.auth.getUser(token);
-    if (userErr) return json(req, { error: `Auth error: ${userErr.message}` }, 401);
-
-    const callerEmail = (userData.user?.email || "").toLowerCase();
-    if (!callerEmail || callerEmail !== ADMIN_EMAIL) {
-      return json(req, { error: "Forbidden: admin only" }, 403);
-    }
+    // Verify caller is authenticated and is an admin (database-backed check)
+    const { sb: admin } = await ensureAdmin(req.headers.get("Authorization"));
 
     const body = (await req.json().catch(() => ({}))) as ReqBody;
     const content = (body.content || "").trim();

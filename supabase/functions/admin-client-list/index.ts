@@ -1,8 +1,8 @@
 // supabase/functions/admin-client-list/index.ts
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders, handleCorsPrefllight } from "../_shared/cors.ts";
 import { checkRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
+import { ensureAdmin } from "../_shared/auth.ts";
 
 function json(req: Request, body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -123,22 +123,8 @@ serve(async (req) => {
   if (rateLimitResponse) return rateLimitResponse;
 
   try {
-    const SB_URL = getEnv("SB_URL");
-    const SB_SERVICE_ROLE_KEY = getEnv("SB_SERVICE_ROLE_KEY");
-    const ADMIN_EMAIL = getEnv("ADMIN_EMAIL").toLowerCase();
-
-    const authHeader = req.headers.get("Authorization") ?? "";
-    const jwt = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
-    if (!jwt) return json(req, { error: "Missing Authorization bearer token." }, 401);
-
-    const sb = createClient(SB_URL, SB_SERVICE_ROLE_KEY);
-
-    // Verify caller is authenticated and is the admin email
-    const { data: userData, error: userErr } = await sb.auth.getUser(jwt);
-    if (userErr || !userData?.user) return json(req, { error: "Invalid session." }, 401);
-
-    const callerEmail = (userData.user.email ?? "").toLowerCase();
-    if (callerEmail !== ADMIN_EMAIL) return json(req, { error: "Forbidden." }, 403);
+    // Verify caller is authenticated and is an admin (database-backed check)
+    const { sb } = await ensureAdmin(req.headers.get("Authorization"));
 
     const body = await req.json().catch(() => ({}));
     const includeStripe = body?.includeStripe !== false; // default true
