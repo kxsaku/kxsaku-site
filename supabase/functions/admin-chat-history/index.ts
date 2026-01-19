@@ -3,6 +3,7 @@ import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { getCorsHeaders, handleCorsPrefllight } from "../_shared/cors.ts";
 import { checkRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 import { ensureAdmin } from "../_shared/auth.ts";
+import { decryptMessage, getEncryptionKey } from "../_shared/crypto.ts";
 
 function json(req: Request, data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -114,26 +115,37 @@ serve(async (req) => {
       byMessageId.get(mid)!.push(out);
     }
 
-    const merged = (messages || []).map((m) => ({
-      id: m.id,
-      thread_id: m.thread_id,
-      sender_role: m.sender_role,
-      body: m.body,
-      created_at: m.created_at,
-      delivered_at: m.delivered_at ?? null,
-      read_by_client_at: m.read_by_client_at ?? null,
-      reply_to_message_id: m.reply_to_message_id ?? null,
+    // Decrypt message bodies
+    const encryptionKey = getEncryptionKey();
+    const merged = await Promise.all((messages || []).map(async (m) => {
+      const decryptedBody = m.deleted_at
+        ? "Deleted Message"
+        : await decryptMessage(m.body || "", encryptionKey);
+      const decryptedOriginal = m.original_body
+        ? await decryptMessage(m.original_body, encryptionKey)
+        : null;
 
-      // keep both "*_at" fields AND booleans for UI compatibility
-      edited_at: m.edited_at ?? null,
-      deleted_at: m.deleted_at ?? null,
-      edited: !!m.edited_at,
-      deleted: !!m.deleted_at,
+      return {
+        id: m.id,
+        thread_id: m.thread_id,
+        sender_role: m.sender_role,
+        body: decryptedBody,
+        created_at: m.created_at,
+        delivered_at: m.delivered_at ?? null,
+        read_by_client_at: m.read_by_client_at ?? null,
+        reply_to_message_id: m.reply_to_message_id ?? null,
 
-      // admin-only field (your UI uses a separate function to view original, but keeping it is fine)
-      original_body: m.original_body ?? null,
+        // keep both "*_at" fields AND booleans for UI compatibility
+        edited_at: m.edited_at ?? null,
+        deleted_at: m.deleted_at ?? null,
+        edited: !!m.edited_at,
+        deleted: !!m.deleted_at,
 
-      attachments: byMessageId.get(String(m.id)) || [],
+        // admin-only field
+        original_body: decryptedOriginal,
+
+        attachments: byMessageId.get(String(m.id)) || [],
+      };
     }));
 
     return json(req, { ok: true, thread_id: threadId, messages: merged }, 200);

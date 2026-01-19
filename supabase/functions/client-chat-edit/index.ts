@@ -3,6 +3,7 @@ import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders, handleCorsPrefllight } from "../_shared/cors.ts";
 import { checkRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
+import { encryptMessage, getEncryptionKey } from "../_shared/crypto.ts";
 
 function json(req: Request, data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -81,14 +82,18 @@ serve(async (req) => {
     const thread = threadRes.data as any;
     if (!thread || thread.user_id !== uid) return json(req, { error: "Forbidden" }, 403);
 
-    // Preserve original_body on first edit only
+    // Preserve original_body on first edit only (already encrypted in DB)
     const nowIso = new Date().toISOString();
     const originalBody = msg.original_body ?? msg.body;
+
+    // Encrypt the new message body
+    const encryptionKey = getEncryptionKey();
+    const encryptedBody = await encryptMessage(nextText, encryptionKey);
 
     const upd = await sb
       .from("chat_messages")
       .update({
-        body: nextText,
+        body: encryptedBody,
         edited_at: nowIso,
         original_body: originalBody,
       })
@@ -98,15 +103,16 @@ serve(async (req) => {
 
     if (upd.error) return json(req, { error: upd.error.message }, 500);
 
+    // Return unencrypted text for immediate display
     return json(req, {
       ok: true,
       message: {
         id: upd.data.id,
         sender_role: upd.data.sender_role,
-        body: upd.data.body,
+        body: nextText,
         created_at: upd.data.created_at,
         edited: !!upd.data.edited_at,
-        original_body: upd.data.original_body || null,
+        original_body: null, // Don't expose encrypted original
         deleted: !!upd.data.deleted_at,
         delivered_at: upd.data.delivered_at || null,
       },

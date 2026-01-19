@@ -5,6 +5,7 @@ import { getCorsHeaders, handleCorsPrefllight } from "../_shared/cors.ts";
 import { checkRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 import { ensureAdmin } from "../_shared/auth.ts";
 import { logAuditEvent } from "../_shared/audit.ts";
+import { encryptMessage, getEncryptionKey } from "../_shared/crypto.ts";
 
 function json(req: Request, data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -42,6 +43,10 @@ serve(async (req) => {
     const broadcastBody = `📢 BROADCAST\n\n${content}`;
     const preview = broadcastBody.slice(0, 140);
 
+    // Encrypt the broadcast message
+    const encryptionKey = getEncryptionKey();
+    const encryptedBody = await encryptMessage(broadcastBody, encryptionKey);
+
     // Get all chat threads
     const { data: threads, error: threadsErr } = await admin
       .from("chat_threads")
@@ -68,7 +73,7 @@ serve(async (req) => {
         .insert({
           thread_id: threadId,
           sender_role: "admin",
-          body: broadcastBody,
+          body: encryptedBody,
           created_at: nowIso,
           delivered_at: nowIso,
         });

@@ -3,6 +3,7 @@ import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders, handleCorsPrefllight } from "../_shared/cors.ts";
 import { checkRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
+import { decryptMessage, getEncryptionKey } from "../_shared/crypto.ts";
 
 function getEnv(name: string) {
   const v = Deno.env.get(name);
@@ -124,9 +125,18 @@ serve(async (req) => {
       byMessageId.get(mid)!.push(out);
     }
 
-    const merged = (messages || []).map((m) => ({
-      ...m,
-      attachments: byMessageId.get(String(m.id)) || [],
+    // Decrypt message bodies
+    const encryptionKey = getEncryptionKey();
+    const merged = await Promise.all((messages || []).map(async (m) => {
+      const decryptedBody = m.deleted_at
+        ? "Deleted Message"
+        : await decryptMessage(m.body || "", encryptionKey);
+
+      return {
+        ...m,
+        body: decryptedBody,
+        attachments: byMessageId.get(String(m.id)) || [],
+      };
     }));
 
     return json(req,

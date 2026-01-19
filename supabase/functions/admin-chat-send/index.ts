@@ -4,6 +4,7 @@ import { getCorsHeaders, handleCorsPrefllight } from "../_shared/cors.ts";
 import { checkRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 import { ensureAdmin } from "../_shared/auth.ts";
 import { logAuditEvent } from "../_shared/audit.ts";
+import { encryptMessage, getEncryptionKey } from "../_shared/crypto.ts";
 
 function getEnv(name: string) {
   const v = Deno.env.get(name);
@@ -168,12 +169,16 @@ serve(async (req) => {
     }
 
     // 2) Insert message (expected table: chat_messages)
+    // Encrypt the message body before storing
+    const encryptionKey = getEncryptionKey();
+    const encryptedBody = text ? await encryptMessage(text, encryptionKey) : "";
+
     const insMsg = await admin
       .from("chat_messages")
       .insert({
         thread_id: threadId,
         sender_role: "admin",
-        body: text,
+        body: encryptedBody,
         created_at: nowIso,
         delivered_at: nowIso,
       })
@@ -322,10 +327,10 @@ serve(async (req) => {
       message: {
         id: m.id,
         sender_role: m.sender_role,
-        body: m.body,
+        body: text, // Return original unencrypted text for immediate display
         created_at: m.created_at,
         edited: !!m.edited_at,
-        original_body: m.original_body || null,
+        original_body: null,
         deleted: !!m.deleted_at,
         delivered_at: m.delivered_at || null,
         read_by_client_at: m.read_by_client_at || null,
