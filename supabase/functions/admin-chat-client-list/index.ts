@@ -76,8 +76,21 @@ serve(async (req) => {
     const threadByUser = new Map<string, ThreadRow>();
     for (const t of threadRows) threadByUser.set(t.user_id, t);
 
+    // Calculate online status based on last_seen timestamp
+    // Client is considered online if they sent a heartbeat within the last 60 seconds
+    const ONLINE_THRESHOLD_MS = 60 * 1000; // 60 seconds
+    const now = Date.now();
+
     const clients = clientRows.map((c) => {
       const t = threadByUser.get(c.user_id);
+
+      // Determine if client is truly online based on last_seen
+      let isOnline = false;
+      if (t?.last_seen) {
+        const lastSeenTime = new Date(t.last_seen).getTime();
+        isOnline = (now - lastSeenTime) < ONLINE_THRESHOLD_MS;
+      }
+
       return {
         user_id: c.user_id,
         email: c.email,
@@ -86,7 +99,7 @@ serve(async (req) => {
         phone: c.phone,
         last_message_at: t?.last_message_at ?? null,
         has_unread: Boolean((t as any)?.unread_for_admin ?? false),
-        is_online: Boolean(t?.is_online ?? false),
+        is_online: isOnline,
         last_seen: t?.last_seen ?? null,
       };
     });
