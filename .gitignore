@@ -3,3 +3,9 @@ supabase-export/
 
 # Dev-only source directories (built outputs are in home/ subdirs)
 react-headline/node_modules/
+supabase-selfhost/
+MIGRATION_REPORT.md
+MIGRATION_ANALYSIS.md
+MIGRATION_PROGRESS.md
+PHASE2_PLAN.md
+DEPLOYMENT_CHECKLIST.md
