@@ -802,6 +802,7 @@
 
 </head>
 <body>
+<a href="#main-content" class="skip-link">Skip to content</a>
   <!-- Mobile navigation (hidden on desktop, visible on mobile) -->
   <div class="mobile-bg-effects" aria-hidden="true">
     <div class="glow"></div>
@@ -870,7 +871,7 @@
     </div>
   </header>
 
-  <div class="wrap">
+  <div class="wrap" id="main-content">
     <div class="top">
       <div>
         <h1>SNS Client Dashboard</h1>
@@ -956,8 +957,9 @@
 
     <div class="chatComposer">
       <input id="chatFile" type="file" multiple style="display:none" />
-      <button id="chatAttachBtn" class="btn btnGhost" type="button" title="Attach files">Attach</button>
+      <button id="chatAttachBtn" class="btn btnGhost" type="button" title="Attach files" aria-label="Attach files">Attach</button>
 
+      <label for="chatInput" class="sr-only">Type your message</label>
       <textarea id="chatInput" class="chatInput" placeholder="Type a message… (Enter = send, Shift+Enter = newline)"></textarea>
       <button id="chatSend" class="btn">Send</button>
     </div>

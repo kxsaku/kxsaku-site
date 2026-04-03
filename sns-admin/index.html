@@ -718,6 +718,7 @@
 </head>
 
 <body>
+<a href="#main-content" class="skip-link">Skip to content</a>
   <!-- Mobile navigation (hidden on desktop, visible on mobile) -->
   <div class="mobile-bg-effects" aria-hidden="true">
     <div class="glow"></div>
@@ -786,7 +787,7 @@
     </div>
   </header>
 
-  <div class="wrap">
+  <div class="wrap" id="main-content">
     <!-- Page Header -->
     <header class="page-header page-enter">
       <div class="page-header-content">
@@ -1229,7 +1230,7 @@
           <td>${sanitize(Array.isArray(r.services) ? r.services.join(", ") : (r.services || ""))}</td>
           <td>
             <div class="row-actions">
-              <button class="row-action-btn" data-eye="${sanitize(r.id)}" type="button" title="Quick look">👁️</button>
+              <button class="row-action-btn" data-eye="${sanitize(r.id)}" type="button" title="Quick look" aria-label="Quick look">👁️</button>
               <button class="row-action-btn" data-view="${sanitize(r.id)}" type="button">View</button>
               <button class="row-action-btn danger" data-del="${sanitize(r.id)}" type="button">Delete</button>
             </div>
