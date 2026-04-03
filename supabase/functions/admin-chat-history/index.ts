@@ -84,20 +84,25 @@ serve(async (req) => {
       return json(req, { error: `Failed to load attachments: ${attErr.message}` }, 500);
     }
 
-    // Sign URLs and group by message_id
+    // Sign URLs in parallel and group by message_id
     const byMessageId = new Map<string, AttachmentOut[]>();
 
-    for (const a of atts || []) {
-      const bucket = (a as any).storage_bucket || "chat-attachments";
-      const path = a.storage_path as string;
-      if (!path) continue;
+    const validAtts = (atts || []).filter((a) => a.storage_path);
+    const signedResults = await Promise.all(
+      validAtts.map((a) => {
+        const bucket = (a as any).storage_bucket || "chat-attachments";
+        return sb.storage.from(bucket).createSignedUrl(a.storage_path as string, 60 * 60);
+      })
+    );
 
-      const signed = await sb.storage.from(bucket).createSignedUrl(path, 60 * 60);
+    for (let i = 0; i < validAtts.length; i++) {
+      const a = validAtts[i];
+      const signed = signedResults[i];
       const signedUrl = signed.error ? null : (signed.data?.signedUrl ?? null);
 
       const out: AttachmentOut = {
         id: String(a.id),
-        storage_path: path,
+        storage_path: a.storage_path as string,
         mime_type: String(a.mime_type || ""),
         file_name: String(a.original_name || "attachment"),
         size_bytes: (a.size_bytes ?? null) as number | null,
