@@ -1,85 +1,20 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>SNS · Client Login</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://esm.sh; style-src 'self' 'unsafe-inline'; connect-src 'self' https://api.kxsaku.com wss://api.kxsaku.com https://api.stripe.com; img-src 'self' data: blob: https://api.kxsaku.com; font-src 'self'; frame-src https://js.stripe.com;" />
-  <link rel="stylesheet" href="/styles.min.css" />
-<style>
-    /* Page-specific layout */
-    .wrap{ max-width: 980px; padding: 2.5rem 1rem 4rem; }
-    .topbar{ display:flex; justify-content:space-between; align-items:center; gap:1rem; }
-    .brand{ display:flex; align-items:center; gap:.75rem; text-decoration:none; color:var(--color-text-primary); }
-    .brand strong{ letter-spacing:.18em; text-transform:uppercase; font-size: .95rem; }
+// /mobile-nav.js — Shared mobile navigation for all kxsaku.com pages
+// Usage: <script src="/mobile-nav.js" defer></script>
+//
+// Injects mobile nav CSS, HTML, and JS handlers.
+// Must be loaded after the <body> tag exists (use defer or place at end of body).
 
-    /* Login card structure */
-    .login-card{
-      margin-top: 2rem;
-      background: rgba(10, 6, 24, .55);
-      border: 1px solid rgba(180,150,255,.22);
-      border-radius: 18px;
-      box-shadow: 0 18px 70px rgba(0,0,0,.55);
-      overflow:hidden;
-      width: 100%;
-      max-width: 100%;
-      padding: 0;
-    }
-    .card-h{
-      padding: 1.4rem 1.4rem 1rem;
-      border-bottom: 1px solid rgba(180,150,255,.12);
-    }
-    .card-h h1{ margin:0; font-size: 1.05rem; letter-spacing:.18em; text-transform:uppercase; }
-    .card-h p{ margin:.55rem 0 0; color: var(--color-text-muted); }
-    .card-b{ padding: 1.4rem; display:grid; gap: .9rem; }
+(function() {
+  "use strict";
 
-    /* Form fields */
-    label{ font-size:.78rem; letter-spacing:.16em; text-transform:uppercase; color: rgba(244,240,255,.75); }
-    input{
-      width:100%;
-      max-width: 100%;
-      padding: .9rem 1rem;
-      border-radius: 14px;
-      border: 1px solid var(--color-border-input);
-      background: var(--color-surface-input);
-      color: var(--color-text-primary);
-      outline:none;
-    }
-    input:focus{ border-color: rgba(200,170,255,.6); }
-    .form-row{ display:grid; grid-template-columns: 1fr; gap:.4rem; }
-    .form-row > * { min-width: 0; }
-    .actions{ display:flex; gap:.8rem; align-items:center; justify-content:flex-end; margin-top:.4rem; flex-wrap:wrap; }
-
-    /* Message box */
-    .msg{
-      display:none;
-      padding:.9rem 1rem;
-      border-radius: 14px;
-      border: 1px solid rgba(255,120,170,.35);
-      background: rgba(60,0,30,.25);
-      color:#ffd6e6;
-    }
-
-    /* Muted link */
-    .muted-link{
-      color: rgba(200,170,255,.85);
-      text-decoration:none;
-      font-weight:700;
-      letter-spacing:.10em;
-      text-transform:uppercase;
-      font-size:.75rem;
-    }
-    .muted-link:hover{ text-decoration:underline; }
-  
-    /* ===== MOBILE RESPONSIVE ===== */
+  // ─── CSS ──────────────────────────────────────────────────────────
+  const css = `
     @media (max-width: 768px) {
-      /* Show mobile nav elements */
       .mobile-bg-effects { display: block; }
       .mobile-topnav { display: block; }
       .mobile-scrim { display: block; }
       .mobile-menu { display: block; }
 
-      /* Animated background */
       .mobile-bg-effects {
         position: fixed;
         inset: 0;
@@ -137,7 +72,6 @@
         z-index: 1;
       }
 
-      /* Mobile top nav */
       .mobile-topnav {
         position: sticky;
         top: 0;
@@ -222,7 +156,6 @@
       .mobile-icon-btn:active { transform: translateY(0); filter: brightness(1.04); }
       .mobile-icon-btn svg { opacity: .92; }
 
-      /* Mobile slide-down menu */
       .mobile-scrim {
         position: fixed;
         inset: 0;
@@ -293,77 +226,23 @@
       }
       .mobile-menu-actions .btn { width: 100%; }
 
-      /* Mobile layout adjustments */
-      .wrap {
-        width: min(640px, calc(100% - 1.25rem));
-        padding-left: 0;
-        padding-right: 0;
+      @media (prefers-reduced-motion: reduce) {
+        .mobile-bg-effects .glow { animation: none !important; }
+        .mobile-bg-effects .lines { animation: none !important; }
+        .mobile-bg-effects .dots { animation: none !important; }
+        .mobile-menu, .mobile-scrim { transition: none !important; }
       }
-
-      /* Stack desktop toprow vertically */
-      .toprow {
-        flex-direction: column;
-        align-items: stretch;
-        gap: .75rem;
-      }
-
-      /* Stack desktop button rows */
-      .btnrow {
-        flex-wrap: wrap;
-      }
-
-      /* Table responsive: stack cells on mobile */
-      table { border-collapse: collapse; }
-      thead { display: none; }
-      tbody, tr, td { display: block; width: 100%; }
-      tr {
-        border-radius: 16px;
-        border: 1px solid rgba(196,181,253,.10);
-        background: rgba(0,0,0,.16);
-        margin-bottom: .75rem;
-        overflow: hidden;
-      }
-      td {
-        padding: .85rem .9rem;
-        border-top: 1px solid rgba(196,181,253,.08);
-        border-bottom: none;
-      }
-      tr td:first-child { border-top: none; }
-
-      /* Detail grid stacks to single column */
-      .detail-grid { grid-template-columns: 1fr; }
-      .full { grid-column: 1; }
-
-      /* Toolbar stacks */
-      .toolbar { flex-direction: column; gap: .5rem; }
-      .toolbar-left, .toolbar-right { flex-wrap: wrap; }
-
-      /* Actions full-width on mobile */
-      .actions { flex-direction: column; }
-      .actions .btn { width: 100%; }
     }
+  `;
 
-    /* Hide mobile elements on desktop */
-    @media (min-width: 769px) {
-      .mobile-bg-effects,
-      .mobile-topnav,
-      .mobile-scrim,
-      .mobile-menu { display: none !important; }
-    }
+  // ─── Inject CSS ───────────────────────────────────────────────────
+  var style = document.createElement("style");
+  style.setAttribute("data-mobile-nav", "true");
+  style.textContent = css;
+  document.head.appendChild(style);
 
-    /* Reduced motion */
-    @media (prefers-reduced-motion: reduce) {
-      .mobile-bg-effects .glow,
-      .mobile-bg-effects .lines,
-      .mobile-bg-effects .dots { animation: none !important; }
-      .mobile-menu, .mobile-scrim { transition: none !important; }
-    }
-
-  </style>
-</head>
-<body>
-<a href="#main-content" class="skip-link">Skip to content</a>
-  <!-- Mobile navigation (hidden on desktop, visible on mobile) -->
+  // ─── HTML ─────────────────────────────────────────────────────────
+  var html = `
   <div class="mobile-bg-effects" aria-hidden="true">
     <div class="glow"></div>
     <div class="lines"></div>
@@ -430,132 +309,56 @@
       </div>
     </div>
   </header>
+  `;
 
-  <div class="wrap" id="main-content">
-    <div class="topbar">
-      <a class="brand" href="/sns/">
-        <strong>Saku Network Solutions</strong>
-      </a>
-      <a class="btn" href="/sns/">Back</a>
-    </div>
+  // ─── Inject HTML at start of body ─────────────────────────────────
+  // Only inject if not already present
+  if (!document.getElementById("mobileMenu")) {
+    var container = document.createElement("div");
+    container.innerHTML = html;
+    // Prepend all children to body
+    while (container.lastChild) {
+      document.body.insertBefore(container.lastChild, document.body.firstChild);
+    }
+  }
 
-    <div class="login-card">
-      <div class="card-h">
-        <h1>Client Login</h1>
-        <p>Log in to view your dashboard and subscription.</p>
-      </div>
-      <div class="card-b">
-        <div id="msg" class="msg"></div>
+  // ─── JS Handlers ──────────────────────────────────────────────────
+  var menu = document.getElementById("mobileMenu");
+  var scrim = document.getElementById("mobileScrim");
+  var openBtn = document.getElementById("mobileOpenMenu");
+  var closeBtn = document.getElementById("mobileCloseMenu");
 
-        <div class="form-row">
-          <label for="email">Email</label>
-          <input id="email" type="email" autocomplete="email" placeholder="you@domain.com" />
-        </div>
-
-        <div class="form-row">
-          <label for="password">Password</label>
-          <input id="password" type="password" autocomplete="current-password" placeholder="••••••••" />
-        </div>
-
-        <div class="actions">
-          <a class="muted-link" href="/sns-portal-invite/">Have an invite?</a>
-          <button id="loginBtn" class="btn btn-primary">Login</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script src="/vendor/supabase-js.min.js" defer></script>
-  <script type="module">
-    import { createSupabaseClient, SUPABASE_URL, SUPABASE_ANON_KEY } from "/shared.js";
-
-    const supabase = createSupabaseClient();
-
-    const msg = document.getElementById("msg");
-    const emailEl = document.getElementById("email");
-    const passEl = document.getElementById("password");
-    const btn = document.getElementById("loginBtn");
-
-    function showMsg(text){
-      msg.textContent = text;
-      msg.style.display = "block";
+  if (menu && scrim && openBtn && closeBtn) {
+    function openMenu() {
+      menu.classList.add("open");
+      scrim.classList.add("open");
+      menu.setAttribute("aria-hidden", "false");
+      scrim.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+    }
+    function closeMenu() {
+      menu.classList.remove("open");
+      scrim.classList.remove("open");
+      menu.setAttribute("aria-hidden", "true");
+      scrim.setAttribute("aria-hidden", "true");
+      document.body.style.overflow = "";
     }
 
-    // If already logged in, go straight to dashboard
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session) window.location.href = "/sns-dashboard/";
-
-    // Enter key support for login
-    passEl.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") { e.preventDefault(); btn.click(); }
+    openBtn.addEventListener("click", openMenu);
+    closeBtn.addEventListener("click", closeMenu);
+    scrim.addEventListener("click", closeMenu);
+    window.addEventListener("keydown", function(e) {
+      if (e.key === "Escape") closeMenu();
     });
-    emailEl.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") { e.preventDefault(); btn.click(); }
+  }
+
+  // View Desktop Site preference
+  var desktopLink = document.getElementById("mobileViewDesktop");
+  if (desktopLink) {
+    desktopLink.addEventListener("click", function(e) {
+      e.preventDefault();
+      localStorage.setItem("sns_force_desktop", "1");
+      location.reload();
     });
-
-    btn.addEventListener("click", async () => {
-      msg.style.display = "none";
-      btn.disabled = true;
-
-      const email = emailEl.value.trim();
-      const password = passEl.value;
-
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error){
-        showMsg(error.message || "Login failed.");
-        btn.disabled = false;
-        return;
-      }
-
-      window.location.href = "/sns-dashboard/";
-    });
-  </script>
-
-  <script>
-    // Mobile menu handler
-    (function(){
-      var menu = document.getElementById("mobileMenu");
-      var scrim = document.getElementById("mobileScrim");
-      var openBtn = document.getElementById("mobileOpenMenu");
-      var closeBtn = document.getElementById("mobileCloseMenu");
-      if (!menu || !scrim || !openBtn || !closeBtn) return;
-
-      function openMenu(){
-        menu.classList.add("open");
-        scrim.classList.add("open");
-        menu.setAttribute("aria-hidden","false");
-        scrim.setAttribute("aria-hidden","false");
-        document.body.style.overflow = "hidden";
-      }
-      function closeMenu(){
-        menu.classList.remove("open");
-        scrim.classList.remove("open");
-        menu.setAttribute("aria-hidden","true");
-        scrim.setAttribute("aria-hidden","true");
-        document.body.style.overflow = "";
-      }
-
-      openBtn.addEventListener("click", openMenu);
-      closeBtn.addEventListener("click", closeMenu);
-      scrim.addEventListener("click", closeMenu);
-      window.addEventListener("keydown", function(e){
-        if (e.key === "Escape") closeMenu();
-      });
-    })();
-  </script>
-
-  <script>
-    // View Desktop Site preference
-    (function(){
-      var a = document.getElementById("mobileViewDesktop");
-      if (!a) return;
-      a.addEventListener("click", function(e){
-        e.preventDefault();
-        localStorage.setItem("sns_force_desktop", "1");
-        location.reload();
-      });
-    })();
-  </script>
-
-</body>
-</html>
+  }
+})();

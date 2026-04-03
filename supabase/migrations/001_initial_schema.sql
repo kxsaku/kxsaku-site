@@ -225,45 +225,8 @@ CREATE TABLE public.chat_messages (
 );
 
 
---
--- Name: chat_notification_prefs; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.chat_notification_prefs (
-    id uuid DEFAULT gen_random_uuid() NOT NULL,
-    user_id uuid NOT NULL,
-    email_enabled boolean DEFAULT true NOT NULL,
-    push_enabled boolean DEFAULT true NOT NULL,
-    created_at timestamp with time zone DEFAULT now() NOT NULL,
-    updated_at timestamp with time zone DEFAULT now() NOT NULL
-);
-
-
---
--- Name: chat_notification_state; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.chat_notification_state (
-    id uuid DEFAULT gen_random_uuid() NOT NULL,
-    user_id uuid NOT NULL,
-    last_notified_at timestamp with time zone,
-    created_at timestamp with time zone DEFAULT now() NOT NULL,
-    updated_at timestamp with time zone DEFAULT now() NOT NULL
-);
-
-
---
--- Name: chat_presence; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.chat_presence (
-    id uuid DEFAULT gen_random_uuid() NOT NULL,
-    user_id uuid NOT NULL,
-    is_online boolean DEFAULT false NOT NULL,
-    last_seen timestamp with time zone,
-    created_at timestamp with time zone DEFAULT now() NOT NULL,
-    updated_at timestamp with time zone DEFAULT now() NOT NULL
-);
+-- REMOVED: chat_notification_prefs, chat_notification_state, chat_presence
+-- These tables were unused — presence is tracked on chat_threads directly (is_online, last_seen).
 
 
 --
@@ -293,6 +256,11 @@ CREATE TABLE public.chat_threads (
 
 --
 -- Name: client_profiles; Type: TABLE; Schema: public; Owner: -
+--
+-- TODO: client_profiles overlaps with user_profiles on email, business_name, and phone.
+-- user_profiles tracks admin status; client_profiles tracks client-specific fields (addresses, billing).
+-- Consider merging into a unified profile table in a future migration to eliminate ambiguity
+-- about which table is the source of truth for shared fields.
 --
 
 CREATE TABLE public.client_profiles (
@@ -418,28 +386,7 @@ ALTER TABLE ONLY public.chat_messages
     ADD CONSTRAINT chat_messages_pkey PRIMARY KEY (id);
 
 
---
--- Name: chat_notification_prefs chat_notification_prefs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.chat_notification_prefs
-    ADD CONSTRAINT chat_notification_prefs_pkey PRIMARY KEY (id);
-
-
---
--- Name: chat_notification_state chat_notification_state_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.chat_notification_state
-    ADD CONSTRAINT chat_notification_state_pkey PRIMARY KEY (id);
-
-
---
--- Name: chat_presence chat_presence_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.chat_presence
-    ADD CONSTRAINT chat_presence_pkey PRIMARY KEY (id);
+-- REMOVED: chat_notification_prefs_pkey, chat_notification_state_pkey, chat_presence_pkey (tables removed)
 
 
 --
@@ -588,25 +535,7 @@ CREATE TRIGGER set_updated_at BEFORE UPDATE ON public.billing_subscriptions FOR 
 CREATE TRIGGER set_updated_at BEFORE UPDATE ON public.chat_messages FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
 
 
---
--- Name: chat_notification_prefs set_updated_at; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER set_updated_at BEFORE UPDATE ON public.chat_notification_prefs FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
-
-
---
--- Name: chat_notification_state set_updated_at; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER set_updated_at BEFORE UPDATE ON public.chat_notification_state FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
-
-
---
--- Name: chat_presence set_updated_at; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER set_updated_at BEFORE UPDATE ON public.chat_presence FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
+-- REMOVED: set_updated_at triggers for chat_notification_prefs, chat_notification_state, chat_presence (tables removed)
 
 
 --
@@ -699,28 +628,7 @@ ALTER TABLE ONLY public.chat_messages
     ADD CONSTRAINT chat_messages_thread_id_fkey FOREIGN KEY (thread_id) REFERENCES public.chat_threads(id) ON DELETE CASCADE;
 
 
---
--- Name: chat_notification_prefs chat_notification_prefs_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.chat_notification_prefs
-    ADD CONSTRAINT chat_notification_prefs_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE;
-
-
---
--- Name: chat_notification_state chat_notification_state_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.chat_notification_state
-    ADD CONSTRAINT chat_notification_state_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE;
-
-
---
--- Name: chat_presence chat_presence_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.chat_presence
-    ADD CONSTRAINT chat_presence_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE;
+-- REMOVED: FK constraints for chat_notification_prefs, chat_notification_state, chat_presence (tables removed)
 
 
 --
@@ -825,25 +733,7 @@ CREATE POLICY "Service role full access" ON public.chat_attachments USING ((auth
 CREATE POLICY "Service role full access" ON public.chat_messages USING ((auth.role() = 'service_role'::text));
 
 
---
--- Name: chat_notification_prefs Service role full access; Type: POLICY; Schema: public; Owner: -
---
-
-CREATE POLICY "Service role full access" ON public.chat_notification_prefs USING ((auth.role() = 'service_role'::text));
-
-
---
--- Name: chat_notification_state Service role full access; Type: POLICY; Schema: public; Owner: -
---
-
-CREATE POLICY "Service role full access" ON public.chat_notification_state USING ((auth.role() = 'service_role'::text));
-
-
---
--- Name: chat_presence Service role full access; Type: POLICY; Schema: public; Owner: -
---
-
-CREATE POLICY "Service role full access" ON public.chat_presence USING ((auth.role() = 'service_role'::text));
+-- REMOVED: Service role policies for chat_notification_prefs, chat_notification_state, chat_presence (tables removed)
 
 
 --
@@ -888,25 +778,7 @@ CREATE POLICY "Service role full access" ON public.sns_system_status USING ((aut
 CREATE POLICY "Service role full access" ON public.user_profiles USING ((auth.role() = 'service_role'::text));
 
 
---
--- Name: chat_notification_state Users can manage own notification state; Type: POLICY; Schema: public; Owner: -
---
-
-CREATE POLICY "Users can manage own notification state" ON public.chat_notification_state USING ((auth.uid() = user_id));
-
-
---
--- Name: chat_notification_prefs Users can manage own prefs; Type: POLICY; Schema: public; Owner: -
---
-
-CREATE POLICY "Users can manage own prefs" ON public.chat_notification_prefs USING ((auth.uid() = user_id));
-
-
---
--- Name: chat_presence Users can manage own presence; Type: POLICY; Schema: public; Owner: -
---
-
-CREATE POLICY "Users can manage own presence" ON public.chat_presence USING ((auth.uid() = user_id));
+-- REMOVED: User policies for chat_notification_prefs, chat_notification_state, chat_presence (tables removed)
 
 
 --
@@ -972,23 +844,7 @@ ALTER TABLE public.chat_attachments ENABLE ROW LEVEL SECURITY;
 
 ALTER TABLE public.chat_messages ENABLE ROW LEVEL SECURITY;
 
---
--- Name: chat_notification_prefs; Type: ROW SECURITY; Schema: public; Owner: -
---
-
-ALTER TABLE public.chat_notification_prefs ENABLE ROW LEVEL SECURITY;
-
---
--- Name: chat_notification_state; Type: ROW SECURITY; Schema: public; Owner: -
---
-
-ALTER TABLE public.chat_notification_state ENABLE ROW LEVEL SECURITY;
-
---
--- Name: chat_presence; Type: ROW SECURITY; Schema: public; Owner: -
---
-
-ALTER TABLE public.chat_presence ENABLE ROW LEVEL SECURITY;
+-- REMOVED: RLS for chat_notification_prefs, chat_notification_state, chat_presence (tables removed)
 
 --
 -- Name: chat_threads; Type: ROW SECURITY; Schema: public; Owner: -

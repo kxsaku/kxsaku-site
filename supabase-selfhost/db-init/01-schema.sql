@@ -111,34 +111,7 @@ CREATE TABLE IF NOT EXISTS public.chat_attachments (
 CREATE INDEX idx_chat_attachments_thread_id ON public.chat_attachments(thread_id);
 CREATE INDEX idx_chat_attachments_message_id ON public.chat_attachments(message_id);
 
--- 7. chat_notification_prefs
-CREATE TABLE IF NOT EXISTS public.chat_notification_prefs (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  email_enabled BOOLEAN NOT NULL DEFAULT true,
-  push_enabled BOOLEAN NOT NULL DEFAULT true,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-
--- 8. chat_notification_state
-CREATE TABLE IF NOT EXISTS public.chat_notification_state (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  last_notified_at TIMESTAMPTZ,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-
--- 9. chat_presence
-CREATE TABLE IF NOT EXISTS public.chat_presence (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  is_online BOOLEAN NOT NULL DEFAULT false,
-  last_seen TIMESTAMPTZ,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
-);
+-- REMOVED: chat_notification_prefs, chat_notification_state, chat_presence (unused — presence tracked on chat_threads)
 
 -- 10. inquiries
 CREATE TABLE IF NOT EXISTS public.inquiries (

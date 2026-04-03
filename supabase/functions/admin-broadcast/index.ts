@@ -54,35 +54,37 @@ serve(async (req) => {
       return json(req, { ok: true, sent_count: 0, message: "No client threads exist yet" }, 200);
     }
 
-    let sentCount = 0;
     const errors: string[] = [];
 
-    // Insert broadcast message to each thread
+    // Build all message rows (each needs unique encryption)
+    const messageRows = [];
     for (const thread of threads) {
-      const threadId = thread.id;
-
-      // Encrypt per-thread so each gets unique ciphertext/IV
       const encryptedBody = await encryptMessage(broadcastBody, encryptionKey);
+      messageRows.push({
+        thread_id: thread.id,
+        sender_role: "admin",
+        body: encryptedBody,
+        created_at: nowIso,
+        delivered_at: nowIso,
+      });
+    }
 
-      // Insert message (using only standard columns)
-      const msgInsert = await admin
-        .from("chat_messages")
-        .insert({
-          thread_id: threadId,
-          sender_role: "admin",
-          body: encryptedBody,
-          created_at: nowIso,
-          delivered_at: nowIso,
-        });
+    // Batch insert all messages at once
+    const msgInsert = await admin
+      .from("chat_messages")
+      .insert(messageRows);
 
-      if (msgInsert.error) {
-        console.error(`Failed to insert broadcast to thread ${threadId}:`, msgInsert.error);
-        errors.push(`Thread ${threadId}: ${msgInsert.error.message}`);
-        continue;
-      }
+    if (msgInsert.error) {
+      console.error("Batch broadcast insert failed:", msgInsert.error);
+      errors.push(`Batch insert: ${msgInsert.error.message}`);
+    }
 
-      // Update thread to show unread
-      await admin
+    const sentCount = msgInsert.error ? 0 : threads.length;
+
+    // Batch update all threads to show unread
+    if (sentCount > 0) {
+      const threadIds = threads.map(t => t.id);
+      const updResult = await admin
         .from("chat_threads")
         .update({
           last_admin_msg_at: nowIso,
@@ -91,9 +93,12 @@ serve(async (req) => {
           last_sender_role: "admin",
           unread_for_client: true,
         })
-        .eq("id", threadId);
+        .in("id", threadIds);
 
-      sentCount++;
+      if (updResult.error) {
+        console.error("Batch thread update failed:", updResult.error);
+        errors.push(`Thread update: ${updResult.error.message}`);
+      }
     }
 
     // Audit log the broadcast

@@ -80,6 +80,7 @@ serve(async (req) => {
         storage_bucket: bucket,
         storage_path: path,
         original_name: fileName,
+        filename: fileName,
         mime_type: mimeType,
         size_bytes: sizeBytes,
         uploader_user_id: callerId,

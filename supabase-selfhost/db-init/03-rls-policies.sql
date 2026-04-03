@@ -7,9 +7,7 @@ ALTER TABLE public.billing_subscriptions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.chat_threads ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.chat_messages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.chat_attachments ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.chat_notification_prefs ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.chat_notification_state ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.chat_presence ENABLE ROW LEVEL SECURITY;
+-- REMOVED: chat_notification_prefs, chat_notification_state, chat_presence (tables removed)
 ALTER TABLE public.inquiries ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.sns_internal_notes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.sns_system_status ENABLE ROW LEVEL SECURITY;
@@ -59,21 +57,7 @@ CREATE POLICY "Users can view own thread attachments" ON public.chat_attachments
 CREATE POLICY "Service role full access" ON public.chat_attachments
   FOR ALL USING (auth.role() = 'service_role');
 
--- chat_notification_prefs/state/presence: Own data only
-CREATE POLICY "Users can manage own prefs" ON public.chat_notification_prefs
-  FOR ALL USING (auth.uid() = user_id);
-CREATE POLICY "Service role full access" ON public.chat_notification_prefs
-  FOR ALL USING (auth.role() = 'service_role');
-
-CREATE POLICY "Users can manage own notification state" ON public.chat_notification_state
-  FOR ALL USING (auth.uid() = user_id);
-CREATE POLICY "Service role full access" ON public.chat_notification_state
-  FOR ALL USING (auth.role() = 'service_role');
-
-CREATE POLICY "Users can manage own presence" ON public.chat_presence
-  FOR ALL USING (auth.uid() = user_id);
-CREATE POLICY "Service role full access" ON public.chat_presence
-  FOR ALL USING (auth.role() = 'service_role');
+-- REMOVED: Policies for chat_notification_prefs, chat_notification_state, chat_presence (tables removed)
 
 -- inquiries: Admins can do everything; public can insert (for form submission)
 CREATE POLICY "Admins can manage inquiries" ON public.inquiries

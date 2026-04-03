@@ -537,15 +537,11 @@
     </div>
   </div>
 
-  <script src="/vendor/supabase-js.min.js"></script>
+  <script src="/vendor/supabase-js.min.js" defer></script>
   <script type="module">
-    import { createClient } from "/vendor/supabase-esm.js";
+    import { createSupabaseClient, fmtDate } from "/shared.js";
 
-    // MUST MATCH YOUR OTHER PAGES
-    const SUPABASE_URL = "https://api.kxsaku.com";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJyb2xlIjogImFub24iLCAiaXNzIjogInN1cGFiYXNlIiwgImlhdCI6IDE3NzQ1ODk3MDQsICJleHAiOiAyMDg5OTQ5NzA0fQ.6a6MgSOWpvsLl86OtTPOPTrndiIz4WwGlVDzPrc8CtM"; // <-- replace with the same anon key used on sns-dashboard
-
-    const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const sb = createSupabaseClient();
 
     const who = document.getElementById("who");
     const rows = document.getElementById("rows");
@@ -566,14 +562,7 @@
       warn.textContent = msg;
     }
 
-    function fmtDate(iso) {
-      try {
-        const d = new Date(iso);
-        return d.toLocaleString(undefined, { year:"numeric", month:"short", day:"2-digit", hour:"2-digit", minute:"2-digit" });
-      } catch {
-        return iso ?? "";
-      }
-    }
+    // fmtDate() imported from /shared.js
 
     function pill(text) {
       const span = document.createElement("span");

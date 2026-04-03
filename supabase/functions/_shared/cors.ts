@@ -64,15 +64,4 @@ export function handleCorsPrefllight(req: Request): Response {
   return new Response("ok", { headers: getCorsHeaders(req) });
 }
 
-/**
- * Create a JSON response with proper CORS headers.
- */
-export function jsonResponse(req: Request, body: unknown, status = 200): Response {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: {
-      ...getCorsHeaders(req),
-      "Content-Type": "application/json",
-    },
-  });
-}
+// jsonResponse() removed — use json() from ./response.ts instead

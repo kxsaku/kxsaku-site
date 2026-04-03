@@ -32,6 +32,17 @@ serve(async (req) => {
     const { subject, message, page, userAgent } = await req.json();
     if (!subject || !message) return json(req, { error: "Missing subject/message" }, 400);
 
+    // Server-side length validation
+    if (typeof subject === "string" && subject.length > 200) {
+      return json(req, { error: "Subject too long (max 200 characters)" }, 400);
+    }
+    if (typeof message === "string" && message.length > 5000) {
+      return json(req, { error: "Message too long (max 5000 characters)" }, 400);
+    }
+    if (typeof page === "string" && page.length > 500) {
+      return json(req, { error: "Page field too long (max 500 characters)" }, 400);
+    }
+
     const emailText =
 `SNS Website Contact Form
 

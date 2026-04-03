@@ -2,12 +2,7 @@
 // Shared authentication and authorization utilities
 
 import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-function getEnv(name: string): string {
-  const v = Deno.env.get(name);
-  if (!v) throw new Error(`Missing env var: ${name}`);
-  return v;
-}
+import { getEnv } from "./env.ts";
 
 /**
  * Validates the JWT token and checks if the user is an admin.

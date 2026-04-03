@@ -1332,14 +1332,13 @@
     </div>
   </div>
 
-  <script src="/vendor/supabase-js.min.js"></script>
+  <script src="/vendor/supabase-js.min.js" defer></script>
   <script type="module">
-    import { createClient } from "/vendor/supabase-esm.js";
+    import { SUPABASE_URL, SUPABASE_ANON_KEY, createSupabaseClient } from "/shared.js";
 
-    // Keep your current values (as you already had working before)
-    const supabaseUrl = "https://api.kxsaku.com";
-    const supabaseAnonKey = "eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJyb2xlIjogImFub24iLCAiaXNzIjogInN1cGFiYXNlIiwgImlhdCI6IDE3NzQ1ODk3MDQsICJleHAiOiAyMDg5OTQ5NzA0fQ.6a6MgSOWpvsLl86OtTPOPTrndiIz4WwGlVDzPrc8CtM";
-    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+    const supabaseUrl = SUPABASE_URL;
+    const supabaseAnonKey = SUPABASE_ANON_KEY;
+    const supabase = createSupabaseClient();
 
     const form = document.getElementById("sns-inquiry-form");
     const msgEl = document.getElementById("sns-message");
@@ -1349,18 +1348,20 @@
     function toast(title, message, type="good", ms=3000){
       const el = document.createElement("div");
       el.className = `toast ${type}`;
-      el.innerHTML = `
-        <div class="ic">
-          ${type === "good"
-            ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="rgba(122,249,196,.95)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
-            : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="rgba(255,148,148,.95)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
-          }
-        </div>
-        <div>
-          <h4>${title}</h4>
-          <p>${message}</p>
-        </div>
-      `;
+      const icDiv = document.createElement("div");
+      icDiv.className = "ic";
+      icDiv.innerHTML = type === "good"
+        ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="rgba(122,249,196,.95)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+        : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="rgba(255,148,148,.95)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      const textDiv = document.createElement("div");
+      const h4 = document.createElement("h4");
+      h4.textContent = title;
+      const p = document.createElement("p");
+      p.textContent = message;
+      textDiv.appendChild(h4);
+      textDiv.appendChild(p);
+      el.appendChild(icDiv);
+      el.appendChild(textDiv);
       toasts.appendChild(el);
 
       window.setTimeout(() => {

@@ -979,20 +979,17 @@
     </div>
   </div>
 
-  <script src="/vendor/supabase-js.min.js"></script>
+  <script src="/vendor/supabase-js.min.js" defer></script>
   <script type="module">
-    import { createClient } from "/vendor/supabase-esm.js";
+    import { SUPABASE_URL, SUPABASE_ANON_KEY, FN_BASE, createSupabaseClient, sanitize, esc, fmtDate as fmtDateFull, fmtDateSimple, requireUser as sharedRequireUser } from "/shared.js";
 
-    const SUPABASE_URL = "https://api.kxsaku.com";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJyb2xlIjogImFub24iLCAiaXNzIjogInN1cGFiYXNlIiwgImlhdCI6IDE3NzQ1ODk3MDQsICJleHAiOiAyMDg5OTQ5NzA0fQ.6a6MgSOWpvsLl86OtTPOPTrndiIz4WwGlVDzPrc8CtM";
-    const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    const sb = createSupabaseClient({
       auth: {
         persistSession: true,
         autoRefreshToken: true,
         detectSessionInUrl: true
       }
     });
-    const FN_BASE = `${SUPABASE_URL}/functions/v1`;
 
     const who = document.getElementById("who");
     const logoutBtn = document.getElementById("logout");
@@ -1049,25 +1046,8 @@
 
 
     async function requireUser() {
-      // First try to get existing session
-      let { data: { session } } = await sb.auth.getSession();
-
-      // If we have a session but the token might be stale, refresh it
-      if (session) {
-        const { data: refreshData, error: refreshError } = await sb.auth.refreshSession();
-        if (!refreshError && refreshData.session) {
-          session = refreshData.session;
-        }
-      }
-
-      const user = session?.user;
-
-      if (!user) {
-        window.location.href = "/sns-login/";
-        return null;
-      }
-
-      who.textContent = user.email;
+      const user = await sharedRequireUser(sb);
+      if (user) who.textContent = user.email;
       return user;
     }
 
@@ -1076,9 +1056,7 @@
       window.location.href = "/sns-login/";
     });
 
-    function fmtDate(iso){
-      try { return new Date(iso).toLocaleString(); } catch { return iso || ""; }
-    }
+    function fmtDate(iso){ return fmtDateSimple(iso); }
 
     async function loadInquiry(email){
       const { data, error } = await sb
@@ -1426,14 +1404,7 @@ function chatSendTyping(on){
     // --------------------
     // Client Chat helpers
     // --------------------
-    function esc(s){
-      return String(s ?? "")
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
-    }
+    // esc() and sanitize() imported from /shared.js
 
     function chatAttsHTML(m){
     const atts = Array.isArray(m?.attachments) ? m.attachments : [];
@@ -1454,9 +1425,7 @@ function chatSendTyping(on){
   }
 
 
-    function chatFmt(iso){
-      try { return new Date(iso).toLocaleString(); } catch { return iso || ""; }
-    }
+    function chatFmt(iso){ return fmtDateSimple(iso); }
 
     function chatNearBottom(){
       return (chatBody.scrollHeight - chatBody.scrollTop - chatBody.clientHeight) < 120;
