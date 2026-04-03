@@ -342,16 +342,11 @@
 
   <script src="/vendor/supabase-js.min.js"></script>
 
-  <script>
-    /**************************************************************
-     * REQUIRED: Paste your Supabase details below
-     **************************************************************/
-    const SUPABASE_URL = "https://api.kxsaku.com";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJyb2xlIjogImFub24iLCAiaXNzIjogInN1cGFiYXNlIiwgImlhdCI6IDE3NzUyNDk4NTksICJleHAiOiAyMDkwNjA5ODU5fQ.jZdjxM_NH1gBhAYNBCV9tXEAPrLr36-JqhdduwWGBEI";
+  <script type="module">
+    import { createSupabaseClient, fmtDate } from "/shared.js";
     const ADMIN_EMAIL = "brandon.sns@pm.me";
-    /**************************************************************/
 
-    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const sb = createSupabaseClient();
 
     const whoami = document.getElementById("whoami");
     const errEl = document.getElementById("err");
@@ -376,14 +371,7 @@
     }
     function hideLogin() { loginOverlay.style.display = "none"; }
 
-    function sanitize(s) {
-      return (s ?? "").toString().replace(/[&<>"']/g, m => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;" }[m]));
-    }
-
-    function fmtDate(iso) {
-      const d = new Date(iso);
-      return d.toLocaleString(undefined, { year:"numeric", month:"short", day:"2-digit", hour:"2-digit", minute:"2-digit" });
-    }
+    // sanitize() and fmtDate() imported from /shared.js
 
     function qp(name) {
       const u = new URL(location.href);

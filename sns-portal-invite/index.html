@@ -192,12 +192,9 @@
   </div>
 
   <script src="/vendor/supabase-js.min.js"></script>
-<script>
-  const { createClient } = supabase;
-
-  const SUPABASE_URL = "https://api.kxsaku.com";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJyb2xlIjogImFub24iLCAiaXNzIjogInN1cGFiYXNlIiwgImlhdCI6IDE3NzUyNDk4NTksICJleHAiOiAyMDkwNjA5ODU5fQ.jZdjxM_NH1gBhAYNBCV9tXEAPrLr36-JqhdduwWGBEI";
-    const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+<script type="module">
+  import { createSupabaseClient } from "/shared.js";
+  const sb = createSupabaseClient();
 
       async function bootstrapSessionFromUrl() {
     // 1) If we already have a session in storage, use it.

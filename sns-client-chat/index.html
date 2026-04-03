@@ -1646,13 +1646,11 @@
   <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
-  <script>
-    const SUPABASE_URL = "https://api.kxsaku.com";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJyb2xlIjogImFub24iLCAiaXNzIjogInN1cGFiYXNlIiwgImlhdCI6IDE3NzUyNDk4NTksICJleHAiOiAyMDkwNjA5ODU5fQ.jZdjxM_NH1gBhAYNBCV9tXEAPrLr36-JqhdduwWGBEI";
+  <script type="module">
+    import { SUPABASE_URL, FN_BASE, createSupabaseClient, sanitize } from "/shared.js";
     const ADMIN_EMAIL = "brandon.sns@pm.me";
-    const FN_BASE = `${SUPABASE_URL}/functions/v1`;
 
-    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const sb = createSupabaseClient();
 
     const whoami = document.getElementById("whoami");
     const logoutBtn = document.getElementById("logoutBtn");
@@ -1815,14 +1813,7 @@ const typingLine = document.getElementById("typingLine");
       playToneIncoming();
     }
 
-    function sanitize(str){
-      return String(str ?? "")
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
-    }
+    // sanitize() imported from /shared.js
 
 
 function isImageAtt(a){
