@@ -31,9 +31,10 @@ serve(async (req) => {
     const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
     if (!token) return json(req, { error: "Missing Authorization bearer token" }, 401);
 
+    // Service role key bypasses RLS — do NOT mix in user JWT via global headers.
+    // User identity is verified separately via sb.auth.getUser(token) below.
     const sb = createClient(SB_URL, SB_SERVICE_ROLE_KEY, {
       auth: { persistSession: false },
-      global: { headers: { Authorization: `Bearer ${token}` } },
     });
 
     // Identify caller

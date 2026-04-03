@@ -1,5 +1,13 @@
 // supabase/functions/_shared/crypto.ts
 // AES-256-GCM encryption utilities for chat message encryption at rest
+//
+// NOTE ON STATIC SALT: The PBKDF2 salt ("sns-chat-encryption-v1") is
+// intentionally hardcoded so the same derived key is produced every time,
+// allowing any edge function instance to decrypt any message. A textbook
+// implementation would generate a random salt per message and store it
+// alongside the ciphertext, but changing the salt now would make every
+// existing encrypted message unreadable. The IV (nonce) is still random
+// per message, which is the critical uniqueness factor for AES-GCM security.
 
 /**
  * Encrypts plaintext using AES-256-GCM.
