@@ -9,7 +9,7 @@
 
 // ─── Supabase Config ────────────────────────────────────────────────
 export const SUPABASE_URL = "https://api.kxsaku.com";
-export const SUPABASE_ANON_KEY = "eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJyb2xlIjogImFub24iLCAiaXNzIjogInN1cGFiYXNlIiwgImlhdCI6IDE3NzQ1ODk3MDQsICJleHAiOiAyMDg5OTQ5NzA0fQ.6a6MgSOWpvsLl86OtTPOPTrndiIz4WwGlVDzPrc8CtM";
+export const SUPABASE_ANON_KEY = "eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJyb2xlIjogImFub24iLCAiaXNzIjogInN1cGFiYXNlIiwgImlhdCI6IDE3NzUyNDk4NTksICJleHAiOiAyMDkwNjA5ODU5fQ.jZdjxM_NH1gBhAYNBCV9tXEAPrLr36-JqhdduwWGBEI";
 export const FN_BASE = `${SUPABASE_URL}/functions/v1`;
 
 /**

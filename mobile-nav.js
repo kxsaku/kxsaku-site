@@ -9,6 +9,12 @@
 
   // ─── CSS ──────────────────────────────────────────────────────────
   const css = `
+    /* Base: hide mobile nav on all viewports, then show on mobile */
+    .mobile-bg-effects,
+    .mobile-topnav,
+    .mobile-scrim,
+    .mobile-menu { display: none; }
+
     @media (max-width: 768px) {
       .mobile-bg-effects { display: block; }
       .mobile-topnav { display: block; }
