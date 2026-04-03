@@ -44,7 +44,7 @@ export function usePushNotifications() {
       (response) => {
         const data = response.notification.request.content.data;
         // Handle navigation based on notification data
-        console.log('Notification tapped:', data);
+        if (__DEV__) console.log('Notification tapped:', data);
       }
     );
 
@@ -93,7 +93,7 @@ async function registerForPushNotificationsAsync(): Promise<string | null> {
     }
 
     if (finalStatus !== 'granted') {
-      console.log('Failed to get push notification permission');
+      if (__DEV__) console.log('Failed to get push notification permission');
       return null;
     }
 
@@ -105,7 +105,7 @@ async function registerForPushNotificationsAsync(): Promise<string | null> {
       const isValidUuid = projectId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(projectId);
 
       if (!isValidUuid) {
-        console.log('Push notifications disabled: Run "npx eas init" to configure a valid projectId');
+        if (__DEV__) console.log('Push notifications disabled: Run "npx eas init" to configure a valid projectId');
         return null;
       }
 
@@ -115,10 +115,10 @@ async function registerForPushNotificationsAsync(): Promise<string | null> {
       token = pushToken.data;
     } catch (error) {
       // Silently fail in development - push notifications require EAS setup
-      console.log('Push notifications not available:', (error as Error).message?.substring(0, 50));
+      if (__DEV__) console.log('Push notifications not available:', (error as Error).message?.substring(0, 50));
     }
   } else {
-    console.log('Push notifications require a physical device');
+    if (__DEV__) console.log('Push notifications require a physical device');
   }
 
   return token;

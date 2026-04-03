@@ -50,7 +50,7 @@ export function Button({
     >
       <TouchableOpacity
         onPress={() => {
-          console.log('Button pressed, disabled:', disabled, 'loading:', loading);
+          if (__DEV__) console.log('Button pressed, disabled:', disabled, 'loading:', loading);
           if (onPress) onPress();
         }}
         disabled={disabled || loading}

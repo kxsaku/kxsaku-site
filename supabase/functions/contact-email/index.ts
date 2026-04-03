@@ -2,13 +2,7 @@
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { getCorsHeaders, handleCorsPrefllight } from "../_shared/cors.ts";
 import { checkRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
-
-function json(req: Request, status: number, data: unknown) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
-  });
-}
+import { json } from "../_shared/response.ts";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return handleCorsPrefllight(req);
@@ -17,7 +11,7 @@ serve(async (req) => {
   const rateLimitResponse = checkRateLimit(req, { ...RATE_LIMITS.public, keyPrefix: "contact-email" }, getCorsHeaders(req));
   if (rateLimitResponse) return rateLimitResponse;
 
-  if (req.method !== "POST") return json(req, 405, { error: "Method not allowed" });
+  if (req.method !== "POST") return json(req, { error: "Method not allowed" }, 405);
 
   try {
     const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
@@ -25,18 +19,18 @@ serve(async (req) => {
     const FROM_EMAIL = Deno.env.get("CONTACT_FROM_EMAIL");
 
     if (!RESEND_API_KEY || !TO_EMAIL || !FROM_EMAIL) {
-      return json(req, 500, {
+      return json(req, {
         error: "Missing env var(s)",
         missing: {
           RESEND_API_KEY: !RESEND_API_KEY,
           CONTACT_TO_EMAIL: !TO_EMAIL,
           CONTACT_FROM_EMAIL: !FROM_EMAIL,
         },
-      });
+      }, 500);
     }
 
     const { subject, message, page, userAgent } = await req.json();
-    if (!subject || !message) return json(req, 400, { error: "Missing subject/message" });
+    if (!subject || !message) return json(req, { error: "Missing subject/message" }, 400);
 
     const emailText =
 `SNS Website Contact Form
@@ -69,15 +63,15 @@ Meta:
     const raw = await r.text();
 
     if (!r.ok) {
-      return json(req, 500, {
+      return json(req, {
         error: "Email provider error",
         status: r.status,
         details: raw,
-      });
+      }, 500);
     }
 
-    return json(req, 200, { ok: true, provider: raw });
+    return json(req, { ok: true, provider: raw });
   } catch (e) {
-    return json(req, 500, { error: String((e as any)?.message || e) });
+    return json(req, { error: String((e as any)?.message || e) }, 500);
   }
 });

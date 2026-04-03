@@ -39,7 +39,7 @@ async function fetchUserProfile(email: string): Promise<{ profile: UserProfile |
       return { profile: null, isAdmin: false };
     }
 
-    console.log('Profile fetched:', data);
+    if (__DEV__) console.log('Profile fetched:', data);
     return {
       profile: data,
       isAdmin: data?.is_admin || false,
@@ -60,15 +60,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   isSigningOut: false,
 
   initialize: async () => {
-    console.log('=== AUTH INIT ===');
+    if (__DEV__) console.log('=== AUTH INIT ===');
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      console.log('Initial session:', session?.user?.email || 'none');
+      if (__DEV__) console.log('Initial session:', session?.user?.email || 'none');
 
       if (session?.user?.email) {
         // Fetch profile FIRST to get admin status
         const { profile, isAdmin } = await fetchUserProfile(session.user.email);
-        console.log('Init - isAdmin:', isAdmin);
+        if (__DEV__) console.log('Init - isAdmin:', isAdmin);
 
         set({
           user: session.user,
@@ -87,7 +87,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     // Listen for auth changes - but DON'T auto-set isAuthenticated
     // Let the signIn/signOut functions handle that
     supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth state change:', event, session?.user?.email);
+      if (__DEV__) console.log('Auth state change:', event, session?.user?.email);
 
       // Only handle SIGNED_OUT events automatically
       // SIGNED_IN is handled by signIn function to avoid race conditions
@@ -110,27 +110,27 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   signIn: async (email: string, password: string) => {
-    console.log('=== AUTH STORE SIGN IN ===');
-    console.log('Attempting login for:', email);
+    if (__DEV__) console.log('=== AUTH STORE SIGN IN ===');
+    if (__DEV__) console.log('Attempting login for:', email);
     try {
       set({ isLoading: true });
-      console.log('Calling Supabase signInWithPassword...');
+      if (__DEV__) console.log('Calling Supabase signInWithPassword...');
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email.toLowerCase().trim(),
         password,
       });
 
-      console.log('Supabase response - data:', data?.user?.email, 'error:', error?.message);
+      if (__DEV__) console.log('Supabase response - data:', data?.user?.email, 'error:', error?.message);
 
       if (error) {
-        console.log('Login error:', error.message);
+        if (__DEV__) console.log('Login error:', error.message);
         return { error: error.message };
       }
 
       // Fetch profile FIRST to get admin status
-      console.log('Fetching profile to check admin status...');
+      if (__DEV__) console.log('Fetching profile to check admin status...');
       const { profile, isAdmin } = await fetchUserProfile(data.user?.email || '');
-      console.log('User is admin:', isAdmin);
+      if (__DEV__) console.log('User is admin:', isAdmin);
 
       // NOW set everything including isAuthenticated
       set({
@@ -141,7 +141,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         isAuthenticated: true,
       });
 
-      console.log('Auth state set - isAuthenticated: true, isAdmin:', isAdmin);
+      if (__DEV__) console.log('Auth state set - isAuthenticated: true, isAdmin:', isAdmin);
       return {};
     } catch (error) {
       return { error: String(error) };
@@ -153,17 +153,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   signOut: async () => {
     // Prevent multiple simultaneous signOut calls
     if (get().isSigningOut) {
-      console.log('SignOut already in progress, skipping...');
+      if (__DEV__) console.log('SignOut already in progress, skipping...');
       return;
     }
 
-    console.log('=== SIGN OUT CALLED ===');
+    if (__DEV__) console.log('=== SIGN OUT CALLED ===');
     set({ isSigningOut: true });
 
     try {
-      console.log('Calling Supabase signOut...');
+      if (__DEV__) console.log('Calling Supabase signOut...');
       await supabase.auth.signOut();
-      console.log('Supabase signOut complete, clearing state...');
+      if (__DEV__) console.log('Supabase signOut complete, clearing state...');
       set({
         user: null,
         session: null,
@@ -172,7 +172,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         isAuthenticated: false,
         isSigningOut: false,
       });
-      console.log('State cleared, isAuthenticated should be false now');
+      if (__DEV__) console.log('State cleared, isAuthenticated should be false now');
     } catch (error) {
       console.error('Sign out error:', error);
       set({ isSigningOut: false });

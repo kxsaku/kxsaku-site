@@ -4,13 +4,8 @@ import { getCorsHeaders, handleCorsPrefllight } from "../_shared/cors.ts";
 import { checkRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 import { ensureAdmin } from "../_shared/auth.ts";
 import { decryptMessage, getEncryptionKey } from "../_shared/crypto.ts";
+import { json } from "../_shared/response.ts";
 
-function json(req: Request, data: unknown, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
-  });
-}
 
 type ReqBody = {
   message_id?: string;

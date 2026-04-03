@@ -4,18 +4,8 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders, handleCorsPrefllight } from "../_shared/cors.ts";
 import { checkRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 
-function json(req: Request, data: unknown, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
-  });
-}
-
-function requireEnv(name: string) {
-  const v = Deno.env.get(name);
-  if (!v) throw new Error(`Missing env var: ${name}`);
-  return v;
-}
+import { json } from "../_shared/response.ts";
+import { getEnv } from "../_shared/env.ts";
 
 function normalizeUSPhone(input: string) {
   const digits = input.replace(/\D/g, "");
@@ -26,9 +16,9 @@ function normalizeUSPhone(input: string) {
 }
 
 async function twilioVerifySend(phoneE164: string) {
-  const accountSid = requireEnv("TWILIO_ACCOUNT_SID");
-  const authToken = requireEnv("TWILIO_AUTH_TOKEN");
-  const serviceSid = requireEnv("TWILIO_VERIFY_SERVICE_SID");
+  const accountSid = getEnv("TWILIO_ACCOUNT_SID");
+  const authToken = getEnv("TWILIO_AUTH_TOKEN");
+  const serviceSid = getEnv("TWILIO_VERIFY_SERVICE_SID");
 
   const url =
     `https://verify.twilio.com/v2/Services/${serviceSid}/Verifications`;
@@ -52,9 +42,9 @@ async function twilioVerifySend(phoneE164: string) {
 }
 
 async function twilioVerifyCheck(phoneE164: string, code: string) {
-  const accountSid = requireEnv("TWILIO_ACCOUNT_SID");
-  const authToken = requireEnv("TWILIO_AUTH_TOKEN");
-  const serviceSid = requireEnv("TWILIO_VERIFY_SERVICE_SID");
+  const accountSid = getEnv("TWILIO_ACCOUNT_SID");
+  const authToken = getEnv("TWILIO_AUTH_TOKEN");
+  const serviceSid = getEnv("TWILIO_VERIFY_SERVICE_SID");
 
   const url =
     `https://verify.twilio.com/v2/Services/${serviceSid}/VerificationCheck`;
@@ -106,8 +96,8 @@ serve(async (req) => {
       }
 
       // Insert into Supabase using SERVICE ROLE (bypasses RLS)
-      const supabaseUrl = requireEnv("SB_URL");
-      const serviceRole = requireEnv("SB_SERVICE_ROLE_KEY");
+      const supabaseUrl = getEnv("SB_URL");
+      const serviceRole = getEnv("SB_SERVICE_ROLE_KEY");
       const sb = createClient(supabaseUrl, serviceRole);
 
       // payload should be the inquiry fields

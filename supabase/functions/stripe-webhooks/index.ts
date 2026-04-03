@@ -3,12 +3,7 @@ import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import Stripe from "https://esm.sh/stripe@14.21.0?target=deno";
 import { checkRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
-
-function getEnv(name: string) {
-  const v = Deno.env.get(name);
-  if (!v) throw new Error(`Missing env var: ${name}`);
-  return v;
-}
+import { getEnv } from "../_shared/env.ts";
 
 function timingSafeEqual(a: string, b: string) {
   if (a.length !== b.length) return false;

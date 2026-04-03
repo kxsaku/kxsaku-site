@@ -42,16 +42,16 @@ export async function invokeFunction<T = unknown>(
 ): Promise<ApiResponse<T>> {
   try {
     const token = await getAuthToken();
-    console.log(`=== API CALL: ${functionName} ===`);
-    console.log('Token present:', !!token);
+    if (__DEV__) console.log(`=== API CALL: ${functionName} ===`);
+    if (__DEV__) console.log('Token present:', !!token);
 
     if (!token) {
-      console.log('No token - not authenticated');
+      if (__DEV__) console.log('No token - not authenticated');
       return { error: 'Not authenticated' };
     }
 
     const url = `${SUPABASE_URL}/functions/v1/${functionName}`;
-    console.log('Calling URL:', url);
+    if (__DEV__) console.log('Calling URL:', url);
 
     const response = await fetch(url, {
       method: 'POST',
@@ -62,9 +62,9 @@ export async function invokeFunction<T = unknown>(
       body: body ? JSON.stringify(body) : undefined,
     });
 
-    console.log('Response status:', response.status);
+    if (__DEV__) console.log('Response status:', response.status);
     const data = await response.json();
-    console.log('Response data:', JSON.stringify(data).substring(0, 200));
+    if (__DEV__) console.log('Response data:', JSON.stringify(data).substring(0, 200));
 
     if (!response.ok) {
       return { error: data.error || 'Request failed', details: data.details };
@@ -265,16 +265,16 @@ export async function uploadAttachment(
       return { error: 'Not authenticated' };
     }
 
-    console.log('=== UPLOAD ATTACHMENT ===');
-    console.log('Thread ID:', threadId);
-    console.log('File:', fileName, mimeType);
+    if (__DEV__) console.log('=== UPLOAD ATTACHMENT ===');
+    if (__DEV__) console.log('Thread ID:', threadId);
+    if (__DEV__) console.log('File:', fileName, mimeType);
 
     // First, fetch the file to get its size
     const fileResponse = await fetch(uri);
     const blob = await fileResponse.blob();
     const sizeBytes = blob.size;
 
-    console.log('File size:', sizeBytes, 'bytes');
+    if (__DEV__) console.log('File size:', sizeBytes, 'bytes');
 
     // Step 1: Get presigned upload URL from edge function
     const uploadUrlResponse = await invokeFunction<{
@@ -298,10 +298,10 @@ export async function uploadAttachment(
     }
 
     const { attachment_id, signed_upload_url, path } = (uploadUrlResponse as any).upload;
-    console.log('Got upload URL, attachment_id:', attachment_id);
+    if (__DEV__) console.log('Got upload URL, attachment_id:', attachment_id);
 
     // Step 2: Upload file to the signed URL (reuse blob from earlier)
-    console.log('Uploading blob, size:', blob.size);
+    if (__DEV__) console.log('Uploading blob, size:', blob.size);
 
     const uploadResponse = await fetch(signed_upload_url, {
       method: 'PUT',
@@ -317,7 +317,7 @@ export async function uploadAttachment(
       return { error: `Upload failed: ${uploadResponse.status}` };
     }
 
-    console.log('Upload successful, attachment_id:', attachment_id);
+    if (__DEV__) console.log('Upload successful, attachment_id:', attachment_id);
 
     return {
       attachment_id,
