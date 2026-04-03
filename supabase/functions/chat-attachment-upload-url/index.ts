@@ -1,14 +1,8 @@
 // supabase/functions/chat-attachment-upload-url/index.ts
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders, handleCorsPrefllight } from "../_shared/cors.ts";
 import { checkRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
-
-function getEnv(name: string) {
-  const v = Deno.env.get(name);
-  if (!v) throw new Error(`Missing env var: ${name}`);
-  return v;
-}
+import { ensureAuthenticated } from "../_shared/auth.ts";
 
 function json(req: Request, data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -34,13 +28,8 @@ serve(async (req) => {
   if (req.method !== "POST") return json(req, { error: "Method not allowed" }, 405);
 
   try {
-    const SB_URL = getEnv("SB_URL");
-    const SB_SERVICE_ROLE_KEY = getEnv("SB_SERVICE_ROLE_KEY");
-    const ADMIN_EMAIL = (getEnv("ADMIN_EMAIL") || "").toLowerCase();
-
-    const authHeader = req.headers.get("Authorization") || "";
-    const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
-    if (!token) return json(req, { error: "Missing Authorization bearer token" }, 401);
+    // Authenticate the caller (validates JWT, returns service-role client)
+    const { sb: admin, email: callerEmail, userId: callerId } = await ensureAuthenticated(req.headers.get("Authorization"));
 
     const body = (await req.json()) as ReqBody;
     const threadId = (body.thread_id || "").trim();
@@ -51,20 +40,14 @@ serve(async (req) => {
     if (!threadId) return json(req, { error: "Missing thread_id" }, 400);
     if (!fileName) return json(req, { error: "Missing file_name" }, 400);
 
-    // Use SERVICE ROLE for everything here (bypasses RLS),
-    // but we will enforce permissions manually.
-    const admin = createClient(SB_URL, SB_SERVICE_ROLE_KEY, {
-      auth: { persistSession: false },
-    });
+    // Check admin status via database flag (consistent with ensureAdmin pattern)
+    const { data: prof } = await admin
+      .from("user_profiles")
+      .select("is_admin")
+      .eq("email", callerEmail)
+      .maybeSingle();
 
-    // Identify caller
-    const { data: userData, error: userErr } = await admin.auth.getUser(token);
-    if (userErr || !userData?.user) {
-      return json(req, { error: "Unauthorized" }, 401);
-    }
-
-    const callerId = userData.user.id;
-    const callerEmail = (userData.user.email || "").toLowerCase();
+    const isAdmin = !!prof?.is_admin;
 
     // Get thread owner
     const th = await admin
@@ -77,8 +60,6 @@ serve(async (req) => {
     if (!th.data) return json(req, { error: "Thread not found" }, 404);
 
     const threadOwnerId = th.data.user_id as string;
-
-    const isAdmin = callerEmail && callerEmail === ADMIN_EMAIL;
     const isOwner = callerId === threadOwnerId;
 
     // Only allow: thread owner (client) OR admin email

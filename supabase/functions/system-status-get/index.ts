@@ -25,8 +25,8 @@ serve(async (req) => {
   if (rateLimitResponse) return rateLimitResponse;
 
   try {
-    const SUPABASE_URL = getEnv("SUPABASE_URL");
-    const SUPABASE_SERVICE_ROLE_KEY = getEnv("SUPABASE_SERVICE_ROLE_KEY");
+    const SUPABASE_URL = getEnv("SB_URL");
+    const SUPABASE_SERVICE_ROLE_KEY = getEnv("SB_SERVICE_ROLE_KEY");
     const sb = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
     const { data, error } = await sb

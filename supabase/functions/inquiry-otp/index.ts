@@ -106,8 +106,8 @@ serve(async (req) => {
       }
 
       // Insert into Supabase using SERVICE ROLE (bypasses RLS)
-      const supabaseUrl = requireEnv("PROJECT_SUPABASE_URL");
-      const serviceRole = requireEnv("PROJECT_SERVICE_ROLE_KEY");
+      const supabaseUrl = requireEnv("SB_URL");
+      const serviceRole = requireEnv("SB_SERVICE_ROLE_KEY");
       const sb = createClient(supabaseUrl, serviceRole);
 
       // payload should be the inquiry fields

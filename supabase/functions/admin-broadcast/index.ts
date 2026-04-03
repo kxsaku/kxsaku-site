@@ -43,9 +43,8 @@ serve(async (req) => {
     const broadcastBody = `📢 BROADCAST\n\n${content}`;
     const preview = broadcastBody.slice(0, 140);
 
-    // Encrypt the broadcast message
+    // Get encryption key (shared across all messages)
     const encryptionKey = getEncryptionKey();
-    const encryptedBody = await encryptMessage(broadcastBody, encryptionKey);
 
     // Get all chat threads
     const { data: threads, error: threadsErr } = await admin
@@ -66,6 +65,9 @@ serve(async (req) => {
     // Insert broadcast message to each thread
     for (const thread of threads) {
       const threadId = thread.id;
+
+      // Encrypt per-thread so each gets unique ciphertext/IV
+      const encryptedBody = await encryptMessage(broadcastBody, encryptionKey);
 
       // Insert message (using only standard columns)
       const msgInsert = await admin

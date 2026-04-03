@@ -22,8 +22,10 @@ function getAllowedOrigins(): string[] {
     origins.push(...parsed);
   }
 
-  // Always allow localhost for development
-  origins.push("http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:5173", "http://127.0.0.1:5173");
+  // Only allow localhost in development
+  if (Deno.env.get("ENVIRONMENT") === "development") {
+    origins.push("http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:5173", "http://127.0.0.1:5173");
+  }
 
   return [...new Set(origins)]; // dedupe
 }
