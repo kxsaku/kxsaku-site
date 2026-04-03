@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <title>SNS · Start Your Network Project</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://esm.sh; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com; img-src 'self' data: blob: https://*.supabase.co; font-src 'self'; frame-src https://js.stripe.com;" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://esm.sh; style-src 'self' 'unsafe-inline'; connect-src 'self' https://api.kxsaku.com wss://api.kxsaku.com https://api.stripe.com; img-src 'self' data: blob: https://api.kxsaku.com; font-src 'self'; frame-src https://js.stripe.com;" />
   <script>
   (function () {
     const forceDesktop = localStorage.getItem("sns_force_desktop") === "1";
@@ -991,8 +991,8 @@
     import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
     // Keep your current values (as you already had working before)
-    const supabaseUrl = "https://jgvxmpsjtkedzgygynbl.supabase.co";
-    const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpndnhtcHNqdGtlZHpneWd5bmJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0NzgxMjYsImV4cCI6MjA4MTA1NDEyNn0.OCh23RWm8COtxWuumYvKUmfMOLOW01B1zrbtzcr3w6Y";
+    const supabaseUrl = "https://api.kxsaku.com";
+    const supabaseAnonKey = "eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJyb2xlIjogImFub24iLCAiaXNzIjogInN1cGFiYXNlIiwgImlhdCI6IDE3NzQ1ODk3MDQsICJleHAiOiAyMDg5OTQ5NzA0fQ.6a6MgSOWpvsLl86OtTPOPTrndiIz4WwGlVDzPrc8CtM";
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
     const form = document.getElementById("sns-inquiry-form");
