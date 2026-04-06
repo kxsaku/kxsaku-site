@@ -4,8 +4,22 @@
   <meta charset="UTF-8" />
   <title>SNS · Create Account</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://esm.sh; style-src 'self' 'unsafe-inline'; connect-src 'self' https://api.kxsaku.com wss://api.kxsaku.com https://api.stripe.com; img-src 'self' data: blob: https://api.kxsaku.com; font-src 'self'; frame-src https://js.stripe.com;" />
-<link rel="stylesheet" href="/styles.min.css" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://esm.sh; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com; img-src 'self' data: blob: https://*.supabase.co; font-src 'self'; frame-src https://js.stripe.com;" />
+  <script>
+  (function () {
+    const forceDesktop = localStorage.getItem("sns_force_desktop") === "1";
+    if (forceDesktop) return;
+
+    const isMobile = window.matchMedia("(max-width: 820px)").matches;
+
+    // Preserve invite params like ?code=... or anything else
+    if (isMobile && !location.pathname.endsWith("/sns-portal-invite/mobile.html")) {
+      location.replace("/sns-portal-invite/mobile.html" + location.search);
+    }
+  })();
+</script>
+
+  <link rel="stylesheet" href="/styles.css" />
   <style>
     /* Page-specific: invite form layout */
     .invite-wrap {
@@ -116,13 +130,11 @@
       color: var(--color-text-muted);
       margin-top: 6px;
     }
-
   </style>
 </head>
 <body>
-<a href="#main-content" class="skip-link">Skip to content</a>
   <div class="invite-wrap">
-    <div class="invite-card" id="main-content">
+    <div class="invite-card">
       <h1>Create Your SNS Account</h1>
       <p>Set your password and confirm your business details. This account is invite-only.</p>
 
@@ -191,10 +203,13 @@
     </div>
   </div>
 
-  <script src="/vendor/supabase-js.min.js"></script>
-<script type="module">
-  import { createSupabaseClient } from "/shared.js";
-  const sb = createSupabaseClient();
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" integrity="sha384-0cJhvyxOncqJDixLuJRbH99K17F1B6DH3D8aUBlsJlsgiqRZQpQ1EUFWdgscplLu" crossorigin="anonymous"></script>
+<script>
+  const { createClient } = supabase;
+
+  const SUPABASE_URL = "https://jgvxmpsjtkedzgygynbl.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpndnhtcHNqdGtlZHpneWd5bmJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0NzgxMjYsImV4cCI6MjA4MTA1NDEyNn0.OCh23RWm8COtxWuumYvKUmfMOLOW01B1zrbtzcr3w6Y";
+    const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
       async function bootstrapSessionFromUrl() {
     // 1) If we already have a session in storage, use it.
@@ -491,8 +506,5 @@
         });
     })();
     </script>
-
-  <script src="/mobile-nav.js" defer></script>
-
-</body>
+    </body>
     </html>
