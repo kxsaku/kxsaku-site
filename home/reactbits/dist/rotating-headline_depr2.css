@@ -1,0 +1,15 @@
+
+.rt-layout {
+  display: inline-flex;
+  align-items: baseline;
+}
+
+.rt-word {
+  display: inline-flex;
+  white-space: nowrap;
+}
+
+.rt-char {
+  display: inline-block;
+  will-change: transform, opacity;
+}

@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Saku Network Solutions | Reliable Networks, Done Clean</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="description" content="Saku Network Solutions (SNS) provides network assessments, Wi-Fi stability upgrades, secure office networks, and ongoing administration." />
+  <link rel="stylesheet" href="/styles.css" />
+  <link href="/home/react-headline/assets/index.css" rel="stylesheet"/>
+  <script type="module" src="/home/react-headline/assets/rotating-headline.js"></script>
+
+  <style>
+    /* Page-specific variables (extend design system) */
+    :root{
+      --bg0:#03010b;
+      --bg1:#060214;
+      --ink: var(--color-text-primary);
+      --muted: var(--color-text-muted);
+      --muted2: var(--color-text-muted2);
+
+      --stroke: rgba(196, 181, 253, .18);
+      --stroke2: rgba(196, 181, 253, .28);
+
+      --glass: var(--color-surface-glass);
+      --glass2: rgba(12, 8, 34, .62);
+
+      --accent: var(--color-accent);
+      --accent2:#f973e2;
+      --accent3:#5eead4;
+
+      --max: 1160px;
+
+      --r-xl: var(--radius-xl);
+      --r-lg: var(--radius-md);
+      --r-sm: var(--radius-sm);
+
+      --shadow: var(--shadow-xl);
+      --shadow2: var(--shadow-md);
+    }
+
+    /* Override body background for this page */
+    body{
+      background: linear-gradient(180deg, var(--bg1), var(--bg0));
+      overflow-x:hidden;
+      -webkit-text-size-adjust: 100%;
+      text-rendering: optimizeLegibility;
+    }
+
+    /* Full-bleed animated background (same as desktop home) */
+    .bg{
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      pointer-events:none;
+      overflow:hidden;
+    }
+
+    /* True Beams / DarkVeil background app (isolated in an iframe so its bundled CSS can't affect this page) */
+    .beams-iframe{
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      border: 0;
+      z-index: 0;
+      pointer-events: none;
+      background: transparent;
+      opacity: 0;
+      transition: opacity .35s ease;
+    }
+    body.bg-ready .beams-iframe{ opacity: 1; }
+
+    /* vignette to keep edges dark */
+    .bg .vignette{
+      position:absolute;
+      inset:0;
+      background: radial-gradient(circle at 50% 0%, rgba(0,0,0,.08), rgba(0,0,0,.64) 62%, rgba(0,0,0,.78));
+      z-index: 1;
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      .beams-iframe{ transition:none; }
+    }
+
+    /* Layout - override wrap for this page */
+    .wrap{
+      width: min(var(--max), calc(100% - 1.35rem));
+      margin: 0 auto;
+      padding: 0;
+    }
+
+    /* Mobile top bar */
+    .topbar{
+      position: sticky;
+      top: 0;
+      z-index: 60;
+      padding: .9rem 0 calc(.85rem + env(safe-area-inset-top));
+      backdrop-filter: blur(14px);
+      background: linear-gradient(180deg, rgba(3,1,11,.78), rgba(3,1,11,.18));
+      border-bottom: 1px solid rgba(196,181,253,.10);
+    }
+    .barrow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: .9rem;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:.65rem;
+      min-width: 0;
+    }
+    .mark{
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      box-shadow: 0 18px 50px rgba(0,0,0,.45);
+      flex: 0 0 auto;
+    }
+    .mark img{
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border-radius: 12px;
+    }
+    .brandtext{
+      min-width: 0;
+    }
+    .brandtext strong{
+      display:block;
+      font-size:.86rem;
+      letter-spacing:.14em;
+      text-transform: uppercase;
+      line-height:1.1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .brandtext span{
+      display:block;
+      color: var(--muted2);
+      font-size:.80rem;
+      line-height:1.1;
+      margin-top:.12rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Icon buttons */
+    .iconbtn{
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      border: 1px solid rgba(196,181,253,.18);
+      background: rgba(0,0,0,.20);
+      box-shadow: 0 14px 40px rgba(0,0,0,.32);
+      backdrop-filter: blur(10px);
+      color: var(--ink);
+      display:grid;
+      place-items:center;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: transform .14s ease, border-color .14s ease, filter .14s ease, background .14s ease;
+      will-change: transform;
+      position: relative;
+      overflow:hidden;
+    }
+    .iconbtn:active{ transform: translateY(1px) scale(.98); }
+    .iconbtn:hover{ border-color: rgba(196,181,253,.30); filter: brightness(1.06); }
+
+    .hamburger{
+      position: relative;
+      width: 18px; height: 14px;
+    }
+    .hamburger i{
+      position:absolute; left:0; right:0;
+      height: 2px;
+      border-radius: 99px;
+      background: rgba(244,240,255,.88);
+      box-shadow: 0 0 0 1px rgba(196,181,253,.10);
+      transition: transform .18s ease, top .18s ease, opacity .14s ease;
+    }
+    .hamburger i:nth-child(1){ top: 1px; }
+    .hamburger i:nth-child(2){ top: 6px; opacity: .92; }
+    .hamburger i:nth-child(3){ top: 11px; opacity: .86; }
+
+    /* Drawer */
+    .drawer-backdrop{
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      background: rgba(0,0,0,.52);
+      backdrop-filter: blur(8px);
+      opacity: 0;
+      pointer-events:none;
+      transition: opacity .18s ease;
+    }
+    .drawer{
+      position: fixed;
+      right: 0;
+      top: 0;
+      height: 100%;
+      width: min(86vw, 360px);
+      z-index: 90;
+      background: linear-gradient(180deg, rgba(10,6,28,.92), rgba(10,6,28,.78));
+      border-left: 1px solid rgba(196,181,253,.16);
+      box-shadow: -18px 0 70px rgba(0,0,0,.55);
+      transform: translateX(104%);
+      transition: transform .22s cubic-bezier(.2,.9,.2,1);
+      padding: calc(1rem + env(safe-area-inset-top)) 1rem 1.2rem;
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    body.menu-open .drawer-backdrop{
+      opacity: 1;
+      pointer-events:auto;
+    }
+    body.menu-open .drawer{
+      transform: translateX(0);
+    }
+
+    .drawer header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: .75rem;
+      margin-bottom: .9rem;
+    }
+    .drawer h2{
+      margin:0;
+      font-size:.88rem;
+      letter-spacing:.14em;
+      text-transform: uppercase;
+      color: rgba(244,240,255,.92);
+    }
+
+    .navlist{
+      display:flex;
+      flex-direction:column;
+      gap: .55rem;
+      margin-top: .35rem;
+    }
+    .navitem{
+      text-decoration:none;
+      color: var(--muted);
+      font-size:.78rem;
+      letter-spacing:.14em;
+      text-transform: uppercase;
+      padding: .85rem .85rem;
+      border-radius: 16px;
+      border: 1px solid rgba(196,181,253,.12);
+      background: rgba(196,181,253,.06);
+      transition: transform .14s ease, border-color .14s ease, filter .14s ease, background .14s ease, color .14s ease;
+      will-change: transform;
+    }
+    .navitem:active{ transform: translateY(1px) scale(.99); }
+    .navitem:hover{ border-color: rgba(196,181,253,.26); filter: brightness(1.05); color: var(--ink); }
+    .navitem.active{
+      background: rgba(179,124,255,.16);
+      border-color: rgba(179,124,255,.26);
+      color: var(--ink);
+    }
+
+    .drawer .divider{
+      height: 1px;
+      background: rgba(196,181,253,.12);
+      margin: .95rem 0;
+    }
+
+    /* Button overrides for mobile home page (sheen effect + specific sizing) */
+    .btn{
+      position: relative;
+      height: 44px;
+      padding: 0 16px;
+      box-shadow: 0 12px 40px rgba(0,0,0,.32);
+      backdrop-filter: blur(10px);
+      will-change: transform;
+      overflow:hidden;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn::after{
+      content:"";
+      position:absolute;
+      inset:-40% -60%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.18), transparent);
+      transform: translateX(-60%) rotate(10deg);
+      opacity: 0;
+      transition: transform .55s ease, opacity .18s ease;
+    }
+    .btn:active{ transform: translateY(1px) scale(.99); }
+    .btn:hover::after{
+      opacity: 1;
+      transform: translateX(60%) rotate(10deg);
+    }
+    .btn.primary{
+      background: linear-gradient(90deg, rgba(179,124,255,.92), rgba(249,115,226,.72));
+      border-color: rgba(255,255,255,.18);
+    }
+    .btn.ghost{
+      background: rgba(196,181,253,.06);
+      border-color: rgba(196,181,253,.14);
+      box-shadow: 0 10px 34px rgba(0,0,0,.26);
+    }
+
+    /* Hero */
+    .hero{
+      position: relative;
+      overflow: hidden;
+      padding: 3.5rem 0 2.75rem;
+      text-align:center;
+    }
+    .hero .wrap{ position: relative; z-index: 2; }
+
+    /* Hero-only particle layer */
+    #particles{
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+      opacity: .42;
+      mix-blend-mode: screen;
+    }
+    @media (prefers-reduced-motion: reduce){
+      #particles{ display:none; }
+    }
+
+    /* Rotating headline container */
+    .hero-title-rt {
+      margin: 0 auto 1.0rem;
+      font-size: clamp(1.9rem, 7vw, 2.8rem);
+      line-height: 1.08;
+      letter-spacing: .01em;
+      display: flex;
+      justify-content: center;
+      width: 100%;
+    }
+    .hero-title-rt .rotating-text-demo {
+      font-size: inherit;
+      line-height: inherit;
+    }
+    .hero-title-rt .rotating-text-ptag {
+      color: var(--ink);
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .hero-title-rt .rotating-text-main {
+      background: linear-gradient(135deg, rgba(179,124,255,.18), rgba(249,115,226,.12));
+      border: 1px solid rgba(179,124,255,.32);
+      box-shadow: 0 0 24px rgba(179,124,255,.15), inset 0 1px 0 rgba(255,255,255,.06);
+      color: var(--accent);
+      border-radius: 0.4em;
+      padding: 0.05em 0.35em;
+    }
+
+    .lede{
+      margin: 0 auto;
+      max-width: 56ch;
+      color: var(--muted);
+      font-size: 1.0rem;
+      line-height: 1.75;
+    }
+
+    .cta{
+      margin-top: 1.25rem;
+      display:flex;
+      justify-content:center;
+      gap:.7rem;
+      flex-wrap: wrap;
+    }
+    .cta .btn{ height: 44px; }
+
+    /* Feature cards (stacked, touch-friendly) */
+    .featureRow{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: .9rem;
+      margin-top: 2.0rem;
+      align-items: stretch;
+    }
+
+    /* Card overrides for mobile home page (custom background + touch interactions) */
+    .card{
+      margin-top: 0;
+      border: 1px solid rgba(196,181,253,.16);
+      background: linear-gradient(180deg, rgba(10,6,28,.52), rgba(10,6,28,.30));
+      box-shadow: var(--shadow2);
+      padding: 1.2rem 1.1rem;
+      text-align:left;
+      transition: transform .16s ease, border-color .16s ease, filter .16s ease;
+      will-change: transform;
+    }
+    .card:active{ transform: translateY(1px); }
+    .card:hover{
+      transform: translateY(-2px);
+      border-color: rgba(196,181,253,.26);
+      filter: brightness(1.03);
+    }
+    .card h3{
+      margin:0;
+      font-size: .90rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    .card p{
+      margin: .55rem 0 0;
+      color: var(--muted);
+      line-height: 1.65;
+      font-size: .98rem;
+    }
+
+    /* Section */
+    .section{
+      padding: 2.6rem 0 2.2rem;
+    }
+
+    .panel{
+      border-radius: var(--r-xl);
+      border: 1px solid rgba(196,181,253,.14);
+      background: linear-gradient(180deg, rgba(10,6,28,.44), rgba(10,6,28,.24));
+      box-shadow: var(--shadow2);
+      padding: 1.25rem 1.1rem;
+      text-align:left;
+      margin-top: .9rem;
+    }
+    .panel:first-child{ margin-top: 0; }
+    .panel h2{
+      margin:0;
+      font-size: 1.02rem;
+      letter-spacing:.12em;
+      text-transform: uppercase;
+    }
+    .panel p{
+      margin:.7rem 0 0;
+      color: var(--muted);
+      line-height:1.7;
+      font-size: .98rem;
+    }
+
+    footer{
+      padding: 2.4rem 0 calc(2.0rem + env(safe-area-inset-bottom));
+      color: var(--muted2);
+      text-align:center;
+    }
+    footer a{
+      color: var(--muted);
+      text-decoration:none;
+      border-bottom: 1px solid rgba(196,181,253,.22);
+    }
+    footer a:hover{
+      color: var(--ink);
+      border-bottom-color: rgba(196,181,253,.38);
+    }
+
+    /* Reveal */
+    .reveal{ opacity:0; transform: translateY(14px); transition: opacity .55s ease, transform .55s cubic-bezier(.2,.9,.2,1); }
+    .reveal.in{ opacity:1; transform: translateY(0); }
+
+    @media (prefers-reduced-motion: reduce){
+      .btn, .card, .navitem, .iconbtn{ transition:none; }
+      .reveal{ opacity:1; transform:none; transition:none; }
+    }
+
+    /* Boot loading */
+    body.is-loading{ overflow-y: hidden; }
+    #app{ opacity: 0; transform: translateY(6px); transition: opacity .28s ease, transform .28s ease; }
+    body.is-ready #app{ opacity: 1; transform: none; }
+
+    #boot-skeleton{
+      position: fixed;
+      inset: 0;
+      z-index: 999;
+      pointer-events: none;
+      background: linear-gradient(180deg, var(--bg1), var(--bg0));
+      overflow: hidden;
+    }
+    body.is-ready #boot-skeleton{ display:none; }
+
+    #boot-skeleton::before{
+      content:"";
+      position:absolute;
+      inset:-20%;
+      background:
+        radial-gradient(circle at 20% 18%, rgba(179,124,255,.22), transparent 55%),
+        radial-gradient(circle at 78% 12%, rgba(94,234,212,.12), transparent 55%),
+        radial-gradient(circle at 62% 78%, rgba(249,115,226,.14), transparent 55%);
+      filter: blur(10px);
+      animation: skGlowFloat 16s ease-in-out infinite alternate;
+      opacity: .95;
+    }
+    #boot-skeleton::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        repeating-linear-gradient(
+          135deg,
+          rgba(255,255,255,.05) 0px,
+          rgba(255,255,255,.05) 1px,
+          transparent 1px,
+          transparent 120px
+        );
+      opacity: .10;
+      -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 55%, transparent 100%);
+      mask-image: linear-gradient(to bottom, #000 0%, #000 55%, transparent 100%);
+      animation: skLineDrift 22s linear infinite;
+    }
+    @keyframes skGlowFloat{
+      from{ transform: translate3d(0,0,0) scale(1); }
+      to{ transform: translate3d(-18px, 12px, 0) scale(1.03); }
+    }
+    @keyframes skLineDrift{
+      from{ transform: translate3d(0,0,0); }
+      to{ transform: translate3d(-140px, 140px, 0); }
+    }
+
+    .sk-wrap{
+      width: min(var(--max), calc(100% - 1.35rem));
+      margin: 0 auto;
+      padding: 1.0rem 0 1.5rem;
+      position: relative;
+      z-index: 1;
+      animation: skStageIn .28s ease both;
+    }
+    @keyframes skStageIn{
+      from{ opacity: 0; transform: translateY(6px); }
+      to{ opacity: 1; transform: translateY(0); }
+    }
+
+    .sk-pill{
+      height: 44px;
+      border-radius: 999px;
+      border: 1px solid rgba(196,181,253,.12);
+      background: rgba(196,181,253,.08);
+      box-shadow: 0 14px 40px rgba(0,0,0,.26);
+      position: relative;
+      overflow:hidden;
+    }
+
+    .sk-block{
+      border-radius: var(--r-xl);
+      border: 1px solid rgba(196,181,253,.14);
+      background: linear-gradient(180deg, rgba(10,6,28,.44), rgba(10,6,28,.22));
+      box-shadow: 0 18px 55px rgba(0,0,0,.24);
+      position: relative;
+      overflow:hidden;
+    }
+
+    .sk-shimmer::after{
+      content:"";
+      position:absolute;
+      inset:-70% -90%;
+      background:
+        linear-gradient(90deg,
+          transparent 0%,
+          rgba(179,124,255,.10) 22%,
+          rgba(255,255,255,.12) 35%,
+          rgba(249,115,226,.10) 50%,
+          rgba(94,234,212,.08) 64%,
+          transparent 100%
+        );
+      transform: translateX(-60%) rotate(10deg);
+      animation: skShimmer 1.15s cubic-bezier(.2,.6,.2,1) infinite;
+      opacity: .95;
+    }
+    @keyframes skShimmer{
+      from{ transform: translateX(-60%) rotate(10deg); }
+      to{ transform: translateX(60%) rotate(10deg); }
+    }
+
+    .sk-top{
+      display:flex;
+      gap:.85rem;
+      align-items:center;
+    }
+    .sk-logo{
+      width: 40px; height: 40px;
+      border-radius: 14px;
+      border: 1px solid rgba(196,181,253,.14);
+      background: rgba(196,181,253,.10);
+      box-shadow: 0 18px 50px rgba(0,0,0,.34);
+      flex: 0 0 auto;
+      position: relative;
+      overflow:hidden;
+    }
+    .sk-lines{
+      flex: 1;
+      display:flex;
+      flex-direction:column;
+      gap: 8px;
+    }
+    .sk-line{
+      height: 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(196,181,253,.10);
+      background: rgba(196,181,253,.07);
+      position: relative;
+      overflow:hidden;
+    }
+    .sk-line.w1{ width: 74%; }
+    .sk-line.w2{ width: 56%; opacity:.85; }
+
+    .sk-hero{
+      text-align:center;
+      margin-top: 1.6rem;
+    }
+
+    .sk-title{
+      height: 46px;
+      width: 92%;
+      margin: 1.0rem auto 0;
+      border-radius: 16px;
+      border: 1px solid rgba(196,181,253,.14);
+      background: linear-gradient(90deg, rgba(179,124,255,.14), rgba(196,181,253,.10), rgba(249,115,226,.12));
+      position: relative;
+      overflow:hidden;
+    }
+    .sk-title.sm{ height: 38px; width: 84%; margin-top: .6rem; opacity:.95; }
+
+    .sk-text{ height: 16px; width: 92%; margin: .95rem auto 0; border-radius: 999px; border: 1px solid rgba(196,181,253,.10); background: rgba(196,181,253,.07); position: relative; overflow:hidden;}
+    .sk-text.sm{ width: 86%; }
+    .sk-text.xs{ width: 74%; opacity:.9; }
+
+    .sk-ctarow{
+      margin-top: 1.2rem;
+      display:flex;
+      gap:.7rem;
+      justify-content:center;
+    }
+    .sk-ctarow .sk-pill{ width: 160px; }
+
+    .sk-cards{
+      margin-top: 1.65rem;
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: .9rem;
+    }
+    .sk-card{ height: 112px; padding: 1.05rem 1.0rem; }
+    .sk-card .sk-line.w1{ width: 58%; height: 12px; }
+    .sk-card .sk-line.w2{ width: 92%; height: 12px; opacity:.82; }
+    .sk-card .sk-line.w3{ width: 76%; height: 12px; opacity:.76; }
+
+    .sk-panels{ margin-top: 1.35rem; display:grid; gap:.9rem; }
+    .sk-panel{ height: 138px; padding: 1.05rem 1.0rem; }
+
+    @media (prefers-reduced-motion: reduce){
+      #boot-skeleton::before, #boot-skeleton::after{ animation:none; }
+      .sk-shimmer::after{ display:none; }
+      .sk-wrap{ animation:none; }
+    }
+  </style>
+</head>
+
+<body class="is-loading">
+  <div class="bg">
+    <iframe class="beams-iframe" src="/darkveil-bg/index.html" aria-hidden="true" tabindex="-1"></iframe>
+    <div class="vignette"></div>
+  </div>
+
+  <!-- Boot skeleton shown until background + DOM are ready -->
+  <div id="boot-skeleton" aria-hidden="true">
+    <div class="sk-wrap">
+      <div class="sk-top">
+        <div class="sk-logo sk-shimmer"></div>
+        <div class="sk-lines">
+          <div class="sk-line w1 sk-shimmer"></div>
+          <div class="sk-line w2 sk-shimmer"></div>
+        </div>
+        <div class="sk-pill sk-shimmer" style="width:52px; border-radius:14px;"></div>
+      </div>
+
+      <div class="sk-hero">
+        <div class="sk-title sk-shimmer"></div>
+
+        <div class="sk-text sk-shimmer"></div>
+        <div class="sk-text sm sk-shimmer"></div>
+        <div class="sk-text xs sk-shimmer"></div>
+
+        <div class="sk-ctarow">
+          <div class="sk-pill sk-shimmer"></div>
+          <div class="sk-pill sk-shimmer"></div>
+        </div>
+
+        <div class="sk-cards">
+          <div class="sk-block sk-card sk-shimmer">
+            <div class="sk-line w1 sk-shimmer"></div>
+            <div class="sk-line w2 sk-shimmer" style="margin-top:10px;"></div>
+            <div class="sk-line w3 sk-shimmer" style="margin-top:10px;"></div>
+          </div>
+          <div class="sk-block sk-card sk-shimmer">
+            <div class="sk-line w1 sk-shimmer"></div>
+            <div class="sk-line w2 sk-shimmer" style="margin-top:10px;"></div>
+            <div class="sk-line w3 sk-shimmer" style="margin-top:10px;"></div>
+          </div>
+          <div class="sk-block sk-card sk-shimmer">
+            <div class="sk-line w1 sk-shimmer"></div>
+            <div class="sk-line w2 sk-shimmer" style="margin-top:10px;"></div>
+            <div class="sk-line w3 sk-shimmer" style="margin-top:10px;"></div>
+          </div>
+        </div>
+
+        <div class="sk-panels">
+          <div class="sk-block sk-panel sk-shimmer">
+            <div class="sk-line w1 sk-shimmer"></div>
+            <div class="sk-line w2 sk-shimmer" style="margin-top:12px;"></div>
+            <div class="sk-line w3 sk-shimmer" style="margin-top:12px;"></div>
+          </div>
+          <div class="sk-block sk-panel sk-shimmer">
+            <div class="sk-line w1 sk-shimmer"></div>
+            <div class="sk-line w2 sk-shimmer" style="margin-top:12px;"></div>
+            <div class="sk-line w3 sk-shimmer" style="margin-top:12px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="app">
+    <!-- Mobile Top Bar -->
+    <header class="topbar">
+      <div class="wrap">
+        <div class="barrow">
+          <div class="brand" aria-label="Saku Network Solutions">
+            <div class="mark">
+              <img src="/assets/sns-logo-purple.png" alt="Saku Network Solutions logo">
+            </div>
+            <div class="brandtext">
+              <strong>SAKU NETWORK SOLUTIONS</strong>
+              <span>Network infrastructure, done clean.</span>
+            </div>
+          </div>
+
+          <button class="iconbtn" id="menuBtn" aria-label="Open menu" aria-haspopup="dialog" aria-controls="drawer" aria-expanded="false">
+            <span class="hamburger" aria-hidden="true">
+              <i></i><i></i><i></i>
+            </span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Drawer -->
+    <div class="drawer-backdrop" id="drawerBackdrop" aria-hidden="true"></div>
+    <aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-label="Navigation menu">
+      <header>
+        <h2>Menu</h2>
+        <button class="iconbtn" id="closeMenuBtn" aria-label="Close menu">
+          <span style="font-weight:900; font-size:18px; line-height:1;">×</span>
+        </button>
+      </header>
+
+      <nav class="navlist" aria-label="Primary">
+        <a class="navitem active" href="/home/">Home</a>
+        <a class="navitem" href="/sns/">Services</a>
+        <a class="navitem" href="/credibility/">Credibility</a>
+        <a class="navitem" href="/resources/">Resources</a>
+        <a class="navitem" href="/contact/">Contact</a>
+      </nav>
+
+      <div class="divider"></div>
+
+      <a class="btn primary" href="/sns-inquiry/" style="width:100%; justify-content:center;">Start an Inquiry</a>
+      <div style="height:.6rem;"></div>
+      <a class="btn ghost" href="/sns-login/" style="width:100%; justify-content:center;">Client Login</a>
+
+      <div class="divider"></div>
+
+      <a class="navitem" href="/home/" id="viewDesktop">View Desktop Site</a>
+
+      <div style="height:1.0rem;"></div>
+      <div style="color: var(--muted2); font-size:.82rem; line-height:1.55;">
+        © 2026 Saku Network Solutions
+      </div>
+    </aside>
+
+    <!-- Hero -->
+    <main>
+      <section class="hero">
+        <canvas id="particles"></canvas>
+        <div class="wrap">
+          <div class="reveal hero-title-rt" id="rt-headline-root"></div>
+
+          <p class="lede reveal">
+            SNS designs, installs, and supports business networks with a focus on stability, clean implementation,
+            and security-minded configuration.
+          </p>
+
+          <div class="cta reveal">
+            <a class="btn primary" href="/sns-inquiry/">Start an Inquiry</a>
+            <a class="btn" href="/sns/">View Services</a>
+          </div>
+
+          <div class="featureRow">
+            <div class="card reveal">
+              <h3>Network Assessment</h3>
+              <p>On-site survey + actionable plan. Know what’s wrong, what changes, and what it costs.</p>
+            </div>
+            <div class="card reveal">
+              <h3>Wi-Fi Under Load</h3>
+              <p>Fix drops, interference, and bandwidth abuse with clean config and right-sized hardware.</p>
+            </div>
+            <div class="card reveal">
+              <h3>Ongoing Support</h3>
+              <p>Optional membership for continuous admin, monitoring, and rapid changes as you grow.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="wrap">
+          <div class="panel reveal">
+            <h2>Best Starting Point</h2>
+            <p>
+              An on-site environment survey + network assessment. You get a clear scope, recommended fixes,
+              and a deployment plan — before any work begins.
+            </p>
+          </div>
+
+          <div class="panel reveal">
+            <h2>Professional, quiet credibility</h2>
+            <p>
+              Enterprise-style execution: clean installs, documentation-first thinking, and security-minded network design.
+              Proof lives on the Credibility page — not in loud marketing.
+            </p>
+          </div>
+
+          <div class="cta reveal" style="margin-top:1.25rem;">
+            <a class="btn" href="/credibility/">Proof & History</a>
+            <a class="btn" href="/contact/">Contact</a>
+          </div>
+        </div>
+      </section>
+
+      <footer>
+        <div class="wrap">
+          <div>© 2026 Saku Network Solutions</div>
+          <div style="margin-top:.85rem; line-height:1.9;">
+            <a href="/sns-inquiry/">Inquiry</a> &nbsp;•&nbsp;
+            <a href="/sns/">Services</a> &nbsp;•&nbsp;
+            <a href="/sns-login/">Client Login</a> &nbsp;•&nbsp;
+            <a href="/sns-admin/" class="footer-link admin-link">Admin Login</a>
+          </div>
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    // Reveal-on-scroll (initialized after boot so you never see the "unstyled" state)
+    function initReveal(){
+      const els = Array.from(document.querySelectorAll('.reveal'));
+      if (!('IntersectionObserver' in window) || els.length === 0) {
+        els.forEach(el => el.classList.add('in'));
+        return;
+      }
+      const io = new IntersectionObserver((entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            e.target.classList.add('in');
+            io.unobserve(e.target);
+          }
+        }
+      }, { threshold: 0.14 });
+      els.forEach(el => io.observe(el));
+    }
+  </script>
+
+  <script>
+    // Same particle vibe as desktop home, tuned for mobile performance
+    function initParticles(){
+      const c = document.getElementById("particles");
+      if (!c) return;
+
+      const hero = c.closest(".hero");
+      if (!hero) return;
+
+      const ctx = c.getContext("2d", { alpha: true });
+      let w = 0, h = 0;
+      const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+
+      const prefersReduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (prefersReduced) return;
+
+      function rand(min, max){ return Math.random() * (max - min) + min; }
+
+      function resize(){
+        const r = hero.getBoundingClientRect();
+        w = Math.floor(r.width);
+        h = Math.floor(r.height);
+
+        c.width  = Math.floor(w * dpr);
+        c.height = Math.floor(h * dpr);
+        c.style.width = w + "px";
+        c.style.height = h + "px";
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      let N = 0;
+      const p = [];
+
+      function resetParticle(s){
+        // keep the "upper-right drift" look, but safe on narrow screens
+        s.x = rand(w * 0.55, w * 0.98);
+        s.y = rand(-70, -10);
+
+        s.r = rand(0.7, 1.9);
+        s.a = rand(0.14, 0.44);
+
+        s.vx = rand(0.05, 0.20);
+        s.vy = rand(0.05, 0.18);
+
+        s.phase = rand(0, Math.PI * 2);
+        s.drift = rand(0.18, 0.55);
+      }
+
+      function seed(){
+        p.length = 0;
+        // mobile-friendly density
+        N = Math.floor(Math.min(85, Math.max(34, (w * h) / 32000)));
+        for (let i = 0; i < N; i++){
+          const s = {};
+          resetParticle(s);
+          s.x = rand(0, w);
+          s.y = rand(0, h);
+          p.push(s);
+        }
+      }
+
+      let last = performance.now();
+
+      function tick(now){
+        const dt = Math.min(33, now - last);
+        last = now;
+
+        ctx.clearRect(0, 0, w, h);
+
+        for (let i = 0; i < p.length; i++){
+          const s = p[i];
+
+          s.phase += 0.0016 * dt * s.drift;
+
+          s.x -= s.vx * dt;
+          s.y += s.vy * dt;
+
+          s.x += Math.sin(s.phase) * 0.04 * dt;
+
+          if (s.y > h * 0.86 || s.x < w * 0.06){
+            resetParticle(s);
+          }
+
+          ctx.fillStyle = `rgba(230,220,255,${s.a})`;
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        requestAnimationFrame(tick);
+      }
+
+      resize();
+      seed();
+      requestAnimationFrame(tick);
+
+      window.addEventListener("resize", () => {
+        resize();
+        seed();
+      }, { passive: true });
+    }
+  </script>
+
+  <script>
+    // Mobile menu
+    (function(){
+      const menuBtn = document.getElementById("menuBtn");
+      const closeBtn = document.getElementById("closeMenuBtn");
+      const backdrop = document.getElementById("drawerBackdrop");
+      const drawer = document.getElementById("drawer");
+      const viewDesktop = document.getElementById("viewDesktop");
+
+      function openMenu(){
+        document.body.classList.add("menu-open");
+        menuBtn && menuBtn.setAttribute("aria-expanded", "true");
+        // prevent background scroll on iOS
+        document.documentElement.style.overflow = "hidden";
+        document.body.style.overflow = "hidden";
+      }
+
+      function closeMenu(){
+        document.body.classList.remove("menu-open");
+        menuBtn && menuBtn.setAttribute("aria-expanded", "false");
+        document.documentElement.style.overflow = "";
+        document.body.style.overflow = "";
+      }
+
+      menuBtn && menuBtn.addEventListener("click", openMenu);
+      closeBtn && closeBtn.addEventListener("click", closeMenu);
+      backdrop && backdrop.addEventListener("click", closeMenu);
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") closeMenu();
+      });
+
+      // Allow user to force desktop (disables desktop->mobile redirect)
+      viewDesktop && viewDesktop.addEventListener("click", (e) => {
+        e.preventDefault();
+        try { localStorage.setItem("sns_force_desktop", "1"); } catch(_){}
+        location.href = "/home/";
+      });
+
+      // Close drawer after tapping any nav link
+      drawer && drawer.addEventListener("click", (e) => {
+        const a = e.target && e.target.closest ? e.target.closest("a") : null;
+        if (a && a.getAttribute("href") && a.id !== "viewDesktop") closeMenu();
+      });
+    })();
+  </script>
+
+  <script>
+    // Boot logic (same behavior as desktop home)
+    (function(){
+      const iframe = document.querySelector(".beams-iframe");
+      let domReady = false;
+      let bgReady = false;
+      let bootDone = false;
+
+      function finishBoot(){
+        if (bootDone) return;
+        bootDone = true;
+
+        document.body.classList.add("bg-ready");
+
+        setTimeout(() => {
+          document.body.classList.remove("is-loading");
+          document.body.classList.add("is-ready");
+
+          if (typeof initReveal === "function") initReveal();
+          if (typeof initParticles === "function") initParticles();
+        }, 50);
+      }
+
+      function tryBoot(){
+        if (domReady && bgReady) finishBoot();
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        domReady = true;
+        tryBoot();
+      });
+
+      if (iframe){
+        try {
+          if (iframe.contentDocument && iframe.contentDocument.readyState === "complete") {
+            bgReady = true;
+            tryBoot();
+          }
+        } catch(e){ /* ignore */ }
+
+        iframe.addEventListener("load", () => {
+          bgReady = true;
+          tryBoot();
+        }, { once: true });
+      } else {
+        bgReady = true;
+        tryBoot();
+      }
+
+      setTimeout(() => finishBoot(), 2500);
+    })();
+  </script>
+</body>
+</html>

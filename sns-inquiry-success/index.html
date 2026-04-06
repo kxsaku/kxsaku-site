@@ -4,7 +4,19 @@
   <meta charset="UTF-8" />
   <title>SNS · Inquiry Sent</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="stylesheet" href="/styles.min.css" />
+  <script>
+  (function () {
+    const forceDesktop = localStorage.getItem("sns_force_desktop") === "1";
+    if (forceDesktop) return;
+
+    const isMobile = window.matchMedia("(max-width: 820px)").matches;
+    if (isMobile && !location.pathname.endsWith("/sns-inquiry-success/mobile.html")) {
+      location.replace("/sns-inquiry-success/mobile.html");
+    }
+  })();
+</script>
+
+  <link rel="stylesheet" href="/styles.css" />
   <style>
     /* Page-specific: Success page layout */
     .page-shell {
@@ -58,12 +70,10 @@
       box-shadow: var(--shadow-lg);
       filter: brightness(1.05);
     }
-
   </style>
 </head>
 <body>
-<a href="#main-content" class="skip-link">Skip to content</a>
-  <div class="page-shell" id="main-content">
+  <div class="page-shell">
     <div class="sns-success-card">
       <h1>Inquiry successfully sent</h1>
       <p>
@@ -74,9 +84,6 @@
       <a href="/sns/index.html">Back to Saku Network Solutions</a>
     </div>
   </div>
-
-  <script src="/mobile-nav.js" defer></script>
-
 </body>
 </html>
 

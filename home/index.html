@@ -5,9 +5,25 @@
 <meta charset="utf-8"/>
 <title>Saku Network Solutions | Reliable Networks, Done Clean</title>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
+<script>
+  (function () {
+    // If user explicitly chose desktop, do not redirect
+    if (localStorage.getItem("sns_force_desktop") === "1") return;
+
+    // Treat as "phone" if small viewport + touch capable
+    var isPhone = window.matchMedia("(max-width: 740px)").matches &&
+                  ("ontouchstart" in window || navigator.maxTouchPoints > 0);
+
+    // Avoid redirect loop
+    var alreadyMobile = location.pathname.endsWith("/home/mobile.html");
+
+    if (isPhone && !alreadyMobile) {
+      location.replace("/home/mobile.html");
+    }
+  })();
+</script>
 <meta content="Saku Network Solutions (SNS) provides network assessments, Wi-Fi stability upgrades, secure office networks, and ongoing administration." name="description"/>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; frame-src 'self';" />
-<link rel="stylesheet" href="/styles.min.css" />
+<link rel="stylesheet" href="/styles.css" />
 <style>
     /* Page-specific variables (extend design system) */
     :root{
@@ -358,40 +374,20 @@
       justify-content: center;
       width: 100%;
     }
-    .hero-title-rt .rt-inner {
-      display: flex;
-      align-items: center;
-      gap: .2em;
-      font-weight: 900;
-      color: var(--ink);
+    .hero-title-rt .rotating-text-demo {
       font-size: inherit;
       line-height: inherit;
     }
-    .hero-title-rt .rt-word {
-      display: inline-flex;
-      overflow: hidden;
+    .hero-title-rt .rotating-text-ptag {
+      color: var(--ink);
+    }
+    .hero-title-rt .rotating-text-main {
       background: linear-gradient(135deg, rgba(179,124,255,.18), rgba(249,115,226,.12));
       border: 1px solid rgba(179,124,255,.32);
       box-shadow: 0 0 24px rgba(179,124,255,.15), inset 0 1px 0 rgba(255,255,255,.06);
       color: var(--accent);
       border-radius: 0.4em;
       padding: 0.05em 0.35em;
-      position: relative;
-    }
-    .hero-title-rt .rt-char {
-      display: inline-block;
-      transition: transform .35s cubic-bezier(.2,.9,.3,1), opacity .3s ease;
-    }
-    .hero-title-rt .rt-char.exit {
-      transform: translateY(-120%);
-      opacity: 0;
-    }
-    .hero-title-rt .rt-char.enter {
-      transform: translateY(100%);
-      opacity: 0;
-    }
-    @media (prefers-reduced-motion: reduce) {
-      .hero-title-rt .rt-char { transition: none !important; }
     }
 
 
@@ -632,6 +628,13 @@
       border: 1px solid rgba(196,181,253,.12);
     }
 
+    .react-headline-iframe {
+      border: 0;
+      width: 100%;
+      height: 1.6em; /* tune later */
+      display: block;
+    }
+
     /* shimmer */
     #boot-skeleton .shimmer{
       position: relative;
@@ -660,64 +663,11 @@
 
 
 
-
-    /* ===== MOBILE RESPONSIVE ===== */
-    @media (max-width: 768px) {
-      /* Mobile layout adjustments */
-      .wrap {
-        width: min(640px, calc(100% - 1.25rem));
-        padding-left: 0;
-        padding-right: 0;
-      }
-
-      /* Stack desktop toprow vertically */
-      .toprow {
-        flex-direction: column;
-        align-items: stretch;
-        gap: .75rem;
-      }
-
-      /* Stack desktop button rows */
-      .btnrow {
-        flex-wrap: wrap;
-      }
-
-      /* Table responsive: stack cells on mobile */
-      table { border-collapse: collapse; }
-      thead { display: none; }
-      tbody, tr, td { display: block; width: 100%; }
-      tr {
-        border-radius: 16px;
-        border: 1px solid rgba(196,181,253,.10);
-        background: rgba(0,0,0,.16);
-        margin-bottom: .75rem;
-        overflow: hidden;
-      }
-      td {
-        padding: .85rem .9rem;
-        border-top: 1px solid rgba(196,181,253,.08);
-        border-bottom: none;
-      }
-      tr td:first-child { border-top: none; }
-
-      /* Detail grid stacks to single column */
-      .detail-grid { grid-template-columns: 1fr; }
-      .full { grid-column: 1; }
-
-      /* Toolbar stacks */
-      .toolbar { flex-direction: column; gap: .5rem; }
-      .toolbar-left, .toolbar-right { flex-wrap: wrap; }
-
-      /* Actions full-width on mobile */
-      .actions { flex-direction: column; }
-      .actions .btn { width: 100%; }
-    }
-
   </style>
-<!-- Rotating headline (vanilla JS, replaces 316KB React bundle) -->
+<link href="/home/react-headline/assets/index.css" rel="stylesheet"/>
+<script type="module" src="/home/react-headline/assets/rotating-headline.js"></script>
 </head>
 <body class="is-loading">
-<a href="#main-content" class="skip-link">Skip to content</a>
 <div class="bg">
 <!-- True Beams background app (Vite build) -->
 <iframe aria-hidden="true" class="beams-iframe" src="/darkveil-bg/index.html" tabindex="-1"></iframe>
@@ -777,7 +727,7 @@
 </div>
 </header>
 <!-- Hero -->
-<main id="main-content">
+<main>
 <section class="hero">
 <canvas id="particles"></canvas>
 <div class="wrap">
@@ -1020,72 +970,4 @@ function initParticles(){
   setTimeout(() => finishBoot(), 2500);
 })();
 </script>
-
-  <script>
-    // Rotating headline — vanilla JS replacement for react-headline (316KB React bundle)
-    (function(){
-      var root = document.getElementById("rt-headline-root");
-      if (!root) return;
-
-      var words = ["Reliability", "Security", "Continuity", "Affordability"];
-      var idx = 0;
-      var INTERVAL = 2000;
-      var STAGGER = 25; // ms per character delay
-
-      // Build DOM
-      root.innerHTML = '<div class="rt-inner"><span>Network </span><span class="rt-word" id="rt-word"></span></div>';
-      var wordEl = document.getElementById("rt-word");
-
-      function renderWord(text, enterClass) {
-        wordEl.innerHTML = "";
-        for (var i = 0; i < text.length; i++) {
-          var span = document.createElement("span");
-          span.className = "rt-char" + (enterClass ? " " + enterClass : "");
-          span.textContent = text[i];
-          span.style.transitionDelay = (i * STAGGER) + "ms";
-          wordEl.appendChild(span);
-        }
-      }
-
-      // Initial render
-      renderWord(words[0]);
-
-      function rotate() {
-        // Exit current chars
-        var chars = wordEl.querySelectorAll(".rt-char");
-        var maxExitDelay = 0;
-        for (var i = 0; i < chars.length; i++) {
-          var delay = ((chars.length - 1 - i) * STAGGER);
-          chars[i].style.transitionDelay = delay + "ms";
-          chars[i].classList.add("exit");
-          if (delay > maxExitDelay) maxExitDelay = delay;
-        }
-
-        // After exit animation, render next word
-        setTimeout(function() {
-          idx = (idx + 1) % words.length;
-          renderWord(words[idx], "enter");
-
-          // Force reflow, then remove enter class
-          requestAnimationFrame(function() {
-            requestAnimationFrame(function() {
-              var newChars = wordEl.querySelectorAll(".rt-char");
-              for (var j = 0; j < newChars.length; j++) {
-                newChars[j].classList.remove("enter");
-              }
-            });
-          });
-        }, maxExitDelay + 300);
-      }
-
-      // Respect prefers-reduced-motion
-      var mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-      if (!mq.matches) {
-        setInterval(rotate, INTERVAL);
-      }
-    })();
-  </script>
-
-<script src="/mobile-nav.js" defer></script>
-</body>
 </html>

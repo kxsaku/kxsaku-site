@@ -3,9 +3,26 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>SNS · Services</title>
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; frame-src 'none';" />
-  <link rel="stylesheet" href="/styles.min.css" />
+  <script>
+  (function () {
+    // If user explicitly chose desktop, do not redirect
+    if (localStorage.getItem("sns_force_desktop") === "1") return;
+
+    // phone-ish: small viewport + touch
+    var isPhone = window.matchMedia("(max-width: 740px)").matches &&
+                  ("ontouchstart" in window || navigator.maxTouchPoints > 0);
+
+    // avoid loops
+    var alreadyMobile = location.pathname.endsWith("/sns/mobile.html");
+
+    if (isPhone && !alreadyMobile) {
+      location.replace("/sns/mobile.html");
+    }
+  })();
+</script>
+
+  <title>SNS · Services</title>
+  <link rel="stylesheet" href="/styles.css" />
 
   <style>
     /* SNS page-specific: custom background for services pages */
@@ -710,64 +727,10 @@
       .btn, .card, .miniCard, .price{ transition:none !important; }
       .reveal{ opacity:1 !important; transform:none !important; }
     }
-
-    /* ===== MOBILE RESPONSIVE ===== */
-    @media (max-width: 768px) {
-      /* Mobile layout adjustments */
-      .wrap {
-        width: min(640px, calc(100% - 1.25rem));
-        padding-left: 0;
-        padding-right: 0;
-      }
-
-      /* Stack desktop toprow vertically */
-      .toprow {
-        flex-direction: column;
-        align-items: stretch;
-        gap: .75rem;
-      }
-
-      /* Stack desktop button rows */
-      .btnrow {
-        flex-wrap: wrap;
-      }
-
-      /* Table responsive: stack cells on mobile */
-      table { border-collapse: collapse; }
-      thead { display: none; }
-      tbody, tr, td { display: block; width: 100%; }
-      tr {
-        border-radius: 16px;
-        border: 1px solid rgba(196,181,253,.10);
-        background: rgba(0,0,0,.16);
-        margin-bottom: .75rem;
-        overflow: hidden;
-      }
-      td {
-        padding: .85rem .9rem;
-        border-top: 1px solid rgba(196,181,253,.08);
-        border-bottom: none;
-      }
-      tr td:first-child { border-top: none; }
-
-      /* Detail grid stacks to single column */
-      .detail-grid { grid-template-columns: 1fr; }
-      .full { grid-column: 1; }
-
-      /* Toolbar stacks */
-      .toolbar { flex-direction: column; gap: .5rem; }
-      .toolbar-left, .toolbar-right { flex-wrap: wrap; }
-
-      /* Actions full-width on mobile */
-      .actions { flex-direction: column; }
-      .actions .btn { width: 100%; }
-    }
-
   </style>
 </head>
 
 <body>
-<a href="#main-content" class="skip-link">Skip to content</a>
   <div class="bg" aria-hidden="true"></div>
 
   <!-- Top Nav -->
@@ -799,7 +762,7 @@
     </div>
   </header>
 
-  <main id="main-content">
+  <main>
     <!-- HERO -->
     <section class="hero section tight">
       <div class="wrap">
@@ -1190,7 +1153,5 @@
       els.forEach(el => io.observe(el));
     })();
   </script>
-
-<script src="/mobile-nav.js" defer></script>
 </body>
 </html>

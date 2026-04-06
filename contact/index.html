@@ -3,9 +3,26 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>SNS · Contact</title>
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://api.kxsaku.com; img-src 'self' data:; font-src 'self'; frame-src 'none';" />
-  <link rel="stylesheet" href="/styles.min.css" />
+  <script>
+  (function () {
+    // If user explicitly chose desktop, do not redirect
+    if (localStorage.getItem("sns_force_desktop") === "1") return;
+
+    // phone-ish: small viewport + touch
+    var isPhone = window.matchMedia("(max-width: 740px)").matches &&
+                  ("ontouchstart" in window || navigator.maxTouchPoints > 0);
+
+    // avoid loops
+    var alreadyMobile = location.pathname.endsWith("/contact/mobile.html");
+
+    if (isPhone && !alreadyMobile) {
+      location.replace("/contact/mobile.html");
+    }
+  })();
+</script>
+
+  <title>SNS · Contact</title>
+  <link rel="stylesheet" href="/styles.css" />
 
   <style>
     /* ===== Page-specific variables ===== */
@@ -486,12 +503,10 @@
       .toast { transition: none !important; }
       .reveal { opacity: 1 !important; transform: none !important; }
     }
-
   </style>
 </head>
 
 <body>
-<a href="#main-content" class="skip-link">Skip to content</a>
   <div class="bg" aria-hidden="true"></div>
 
   <!-- Top Nav (same as Experience/SNS) -->
@@ -523,7 +538,7 @@
     </div>
   </header>
 
-  <main id="main-content">
+  <main>
     <section class="hero">
       <div class="wrap">
         <div class="kicker reveal">
@@ -621,13 +636,15 @@
   </div>
 
 
-  <script type="module">
-    import { SUPABASE_ANON_KEY, FN_BASE } from "/shared.js";
+  <script>
     // ===== CONFIG (edit these 2 lines) =====
     const BUSINESS_EMAIL = "brandon.sns@proton.me";
     const LINKEDIN_URL = "https://www.linkedin.com/in/brandon-ortiz-4b148326b/";
 
-    const CONTACT_ENDPOINT = `${FN_BASE}/contact-email`;
+    // Supabase Edge Function endpoint (you'll create this in step 2)
+    // Replace YOUR_PROJECT_REF with your Supabase project ref.
+    const CONTACT_ENDPOINT = "https://jgvxmpsjtkedzgygynbl.supabase.co/functions/v1/contact-email";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpndnhtcHNqdGtlZHpneWd5bmJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0NzgxMjYsImV4cCI6MjA4MTA1NDEyNn0.OCh23RWm8COtxWuumYvKUmfMOLOW01B1zrbtzcr3w6Y";
 
     // ===== small helpers =====
     const $ = (s) => document.querySelector(s);
@@ -732,9 +749,6 @@
 
 
 
-
-
-  <script src="/mobile-nav.js" defer></script>
 
 </body>
 </html>
