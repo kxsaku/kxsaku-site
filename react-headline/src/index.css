@@ -1,0 +1,6 @@
+/* Minimal reset - component inherits from parent page */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
