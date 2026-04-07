@@ -2,10 +2,11 @@
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders, handleCorsPrefllight } from "../_shared/cors.ts";
-import { checkRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
+import { checkRateLimitDB, RATE_LIMITS } from "../_shared/rate-limit-db.ts";
 
 import { json } from "../_shared/response.ts";
 import { getEnv } from "../_shared/env.ts";
+import { verifyTurnstile } from "../_shared/turnstile.ts";
 
 function normalizeUSPhone(input: string) {
   const digits = input.replace(/\D/g, "");
@@ -67,20 +68,31 @@ async function twilioVerifyCheck(phoneE164: string, code: string) {
   return data;
 }
 
+const sbRL = createClient(
+  Deno.env.get("SB_URL")!,
+  Deno.env.get("SB_SERVICE_ROLE_KEY")!,
+);
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return handleCorsPrefllight(req);
 
   // Rate limiting for auth-related endpoints (OTP is sensitive to abuse)
-  const rateLimitResponse = checkRateLimit(req, { ...RATE_LIMITS.auth, keyPrefix: "inquiry-otp" }, getCorsHeaders(req));
+  const rateLimitResponse = await checkRateLimitDB(req, sbRL, { ...RATE_LIMITS.auth, keyPrefix: "inquiry-otp" }, getCorsHeaders(req));
   if (rateLimitResponse) return rateLimitResponse;
 
   try {
-    const { action, phone, code, payload } = await req.json();
+    const { action, phone, code, payload, captcha_token } = await req.json();
 
     const phoneE164 = normalizeUSPhone(phone || "");
     if (!phoneE164) return json(req, { ok: false, error: "Invalid phone number." }, 400);
 
     if (action === "send") {
+      // Verify Turnstile CAPTCHA token before sending OTP
+      const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || undefined;
+      if (!await verifyTurnstile(captcha_token || "", clientIp)) {
+        return json(req, { ok: false, error: "CAPTCHA verification failed. Please try again." }, 403);
+      }
+
       await twilioVerifySend(phoneE164);
       return json(req, { ok: true });
     }

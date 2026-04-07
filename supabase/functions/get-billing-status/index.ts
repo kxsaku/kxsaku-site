@@ -2,15 +2,20 @@
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders, handleCorsPrefllight } from "../_shared/cors.ts";
-import { checkRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
+import { checkRateLimitDB, RATE_LIMITS } from "../_shared/rate-limit-db.ts";
 import { json } from "../_shared/response.ts";
 import { getEnv } from "../_shared/env.ts";
+
+const sbRL = createClient(
+  Deno.env.get("SB_URL")!,
+  Deno.env.get("SB_SERVICE_ROLE_KEY")!,
+);
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return handleCorsPrefllight(req);
 
   // Rate limiting
-  const rateLimitResponse = checkRateLimit(req, { ...RATE_LIMITS.public, keyPrefix: "get-billing-status" }, getCorsHeaders(req));
+  const rateLimitResponse = await checkRateLimitDB(req, sbRL, { ...RATE_LIMITS.public, keyPrefix: "get-billing-status" }, getCorsHeaders(req));
   if (rateLimitResponse) return rateLimitResponse;
 
   try {

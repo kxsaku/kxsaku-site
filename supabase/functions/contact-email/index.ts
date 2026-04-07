@@ -1,14 +1,21 @@
 // supabase/functions/contact-email/index.ts
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { getCorsHeaders, handleCorsPrefllight } from "../_shared/cors.ts";
-import { checkRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { checkRateLimitDB, RATE_LIMITS } from "../_shared/rate-limit-db.ts";
 import { json } from "../_shared/response.ts";
+import { verifyTurnstile } from "../_shared/turnstile.ts";
+
+const sbRL = createClient(
+  Deno.env.get("SB_URL")!,
+  Deno.env.get("SB_SERVICE_ROLE_KEY")!,
+);
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return handleCorsPrefllight(req);
 
   // Rate limiting for public endpoints (contact form is more susceptible to abuse)
-  const rateLimitResponse = checkRateLimit(req, { ...RATE_LIMITS.public, keyPrefix: "contact-email" }, getCorsHeaders(req));
+  const rateLimitResponse = await checkRateLimitDB(req, sbRL, { ...RATE_LIMITS.public, keyPrefix: "contact-email" }, getCorsHeaders(req));
   if (rateLimitResponse) return rateLimitResponse;
 
   if (req.method !== "POST") return json(req, { error: "Method not allowed" }, 405);
@@ -29,7 +36,14 @@ serve(async (req) => {
       }, 500);
     }
 
-    const { subject, message, page, userAgent } = await req.json();
+    const { subject, message, page, userAgent, captcha_token } = await req.json();
+
+    // Verify Turnstile CAPTCHA token before sending email
+    const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || undefined;
+    if (!await verifyTurnstile(captcha_token || "", clientIp)) {
+      return json(req, { error: "CAPTCHA verification failed. Please try again." }, 403);
+    }
+
     if (!subject || !message) return json(req, { error: "Missing subject/message" }, 400);
 
     // Server-side length validation

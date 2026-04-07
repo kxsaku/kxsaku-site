@@ -4,8 +4,10 @@
   <meta charset="UTF-8" />
   <title>SNS · Client Login</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; connect-src 'self' https://api.kxsaku.com wss://api.kxsaku.com https://*.supabase.co wss://*.supabase.co https://api.stripe.com; img-src 'self' data: blob: https://api.kxsaku.com https://*.supabase.co; font-src 'self'; frame-src https://js.stripe.com;" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; connect-src 'self' https://api.kxsaku.com wss://api.kxsaku.com https://*.supabase.co wss://*.supabase.co https://api.stripe.com; img-src 'self' data: blob: https://api.kxsaku.com https://*.supabase.co; font-src 'self'; frame-src https://js.stripe.com https://challenges.cloudflare.com;" />
   <meta name="description" content="SNS client login to access your dashboard and subscription." />
+  <!-- Cloudflare Turnstile CAPTCHA -->
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
   <link rel="stylesheet" href="/styles.css" />
 
   <style>
@@ -541,6 +543,9 @@
               <label for="password">Password</label>
               <input id="password" type="password" autocomplete="current-password" placeholder="••••••••" />
             </div>
+
+            <!-- Cloudflare Turnstile CAPTCHA — TEST KEY, replace with real site key from Cloudflare Dashboard -->
+            <div class="cf-turnstile" data-sitekey="1x00000000000000000000AA" data-theme="dark" data-callback="onTurnstileSuccess" data-expired-callback="onTurnstileExpired"></div>
 
             <div class="actions">
               <a class="muted-link" href="/sns-portal-invite/">Have an invite?</a>

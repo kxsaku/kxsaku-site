@@ -4,7 +4,9 @@
   <meta charset="UTF-8" />
   <title>SNS · Start Your Network Project</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; connect-src 'self' https://api.kxsaku.com wss://api.kxsaku.com https://*.supabase.co wss://*.supabase.co https://api.stripe.com; img-src 'self' data: blob: https://api.kxsaku.com https://*.supabase.co; font-src 'self'; frame-src https://js.stripe.com;" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; connect-src 'self' https://api.kxsaku.com wss://api.kxsaku.com https://*.supabase.co wss://*.supabase.co https://api.stripe.com; img-src 'self' data: blob: https://api.kxsaku.com https://*.supabase.co; font-src 'self'; frame-src https://js.stripe.com https://challenges.cloudflare.com;" />
+  <!-- Cloudflare Turnstile CAPTCHA -->
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
   <!-- Consolidated design system -->
   <link rel="stylesheet" href="/styles.css" />
@@ -901,6 +903,9 @@
                 <p class="hint">
                   By submitting, you agree to be contacted by email regarding this inquiry.
                 </p>
+
+                <!-- Cloudflare Turnstile CAPTCHA — TEST KEY, replace with real site key from Cloudflare Dashboard -->
+                <div class="cf-turnstile" data-sitekey="1x00000000000000000000AA" data-theme="dark" data-callback="onTurnstileSuccess" data-expired-callback="onTurnstileExpired" style="margin-bottom:.75rem;"></div>
 
                 <button id="submitBtn" type="submit" class="submitBtn">
                   Send inquiry

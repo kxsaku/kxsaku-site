@@ -20,9 +20,22 @@ function showMsg(text){
 const { data: { session } } = await supabase.auth.getSession();
 if (session) window.location.href = "/sns-dashboard/";
 
+// Turnstile CAPTCHA state
+let turnstileToken = null;
+window.onTurnstileSuccess = function(token) { turnstileToken = token; };
+window.onTurnstileExpired = function() { turnstileToken = null; };
+
 btn.addEventListener("click", async () => {
   msg.style.display = "none";
   btn.disabled = true;
+
+  // Verify Turnstile CAPTCHA token before login
+  const cfToken = turnstileToken || (typeof turnstile !== "undefined" ? turnstile.getResponse() : null);
+  if (!cfToken) {
+    showMsg("Please complete the CAPTCHA verification.");
+    btn.disabled = false;
+    return;
+  }
 
   const email = emailEl.value.trim();
   const password = passEl.value;

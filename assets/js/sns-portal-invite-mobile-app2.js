@@ -234,9 +234,20 @@
         const inviteUser = await requireInviteSession();
         if (inviteUser) await autofillFromInquiry(inviteUser.email);
 
+        // Turnstile CAPTCHA state
+        let turnstileToken = null;
+        window.onTurnstileSuccess = function(token) { turnstileToken = token; };
+        window.onTurnstileExpired = function() { turnstileToken = null; };
+
         document.getElementById("form").addEventListener("submit", async (e) => {
         e.preventDefault();
         clearMsg();
+
+        // Verify Turnstile CAPTCHA token
+        const cfToken = turnstileToken || (typeof turnstile !== "undefined" ? turnstile.getResponse() : null);
+        if (!cfToken) {
+            return showMsg("Please complete the CAPTCHA verification.");
+        }
 
         const pw = pwEl.value || "";
         const pw2 = pw2El.value || "";

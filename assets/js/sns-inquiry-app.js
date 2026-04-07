@@ -124,13 +124,18 @@ async function callOtpFunction(body) {
   return data;
 }
 
-async function sendOtp(phone) {
-  await callOtpFunction({ action: "send", phone });
+async function sendOtp(phone, captcha_token) {
+  await callOtpFunction({ action: "send", phone, captcha_token });
 }
 
 async function verifyOtpAndSubmit(phone, code, payload) {
   await callOtpFunction({ action: "check", phone, code, payload });
 }
+
+// Turnstile CAPTCHA state
+let turnstileToken = null;
+window.onTurnstileSuccess = function(token) { turnstileToken = token; };
+window.onTurnstileExpired = function() { turnstileToken = null; };
 
 let isSubmitting = false;
 
@@ -150,6 +155,16 @@ form.addEventListener("submit", async (e) => {
   }
 
   try {
+    // Verify Turnstile CAPTCHA token
+    const cfToken = turnstileToken || (typeof turnstile !== "undefined" ? turnstile.getResponse() : null);
+    if (!cfToken) {
+      showMsg("Please complete the CAPTCHA verification.");
+      toast("CAPTCHA required", "Complete the verification to continue.", "bad", 3500);
+      submitBtn.disabled = false;
+      isSubmitting = false;
+      return;
+    }
+
     const fd = new FormData(form);
 
     // Validate step 3 required fields
@@ -185,8 +200,8 @@ form.addEventListener("submit", async (e) => {
       extra_notes: (fd.get("extraNotes") || "").toString().trim() || null,
     };
 
-    // Send OTP
-    await sendOtp(phoneE164);
+    // Send OTP (include Turnstile token for backend verification)
+    await sendOtp(phoneE164, cfToken);
     toast("Code sent", `Text sent to ${phoneDisplay}`, "good", 3000);
 
     // Verify + submit

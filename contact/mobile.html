@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>SNS · Contact</title>
+  <!-- Cloudflare Turnstile CAPTCHA -->
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
   <link rel="stylesheet" href="/styles.css" />
 
   <style>
@@ -610,6 +612,9 @@
                 <label for="message">Message</label>
                 <textarea id="message" name="message" maxlength="4000" placeholder="Enter your message here." required></textarea>
               </div>
+
+              <!-- Cloudflare Turnstile CAPTCHA — TEST KEY, replace with real site key from Cloudflare Dashboard -->
+              <div class="cf-turnstile" data-sitekey="1x00000000000000000000AA" data-theme="dark" data-callback="onTurnstileSuccess" data-expired-callback="onTurnstileExpired" style="margin-top:.85rem;"></div>
 
               <div class="formRow">
                 <button class="btn" type="button" id="mailtoFallback" title="Opens your email client (fallback)">Use email app</button>

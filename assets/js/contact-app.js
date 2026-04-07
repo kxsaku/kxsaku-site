@@ -55,6 +55,11 @@ const io = new IntersectionObserver((entries) => {
 
 document.querySelectorAll(".reveal").forEach(el => io.observe(el));
 
+// Turnstile CAPTCHA state
+let turnstileToken = null;
+window.onTurnstileSuccess = function(token) { turnstileToken = token; };
+window.onTurnstileExpired = function() { turnstileToken = null; };
+
 // ===== form submit -> Supabase Edge Function =====
 $("#contactForm").addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -77,6 +82,13 @@ $("#contactForm").addEventListener("submit", async (e) => {
     return;
   }
 
+  // Verify Turnstile CAPTCHA token
+  const cfToken = turnstileToken || (typeof turnstile !== "undefined" ? turnstile.getResponse() : null);
+  if (!cfToken) {
+    toast("CAPTCHA required", "Please complete the verification.", "warn");
+    return;
+  }
+
   btn.disabled = true;
   btn.style.opacity = ".8";
   btn.textContent = "Sending...";
@@ -92,6 +104,7 @@ $("#contactForm").addEventListener("submit", async (e) => {
       body: JSON.stringify({
         subject,
         message,
+        captcha_token: cfToken,
         page: window.location.href,
         userAgent: navigator.userAgent
       })
