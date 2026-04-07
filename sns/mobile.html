@@ -923,69 +923,8 @@
     </footer>
   </main>
 
-  <script>
-    // Reveal-on-scroll (same as your desktop sns behavior)
-    (function(){
-      const els = Array.from(document.querySelectorAll('.reveal'));
-      if (!('IntersectionObserver' in window) || els.length === 0) {
-        els.forEach(el => el.classList.add('on'));
-        return;
-      }
-      const io = new IntersectionObserver((entries) => {
-        entries.forEach(e => {
-          if (e.isIntersecting) {
-            e.target.classList.add('on');
-            io.unobserve(e.target);
-          }
-        });
-      }, { threshold: 0.12 });
-      els.forEach(el => io.observe(el));
-    })();
-  </script>
-
-  <script>
-    // Mobile menu
-    (function(){
-      const menu = document.getElementById("menu");
-      const scrim = document.getElementById("scrim");
-      const openBtn = document.getElementById("openMenu");
-      const closeBtn = document.getElementById("closeMenu");
-
-      function open(){
-        menu.classList.add("open");
-        scrim.classList.add("open");
-        menu.setAttribute("aria-hidden","false");
-        scrim.setAttribute("aria-hidden","false");
-        document.body.style.overflow = "hidden";
-      }
-      function close(){
-        menu.classList.remove("open");
-        scrim.classList.remove("open");
-        menu.setAttribute("aria-hidden","true");
-        scrim.setAttribute("aria-hidden","true");
-        document.body.style.overflow = "";
-      }
-
-      openBtn.addEventListener("click", open);
-      closeBtn.addEventListener("click", close);
-      scrim.addEventListener("click", close);
-      window.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") close();
-      });
-    })();
-  </script>
-
-  <script>
-    // View Desktop Site preference
-    (function(){
-      const a = document.getElementById("viewDesktop");
-      if (!a) return;
-      a.addEventListener("click", function(e){
-        e.preventDefault();
-        localStorage.setItem("sns_force_desktop", "1");
-        location.replace("/sns/");
-      });
-    })();
-  </script>
+  <script src="/assets/js/sns-reveal.js"></script>
+  <script src="/assets/js/mobile-nav.js"></script>
+  <script src="/assets/js/desktop-toggle.js"></script>
 </body>
 </html>
