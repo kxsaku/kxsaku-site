@@ -553,111 +553,11 @@
     </section>
   </main>
 
-  <script>
-    // Reveal-on-scroll (same behavior as other mobile pages)
-    (function(){
-      const els = Array.from(document.querySelectorAll('.reveal'));
-      if (!('IntersectionObserver' in window) || els.length === 0) {
-        els.forEach(el => el.classList.add('on'));
-        return;
-      }
-      const io = new IntersectionObserver((entries) => {
-        for (const e of entries) {
-          if (e.isIntersecting) {
-            e.target.classList.add('on');
-            io.unobserve(e.target);
-          }
-        }
-      }, { threshold: 0.14 });
-      els.forEach(el => io.observe(el));
-    })();
-  </script>
-
-  <script>
-    // Mobile menu (reference)
-    (function(){
-      const menu = document.getElementById("menu");
-      const scrim = document.getElementById("scrim");
-      const openBtn = document.getElementById("openMenu");
-      const closeBtn = document.getElementById("closeMenu");
-
-      function open(){
-        menu.classList.add("open");
-        scrim.classList.add("open");
-        menu.setAttribute("aria-hidden","false");
-        scrim.setAttribute("aria-hidden","false");
-        document.body.style.overflow = "hidden";
-      }
-      function close(){
-        menu.classList.remove("open");
-        scrim.classList.remove("open");
-        menu.setAttribute("aria-hidden","true");
-        scrim.setAttribute("aria-hidden","true");
-        document.body.style.overflow = "";
-      }
-
-      openBtn.addEventListener("click", open);
-      closeBtn.addEventListener("click", close);
-      scrim.addEventListener("click", close);
-      window.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") close();
-      });
-    })();
-  </script>
-
-  <script>
-    // View Desktop Site preference (reference)
-    (function(){
-      const a = document.getElementById("viewDesktop");
-      if (!a) return;
-      a.addEventListener("click", function(e){
-        e.preventDefault();
-        localStorage.setItem("sns_force_desktop", "1");
-        location.replace("/sns-login/");
-      });
-    })();
-  </script>
+  <script src="/assets/js/sns-login-mobile-reveal.js"></script>
+  <script src="/assets/js/mobile-nav.js"></script>
+  <script src="/assets/js/desktop-toggle.js"></script>
 
   <script src="/vendor/supabase-js.min.js" integrity="sha384-0VpB0wAYDdhWCEv3+IjT0Z9Kgpvszkf70RFX3ro7l4QR5nywxsMaOpmvZKsfRF8I" crossorigin="anonymous"></script>
-  <script type="module">
-    import { createClient } from "/vendor/supabase-esm.js";
-
-    // Keep these consistent with your other pages
-    const SUPABASE_URL = "https://api.kxsaku.com";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJyb2xlIjogImFub24iLCAiaXNzIjogInN1cGFiYXNlIiwgImlhdCI6IDE3NzUyNDk4NTksICJleHAiOiAyMDkwNjA5ODU5fQ.jZdjxM_NH1gBhAYNBCV9tXEAPrLr36-JqhdduwWGBEI";
-
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    const msg = document.getElementById("msg");
-    const emailEl = document.getElementById("email");
-    const passEl = document.getElementById("password");
-    const btn = document.getElementById("loginBtn");
-
-    function showMsg(text){
-      msg.textContent = text;
-      msg.style.display = "block";
-    }
-
-    // If already logged in, go straight to dashboard
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session) window.location.href = "/sns-dashboard/";
-
-    btn.addEventListener("click", async () => {
-      msg.style.display = "none";
-      btn.disabled = true;
-
-      const email = emailEl.value.trim();
-      const password = passEl.value;
-
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error){
-        showMsg(error.message || "Login failed.");
-        btn.disabled = false;
-        return;
-      }
-
-      window.location.href = "/sns-dashboard/";
-    });
-  </script>
+  <script type="module" src="/assets/js/sns-login-mobile-app.js"></script>
 </body>
 </html>

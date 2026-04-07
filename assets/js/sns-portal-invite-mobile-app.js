@@ -1,0 +1,295 @@
+
+      async function bootstrapSessionFromUrl() {
+    // 1) If we already have a session in storage, use it.
+    const { data: s0, error: e0 } = await sb.auth.getSession();
+    if (e0) console.warn("getSession error:", e0);
+    if (s0?.session) return s0.session;
+
+    const url = new URL(window.location.href);
+
+    // 2) PKCE/code flow: ?code=...
+    const code = url.searchParams.get("code");
+    if (code) {
+      const { data, error } = await sb.auth.exchangeCodeForSession(code);
+      if (error) throw error;
+
+      // Clean the URL (removes code from address bar)
+      url.searchParams.delete("code");
+      url.searchParams.delete("type");
+      url.searchParams.delete("token");
+      window.history.replaceState({}, document.title, url.pathname + (url.searchParams.toString() ? `?${url.searchParams}` : ""));
+
+      return data.session;
+    }
+
+    // 3) Implicit/token flow: #access_token=...&refresh_token=...
+    // Note: some browsers/email clients move hash tokens into query params.
+    const hash = new URLSearchParams(window.location.hash.slice(1));
+    const qs = new URLSearchParams(window.location.search);
+
+    const access_token = hash.get("access_token") || qs.get("access_token");
+    const refresh_token = hash.get("refresh_token") || qs.get("refresh_token");
+
+
+    if (access_token && refresh_token) {
+      const { data, error } = await sb.auth.setSession({ access_token, refresh_token });
+      if (error) throw error;
+
+      // Clean hash so refreshes don't re-run weirdly
+      window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
+      return data.session;
+    }
+
+    return null;
+  }
+
+  function showMsg(text, type = "error") {
+    // your existing UI message function
+    const el = document.getElementById("msg");
+    if (!el) return alert(text);
+    el.textContent = text;
+    el.style.display = "block";
+    el.dataset.type = type;
+  }
+
+  function getEmailFromUrl() {
+    // Optional: if you pass email in query/hash; otherwise ignore
+    const url = new URL(window.location.href);
+    return url.searchParams.get("email") || "";
+  }
+
+  async function initInvitePage() {
+    try {
+      const session = await bootstrapSessionFromUrl();
+      if (!session?.user) {
+        showMsg("Auth session missing. Please open a fresh invite link.", "error");
+        return;
+      }
+
+      // Prefill email field from the *actual* authed user
+      const emailInput = document.getElementById("email");
+      if (emailInput) {
+        emailInput.value = session.user.email ?? "";
+        emailInput.readOnly = true;
+      }
+
+      // Clear any old error message if we're good
+      showMsg("", "ok");
+      const msg = document.getElementById("msg");
+      if (msg) msg.style.display = "none";
+    } catch (err) {
+      console.error(err);
+      showMsg("Invite link is invalid or expired. Please request a new invite.", "error");
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", initInvitePage);
+
+  // IMPORTANT: your submit handler must NOT call getUser() before initInvitePage runs.
+  document.getElementById("inviteForm")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    try {
+      const session = await bootstrapSessionFromUrl();
+      if (!session?.user) {
+        showMsg("Auth session missing. Please open a fresh invite link.", "error");
+        return;
+      }
+
+      // Now safe to do:
+      // 1) sb.auth.updateUser({ password })
+      // 2) insert/update your profile/business fields in DB using session.user.id
+      // ...your existing logic...
+    } catch (err) {
+      console.error(err);
+      showMsg(err?.message || "Failed to create account.", "error");
+    }
+  });
+
+    (async () => {
+        const msg = document.getElementById("msg");
+        const emailEl = document.getElementById("email");
+        const pwEl = document.getElementById("pw");
+        const pw2El = document.getElementById("pw2");
+        const submitBtn = document.getElementById("submitBtn");
+
+        const meterFill = document.getElementById("meterFill");
+        const meterText = document.getElementById("meterText");
+
+        const billingSame = document.getElementById("billing_same");
+        const billingWrap = document.getElementById("billingWrap");
+        const billingAddr = document.getElementById("billing_address");
+
+        function showMsg(text, ok = false) {
+        msg.style.display = "block";
+        msg.className = "msg " + (ok ? "ok" : "err");
+        msg.textContent = text;
+        }
+        function clearMsg() {
+        msg.style.display = "none";
+        msg.textContent = "";
+        }
+
+        billingSame.addEventListener("change", () => {
+        billingWrap.style.display = billingSame.checked ? "none" : "block";
+        });
+
+        // Supports hash (#access_token=...) AND query (?access_token=...)
+        function parseTokens() {
+        const hash = new URLSearchParams((location.hash || "").replace(/^#/, ""));
+        const qs = new URLSearchParams(location.search || "");
+
+        const access_token = hash.get("access_token") || qs.get("access_token");
+        const refresh_token = hash.get("refresh_token") || qs.get("refresh_token");
+
+        return { access_token, refresh_token };
+        }
+
+        function pwPolicy(pw) {
+        const lenOk = pw.length >= 7 && pw.length <= 30;
+        const upperOk = /[A-Z]/.test(pw);
+        const numOk = /[0-9]/.test(pw);
+        const specialOk = /[!@#$%^&*()]/.test(pw);
+        const allowedOk = /^[A-Za-z0-9!@#$%^&*()]+$/.test(pw);
+        return { lenOk, upperOk, numOk, specialOk, allowedOk };
+        }
+
+        function updateMeter() {
+        const pw = pwEl.value || "";
+        const p = pwPolicy(pw);
+
+        let score = 0;
+        if (p.lenOk) score++;
+        if (p.upperOk) score++;
+        if (p.numOk) score++;
+        if (p.specialOk) score++;
+        if (p.allowedOk) score++;
+
+        const percent = Math.min(100, (score / 5) * 100);
+        meterFill.style.width = percent + "%";
+
+        let color = "rgba(255,60,120,75)";
+        let label = "Weak";
+        if (score >= 4) { color = "rgba(80,255,180,70)"; label = "Strong"; }
+        else if (score >= 3) { color = "rgba(255,210,90,70)"; label = "Fine"; }
+
+        meterFill.style.background = color;
+        meterText.textContent = `${label} — Must be 7–30 chars; include 1 uppercase, 1 number, 1 special (!@#$%^&*()).`;
+        }
+
+        pwEl.addEventListener("input", updateMeter);
+
+        async function requireInviteSession() {
+        const { access_token, refresh_token } = parseTokens();
+
+        if (!access_token || !refresh_token) {
+            showMsg("Auth session missing. Please open the invite email link again (tokens not found).");
+            submitBtn.disabled = true;
+            return null;
+        }
+
+        const { data, error } = await sb.auth.setSession({ access_token, refresh_token });
+        if (error) {
+            showMsg("Invite session failed. Please request a new invite.");
+            submitBtn.disabled = true;
+            return null;
+        }
+
+        history.replaceState({}, document.title, location.pathname);
+
+
+        const user = data?.user;
+        if (!user?.email) {
+            showMsg("No user email found. Please request a new invite.");
+            submitBtn.disabled = true;
+            return null;
+        }
+
+        emailEl.value = user.email;
+        return user;
+        }
+
+        async function autofillFromInquiry(email) {
+        const { data, error } = await sb
+            .from("inquiries")
+            .select("contact_name,business_name,phone")
+            .eq("email", email)
+            .order("created_at", { ascending: false })
+            .limit(1);
+
+        if (!error && data && data[0]) {
+            const row = data[0];
+            document.getElementById("contact_name").value = row.contact_name || "";
+            document.getElementById("business_name").value = row.business_name || "";
+            document.getElementById("phone").value = row.phone || "";
+        }
+        }
+
+        const inviteUser = await requireInviteSession();
+        if (inviteUser) await autofillFromInquiry(inviteUser.email);
+
+        document.getElementById("form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        clearMsg();
+
+        const pw = pwEl.value || "";
+        const pw2 = pw2El.value || "";
+        const p = pwPolicy(pw);
+
+        if (pw !== pw2) return showMsg("Passwords do not match.");
+        if (!p.allowedOk) return showMsg("Password has invalid characters. Use only letters, numbers, and !@#$%^&*().");
+        if (!(p.lenOk && p.upperOk && p.numOk && p.specialOk)) return showMsg("Password does not meet requirements.");
+
+        const contact_name = document.getElementById("contact_name").value.trim();
+        const business_name = document.getElementById("business_name").value.trim();
+        const phone = document.getElementById("phone").value.trim();
+        const business_location = document.getElementById("business_location").value.trim();
+        const mailing_address = document.getElementById("mailing_address").value.trim();
+        const billing_address = billingSame.checked ? mailing_address : (billingAddr.value || "").trim();
+
+        if (!contact_name || !business_name || !business_location || !mailing_address || !billing_address) {
+            return showMsg("Please fill in all required fields (business + addresses).");
+        }
+
+        submitBtn.disabled = true;
+
+        try {
+            // Ensure session exists
+            const { data: s, error: sErr } = await sb.auth.getSession();
+            if (sErr) throw sErr;
+
+            const session = s?.session;
+            if (!session?.user) throw new Error("Auth session missing. Please use invite link again.");
+
+            const user = session.user;
+
+
+            // 1) Set password
+            const { error: pwErr } = await sb.auth.updateUser({ password: pw });
+            if (pwErr) throw pwErr;
+
+            // 2) Save profile
+            const { error: profErr } = await sb
+            .from("client_profiles")
+            .upsert({
+                user_id: user.id,
+                email: user.email,
+                contact_name,
+                business_name,
+                phone,
+                business_location,
+                mailing_address,
+                billing_address
+            }, { onConflict: "user_id" });
+
+            if (profErr) throw profErr;
+
+            showMsg("Account created. Redirecting to dashboard…", true);
+            setTimeout(() => { window.location.href = "/sns-dashboard/index.html"; }, 900);
+        } catch (err) {
+            console.error(err);
+            showMsg(err?.message || "Failed to create account.");
+            submitBtn.disabled = false;
+        }
+        });
+    })();
