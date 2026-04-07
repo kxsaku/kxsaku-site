@@ -2,7 +2,7 @@
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders, handleCorsPrefllight } from "../_shared/cors.ts";
-import { checkRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
+import { checkRateLimitDB, RATE_LIMITS } from "../_shared/rate-limit-db.ts";
 import { json } from "../_shared/response.ts";
 import { getEnv } from "../_shared/env.ts";
 
@@ -11,14 +11,14 @@ import { getEnv } from "../_shared/env.ts";
 serve(async (req) => {
   if (req.method === "OPTIONS") return handleCorsPrefllight(req);
 
-  // Rate limiting for public endpoints
-  const rateLimitResponse = checkRateLimit(req, { ...RATE_LIMITS.public, keyPrefix: "system-status-get" }, getCorsHeaders(req));
-  if (rateLimitResponse) return rateLimitResponse;
-
   try {
     const SUPABASE_URL = getEnv("SB_URL");
     const SUPABASE_SERVICE_ROLE_KEY = getEnv("SB_SERVICE_ROLE_KEY");
     const sb = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+    // DB-backed rate limiting (after client is available)
+    const rateLimitResponse = await checkRateLimitDB(req, sb, { ...RATE_LIMITS.public, keyPrefix: "system-status-get" }, getCorsHeaders(req));
+    if (rateLimitResponse) return rateLimitResponse;
 
     const { data, error } = await sb
       .from("sns_system_status")

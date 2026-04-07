@@ -2,7 +2,7 @@
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import Stripe from "https://esm.sh/stripe@14.21.0?target=deno";
-import { checkRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
+import { checkRateLimitDB, RATE_LIMITS } from "../_shared/rate-limit-db.ts";
 import { getEnv } from "../_shared/env.ts";
 
 function timingSafeEqual(a: string, b: string) {
@@ -47,10 +47,6 @@ async function verifyStripeSignature(req: Request, body: string) {
 }
 
 serve(async (req) => {
-  // Rate limiting for webhook endpoints (higher limit since Stripe sends bursts)
-  const rateLimitResponse = checkRateLimit(req, { ...RATE_LIMITS.webhook, keyPrefix: "stripe-webhooks" }, {});
-  if (rateLimitResponse) return rateLimitResponse;
-
   try {
     const SB_URL = getEnv("SB_URL");
     const SB_SERVICE_ROLE_KEY = getEnv("SB_SERVICE_ROLE_KEY");
@@ -64,6 +60,10 @@ serve(async (req) => {
     console.log("stripe-webhooks:", type);
 
     const sb = createClient(SB_URL, SB_SERVICE_ROLE_KEY);
+
+    // DB-backed rate limiting for webhook endpoints (higher limit since Stripe sends bursts)
+    const rateLimitResponse = await checkRateLimitDB(req, sb, { ...RATE_LIMITS.webhook, keyPrefix: "stripe-webhooks" }, {});
+    if (rateLimitResponse) return rateLimitResponse;
     const stripe = new Stripe(getEnv("STRIPE_SECRET_KEY"), {
       apiVersion: "2023-10-16",
       httpClient: Stripe.createFetchHttpClient(),

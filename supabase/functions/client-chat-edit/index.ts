@@ -2,7 +2,7 @@
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders, handleCorsPrefllight } from "../_shared/cors.ts";
-import { checkRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
+import { checkRateLimitDB, RATE_LIMITS } from "../_shared/rate-limit-db.ts";
 import { encryptMessage, getEncryptionKey } from "../_shared/crypto.ts";
 import { json } from "../_shared/response.ts";
 import { getEnv } from "../_shared/env.ts";
@@ -16,10 +16,6 @@ type ReqBody = {
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return handleCorsPrefllight(req);
-
-  // Rate limiting for chat endpoints
-  const rateLimitResponse = checkRateLimit(req, { ...RATE_LIMITS.chat, keyPrefix: "client-chat-edit" }, getCorsHeaders(req));
-  if (rateLimitResponse) return rateLimitResponse;
 
   if (req.method !== "POST") return json(req, { error: "Method not allowed" }, 405);
 
@@ -36,6 +32,10 @@ serve(async (req) => {
     const sb = createClient(SB_URL, SB_SERVICE_ROLE_KEY, {
       auth: { persistSession: false },
     });
+
+    // DB-backed rate limiting (after client is available)
+    const rateLimitResponse = await checkRateLimitDB(req, sb, { ...RATE_LIMITS.chat, keyPrefix: "client-chat-edit" }, getCorsHeaders(req));
+    if (rateLimitResponse) return rateLimitResponse;
 
     // Identify caller
     const { data: userData, error: userErr } = await sb.auth.getUser(token);

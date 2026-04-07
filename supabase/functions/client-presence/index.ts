@@ -3,7 +3,7 @@
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders, handleCorsPrefllight } from "../_shared/cors.ts";
-import { checkRateLimit } from "../_shared/rate-limit.ts";
+import { checkRateLimitDB } from "../_shared/rate-limit-db.ts";
 import { json } from "../_shared/response.ts";
 import { getEnv } from "../_shared/env.ts";
 
@@ -16,10 +16,6 @@ type ReqBody = {
 serve(async (req) => {
   if (req.method === "OPTIONS") return handleCorsPrefllight(req);
 
-  // Rate limiting — 120/min for heartbeat endpoint (called every ~30s per client)
-  const rateLimitResponse = checkRateLimit(req, { windowMs: 60000, maxRequests: 120, keyPrefix: "client-presence" }, getCorsHeaders(req));
-  if (rateLimitResponse) return rateLimitResponse;
-
   try {
     const SB_URL = getEnv("SB_URL");
     const SB_SERVICE_ROLE_KEY = getEnv("SB_SERVICE_ROLE_KEY");
@@ -27,6 +23,10 @@ serve(async (req) => {
     const admin = createClient(SB_URL, SB_SERVICE_ROLE_KEY, {
       auth: { persistSession: false },
     });
+
+    // DB-backed rate limiting — 120/min for heartbeat endpoint (called every ~30s per client)
+    const rateLimitResponse = await checkRateLimitDB(req, admin, { windowMs: 60000, maxRequests: 120, keyPrefix: "client-presence" }, getCorsHeaders(req));
+    if (rateLimitResponse) return rateLimitResponse;
 
     // Verify user
     const authHeader = req.headers.get("authorization") || "";

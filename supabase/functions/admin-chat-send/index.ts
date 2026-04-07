@@ -1,7 +1,7 @@
 // supabase/functions/admin-chat-send/index.ts
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { getCorsHeaders, handleCorsPrefllight } from "../_shared/cors.ts";
-import { checkRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
+import { checkRateLimitDB, RATE_LIMITS } from "../_shared/rate-limit-db.ts";
 import { ensureAdmin } from "../_shared/auth.ts";
 import { logAuditEvent } from "../_shared/audit.ts";
 import { encryptMessage, getEncryptionKey } from "../_shared/crypto.ts";
@@ -63,15 +63,15 @@ type ReqBody = {
 serve(async (req) => {
   if (req.method === "OPTIONS") return handleCorsPrefllight(req);
 
-  // Rate limiting for chat endpoints
-  const rateLimitResponse = checkRateLimit(req, { ...RATE_LIMITS.chat, keyPrefix: "admin-chat-send" }, getCorsHeaders(req));
-  if (rateLimitResponse) return rateLimitResponse;
-
   if (req.method !== "POST") return json(req, { error: "Method not allowed" }, 405);
 
   try {
     // Verify caller is authenticated and is an admin (database-backed check)
     const { sb: admin, email: adminEmail } = await ensureAdmin(req.headers.get("Authorization"));
+
+    // DB-backed rate limiting (after client is available)
+    const rateLimitResponse = await checkRateLimitDB(req, admin, { ...RATE_LIMITS.chat, keyPrefix: "admin-chat-send" }, getCorsHeaders(req));
+    if (rateLimitResponse) return rateLimitResponse;
 
     const body = (await req.json().catch(() => ({}))) as ReqBody;
     const user_id = (body.user_id || "").trim();

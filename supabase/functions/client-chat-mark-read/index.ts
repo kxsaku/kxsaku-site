@@ -2,7 +2,7 @@
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders, handleCorsPrefllight } from "../_shared/cors.ts";
-import { checkRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
+import { checkRateLimitDB, RATE_LIMITS } from "../_shared/rate-limit-db.ts";
 import { json } from "../_shared/response.ts";
 import { getEnv } from "../_shared/env.ts";
 
@@ -14,10 +14,6 @@ type Body = {
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return handleCorsPrefllight(req);
-
-  // Rate limiting for chat endpoints
-  const rateLimitResponse = checkRateLimit(req, { ...RATE_LIMITS.chat, keyPrefix: "client-chat-mark-read" }, getCorsHeaders(req));
-  if (rateLimitResponse) return rateLimitResponse;
 
   if (req.method !== "POST") return json(req, { error: "Method not allowed" }, 405);
 
@@ -38,6 +34,10 @@ serve(async (req) => {
     const admin = createClient(SB_URL, SB_SERVICE_ROLE_KEY, {
       auth: { persistSession: false },
     });
+
+    // DB-backed rate limiting (after client is available)
+    const rateLimitResponse = await checkRateLimitDB(req, admin, { ...RATE_LIMITS.chat, keyPrefix: "client-chat-mark-read" }, getCorsHeaders(req));
+    if (rateLimitResponse) return rateLimitResponse;
 
     // Validate user identity from the JWT
     const { data: userData, error: userErr } = await admin.auth.getUser(token);

@@ -1,7 +1,7 @@
 // supabase/functions/system-status-set/index.ts
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { getCorsHeaders, handleCorsPrefllight } from "../_shared/cors.ts";
-import { checkRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
+import { checkRateLimitDB, RATE_LIMITS } from "../_shared/rate-limit-db.ts";
 import { ensureAdmin } from "../_shared/auth.ts";
 import { json } from "../_shared/response.ts";
 
@@ -9,12 +9,12 @@ import { json } from "../_shared/response.ts";
 serve(async (req) => {
   if (req.method === "OPTIONS") return handleCorsPrefllight(req);
 
-  // Rate limiting for admin endpoints
-  const rateLimitResponse = checkRateLimit(req, { ...RATE_LIMITS.admin, keyPrefix: "system-status-set" }, getCorsHeaders(req));
-  if (rateLimitResponse) return rateLimitResponse;
-
   try {
     const { sb } = await ensureAdmin(req.headers.get("authorization"));
+
+    // DB-backed rate limiting (after client is available)
+    const rateLimitResponse = await checkRateLimitDB(req, sb, { ...RATE_LIMITS.admin, keyPrefix: "system-status-set" }, getCorsHeaders(req));
+    if (rateLimitResponse) return rateLimitResponse;
 
     const body = await req.json().catch(() => ({}));
     const mode = String(body?.mode || "normal").toLowerCase();
