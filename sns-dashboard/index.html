@@ -750,13 +750,13 @@
         </div>
 
         <div style="margin-top:12px;" class="inqMeta">
-          <div class="kv"><div class="k">Contact</div><div class="v">${r.contact_name || "—"}</div></div>
-          <div class="kv"><div class="k">Business</div><div class="v">${r.business_name || "—"}</div></div>
-          <div class="kv"><div class="k">Location</div><div class="v">${r.location || "—"}</div></div>
-          <div class="kv"><div class="k">Phone</div><div class="v">${r.phone || "—"}</div></div>
-          <div class="kv" style="grid-column:1 / -1;"><div class="k">Services</div><div class="v">${(r.services || []).join(", ") || "—"}</div></div>
-          <div class="kv"><div class="k">Timeline</div><div class="v">${r.timeline || "—"}</div></div>
-          <div class="kv"><div class="k">Budget</div><div class="v">${r.budget || "—"}</div></div>
+          <div class="kv"><div class="k">Contact</div><div class="v">${esc(r.contact_name) || "—"}</div></div>
+          <div class="kv"><div class="k">Business</div><div class="v">${esc(r.business_name) || "—"}</div></div>
+          <div class="kv"><div class="k">Location</div><div class="v">${esc(r.location) || "—"}</div></div>
+          <div class="kv"><div class="k">Phone</div><div class="v">${esc(r.phone) || "—"}</div></div>
+          <div class="kv" style="grid-column:1 / -1;"><div class="k">Services</div><div class="v">${esc((r.services || []).join(", ")) || "—"}</div></div>
+          <div class="kv"><div class="k">Timeline</div><div class="v">${esc(r.timeline) || "—"}</div></div>
+          <div class="kv"><div class="k">Budget</div><div class="v">${esc(r.budget) || "—"}</div></div>
         </div>
       `;
 

@@ -90,19 +90,44 @@ serve(async (req) => {
         return json(req, { ok: false, error: "Missing code." }, 400);
       }
 
-      const check = await twilioVerifyCheck(phoneE164, code);
-      if (check?.status !== "approved") {
-        return json(req, { ok: false, error: "Invalid code." }, 400);
-      }
-
       // Insert into Supabase using SERVICE ROLE (bypasses RLS)
       const supabaseUrl = getEnv("SB_URL");
       const serviceRole = getEnv("SB_SERVICE_ROLE_KEY");
       const sb = createClient(supabaseUrl, serviceRole);
 
-      // payload should be the inquiry fields
+      // OTP replay protection: reject if same phone submitted in last 10 minutes
+      const tenMinAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
+      const { data: recent } = await sb
+        .from("inquiries")
+        .select("id")
+        .eq("phone", phoneE164)
+        .gte("created_at", tenMinAgo)
+        .limit(1);
+
+      if (recent && recent.length > 0) {
+        return json(req, { ok: false, error: "Please wait before submitting another inquiry." }, 429);
+      }
+
+      const check = await twilioVerifyCheck(phoneE164, code);
+      if (check?.status !== "approved") {
+        return json(req, { ok: false, error: "Invalid code." }, 400);
+      }
+
+      // Whitelist allowed inquiry fields — never spread raw client payload
+      const ALLOWED_FIELDS = [
+        "contact_name", "business_name", "email", "location",
+        "company_size", "services", "current_setup", "goals",
+        "budget", "timeline", "extra_notes",
+      ] as const;
+      const sanitized: Record<string, unknown> = {};
+      if (payload && typeof payload === "object") {
+        for (const key of ALLOWED_FIELDS) {
+          if (key in payload) sanitized[key] = payload[key];
+        }
+      }
+
       const { error } = await sb.from("inquiries").insert({
-        ...payload,
+        ...sanitized,
         phone: phoneE164,
         phone_verified: true,
       });

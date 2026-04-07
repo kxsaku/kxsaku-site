@@ -1475,10 +1475,14 @@
   <script>
     const SUPABASE_URL = "https://api.kxsaku.com";
     const SUPABASE_ANON_KEY = "eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJyb2xlIjogImFub24iLCAiaXNzIjogInN1cGFiYXNlIiwgImlhdCI6IDE3NzUyNDk4NTksICJleHAiOiAyMDkwNjA5ODU5fQ.jZdjxM_NH1gBhAYNBCV9tXEAPrLr36-JqhdduwWGBEI";
-    const ADMIN_EMAIL = "brandon.sns@pm.me";
     const FN_BASE = `${SUPABASE_URL}/functions/v1`;
 
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    async function checkIsAdmin(userId) {
+      const { data } = await sb.from("user_profiles").select("is_admin").eq("user_id", userId).maybeSingle();
+      return data?.is_admin === true;
+    }
 
     const whoami = document.getElementById("whoami");
     const logoutBtn = document.getElementById("logoutBtn");
@@ -2191,10 +2195,9 @@ async function goHome(){
         return false;
       }
 
-      const email = (session.user?.email || "").toLowerCase();
       whoami.textContent = `Signed in: ${session.user?.email || "—"}`;
 
-      if (email !== ADMIN_EMAIL.toLowerCase()){
+      if (!(await checkIsAdmin(session.user.id))){
         await sb.auth.signOut();
         lock(true, "Not an admin account.");
         return false;

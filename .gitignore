@@ -1,5 +1,6 @@
 node_modules/
 supabase-export/
+*.bak
 
 # Dev-only source directories (built outputs are in home/ subdirs)
 react-headline/node_modules/

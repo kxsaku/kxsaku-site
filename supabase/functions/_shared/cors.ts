@@ -37,7 +37,7 @@ export function isOriginAllowed(origin: string | null): boolean {
   if (!origin) return false;
   const allowed = getAllowedOrigins();
   const normalizedOrigin = origin.replace(/\/+$/, "");
-  return allowed.some((o) => normalizedOrigin === o || normalizedOrigin.endsWith("." + new URL(o).hostname));
+  return allowed.some((o) => normalizedOrigin === o);
 }
 
 /**
