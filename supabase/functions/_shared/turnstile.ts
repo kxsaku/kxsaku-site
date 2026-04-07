@@ -1,6 +1,6 @@
 // Cloudflare Turnstile server-side verification
-// TEST KEY — replace with real secret from Cloudflare Dashboard > Turnstile > Site > Settings
-const TURNSTILE_SECRET = Deno.env.get("TURNSTILE_SECRET_KEY") || "0x4AAAAAAC1o4cK8C61IzwKqz1-4GP-4WGo";
+// Secret key loaded from TURNSTILE_SECRET_KEY env var (set in Supabase docker-compose)
+const TURNSTILE_SECRET = Deno.env.get("TURNSTILE_SECRET_KEY") || "";
 
 export async function verifyTurnstile(token: string, ip?: string): Promise<boolean> {
   if (!token) return false;
