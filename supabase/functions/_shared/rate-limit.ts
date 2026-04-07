@@ -1,13 +1,5 @@
 // supabase/functions/_shared/rate-limit.ts
 // Simple IP-based rate limiting for Edge Functions
-//
-// LIMITATION: This uses an in-memory Map that resets on every cold start.
-// Deno Deploy edge functions can cold-start frequently, so a determined
-// attacker could bypass limits by waiting for a new isolate. A database-backed
-// rate limiter (e.g., Redis or a Supabase table with atomic increments) would
-// be more durable, but adds latency to every request. This best-effort
-// approach is acceptable for the current scale — it stops casual abuse and
-// runaway clients while keeping request overhead near zero.
 
 interface RateLimitEntry {
   count: number;

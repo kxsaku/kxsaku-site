@@ -3,11 +3,19 @@ import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders, handleCorsPrefllight } from "../_shared/cors.ts";
 import { checkRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
-import { encryptMessage, getEncryptionKey } from "../_shared/crypto.ts";
-import { json } from "../_shared/response.ts";
-import { getEnv } from "../_shared/env.ts";
 
+function json(req: Request, data: unknown, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
+  });
+}
 
+function getEnv(name: string) {
+  const v = Deno.env.get(name);
+  if (!v) throw new Error(`Missing env var: ${name}`);
+  return v;
+}
 
 type ReqBody = {
   message_id?: string;
@@ -31,10 +39,9 @@ serve(async (req) => {
     const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
     if (!token) return json(req, { error: "Missing Authorization bearer token" }, 401);
 
-    // Service role key bypasses RLS — do NOT mix in user JWT via global headers.
-    // User identity is verified separately via sb.auth.getUser(token) below.
     const sb = createClient(SB_URL, SB_SERVICE_ROLE_KEY, {
       auth: { persistSession: false },
+      global: { headers: { Authorization: `Bearer ${token}` } },
     });
 
     // Identify caller
@@ -74,18 +81,14 @@ serve(async (req) => {
     const thread = threadRes.data as any;
     if (!thread || thread.user_id !== uid) return json(req, { error: "Forbidden" }, 403);
 
-    // Preserve original_body on first edit only (already encrypted in DB)
+    // Preserve original_body on first edit only
     const nowIso = new Date().toISOString();
     const originalBody = msg.original_body ?? msg.body;
-
-    // Encrypt the new message body
-    const encryptionKey = getEncryptionKey();
-    const encryptedBody = await encryptMessage(nextText, encryptionKey);
 
     const upd = await sb
       .from("chat_messages")
       .update({
-        body: encryptedBody,
+        body: nextText,
         edited_at: nowIso,
         original_body: originalBody,
       })
@@ -95,16 +98,15 @@ serve(async (req) => {
 
     if (upd.error) return json(req, { error: upd.error.message }, 500);
 
-    // Return unencrypted text for immediate display
     return json(req, {
       ok: true,
       message: {
         id: upd.data.id,
         sender_role: upd.data.sender_role,
-        body: nextText,
+        body: upd.data.body,
         created_at: upd.data.created_at,
         edited: !!upd.data.edited_at,
-        original_body: null, // Don't expose encrypted original
+        original_body: upd.data.original_body || null,
         deleted: !!upd.data.deleted_at,
         delivered_at: upd.data.delivered_at || null,
       },

@@ -3,11 +3,19 @@ import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders, handleCorsPrefllight } from "../_shared/cors.ts";
 import { checkRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
-import { decryptMessage, getEncryptionKey } from "../_shared/crypto.ts";
-import { json } from "../_shared/response.ts";
-import { getEnv } from "../_shared/env.ts";
 
+function getEnv(name: string) {
+  const v = Deno.env.get(name);
+  if (!v) throw new Error(`Missing env var: ${name}`);
+  return v;
+}
 
+function json(req: Request, data: unknown, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
+  });
+}
 
 type AttachmentOut = {
   id: string;
@@ -87,25 +95,22 @@ serve(async (req) => {
 
     if (attErr) return json(req, { error: `Failed to load attachments: ${attErr.message}` }, 500);
 
-    // Sign URLs in parallel (so browser can render the image)
+    // Sign URLs (so browser can render the image)
     const byMessageId = new Map<string, AttachmentOut[]>();
 
-    const validAtts = (atts || []).filter((a) => a.storage_path);
-    const signedResults = await Promise.all(
-      validAtts.map((a) => {
-        const bucket = (a as any).storage_bucket || "chat-attachments";
-        return sb.storage.from(bucket).createSignedUrl(a.storage_path as string, 60 * 60);
-      })
-    );
+    for (const a of atts || []) {
+      const bucket = (a as any).storage_bucket || "chat-attachments";
+      const path = a.storage_path as string;
+      if (!path) continue;
 
-    for (let i = 0; i < validAtts.length; i++) {
-      const a = validAtts[i];
-      const signed = signedResults[i];
-      const signedUrl = signed.error ? null : (signed.data?.signedUrl ?? null);
+      let signedUrl: string | null = null;
+
+      const signed = await sb.storage.from(bucket).createSignedUrl(path, 60 * 60);
+      signedUrl = signed.error ? null : (signed.data?.signedUrl ?? null);
 
       const out: AttachmentOut = {
         id: String(a.id),
-        storage_path: a.storage_path as string,
+        storage_path: path,
         mime_type: String(a.mime_type || ""),
         file_name: String(a.original_name || "attachment"),
         size_bytes: (a.size_bytes ?? null) as number | null,
@@ -119,18 +124,9 @@ serve(async (req) => {
       byMessageId.get(mid)!.push(out);
     }
 
-    // Decrypt message bodies
-    const encryptionKey = getEncryptionKey();
-    const merged = await Promise.all((messages || []).map(async (m) => {
-      const decryptedBody = m.deleted_at
-        ? "Deleted Message"
-        : await decryptMessage(m.body || "", encryptionKey);
-
-      return {
-        ...m,
-        body: decryptedBody,
-        attachments: byMessageId.get(String(m.id)) || [],
-      };
+    const merged = (messages || []).map((m) => ({
+      ...m,
+      attachments: byMessageId.get(String(m.id)) || [],
     }));
 
     return json(req,

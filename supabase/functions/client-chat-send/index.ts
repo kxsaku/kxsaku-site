@@ -3,11 +3,19 @@ import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders, handleCorsPrefllight } from "../_shared/cors.ts";
 import { checkRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
-import { encryptMessage, getEncryptionKey } from "../_shared/crypto.ts";
-import { json } from "../_shared/response.ts";
-import { getEnv } from "../_shared/env.ts";
 
+function getEnv(name: string) {
+  const v = Deno.env.get(name);
+  if (!v) throw new Error(`Missing env var: ${name}`);
+  return v;
+}
 
+function json(req: Request, body: unknown, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
+  });
+}
 
 type AttachmentIn = {
   attachment_id?: string;
@@ -133,17 +141,13 @@ serve(async (req) => {
       }
     }
 
-    // Encrypt the message body before storing
-    const encryptionKey = getEncryptionKey();
-    const encryptedBody = text ? await encryptMessage(text, encryptionKey) : "";
-
     // Insert message
     const insMsg = await admin
       .from("chat_messages")
       .insert({
         thread_id: threadId,
         sender_role: "client",
-        body: encryptedBody,
+        body: text,
         created_at: nowIso,
         delivered_at: nowIso,
       })
@@ -173,12 +177,7 @@ serve(async (req) => {
       if (upd.error) return json(req, { error: "Failed to link attachments", details: upd.error.message }, 500);
     }
 
-    // Return original unencrypted text for immediate display
-    const responseMessage = {
-      ...insMsg.data,
-      body: text,
-    };
-    return json(req, { ok: true, thread_id: threadId, message: responseMessage }, 200);
+    return json(req, { ok: true, thread_id: threadId, message: insMsg.data }, 200);
   } catch (e) {
     return json(req, { error: String((e as any)?.message || e) }, 500);
   }

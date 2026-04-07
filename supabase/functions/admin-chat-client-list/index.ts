@@ -1,10 +1,21 @@
 // supabase/functions/admin-chat-client-list/index.ts
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders, handleCorsPrefllight } from "../_shared/cors.ts";
 import { checkRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
-import { ensureAdmin } from "../_shared/auth.ts";
-import { json } from "../_shared/response.ts";
 
+function json(req: Request, body: unknown, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
+  });
+}
+
+function getEnv(name: string) {
+  const v = Deno.env.get(name);
+  if (!v) throw new Error(`Missing env var: ${name}`);
+  return v;
+}
 
 type ClientRow = {
   user_id: string;
@@ -31,8 +42,22 @@ serve(async (req) => {
   if (rateLimitResponse) return rateLimitResponse;
 
   try {
-    // Verify caller is authenticated and is an admin (database-backed check)
-    const { sb } = await ensureAdmin(req.headers.get("Authorization"));
+    const SB_URL = getEnv("SB_URL");
+    const SB_SERVICE_ROLE_KEY = getEnv("SB_SERVICE_ROLE_KEY");
+    const ADMIN_EMAIL = getEnv("ADMIN_EMAIL").toLowerCase();
+
+    const authHeader = req.headers.get("Authorization") ?? "";
+    const jwt = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
+    if (!jwt) return json(req, { error: "Missing Authorization bearer token." }, 401);
+
+    const sb = createClient(SB_URL, SB_SERVICE_ROLE_KEY);
+
+    // Verify caller is authenticated and is the admin email
+    const { data: userData, error: userErr } = await sb.auth.getUser(jwt);
+    if (userErr || !userData?.user) return json(req, { error: "Invalid session." }, 401);
+
+    const callerEmail = (userData.user.email ?? "").toLowerCase();
+    if (callerEmail !== ADMIN_EMAIL) return json(req, { error: "Forbidden." }, 403);
 
     // Pull clients from your existing profile table
     const { data: profiles, error: pErr } = await sb
@@ -71,21 +96,8 @@ serve(async (req) => {
     const threadByUser = new Map<string, ThreadRow>();
     for (const t of threadRows) threadByUser.set(t.user_id, t);
 
-    // Calculate online status based on last_seen timestamp
-    // Client is considered online if they sent a heartbeat within the last 60 seconds
-    const ONLINE_THRESHOLD_MS = 60 * 1000; // 60 seconds
-    const now = Date.now();
-
     const clients = clientRows.map((c) => {
       const t = threadByUser.get(c.user_id);
-
-      // Determine if client is truly online based on last_seen
-      let isOnline = false;
-      if (t?.last_seen) {
-        const lastSeenTime = new Date(t.last_seen).getTime();
-        isOnline = (now - lastSeenTime) < ONLINE_THRESHOLD_MS;
-      }
-
       return {
         user_id: c.user_id,
         email: c.email,
@@ -94,7 +106,7 @@ serve(async (req) => {
         phone: c.phone,
         last_message_at: t?.last_message_at ?? null,
         has_unread: Boolean((t as any)?.unread_for_admin ?? false),
-        is_online: isOnline,
+        is_online: Boolean(t?.is_online ?? false),
         last_seen: t?.last_seen ?? null,
       };
     });
