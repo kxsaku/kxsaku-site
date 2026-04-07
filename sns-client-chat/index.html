@@ -5,23 +5,7 @@
   <title>SNS · Client Chat (Admin)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; connect-src 'self' https://api.kxsaku.com wss://api.kxsaku.com https://*.supabase.co wss://*.supabase.co https://api.stripe.com; img-src 'self' data: blob: https://api.kxsaku.com https://*.supabase.co; font-src 'self'; frame-src https://js.stripe.com;" />
-  <script>
-  (function () {
-    // If user explicitly chose desktop, do not redirect
-    if (localStorage.getItem("sns_force_desktop") === "1") return;
-
-    // phone-ish: small viewport + touch
-    var isPhone = window.matchMedia("(max-width: 740px)").matches &&
-                  ("ontouchstart" in window || navigator.maxTouchPoints > 0);
-
-    // avoid loops
-    var alreadyMobile = location.pathname.endsWith("/sns-client-chat/mobile.html");
-
-    if (isPhone && !alreadyMobile) {
-      location.replace("/sns-client-chat/mobile.html");
-    }
-  })();
-  </script>
+  <script src="/assets/js/redirect.js" data-mobile-path="/sns-client-chat/mobile.html" data-breakpoint="740" data-check-touch="true"></script>
 
   <link rel="stylesheet" href="/styles.css" />
 

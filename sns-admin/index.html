@@ -5,17 +5,7 @@
   <title>SNS · Admin Inquiries</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; connect-src 'self' https://api.kxsaku.com wss://api.kxsaku.com https://*.supabase.co wss://*.supabase.co https://api.stripe.com; img-src 'self' data: blob: https://api.kxsaku.com https://*.supabase.co; font-src 'self'; frame-src https://js.stripe.com;" />
-  <script>
-  (function () {
-    const forceDesktop = localStorage.getItem("sns_force_desktop") === "1";
-    if (forceDesktop) return;
-
-    const isMobile = window.matchMedia("(max-width: 820px)").matches;
-    if (isMobile && !location.pathname.endsWith("/sns-admin/mobile.html")) {
-      location.replace("/sns-admin/mobile.html");
-    }
-  })();
-</script>
+  <script src="/assets/js/redirect.js" data-mobile-path="/sns-admin/mobile.html" data-breakpoint="820"></script>
 
   <link rel="stylesheet" href="/styles.css" />
 
