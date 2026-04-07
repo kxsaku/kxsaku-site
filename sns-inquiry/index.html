@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <title>SNS · Start Your Network Project</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://esm.sh https://fonts.googleapis.com https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; connect-src 'self' https://api.kxsaku.com wss://api.kxsaku.com https://*.supabase.co wss://*.supabase.co https://api.stripe.com; img-src 'self' data: blob: https://api.kxsaku.com https://*.supabase.co; font-src 'self' https://fonts.gstatic.com; frame-src https://js.stripe.com;" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; connect-src 'self' https://api.kxsaku.com wss://api.kxsaku.com https://*.supabase.co wss://*.supabase.co https://api.stripe.com; img-src 'self' data: blob: https://api.kxsaku.com https://*.supabase.co; font-src 'self' https://fonts.gstatic.com; frame-src https://js.stripe.com;" />
   <script>
   (function () {
     const forceDesktop = localStorage.getItem("sns_force_desktop") === "1";
@@ -1137,8 +1137,9 @@
     }
   </script>
 
+  <script src="/vendor/supabase-js.min.js" integrity="sha384-0VpB0wAYDdhWCEv3+IjT0Z9Kgpvszkf70RFX3ro7l4QR5nywxsMaOpmvZKsfRF8I" crossorigin="anonymous"></script>
   <script type="module">
-    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+    import { createClient } from "/vendor/supabase-esm.js";
 
     const supabaseUrl = "https://api.kxsaku.com";
     const supabaseAnonKey = "eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJyb2xlIjogImFub24iLCAiaXNzIjogInN1cGFiYXNlIiwgImlhdCI6IDE3NzUyNDk4NTksICJleHAiOiAyMDkwNjA5ODU5fQ.jZdjxM_NH1gBhAYNBCV9tXEAPrLr36-JqhdduwWGBEI";
