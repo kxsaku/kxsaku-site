@@ -1,14 +1,13 @@
 // supabase/functions/admin-chat-send/index.ts
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders, handleCorsPrefllight } from "../_shared/cors.ts";
 import { checkRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
+import { ensureAdmin } from "../_shared/auth.ts";
+import { logAuditEvent } from "../_shared/audit.ts";
+import { encryptMessage, getEncryptionKey } from "../_shared/crypto.ts";
+import { json } from "../_shared/response.ts";
+import { getEnv } from "../_shared/env.ts";
 
-function getEnv(name: string) {
-  const v = Deno.env.get(name);
-  if (!v) throw new Error(`Missing env var: ${name}`);
-  return v;
-}
 
 async function resendEmail(args: {
   to: string;
@@ -40,12 +39,6 @@ async function resendEmail(args: {
   }
 }
 
-function json(req: Request, data: unknown, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
-  });
-}
 
 type AttachmentIn = {
   attachment_id?: string;
@@ -77,26 +70,8 @@ serve(async (req) => {
   if (req.method !== "POST") return json(req, { error: "Method not allowed" }, 405);
 
   try {
-    const SB_URL = getEnv("SB_URL");
-    const SB_SERVICE_ROLE_KEY = getEnv("SB_SERVICE_ROLE_KEY");
-    const ADMIN_EMAIL = (getEnv("ADMIN_EMAIL") || "").toLowerCase();
-
-    const authHeader = req.headers.get("Authorization") || "";
-    const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
-    if (!token) return json(req, { error: "Missing Authorization bearer token" }, 401);
-
-    const admin = createClient(SB_URL, SB_SERVICE_ROLE_KEY, {
-      auth: { persistSession: false },
-    });
-
-    // Verify caller identity (must be ADMIN_EMAIL)
-    const { data: userData, error: userErr } = await admin.auth.getUser(token);
-    if (userErr) return json(req, { error: `Auth error: ${userErr.message}` }, 401);
-
-    const callerEmail = (userData.user?.email || "").toLowerCase();
-    if (!callerEmail || callerEmail !== ADMIN_EMAIL) {
-      return json(req, { error: "Forbidden: admin only" }, 403);
-    }
+    // Verify caller is authenticated and is an admin (database-backed check)
+    const { sb: admin, email: adminEmail } = await ensureAdmin(req.headers.get("Authorization"));
 
     const body = (await req.json().catch(() => ({}))) as ReqBody;
     const user_id = (body.user_id || "").trim();
@@ -185,12 +160,16 @@ serve(async (req) => {
     }
 
     // 2) Insert message (expected table: chat_messages)
+    // Encrypt the message body before storing
+    const encryptionKey = getEncryptionKey();
+    const encryptedBody = text ? await encryptMessage(text, encryptionKey) : "";
+
     const insMsg = await admin
       .from("chat_messages")
       .insert({
         thread_id: threadId,
         sender_role: "admin",
-        body: text,
+        body: encryptedBody,
         created_at: nowIso,
         delivered_at: nowIso,
       })
@@ -325,16 +304,24 @@ serve(async (req) => {
       }
     }
 
+    // Audit log the message
+    await logAuditEvent(admin, adminEmail, {
+      action: "chat_send",
+      targetTable: "chat_messages",
+      targetId: m.id,
+      details: { recipient_user_id: user_id, has_attachments: outAttachments.length > 0 },
+    }, req);
+
     return json(req, {
       ok: true,
       thread_id: threadId,
       message: {
         id: m.id,
         sender_role: m.sender_role,
-        body: m.body,
+        body: text, // Return original unencrypted text for immediate display
         created_at: m.created_at,
         edited: !!m.edited_at,
-        original_body: m.original_body || null,
+        original_body: null,
         deleted: !!m.deleted_at,
         delivered_at: m.delivered_at || null,
         read_by_client_at: m.read_by_client_at || null,

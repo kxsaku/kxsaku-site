@@ -1,21 +1,13 @@
 // supabase/functions/admin-invite/index.ts
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders, handleCorsPrefllight } from "../_shared/cors.ts";
 import { checkRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
+import { ensureAdmin } from "../_shared/auth.ts";
+import { logAuditEvent } from "../_shared/audit.ts";
+import { json } from "../_shared/response.ts";
+import { getEnv } from "../_shared/env.ts";
 
-function json(req: Request, body: unknown, status = 200) {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
-  });
-}
 
-function getEnv(name: string) {
-  const v = Deno.env.get(name);
-  if (!v) throw new Error(`Missing env var: ${name}`);
-  return v;
-}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return handleCorsPrefllight(req);
@@ -26,22 +18,9 @@ serve(async (req) => {
 
   try {
     const SITE_URL = getEnv("SITE_URL").replace(/\/+$/, "");
-    const SB_URL = getEnv("SB_URL");
-    const SB_SERVICE_ROLE_KEY = getEnv("SB_SERVICE_ROLE_KEY");
-    const ADMIN_EMAIL = getEnv("ADMIN_EMAIL").toLowerCase();
 
-    const authHeader = req.headers.get("Authorization") ?? "";
-    const jwt = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
-    if (!jwt) return json(req, { error: "Missing Authorization bearer token." }, 401);
-
-    const sb = createClient(SB_URL, SB_SERVICE_ROLE_KEY);
-
-    // Verify caller is authenticated and is the admin email
-    const { data: userData, error: userErr } = await sb.auth.getUser(jwt);
-    if (userErr || !userData?.user) return json(req, { error: "Invalid session." }, 401);
-
-    const callerEmail = (userData.user.email ?? "").toLowerCase();
-    if (callerEmail !== ADMIN_EMAIL) return json(req, { error: "Forbidden." }, 403);
+    // Verify caller is authenticated and is an admin (database-backed check)
+    const { sb, email: adminEmail } = await ensureAdmin(req.headers.get("Authorization"));
 
     const body = await req.json().catch(() => ({}));
     const inviteEmailRaw = String(body.email ?? "").trim();
@@ -78,6 +57,14 @@ serve(async (req) => {
         email: inviteEmail,
       });
     }
+
+    // Audit log the invite
+    await logAuditEvent(sb, adminEmail, {
+      action: "client_invite",
+      targetTable: "auth.users",
+      targetId: invitedUserId ?? undefined,
+      details: { invited_email: inviteEmail },
+    }, req);
 
     return json(req, { ok: true, invited_user_id: invitedUserId ?? null });
   } catch (e) {

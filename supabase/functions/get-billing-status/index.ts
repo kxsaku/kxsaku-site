@@ -3,13 +3,8 @@ import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders, handleCorsPrefllight } from "../_shared/cors.ts";
 import { checkRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
-
-function json(req: Request, status: number, body: unknown) {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
-  });
-}
+import { json } from "../_shared/response.ts";
+import { getEnv } from "../_shared/env.ts";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return handleCorsPrefllight(req);
@@ -19,28 +14,22 @@ serve(async (req) => {
   if (rateLimitResponse) return rateLimitResponse;
 
   try {
-    const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
-    const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY");
-
-    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-      return json(req, 500, {
-        error: "Missing SUPABASE_URL or SUPABASE_ANON_KEY in function env.",
-      });
-    }
+    const SB_URL = getEnv("SB_URL");
+    const SUPABASE_ANON_KEY = getEnv("SUPABASE_ANON_KEY");
 
     const authHeader = req.headers.get("Authorization") || "";
     if (!authHeader.startsWith("Bearer ")) {
-      return json(req, 401, { error: "Missing Authorization bearer token." });
+      return json(req, { error: "Missing Authorization bearer token." }, 401);
     }
 
     // Use the caller's JWT (RLS-safe)
-    const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    const sb = createClient(SB_URL, SUPABASE_ANON_KEY, {
       global: { headers: { Authorization: authHeader } },
     });
 
     const { data: userData, error: userErr } = await sb.auth.getUser();
     if (userErr || !userData?.user) {
-      return json(req, 401, { error: "Invalid/expired session.", detail: userErr?.message });
+      return json(req, { error: "Invalid/expired session.", detail: userErr?.message }, 401);
     }
 
     const userId = userData.user.id;
@@ -52,16 +41,16 @@ serve(async (req) => {
       .maybeSingle();
 
     if (error) {
-      return json(req, 500, { error: "DB query failed.", detail: error.message });
+      return json(req, { error: "DB query failed.", detail: error.message }, 500);
     }
 
     // If no row exists yet (webhook not processed), return nulls cleanly
     if (!data) {
-      return json(req, 200, { subscription: null });
+      return json(req, { subscription: null });
     }
 
-    return json(req, 200, { subscription: data });
+    return json(req, { subscription: data });
   } catch (e) {
-    return json(req, 500, { error: "Unhandled exception.", detail: String(e) });
+    return json(req, { error: "Unhandled exception.", detail: String(e) }, 500);
   }
 });

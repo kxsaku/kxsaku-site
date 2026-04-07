@@ -1,21 +1,12 @@
 // supabase/functions/admin-client-list/index.ts
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders, handleCorsPrefllight } from "../_shared/cors.ts";
 import { checkRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
+import { ensureAdmin } from "../_shared/auth.ts";
+import { json } from "../_shared/response.ts";
+import { getEnv } from "../_shared/env.ts";
 
-function json(req: Request, body: unknown, status = 200) {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
-  });
-}
 
-function getEnv(name: string) {
-  const v = Deno.env.get(name);
-  if (!v) throw new Error(`Missing env var: ${name}`);
-  return v;
-}
 
 type StripeInvoice = {
   id: string;
@@ -123,22 +114,8 @@ serve(async (req) => {
   if (rateLimitResponse) return rateLimitResponse;
 
   try {
-    const SB_URL = getEnv("SB_URL");
-    const SB_SERVICE_ROLE_KEY = getEnv("SB_SERVICE_ROLE_KEY");
-    const ADMIN_EMAIL = getEnv("ADMIN_EMAIL").toLowerCase();
-
-    const authHeader = req.headers.get("Authorization") ?? "";
-    const jwt = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
-    if (!jwt) return json(req, { error: "Missing Authorization bearer token." }, 401);
-
-    const sb = createClient(SB_URL, SB_SERVICE_ROLE_KEY);
-
-    // Verify caller is authenticated and is the admin email
-    const { data: userData, error: userErr } = await sb.auth.getUser(jwt);
-    if (userErr || !userData?.user) return json(req, { error: "Invalid session." }, 401);
-
-    const callerEmail = (userData.user.email ?? "").toLowerCase();
-    if (callerEmail !== ADMIN_EMAIL) return json(req, { error: "Forbidden." }, 403);
+    // Verify caller is authenticated and is an admin (database-backed check)
+    const { sb } = await ensureAdmin(req.headers.get("Authorization"));
 
     const body = await req.json().catch(() => ({}));
     const includeStripe = body?.includeStripe !== false; // default true
@@ -166,13 +143,13 @@ serve(async (req) => {
     for (const p of profiles ?? []) allIds.add(p.user_id);
     for (const s of subs ?? []) allIds.add(s.user_id);
 
-    const clients: any[] = [];
+    // Build client entries (profile + subscription base) first
+    const entries: { profile: any; subscription: any }[] = [];
 
     for (const userId of allIds) {
       const p = profById.get(userId) ?? null;
       const s = subById.get(userId) ?? null;
 
-      // Normalize to what your UI expects (full_name/business/phone/email)
       const profile = {
         user_id: userId,
         email: p?.email ?? s?.email ?? null,
@@ -187,7 +164,6 @@ serve(async (req) => {
         updated_at: p?.updated_at ?? null,
       };
 
-      // Base subscription row from DB
       const subscription: any = {
         user_id: userId,
         email: s?.email ?? profile.email ?? null,
@@ -198,8 +174,6 @@ serve(async (req) => {
         last_payment_currency: s?.last_payment_currency ?? null,
         stripe_customer_id: s?.stripe_customer_id ?? null,
         stripe_subscription_id: s?.stripe_subscription_id ?? null,
-
-        // Stripe-derived fields (filled in below if includeStripe)
         stripe_status: null,
         subscription_created_ts: null,
         current_period_end_ts: null,
@@ -207,29 +181,49 @@ serve(async (req) => {
         total_paid_cents: null,
         currency: null,
         first_paid_ts: null,
-
-        // Derived category used by your filters
         category: null,
       };
 
-      if (includeStripe && (subscription.stripe_customer_id || subscription.stripe_subscription_id)) {
-        try {
-          const m = await computeStripeMetrics(subscription.stripe_customer_id, subscription.stripe_subscription_id);
-          subscription.stripe_status = m.stripe_status ?? null;
-          subscription.subscription_created_ts = m.subscription_created_ts ?? null;
-          subscription.current_period_end_ts = m.current_period_end_ts ?? null;
-          subscription.next_invoice_ts = m.next_invoice_ts ?? null;
-          subscription.total_paid_cents = m.total_paid_cents ?? null;
-          subscription.currency = m.currency ?? subscription.last_payment_currency ?? null;
-          subscription.first_paid_ts = m.first_paid_ts ?? null;
-        } catch (e) {
-          // Don't fail the whole page if Stripe has an issue; return partials.
-          subscription.stripe_error = String(e?.message ?? e);
+      entries.push({ profile, subscription });
+    }
+
+    // Parallelized Stripe metrics with concurrency limit of 5
+    if (includeStripe) {
+      const CONCURRENCY = 5;
+      const needsStripe = entries.filter(
+        (e) => e.subscription.stripe_customer_id || e.subscription.stripe_subscription_id
+      );
+
+      for (let i = 0; i < needsStripe.length; i += CONCURRENCY) {
+        const batch = needsStripe.slice(i, i + CONCURRENCY);
+        const results = await Promise.allSettled(
+          batch.map((e) =>
+            computeStripeMetrics(e.subscription.stripe_customer_id, e.subscription.stripe_subscription_id)
+          )
+        );
+
+        for (let j = 0; j < batch.length; j++) {
+          const result = results[j];
+          const sub = batch[j].subscription;
+          if (result.status === "fulfilled") {
+            const m = result.value;
+            sub.stripe_status = m.stripe_status ?? null;
+            sub.subscription_created_ts = m.subscription_created_ts ?? null;
+            sub.current_period_end_ts = m.current_period_end_ts ?? null;
+            sub.next_invoice_ts = m.next_invoice_ts ?? null;
+            sub.total_paid_cents = m.total_paid_cents ?? null;
+            sub.currency = m.currency ?? sub.last_payment_currency ?? null;
+            sub.first_paid_ts = m.first_paid_ts ?? null;
+          } else {
+            sub.stripe_error = String(result.reason?.message ?? result.reason);
+          }
         }
       }
+    }
 
-      // Category logic:
-      // Prefer Stripe status (most correct), fall back to DB status.
+    // Category logic
+    const clients: any[] = [];
+    for (const { profile, subscription } of entries) {
       const st = (subscription.stripe_status ?? subscription.status ?? "").toString().toLowerCase();
       const hasStripeLink = !!(subscription.stripe_customer_id || subscription.stripe_subscription_id);
       const hasPaid = (subscription.total_paid_cents ?? null) != null && Number(subscription.total_paid_cents) > 0;

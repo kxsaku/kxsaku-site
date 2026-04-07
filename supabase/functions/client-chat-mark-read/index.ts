@@ -3,19 +3,10 @@ import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders, handleCorsPrefllight } from "../_shared/cors.ts";
 import { checkRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
+import { json } from "../_shared/response.ts";
+import { getEnv } from "../_shared/env.ts";
 
-function getEnv(name: string) {
-  const v = Deno.env.get(name);
-  if (!v) throw new Error(`Missing env var: ${name}`);
-  return v;
-}
 
-function json(req: Request, data: unknown, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
-  });
-}
 
 type Body = {
   thread_id?: string;

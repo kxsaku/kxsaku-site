@@ -3,19 +3,10 @@ import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders, handleCorsPrefllight } from "../_shared/cors.ts";
 import { checkRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
+import { json } from "../_shared/response.ts";
+import { getEnv } from "../_shared/env.ts";
 
-function json(req: Request, data: unknown, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
-  });
-}
 
-function getEnv(name: string) {
-  const v = Deno.env.get(name);
-  if (!v) throw new Error(`Missing env var: ${name}`);
-  return v;
-}
 
 type ReqBody = {
   message_id?: string;
@@ -38,9 +29,10 @@ serve(async (req) => {
     const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
     if (!token) return json(req, { error: "Missing Authorization bearer token" }, 401);
 
+    // Service role key bypasses RLS — do NOT mix in user JWT via global headers.
+    // User identity is verified separately via sb.auth.getUser(token) below.
     const sb = createClient(SB_URL, SB_SERVICE_ROLE_KEY, {
       auth: { persistSession: false },
-      global: { headers: { Authorization: `Bearer ${token}` } },
     });
 
     // Identify caller
